@@ -1,0 +1,16 @@
+1.0.0
+
+# Traccar Microservices Deployment Configuration Version
+# This file tracks the version of the deployment configuration separate from application versions.
+# 
+# Format: MAJOR.MINOR.PATCH
+# - MAJOR: Incompatible changes that require migration steps
+# - MINOR: Backward-compatible new features or enhancements
+# - PATCH: Backward-compatible bug fixes or minor adjustments
+#
+# Compatibility:
+# - Compatible with Traccar Microservices Architecture v1.x
+# - Requires Kubernetes 1.24+
+# - Supports both RabbitMQ and Kafka message brokers
+#
+# Last updated: 2023-05-21
