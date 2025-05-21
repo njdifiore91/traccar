@@ -1,0 +1,68 @@
+# Build output directories
+target/
+build/
+out/
+bin/
+
+# Gradle specific
+.gradle/
+**/build/
+!src/**/build/
+
+# IDE specific files
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.shelf/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+.checkstyle
+
+# VS Code
+.vscode/
+
+# NetBeans
+nbactions.xml
+nb-configuration.xml
+
+# Local configuration files
+application-local.properties
+application-local.yml
+application-local.yaml
+
+# Logs and temporary files
+logs/
+*.log
+*.log.*
+*.tmp
+*.temp
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Local database files
+*.db
+*.h2.db
+*.mv.db
+*.trace.db
+
+# Docker related
+.docker/
+
+# Test reports and coverage
+test-results/
+reports/
+.coverage/
+jacoco/
+
+# Misc
+*.swp
+*.bak
+*.orig
