@@ -1,0 +1,156 @@
+plugins {
+    id "java"
+    id "checkstyle"
+    id "com.google.protobuf" version "0.9.4"
+    id "org.kordamp.gradle.project-enforcer" version "0.14.0"
+    id "com.palantir.docker" version "0.35.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava.options.encoding = "UTF-8"
+jar.destinationDirectory = file("$projectDir/target")
+
+checkstyle {
+    toolVersion = "10.21.1"
+    configFile = file("gradle/checkstyle.xml")
+    checkstyleTest.enabled = false
+}
+
+enforce {
+    // noinspection UnnecessaryQualifiedReference
+    rule(enforcer.rules.EnforceBytecodeVersion) { r ->
+        r.maxJdkVersion = "17"
+    }
+}
+
+ext {
+    guiceVersion = "7.0.0"
+    jettyVersion = "11.0.24"
+    jerseyVersion = "3.1.10"
+    jacksonVersion = "2.18.2" // same version as jersey-media-json-jackson dependency
+    protobufVersion = "4.29.3"
+    jxlsVersion = "2.14.0" // version 3 has breaking changes
+    velocityVersion = "2.4.1"
+    ical4jVersion = "4.0.8"
+    awsS3Version = "1.12.780"
+    opentelemetryVersion = "1.31.0"
+    junitVersion = "5.11.4"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+}
+
+dependencies {
+    // Core dependencies
+    implementation "commons-codec:commons-codec:1.17.2"
+    implementation "com.h2database:h2:2.3.232"
+    implementation "com.mysql:mysql-connector-j:9.1.0"
+    implementation "org.mariadb.jdbc:mariadb-java-client:3.5.1"
+    implementation "org.postgresql:postgresql:42.7.4"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11"
+    implementation "com.zaxxer:HikariCP:6.2.1"
+    implementation "io.netty:netty-all:4.1.116.Final"
+    implementation "org.slf4j:slf4j-jdk14:2.0.16"
+    implementation "com.google.inject:guice:$guiceVersion"
+    implementation "com.google.inject.extensions:guice-servlet:$guiceVersion"
+    implementation "org.glassfish:jakarta.json:2.0.1"
+    implementation "com.sun.mail:jakarta.mail:2.0.1"
+    implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-servlets:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-jndi:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-proxy:$jettyVersion"
+    implementation "org.eclipse.jetty.websocket:websocket-jetty-server:$jettyVersion"
+    implementation "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
+    implementation "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
+    implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
+    implementation "org.glassfish.hk2:guice-bridge:3.1.1" // same version as jersey-hk2
+    implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jakarta-jsonp:$jacksonVersion"
+    implementation "org.liquibase:liquibase-core:4.23.2" // upgrade has issues
+    implementation "org.apache.commons:commons-jexl3:3.4.0"
+    
+    // Report generation dependencies
+    implementation "org.jxls:jxls:$jxlsVersion"
+    implementation "org.jxls:jxls-poi:$jxlsVersion"
+    implementation "org.apache.velocity:velocity-engine-core:$velocityVersion"
+    implementation "org.apache.velocity.tools:velocity-tools-generic:3.1"
+    implementation "org.apache.commons:commons-collections4:4.4"
+    implementation "org.mnode.ical4j:ical4j:$ical4jVersion"
+    
+    // Spatial dependencies
+    implementation "org.locationtech.spatial4j:spatial4j:0.8"
+    implementation "org.locationtech.jts:jts-core:1.20.0"
+    implementation "net.java.dev.jna:jna-platform:5.16.0"
+    implementation "com.github.jnr:jnr-posix:3.1.20"
+    implementation "com.google.protobuf:protobuf-java:$protobufVersion"
+    
+    // Message broker dependencies
+    implementation "org.apache.kafka:kafka-clients:3.9.0"
+    implementation "com.rabbitmq:amqp-client:5.24.0"
+    
+    // S3-compatible storage client
+    implementation "com.amazonaws:aws-java-sdk-s3:$awsS3Version"
+    
+    // OpenTelemetry for distributed tracing and metrics
+    implementation "io.opentelemetry:opentelemetry-api:$opentelemetryVersion"
+    implementation "io.opentelemetry:opentelemetry-sdk:$opentelemetryVersion"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$opentelemetryVersion"
+    implementation "io.opentelemetry:opentelemetry-semconv:$opentelemetryVersion-alpha"
+    implementation "io.opentelemetry:opentelemetry-sdk-metrics:$opentelemetryVersion"
+    implementation "io.opentelemetry:opentelemetry-sdk-logs:$opentelemetryVersion"
+    
+    // Other dependencies
+    implementation "com.amazonaws:aws-java-sdk-sns:1.12.780"
+    implementation "com.hivemq:hivemq-mqtt-client:1.3.4"
+    implementation "redis.clients:jedis:5.2.0"
+    implementation "com.google.firebase:firebase-admin:9.4.3"
+    implementation "com.nimbusds:oauth2-oidc-sdk:11.20.2"
+    implementation "com.warrenstrange:googleauth:1.5.0"
+    implementation "com.google.openlocationcode:openlocationcode:1.0.4"
+    
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.mockito:mockito-core:5.15.2"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('copyDependencies', Copy) {
+    into "$projectDir/target/lib"
+    from configurations.runtimeClasspath
+}
+assemble.dependsOn(copyDependencies)
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "org.traccar.reporting.Main",
+                "Implementation-Version": "6.6",
+                "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
+    }
+}
+
+// Docker image creation
+docker {
+    name "traccar/reporting-service:${project.version}"
+    files jar.archiveFile, "$projectDir/target/lib"
+    buildArgs(['JAR_FILE': "${jar.archiveFileName}"])
+}
+
+tasks.docker.dependsOn(tasks.assemble)
