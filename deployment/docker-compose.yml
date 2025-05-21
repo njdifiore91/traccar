@@ -1,0 +1,339 @@
+version: '3.8'
+
+# Docker Compose configuration for Traccar Microservices
+# FOR LOCAL DEVELOPMENT ONLY - NOT FOR PRODUCTION USE
+# Requires Docker Compose v2.17+
+#
+# This file enables developers to run the complete microservices stack
+# on their local machines without requiring a full Kubernetes cluster.
+#
+# Usage:
+#   Start all services:  docker-compose up -d
+#   View logs:           docker-compose logs -f [service_name]
+#   Stop all services:   docker-compose down
+#   Destroy with volumes: docker-compose down -v
+
+services:
+  # Message Broker - Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Schema Registry for Kafka
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    container_name: schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: traccar
+      MYSQL_USER: traccar
+      MYSQL_PASSWORD: traccar
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Protocol Service - Handles device communications across 200+ protocols
+  protocol-service:
+    image: traccar/protocol-service:latest
+    build:
+      context: ../protocol-service
+      dockerfile: Dockerfile
+    container_name: protocol-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "5000-5100:5000-5100" # Range for protocol ports
+      - "8082:8082" # Admin/API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - ./protocol-service/config:/app/config
+      - protocol-logs:/app/logs
+
+  # Position Service - Processes GPS positions and related data
+  position-service:
+    image: traccar/position-service:latest
+    build:
+      context: ../position-service
+      dockerfile: Dockerfile
+    container_name: position-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8083:8083" # Admin/API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - ./position-service/config:/app/config
+      - position-logs:/app/logs
+
+  # Event Service - Detects and processes events from position data
+  event-service:
+    image: traccar/event-service:latest
+    build:
+      context: ../event-service
+      dockerfile: Dockerfile
+    container_name: event-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8084:8084" # Admin/API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - ./event-service/config:/app/config
+      - event-logs:/app/logs
+
+  # Notification Service - Manages multi-channel notifications (email, SMS, push)
+  notification-service:
+    image: traccar/notification-service:latest
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8085:8085" # Admin/API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - MAIL_SMTP_HOST=mailhog
+      - MAIL_SMTP_PORT=1025
+      - MAIL_SMTP_STARTTLS=false
+      - MAIL_SMTP_SSL=false
+    volumes:
+      - ./notification-service/config:/app/config
+      - notification-logs:/app/logs
+
+  # API Gateway - Provides external REST API and WebSocket interfaces
+  api-gateway:
+    image: traccar/api-gateway:latest
+    build:
+      context: ../api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      protocol-service:
+        condition: service_started
+      position-service:
+        condition: service_started
+      event-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      reporting-service:
+        condition: service_started
+    ports:
+      - "8080:8080" # Main API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - PROTOCOL_SERVICE_URL=http://protocol-service:8082
+      - POSITION_SERVICE_URL=http://position-service:8083
+      - EVENT_SERVICE_URL=http://event-service:8084
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085
+      - REPORTING_SERVICE_URL=http://reporting-service:8086
+    volumes:
+      - ./api-gateway/config:/app/config
+      - api-gateway-logs:/app/logs
+
+  # Reporting Service - Generates reports based on historical position and event data
+  reporting-service:
+    image: traccar/reporting-service:latest
+    build:
+      context: ../reporting-service
+      dockerfile: Dockerfile
+    container_name: reporting-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8086:8086" # Admin/API port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=jdbc:mysql://mysql:3306/traccar
+      - DATABASE_USERNAME=traccar
+      - DATABASE_PASSWORD=traccar
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - ./reporting-service/config:/app/config
+      - reporting-logs:/app/logs
+
+  # Mail testing service
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+
+# Volumes for persistent data
+volumes:
+  zookeeper-data:
+  zookeeper-log:
+  kafka-data:
+  redis-data:
+  mysql-data:
+  protocol-logs:
+  position-logs:
+  event-logs:
+  notification-logs:
+  api-gateway-logs:
+  reporting-logs:
+
+# Networks
+networks:
+  default:
+    name: traccar-network
+    driver: bridge
