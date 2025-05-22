@@ -1,0 +1,479 @@
+# Docker Compose configuration for Traccar Microservices Architecture
+# For local development environments only - NOT FOR PRODUCTION USE
+# Requires Docker Compose v2.17+
+
+# Alternative Kafka Configuration (uncomment to use Kafka instead of RabbitMQ)
+# -----------------------------------------------------------------
+# zookeeper:
+#   image: confluentinc/cp-zookeeper:7.3.0
+#   container_name: traccar-zookeeper
+#   ports:
+#     - "2181:2181"
+#   environment:
+#     - ZOOKEEPER_CLIENT_PORT=2181
+#     - ZOOKEEPER_TICK_TIME=2000
+#   volumes:
+#     - zookeeper_data:/var/lib/zookeeper/data
+#     - zookeeper_log:/var/lib/zookeeper/log
+#   healthcheck:
+#     test: ["CMD-SHELL", "echo 'ruok' | nc localhost 2181 || exit 1"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 5
+#   restart: unless-stopped
+#
+# kafka:
+#   image: confluentinc/cp-kafka:7.3.0
+#   container_name: traccar-kafka
+#   depends_on:
+#     zookeeper:
+#       condition: service_healthy
+#   ports:
+#     - "9092:9092"
+#     - "29092:29092"
+#   environment:
+#     - KAFKA_BROKER_ID=1
+#     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+#     - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+#     - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#     - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+#     - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+#     - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+#   volumes:
+#     - kafka_data:/var/lib/kafka/data
+#   healthcheck:
+#     test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 5
+#   restart: unless-stopped
+#
+# kafka-ui:
+#   image: provectuslabs/kafka-ui:latest
+#   container_name: traccar-kafka-ui
+#   depends_on:
+#     kafka:
+#       condition: service_healthy
+#   ports:
+#     - "8090:8080"
+#   environment:
+#     - KAFKA_CLUSTERS_0_NAME=traccar-kafka
+#     - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+#     - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+#   restart: unless-stopped
+
+version: '3.8'
+
+services:
+  # Message Broker - RabbitMQ for local development
+  # Alternative: Use 'kafka' and 'zookeeper' services instead
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: traccar-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=traccar
+      - RABBITMQ_DEFAULT_PASS=traccar
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Service Discovery - Consul for local development
+  # Used by all microservices to register and discover each other
+  consul:
+    image: consul:1.14
+    container_name: traccar-consul
+    ports:
+      - "8500:8500"   # HTTP API and UI
+      - "8600:8600/udp" # DNS interface
+    command: "agent -dev -client=0.0.0.0 -ui"
+    volumes:
+      - consul_data:/consul/data
+    healthcheck:
+      test: ["CMD", "consul", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Protocol Service - Handles device connections and protocol decoding
+  # Supports 200+ GPS device protocols and publishes decoded positions to message broker
+  protocol-service:
+    image: traccar/protocol-service:latest
+    container_name: traccar-protocol-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      # Common protocol ports - add more as needed for specific protocols
+      - "5000-5100:5000-5100" # Range for device protocols
+      - "8082:8082" # API port
+      # Specific protocol ports
+      - "5004:5004/udp" # Meitrack
+      - "5005:5005/tcp" # TK103
+      - "5055:5055/tcp" # OsmAnd
+      - "5027:5027/tcp" # Teltonika
+      - "5028:5028/tcp" # Coban
+      - "5029:5029/tcp" # GT06
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - protocol_data:/app/data
+      - ./config/protocol-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Position Service - Processes and enriches position data
+  # Consumes raw positions, applies processing pipeline, and publishes enriched positions
+  position-service:
+    image: traccar/position-service:latest
+    container_name: traccar-position-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8083:8083" # API port
+      - "9083:9083" # gRPC port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - GEOCODER_TYPE=nominatim
+      - GEOCODER_URL=https://nominatim.openstreetmap.org
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - position_data:/app/data
+      - ./config/position-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Event Service - Analyzes position data to detect events
+  # Consumes enriched positions, detects events, and publishes detected events
+  event-service:
+    image: traccar/event-service:latest
+    container_name: traccar-event-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8084:8084" # API port
+      - "9084:9084" # gRPC port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - event_data:/app/data
+      - ./config/event-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Notification Service - Manages and delivers alerts
+  # Consumes events and delivers notifications through multiple channels
+  notification-service:
+    image: traccar/notification-service:latest
+    container_name: traccar-notification-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8085:8085" # API port
+      - "9085:9085" # gRPC port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - MAIL_SENDER=traccar@example.com
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - notification_data:/app/data
+      - ./config/notification-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # API Gateway - Routes client requests and serves as the unified entry point
+  # Provides REST API and WebSocket interfaces for clients
+  api-gateway:
+    image: traccar/api-gateway:latest
+    container_name: traccar-api-gateway
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      protocol-service:
+        condition: service_healthy
+      position-service:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+    ports:
+      - "8080:8080" # Main API port
+      - "8081:8081" # WebSocket port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JWT_SECRET=changeme_for_development_only
+      - JWT_EXPIRATION=86400
+    volumes:
+      - api_gateway_data:/app/data
+      - ./config/api-gateway:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Reporting Service - Generates reports and analytics
+  # Processes historical data to generate various report types
+  reporting-service:
+    image: traccar/reporting-service:latest
+    container_name: traccar-reporting-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8086:8086" # API port
+      - "9086:9086" # gRPC port
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_REDIS_HOST=redis
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+    volumes:
+      - reporting_data:/app/data
+      - ./config/reporting-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Database - Shared PostgreSQL database for development
+  postgres:
+    image: postgres:14-alpine
+    container_name: traccar-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=traccar
+      - POSTGRES_PASSWORD=traccar
+      - POSTGRES_DB=traccar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traccar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis - For caching and distributed state
+  redis:
+    image: redis:7-alpine
+    container_name: traccar-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    
+  # Mail server for local development
+  mailhog:
+    image: mailhog/mailhog
+    container_name: traccar-mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+    restart: unless-stopped
+
+volumes:
+  # Main service volumes
+  rabbitmq_data:
+    name: traccar_rabbitmq_data
+  # Kafka volumes (for alternative configuration)
+  # zookeeper_data:
+  #   name: traccar_zookeeper_data
+  # zookeeper_log:
+  #   name: traccar_zookeeper_log
+  # kafka_data:
+  #   name: traccar_kafka_data
+  consul_data:
+    name: traccar_consul_data
+  protocol_data:
+    name: traccar_protocol_data
+  position_data:
+    name: traccar_position_data
+  event_data:
+    name: traccar_event_data
+  notification_data:
+    name: traccar_notification_data
+  api_gateway_data:
+    name: traccar_api_gateway_data
+  reporting_data:
+    name: traccar_reporting_data
+  postgres_data:
+    name: traccar_postgres_data
+  redis_data:
+    name: traccar_redis_data
+
+networks:
+  default:
+    name: traccar-network
+    driver: bridge
+
+# Usage Instructions:
+# -----------------
+# 1. Create the necessary config directories before starting:
+#    mkdir -p config/{protocol,position,event,notification,api-gateway,reporting}-service init-scripts
+#
+# 2. If using Kafka instead of RabbitMQ:
+#    - Comment out the rabbitmq service
+#    - Uncomment the zookeeper, kafka, and kafka-ui services
+#    - Uncomment the zookeeper and kafka volumes
+#    - Replace SPRING_RABBITMQ_* environment variables in all services with:
+#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+#      - SPRING_KAFKA_CONSUMER_GROUP_ID=<service-name>-group
+#      - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=earliest
+#
+# 2. Start all services:
+#    docker-compose up -d
+#
+# 3. Start specific service and dependencies:
+#    docker-compose up -d api-gateway
+#
+# 4. View logs:
+#    docker-compose logs -f [service_name]
+#
+# 5. Stop all services:
+#    docker-compose down
+#
+# 6. Stop all services and remove volumes:
+#    docker-compose down -v
+#
+# Access Points:
+# - API Gateway: http://localhost:8080
+# - WebSocket: ws://localhost:8081
+# - Consul UI: http://localhost:8500
+# - RabbitMQ Management: http://localhost:15672 (user: traccar, pass: traccar)
+# - MailHog UI: http://localhost:8025
+# - PostgreSQL: localhost:5432 (user: traccar, pass: traccar, db: traccar)
+# - Redis: localhost:6379
+#
+# Note: This configuration is for local development only and is not suitable for production use.
