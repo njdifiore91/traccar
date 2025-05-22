@@ -11,6 +11,10 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: '6.6'
 servers:
+  - url: https://api.traccar.org/api
+    description: API Gateway Production
+  - url: https://api-dev.traccar.org/api
+    description: API Gateway Development
   - url: https://demo.traccar.org/api
     description: Demo Server 1
   - url: https://demo2.traccar.org/api
@@ -69,6 +73,22 @@ tags:
     description: Calendar management
   - name: Statistics
     description: Retrieving server statistics
+  - name: Health
+    description: Service health and monitoring endpoints
+  - name: Discovery
+    description: Service discovery endpoints
+  - name: Protocol Service
+    description: Device protocol handling and communication
+  - name: Position Service
+    description: Position data processing and enrichment
+  - name: Event Service
+    description: Event detection and processing
+  - name: Notification Service
+    description: Alert delivery through multiple channels
+  - name: API Gateway
+    description: API routing and WebSocket management
+  - name: Reporting Service
+    description: Report generation and delivery
 paths:
   /commands:
     get:
@@ -1736,6 +1756,185 @@ paths:
         '204':
           description: No Content
           content: {}
+  /health/liveness:
+    get:
+      summary: Check if the service is running
+      description: Returns the basic operational status of the service
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN]
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is not operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [DOWN]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  details:
+                    type: object
+  /health/readiness:
+    get:
+      summary: Check if the service is ready to handle requests
+      description: Returns the readiness status of the service including dependency checks
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready to handle requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  components:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: [UP, DOWN]
+        '503':
+          description: Service is not ready to handle requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [DOWN]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  components:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: [UP, DOWN]
+  /health/metrics:
+    get:
+      summary: Retrieve service metrics
+      description: Returns detailed performance metrics for the service
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+            text/plain:
+              schema:
+                type: string
+  /services:
+    get:
+      summary: List available services
+      description: Returns a list of all registered microservices and their status
+      tags:
+        - Discovery
+      responses:
+        '200':
+          description: List of services retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    version:
+                      type: string
+                    status:
+                      type: string
+                      enum: [UP, DOWN, UNKNOWN]
+                    endpoints:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          url:
+                            type: string
+  /services/{serviceId}:
+    get:
+      summary: Get service details
+      description: Returns detailed information about a specific service
+      tags:
+        - Discovery
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  version:
+                    type: string
+                  status:
+                    type: string
+                    enum: [UP, DOWN, UNKNOWN]
+                  endpoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        url:
+                          type: string
+                  metadata:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '404':
+          description: Service not found
+          content: {}
 components:
   schemas:
     Position:
@@ -2235,6 +2434,31 @@ components:
         attributes:
           type: object
           properties: {}
+    ServiceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+          enum: [UP, DOWN, UNKNOWN]
+        endpoints:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              url:
+                type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
   parameters:
     entityId:
       name: id
