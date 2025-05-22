@@ -15,12 +15,144 @@
  */
 package org.traccar.broadcast;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * BroadcastMessage is used for asynchronous communication between services via a message broker.
+ * It supports both JSON and Protocol Buffers serialization formats and includes metadata for
+ * distributed tracing, message versioning, and routing.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BroadcastMessage {
+
+    /**
+     * Message schema version for backward compatibility.
+     * Increment this when making breaking changes to the message structure.
+     */
+    private static final int CURRENT_SCHEMA_VERSION = 1;
+
+    /**
+     * Schema version of this message instance.
+     */
+    private int schemaVersion = CURRENT_SCHEMA_VERSION;
+
+    public int getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setSchemaVersion(int schemaVersion) {
+        this.schemaVersion = schemaVersion;
+    }
+
+    /**
+     * Distributed tracing context for tracking message flow across services.
+     */
+    private Map<String, String> tracingContext;
+
+    public Map<String, String> getTracingContext() {
+        if (tracingContext == null) {
+            tracingContext = new HashMap<>();
+        }
+        return tracingContext;
+    }
+
+    public void setTracingContext(Map<String, String> tracingContext) {
+        this.tracingContext = tracingContext;
+    }
+
+    /**
+     * Message routing metadata for message broker configuration.
+     */
+    private Map<String, String> routingMetadata;
+
+    public Map<String, String> getRoutingMetadata() {
+        if (routingMetadata == null) {
+            routingMetadata = new HashMap<>();
+        }
+        return routingMetadata;
+    }
+
+    public void setRoutingMetadata(Map<String, String> routingMetadata) {
+        this.routingMetadata = routingMetadata;
+    }
+
+    /**
+     * Unique message identifier for deduplication and tracking.
+     */
+    private String messageId;
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    /**
+     * Timestamp when the message was created.
+     */
+    private long timestamp;
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * Protocol buffer message for binary serialization.
+     * This field is transient and not serialized to JSON.
+     */
+    @JsonIgnore
+    private transient Message protobufMessage;
+
+    @JsonIgnore
+    public Message getProtobufMessage() {
+        return protobufMessage;
+    }
+
+    @JsonIgnore
+    public void setProtobufMessage(Message protobufMessage) {
+        this.protobufMessage = protobufMessage;
+    }
+
+    /**
+     * Serialized protocol buffer message for JSON serialization.
+     * This is only used when serializing to JSON and the message contains a protobuf payload.
+     */
+    private Any serializedProtobufMessage;
+
+    @JsonProperty("protobufMessage")
+    public Any getSerializedProtobufMessage() {
+        if (serializedProtobufMessage == null && protobufMessage != null) {
+            serializedProtobufMessage = Any.pack(protobufMessage);
+        }
+        return serializedProtobufMessage;
+    }
+
+    @JsonProperty("protobufMessage")
+    public void setSerializedProtobufMessage(Any serializedProtobufMessage) {
+        this.serializedProtobufMessage = serializedProtobufMessage;
+    }
+
+    // Original fields
 
     private Device device;
 
@@ -180,4 +312,43 @@ public class BroadcastMessage {
         this.invalidatePermission = invalidatePermission;
     }
 
+    /**
+     * Helper method to set a routing key for message broker partitioning.
+     * This is typically used to ensure messages for the same device are processed in order.
+     *
+     * @param key The routing key name
+     * @param value The routing key value
+     */
+    public void setRoutingKey(String key, String value) {
+        getRoutingMetadata().put(key, value);
+    }
+
+    /**
+     * Helper method to set a device ID as the routing key.
+     * This ensures all messages for the same device are processed by the same consumer.
+     *
+     * @param deviceId The device ID to use for routing
+     */
+    public void setDeviceIdRoutingKey(long deviceId) {
+        setRoutingKey("deviceId", String.valueOf(deviceId));
+    }
+
+    /**
+     * Helper method to set distributed tracing context from OpenTelemetry.
+     *
+     * @param traceId The trace ID from the current span context
+     * @param spanId The span ID from the current span context
+     */
+    public void setTracingIds(String traceId, String spanId) {
+        Map<String, String> context = getTracingContext();
+        context.put("traceId", traceId);
+        context.put("spanId", spanId);
+    }
+
+    /**
+     * Helper method to set the message timestamp to the current time.
+     */
+    public void setCurrentTimestamp() {
+        this.timestamp = System.currentTimeMillis();
+    }
 }
