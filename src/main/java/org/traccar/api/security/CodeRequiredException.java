@@ -15,8 +15,73 @@
  */
 package org.traccar.api.security;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+
+/**
+ * Exception thrown when a required authentication code is not provided.
+ * This exception is integrated with OpenTelemetry for distributed tracing
+ * and supports API Gateway error standardization.
+ */
 public class CodeRequiredException extends SecurityException {
+    
+    private static final String ERROR_CODE = "AUTH_CODE_REQUIRED";
+    private String correlationId;
+    
+    /**
+     * Constructs a new CodeRequiredException with default message.
+     * Records the current trace context for distributed tracing.
+     */
     public CodeRequiredException() {
-        super("Code not provided");
+        this("Code not provided", null);
+    }
+    
+    /**
+     * Constructs a new CodeRequiredException with a specified message.
+     * Records the current trace context for distributed tracing.
+     * 
+     * @param message the detail message
+     * @param correlationId the correlation ID for distributed tracing, or null to use the current span's trace ID
+     */
+    public CodeRequiredException(String message, String correlationId) {
+        super(message);
+        this.correlationId = correlationId;
+        
+        // Record exception in the current span if available
+        Span currentSpan = Span.current();
+        if (currentSpan != null && !currentSpan.equals(Span.getInvalid())) {
+            currentSpan.recordException(this);
+            currentSpan.setStatus(StatusCode.ERROR, message);
+            
+            // If no correlation ID was provided, use the trace ID as correlation ID
+            if (this.correlationId == null) {
+                this.correlationId = currentSpan.getSpanContext().getTraceId();
+            }
+            
+            // Add error attributes for standardized error handling
+            currentSpan.setAttribute("error.type", this.getClass().getName());
+            currentSpan.setAttribute("error.code", ERROR_CODE);
+            currentSpan.setAttribute("error.correlation_id", this.correlationId);
+        }
+    }
+    
+    /**
+     * Gets the error code for this exception.
+     * Used for API Gateway error standardization.
+     * 
+     * @return the standardized error code
+     */
+    public String getErrorCode() {
+        return ERROR_CODE;
+    }
+    
+    /**
+     * Gets the correlation ID for this exception.
+     * Used for distributed tracing across services.
+     * 
+     * @return the correlation ID
+     */
+    public String getCorrelationId() {
+        return correlationId;
     }
 }
