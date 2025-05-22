@@ -1887,6 +1887,202 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Service discovery type. Available options are "consul" and "kubernetes".
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_TYPE = new StringConfigKey(
+            "service.discovery.type",
+            List.of(KeyType.CONFIG),
+            "kubernetes");
+
+    /**
+     * Service name for registration with service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_SERVICE_NAME = new StringConfigKey(
+            "service.discovery.service.name",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Service host address for registration with service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_SERVICE_HOST = new StringConfigKey(
+            "service.discovery.service.host",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service tags for registration with service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_SERVICE_TAGS = new StringConfigKey(
+            "service.discovery.service.tags",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service metadata for registration with service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_SERVICE_METADATA = new StringConfigKey(
+            "service.discovery.service.metadata",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Health check endpoint for service health monitoring.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_HEALTH_ENDPOINT = new StringConfigKey(
+            "service.discovery.health.endpoint",
+            List.of(KeyType.CONFIG),
+            "/api/health");
+
+    /**
+     * Health check interval in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_HEALTH_INTERVAL = new IntegerConfigKey(
+            "service.discovery.health.interval",
+            List.of(KeyType.CONFIG),
+            10);
+
+    /**
+     * Health check timeout in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_HEALTH_TIMEOUT = new IntegerConfigKey(
+            "service.discovery.health.timeout",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Consul host address for connecting to Consul.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_CONSUL_HOST = new StringConfigKey(
+            "service.discovery.consul.host",
+            List.of(KeyType.CONFIG),
+            "localhost");
+
+    /**
+     * Consul port for connecting to Consul.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_CONSUL_PORT = new IntegerConfigKey(
+            "service.discovery.consul.port",
+            List.of(KeyType.CONFIG),
+            8500);
+
+    /**
+     * Consul DNS port for DNS-based service discovery.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_CONSUL_DNS_PORT = new IntegerConfigKey(
+            "service.discovery.consul.dnsPort",
+            List.of(KeyType.CONFIG),
+            8600);
+
+    /**
+     * Consul HTTP API endpoint for HTTP-based service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_CONSUL_HTTP_ENDPOINT = new StringConfigKey(
+            "service.discovery.consul.httpEndpoint",
+            List.of(KeyType.CONFIG),
+            "/v1/catalog/service/");
+
+    /**
+     * Consul ACL token for authentication.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_CONSUL_TOKEN = new StringConfigKey(
+            "service.discovery.consul.token",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Consul data center name.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_CONSUL_DATACENTER = new StringConfigKey(
+            "service.discovery.consul.datacenter",
+            List.of(KeyType.CONFIG),
+            "dc1");
+
+    /**
+     * Kubernetes namespace for service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_KUBERNETES_NAMESPACE = new StringConfigKey(
+            "service.discovery.kubernetes.namespace",
+            List.of(KeyType.CONFIG),
+            "default");
+
+    /**
+     * Kubernetes service account token path.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_KUBERNETES_TOKEN_PATH = new StringConfigKey(
+            "service.discovery.kubernetes.tokenPath",
+            List.of(KeyType.CONFIG),
+            "/var/run/secrets/kubernetes.io/serviceaccount/token");
+
+    /**
+     * DNS TTL (Time To Live) for service discovery records.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_DNS_TTL = new IntegerConfigKey(
+            "service.discovery.dns.ttl",
+            List.of(KeyType.CONFIG),
+            30);
+
+    /**
+     * Enable or disable service registration.
+     */
+    public static final ConfigKey<Boolean> SERVICE_DISCOVERY_REGISTRATION_ENABLED = new BooleanConfigKey(
+            "service.discovery.registration.enabled",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * Service deregistration timeout in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_DEREGISTRATION_TIMEOUT = new IntegerConfigKey(
+            "service.discovery.deregistration.timeout",
+            List.of(KeyType.CONFIG),
+            60);
+
+    /**
+     * Preferred instance selection strategy for service discovery.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_PREFERRED_INSTANCE_STRATEGY = new StringConfigKey(
+            "service.discovery.preferredInstanceStrategy",
+            List.of(KeyType.CONFIG),
+            "random");
+
+    /**
+     * Service discovery refresh interval in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_REFRESH_INTERVAL = new IntegerConfigKey(
+            "service.discovery.refreshInterval",
+            List.of(KeyType.CONFIG),
+            30);
+
+    /**
+     * Service discovery cache TTL in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_CACHE_TTL = new IntegerConfigKey(
+            "service.discovery.cacheTtl",
+            List.of(KeyType.CONFIG),
+            60);
+
+    /**
+     * Service discovery failure timeout in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_FAILURE_TIMEOUT = new IntegerConfigKey(
+            "service.discovery.failureTimeout",
+            List.of(KeyType.CONFIG),
+            10);
+
+    /**
+     * Service discovery retry count.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_RETRY_COUNT = new IntegerConfigKey(
+            "service.discovery.retryCount",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Service discovery retry delay in seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_RETRY_DELAY = new IntegerConfigKey(
+            "service.discovery.retryDelay",
+            List.of(KeyType.CONFIG),
+            5);
+
+    /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new BooleanConfigKey(
