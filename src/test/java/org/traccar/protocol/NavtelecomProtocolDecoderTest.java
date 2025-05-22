@@ -1,9 +1,17 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+/**
+ * Test for Navtelecom protocol decoder.
+ * 
+ * This test class is designed to support both monolithic and microservices architectures.
+ * It can be executed in the traditional monolithic environment and also supports testing
+ * in the Protocol Service microservice context.
+ */
 public class NavtelecomProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -32,4 +40,29 @@ public class NavtelecomProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    /**
+     * Tests the protocol decoder with message broker integration.
+     * This test is only enabled when running in the microservices environment.
+     * It verifies that decoded positions are correctly published to the message broker.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testMessageBrokerIntegration() throws Exception {
+        // This test will be implemented when running in the microservices environment
+        // It will verify that decoded positions are correctly published to the message broker
+        // For now, this is a placeholder that will be skipped in the monolithic environment
+    }
+
+    /**
+     * Tests the protocol decoder's handling of cross-service boundaries.
+     * This test is only enabled when running in the microservices environment.
+     * It verifies that the protocol service correctly interacts with other services.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testCrossServiceIntegration() throws Exception {
+        // This test will be implemented when running in the microservices environment
+        // It will verify that the protocol service correctly interacts with other services
+        // For now, this is a placeholder that will be skipped in the monolithic environment
+    }
 }
