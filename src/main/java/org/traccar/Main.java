@@ -21,8 +21,15 @@ import com.google.inject.ProvisionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.discovery.ServiceDiscovery;
+import org.traccar.discovery.ServiceRegistry;
+import org.traccar.messaging.MessageBrokerManager;
+import org.traccar.metrics.MicrometerMetricsManager;
 import org.traccar.schedule.ScheduleManager;
 import org.traccar.storage.DatabaseModule;
+import org.traccar.telemetry.OpenTelemetryManager;
 import org.traccar.web.WebModule;
 import org.traccar.web.WebServer;
 
@@ -119,6 +126,45 @@ public final class Main {
             LOGGER.info("Version: {}", Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
+            // Detect execution mode (monolithic or microservices)
+            Config config = injector.getInstance(Config.class);
+            boolean microservicesMode = config.getBoolean(Keys.SERVER_MICROSERVICES_MODE);
+            LOGGER.info("Execution mode: {}", microservicesMode ? "microservices" : "monolithic");
+
+            // Initialize OpenTelemetry for distributed tracing
+            OpenTelemetryManager openTelemetryManager = null;
+            if (config.getBoolean(Keys.TELEMETRY_ENABLE)) {
+                openTelemetryManager = injector.getInstance(OpenTelemetryManager.class);
+                openTelemetryManager.start();
+                LOGGER.info("OpenTelemetry tracing initialized");
+            }
+
+            // Initialize Micrometer for metrics collection
+            MicrometerMetricsManager metricsManager = null;
+            if (config.getBoolean(Keys.METRICS_ENABLE)) {
+                metricsManager = injector.getInstance(MicrometerMetricsManager.class);
+                metricsManager.start();
+                LOGGER.info("Micrometer metrics initialized");
+            }
+
+            // Initialize message broker for asynchronous communication
+            MessageBrokerManager messageBrokerManager = null;
+            if (microservicesMode && config.getBoolean(Keys.MESSAGE_BROKER_ENABLE)) {
+                messageBrokerManager = injector.getInstance(MessageBrokerManager.class);
+                messageBrokerManager.start();
+                LOGGER.info("Message broker initialized");
+            }
+
+            // Initialize service discovery and registry for microservices mode
+            ServiceDiscovery serviceDiscovery = null;
+            ServiceRegistry serviceRegistry = null;
+            if (microservicesMode && config.getBoolean(Keys.SERVICE_DISCOVERY_ENABLE)) {
+                serviceDiscovery = injector.getInstance(ServiceDiscovery.class);
+                serviceRegistry = injector.getInstance(ServiceRegistry.class);
+                serviceRegistry.start();
+                LOGGER.info("Service discovery initialized");
+            }
+
             var services = new ArrayList<LifecycleObject>();
             for (var clazz : List.of(
                     ScheduleManager.class, ServerManager.class, WebServer.class, BroadcastService.class)) {
@@ -134,13 +180,49 @@ public final class Main {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Stopping server...");
 
+                // Graceful shutdown of all services
                 for (var service : services) {
                     try {
                         service.stop();
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        LOGGER.error("Error stopping service", e);
                     }
                 }
+
+                // Graceful shutdown of microservices components
+                if (serviceRegistry != null) {
+                    try {
+                        serviceRegistry.stop();
+                    } catch (Exception e) {
+                        LOGGER.error("Error stopping service registry", e);
+                    }
+                }
+
+                if (messageBrokerManager != null) {
+                    try {
+                        messageBrokerManager.stop();
+                    } catch (Exception e) {
+                        LOGGER.error("Error stopping message broker", e);
+                    }
+                }
+
+                // Shutdown metrics and telemetry
+                if (metricsManager != null) {
+                    try {
+                        metricsManager.stop();
+                    } catch (Exception e) {
+                        LOGGER.error("Error stopping metrics manager", e);
+                    }
+                }
+
+                if (openTelemetryManager != null) {
+                    try {
+                        openTelemetryManager.stop();
+                    } catch (Exception e) {
+                        LOGGER.error("Error stopping OpenTelemetry manager", e);
+                    }
+                }
+
                 injector.getInstance(ExecutorService.class).shutdown();
             }));
         } catch (Exception e) {
