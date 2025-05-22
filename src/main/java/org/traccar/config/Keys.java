@@ -643,38 +643,6 @@ public final class Keys {
     public static final ConfigKey<String> LDAP_ADMIN_GROUP = new StringConfigKey(
             "ldap.adminGroup",
             List.of(KeyType.CONFIG));
-            
-    /**
-     * Enable LDAP connection pooling.
-     */
-    public static final ConfigKey<Boolean> LDAP_POOL_ENABLED = new BooleanConfigKey(
-            "ldap.pool.enabled",
-            List.of(KeyType.CONFIG),
-            true);
-            
-    /**
-     * Maximum size of LDAP connection pool.
-     */
-    public static final ConfigKey<Integer> LDAP_POOL_MAX_SIZE = new IntegerConfigKey(
-            "ldap.pool.maxSize",
-            List.of(KeyType.CONFIG),
-            10);
-            
-    /**
-     * Preferred size of LDAP connection pool.
-     */
-    public static final ConfigKey<Integer> LDAP_POOL_PREFERRED_SIZE = new IntegerConfigKey(
-            "ldap.pool.preferredSize",
-            List.of(KeyType.CONFIG),
-            5);
-            
-    /**
-     * LDAP connection pool timeout in milliseconds.
-     */
-    public static final ConfigKey<Long> LDAP_POOL_TIMEOUT = new LongConfigKey(
-            "ldap.pool.timeout",
-            List.of(KeyType.CONFIG),
-            300000L);
 
     /**
      * Force OpenID Connect authentication. When enabled, the Traccar login page will be skipped
@@ -789,51 +757,6 @@ public final class Keys {
             "media.path",
             List.of(KeyType.CONFIG),
             "./media");
-            
-    /**
-     * Enable S3-compatible storage for media files. When enabled, media files will be stored in S3 instead of local filesystem.
-     */
-    public static final ConfigKey<Boolean> MEDIA_S3_ENABLED = new BooleanConfigKey(
-            "media.s3.enabled",
-            List.of(KeyType.CONFIG),
-            false);
-            
-    /**
-     * S3 bucket name for media storage.
-     */
-    public static final ConfigKey<String> MEDIA_S3_BUCKET = new StringConfigKey(
-            "media.s3.bucket",
-            List.of(KeyType.CONFIG),
-            "traccar-media");
-            
-    /**
-     * S3 endpoint URL. Required for S3-compatible storage.
-     */
-    public static final ConfigKey<String> MEDIA_S3_ENDPOINT = new StringConfigKey(
-            "media.s3.endpoint",
-            List.of(KeyType.CONFIG));
-            
-    /**
-     * S3 region. Default is "us-east-1".
-     */
-    public static final ConfigKey<String> MEDIA_S3_REGION = new StringConfigKey(
-            "media.s3.region",
-            List.of(KeyType.CONFIG),
-            "us-east-1");
-            
-    /**
-     * S3 access key. Required for S3-compatible storage.
-     */
-    public static final ConfigKey<String> MEDIA_S3_ACCESS_KEY = new StringConfigKey(
-            "media.s3.accessKey",
-            List.of(KeyType.CONFIG));
-            
-    /**
-     * S3 secret key. Required for S3-compatible storage.
-     */
-    public static final ConfigKey<String> MEDIA_S3_SECRET_KEY = new StringConfigKey(
-            "media.s3.secretKey",
-            List.of(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
@@ -1033,15 +956,6 @@ public final class Keys {
             "forward.retry.limit",
             List.of(KeyType.CONFIG),
             100);
-
-    /**
-     * MQTT QoS level for position forwarding. Default is 1 (at least once).
-     * Available options: 0 (at most once), 1 (at least once), 2 (exactly once).
-     */
-    public static final ConfigKey<String> FORWARD_MQTT_QOS = new StringConfigKey(
-            "forward.mqtt.qos",
-            List.of(KeyType.CONFIG),
-            "1");
 
     /**
      * Events forwarding format. Available options are "json" and "kafka". Default is "json".
@@ -2052,77 +1966,6 @@ public final class Keys {
     public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
             "broadcast.type",
             List.of(KeyType.CONFIG));
-            
-    /**
-     * Message broker type. Available options are "kafka" and "rabbitmq". Default is "kafka".
-     */
-    public static final ConfigKey<String> BROKER_TYPE = new StringConfigKey(
-            "broker.type",
-            List.of(KeyType.CONFIG),
-            "kafka");
-            
-    /**
-     * Message broker URL for connecting to the broker server.
-     */
-    public static final ConfigKey<String> BROKER_URL = new StringConfigKey(
-            "broker.url",
-            List.of(KeyType.CONFIG));
-            
-    /**
-     * Message broker exchange name for RabbitMQ. Default is "traccar".
-     */
-    public static final ConfigKey<String> BROKER_EXCHANGE = new StringConfigKey(
-            "broker.exchange",
-            List.of(KeyType.CONFIG),
-            "traccar");
-            
-    /**
-     * Message broker acknowledgement mode for Kafka. Default is "all".
-     */
-    public static final ConfigKey<String> BROKER_ACKS = new StringConfigKey(
-            "broker.acks",
-            List.of(KeyType.CONFIG),
-            "all");
-            
-    /**
-     * Enable idempotent producer for Kafka. Default is true.
-     */
-    public static final ConfigKey<Boolean> BROKER_IDEMPOTENCE = new BooleanConfigKey(
-            "broker.idempotence",
-            List.of(KeyType.CONFIG),
-            true);
-            
-    /**
-     * Number of retries for message broker operations. Default is 3.
-     */
-    public static final ConfigKey<Integer> BROKER_RETRIES = new IntegerConfigKey(
-            "broker.retries",
-            List.of(KeyType.CONFIG),
-            3);
-            
-    /**
-     * Maximum number of unacknowledged requests for Kafka. Default is 5.
-     */
-    public static final ConfigKey<Integer> BROKER_MAX_IN_FLIGHT = new IntegerConfigKey(
-            "broker.maxInFlight",
-            List.of(KeyType.CONFIG),
-            5);
-            
-    /**
-     * Enable auto commit for message broker consumer. Default is false.
-     */
-    public static final ConfigKey<Boolean> BROKER_AUTO_COMMIT = new BooleanConfigKey(
-            "broker.autoCommit",
-            List.of(KeyType.CONFIG),
-            false);
-            
-    /**
-     * Auto offset reset policy for message broker consumer. Default is "earliest".
-     */
-    public static final ConfigKey<String> BROKER_OFFSET_RESET = new StringConfigKey(
-            "broker.offsetReset",
-            List.of(KeyType.CONFIG),
-            "earliest");
 
     /**
      * Multicast interface. It can be either an IP address or an interface name.
@@ -2152,4 +1995,487 @@ public final class Keys {
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
+    // Service Discovery Configuration Keys
+
+    /**
+     * Enable service discovery mechanism. Available options are "consul" and "kubernetes".
+     * By default, service discovery is disabled.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_TYPE = new StringConfigKey(
+            "service.discovery.type",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service discovery server URL. For Consul, this is the Consul agent address.
+     * For Kubernetes, this is not required as it uses in-cluster configuration.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_URL = new StringConfigKey(
+            "service.discovery.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service name to register with the service discovery system.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_SERVICE_NAME = new StringConfigKey(
+            "service.discovery.serviceName",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service discovery health check interval in seconds. Default is 10 seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_CHECK_INTERVAL = new IntegerConfigKey(
+            "service.discovery.checkInterval",
+            List.of(KeyType.CONFIG),
+            10);
+
+    /**
+     * Service discovery health check timeout in seconds. Default is 5 seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_CHECK_TIMEOUT = new IntegerConfigKey(
+            "service.discovery.checkTimeout",
+            List.of(KeyType.CONFIG),
+            5);
+
+    /**
+     * Service discovery deregistration timeout in seconds. Default is 30 seconds.
+     */
+    public static final ConfigKey<Integer> SERVICE_DISCOVERY_DEREGISTER_TIMEOUT = new IntegerConfigKey(
+            "service.discovery.deregisterTimeout",
+            List.of(KeyType.CONFIG),
+            30);
+
+    /**
+     * Service discovery tags. Comma-separated list of tags to associate with the service.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_TAGS = new StringConfigKey(
+            "service.discovery.tags",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Service discovery metadata. JSON string containing metadata to associate with the service.
+     */
+    public static final ConfigKey<String> SERVICE_DISCOVERY_METADATA = new StringConfigKey(
+            "service.discovery.metadata",
+            List.of(KeyType.CONFIG));
+
+    // Message Broker Configuration Keys
+
+    /**
+     * Message broker type. Available options are "kafka" and "rabbitmq".
+     * By default, no message broker is used.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_TYPE = new StringConfigKey(
+            "message.broker.type",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker server URL. For Kafka, this is a comma-separated list of bootstrap servers.
+     * For RabbitMQ, this is the AMQP URL.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_URL = new StringConfigKey(
+            "message.broker.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker username for authentication.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_USERNAME = new StringConfigKey(
+            "message.broker.username",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker password for authentication.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_PASSWORD = new StringConfigKey(
+            "message.broker.password",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker client ID. Used for Kafka consumer group ID or RabbitMQ client name.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_CLIENT_ID = new StringConfigKey(
+            "message.broker.clientId",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker SSL enabled flag.
+     */
+    public static final ConfigKey<Boolean> MESSAGE_BROKER_SSL_ENABLED = new BooleanConfigKey(
+            "message.broker.ssl.enabled",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker SSL truststore location.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SSL_TRUSTSTORE_LOCATION = new StringConfigKey(
+            "message.broker.ssl.truststore.location",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker SSL truststore password.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SSL_TRUSTSTORE_PASSWORD = new StringConfigKey(
+            "message.broker.ssl.truststore.password",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Kafka specific configuration: number of partitions for auto-created topics.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_KAFKA_PARTITIONS = new IntegerConfigKey(
+            "message.broker.kafka.partitions",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Kafka specific configuration: replication factor for auto-created topics.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_KAFKA_REPLICATION_FACTOR = new IntegerConfigKey(
+            "message.broker.kafka.replicationFactor",
+            List.of(KeyType.CONFIG),
+            1);
+
+    /**
+     * RabbitMQ specific configuration: virtual host.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST = new StringConfigKey(
+            "message.broker.rabbitmq.virtualHost",
+            List.of(KeyType.CONFIG),
+            "/");
+
+    /**
+     * RabbitMQ specific configuration: exchange type. Default is "topic".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_RABBITMQ_EXCHANGE_TYPE = new StringConfigKey(
+            "message.broker.rabbitmq.exchangeType",
+            List.of(KeyType.CONFIG),
+            "topic");
+
+    /**
+     * RabbitMQ specific configuration: exchange durable flag.
+     */
+    public static final ConfigKey<Boolean> MESSAGE_BROKER_RABBITMQ_EXCHANGE_DURABLE = new BooleanConfigKey(
+            "message.broker.rabbitmq.exchangeDurable",
+            List.of(KeyType.CONFIG),
+            true);
+
+    // Distributed Tracing Configuration Keys
+
+    /**
+     * Enable distributed tracing. Default is false.
+     */
+    public static final ConfigKey<Boolean> TRACING_ENABLED = new BooleanConfigKey(
+            "tracing.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Distributed tracing service name. This is the name that will appear in the tracing system.
+     */
+    public static final ConfigKey<String> TRACING_SERVICE_NAME = new StringConfigKey(
+            "tracing.serviceName",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Distributed tracing exporter type. Available options are "jaeger", "zipkin", and "otlp".
+     * Default is "jaeger".
+     */
+    public static final ConfigKey<String> TRACING_EXPORTER_TYPE = new StringConfigKey(
+            "tracing.exporter.type",
+            List.of(KeyType.CONFIG),
+            "jaeger");
+
+    /**
+     * Distributed tracing exporter endpoint URL.
+     */
+    public static final ConfigKey<String> TRACING_EXPORTER_ENDPOINT = new StringConfigKey(
+            "tracing.exporter.endpoint",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Distributed tracing sampling ratio. Value between 0.0 and 1.0. Default is 0.1 (10% of traces).
+     */
+    public static final ConfigKey<Double> TRACING_SAMPLING_RATIO = new DoubleConfigKey(
+            "tracing.sampling.ratio",
+            List.of(KeyType.CONFIG),
+            0.1);
+
+    /**
+     * Distributed tracing propagation format. Available options are "w3c", "b3", and "jaeger".
+     * Default is "w3c".
+     */
+    public static final ConfigKey<String> TRACING_PROPAGATION_FORMAT = new StringConfigKey(
+            "tracing.propagation.format",
+            List.of(KeyType.CONFIG),
+            "w3c");
+
+    // Metrics Collection Configuration Keys
+
+    /**
+     * Enable metrics collection. Default is false.
+     */
+    public static final ConfigKey<Boolean> METRICS_ENABLED = new BooleanConfigKey(
+            "metrics.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Metrics registry type. Available options are "prometheus" and "jmx".
+     * Default is "prometheus".
+     */
+    public static final ConfigKey<String> METRICS_REGISTRY_TYPE = new StringConfigKey(
+            "metrics.registry.type",
+            List.of(KeyType.CONFIG),
+            "prometheus");
+
+    /**
+     * Metrics endpoint port. Default is 9464.
+     */
+    public static final ConfigKey<Integer> METRICS_ENDPOINT_PORT = new IntegerConfigKey(
+            "metrics.endpoint.port",
+            List.of(KeyType.CONFIG),
+            9464);
+
+    /**
+     * Metrics endpoint path. Default is "/metrics".
+     */
+    public static final ConfigKey<String> METRICS_ENDPOINT_PATH = new StringConfigKey(
+            "metrics.endpoint.path",
+            List.of(KeyType.CONFIG),
+            "/metrics");
+
+    /**
+     * Metrics collection interval in seconds. Default is 15 seconds.
+     */
+    public static final ConfigKey<Integer> METRICS_COLLECTION_INTERVAL = new IntegerConfigKey(
+            "metrics.collection.interval",
+            List.of(KeyType.CONFIG),
+            15);
+
+    /**
+     * Enable JVM metrics collection. Default is true.
+     */
+    public static final ConfigKey<Boolean> METRICS_JVM_ENABLED = new BooleanConfigKey(
+            "metrics.jvm.enabled",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * Enable system metrics collection. Default is true.
+     */
+    public static final ConfigKey<Boolean> METRICS_SYSTEM_ENABLED = new BooleanConfigKey(
+            "metrics.system.enabled",
+            List.of(KeyType.CONFIG),
+            true);
+
+    // Circuit Breaker and Resilience Configuration Keys
+
+    /**
+     * Enable circuit breaker for external service calls. Default is false.
+     */
+    public static final ConfigKey<Boolean> CIRCUIT_BREAKER_ENABLED = new BooleanConfigKey(
+            "circuitBreaker.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Circuit breaker failure threshold percentage. Default is 50%.
+     */
+    public static final ConfigKey<Integer> CIRCUIT_BREAKER_FAILURE_THRESHOLD = new IntegerConfigKey(
+            "circuitBreaker.failureThreshold",
+            List.of(KeyType.CONFIG),
+            50);
+
+    /**
+     * Circuit breaker wait duration in milliseconds before transitioning from open to half-open.
+     * Default is 60000 (60 seconds).
+     */
+    public static final ConfigKey<Long> CIRCUIT_BREAKER_WAIT_DURATION_MS = new LongConfigKey(
+            "circuitBreaker.waitDurationMs",
+            List.of(KeyType.CONFIG),
+            60000L);
+
+    /**
+     * Circuit breaker ring buffer size for closed state. Default is 100.
+     */
+    public static final ConfigKey<Integer> CIRCUIT_BREAKER_RING_BUFFER_SIZE_CLOSED = new IntegerConfigKey(
+            "circuitBreaker.ringBufferSizeClosed",
+            List.of(KeyType.CONFIG),
+            100);
+
+    /**
+     * Circuit breaker ring buffer size for half-open state. Default is 10.
+     */
+    public static final ConfigKey<Integer> CIRCUIT_BREAKER_RING_BUFFER_SIZE_HALF_OPEN = new IntegerConfigKey(
+            "circuitBreaker.ringBufferSizeHalfOpen",
+            List.of(KeyType.CONFIG),
+            10);
+
+    /**
+     * Enable retry mechanism for failed operations. Default is false.
+     */
+    public static final ConfigKey<Boolean> RETRY_ENABLED = new BooleanConfigKey(
+            "retry.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Maximum number of retry attempts. Default is 3.
+     */
+    public static final ConfigKey<Integer> RETRY_MAX_ATTEMPTS = new IntegerConfigKey(
+            "retry.maxAttempts",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Retry initial interval in milliseconds. Default is 1000 (1 second).
+     */
+    public static final ConfigKey<Long> RETRY_INITIAL_INTERVAL_MS = new LongConfigKey(
+            "retry.initialIntervalMs",
+            List.of(KeyType.CONFIG),
+            1000L);
+
+    /**
+     * Retry multiplier for exponential backoff. Default is 1.5.
+     */
+    public static final ConfigKey<Double> RETRY_MULTIPLIER = new DoubleConfigKey(
+            "retry.multiplier",
+            List.of(KeyType.CONFIG),
+            1.5);
+
+    /**
+     * Enable rate limiting for API endpoints. Default is false.
+     */
+    public static final ConfigKey<Boolean> RATE_LIMITER_ENABLED = new BooleanConfigKey(
+            "rateLimiter.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Rate limiter limit for refresh period. Default is 100.
+     */
+    public static final ConfigKey<Integer> RATE_LIMITER_LIMIT = new IntegerConfigKey(
+            "rateLimiter.limit",
+            List.of(KeyType.CONFIG),
+            100);
+
+    /**
+     * Rate limiter refresh period in milliseconds. Default is 1000 (1 second).
+     */
+    public static final ConfigKey<Long> RATE_LIMITER_REFRESH_PERIOD_MS = new LongConfigKey(
+            "rateLimiter.refreshPeriodMs",
+            List.of(KeyType.CONFIG),
+            1000L);
+
+    /**
+     * Enable bulkhead pattern for limiting concurrent calls. Default is false.
+     */
+    public static final ConfigKey<Boolean> BULKHEAD_ENABLED = new BooleanConfigKey(
+            "bulkhead.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Maximum number of concurrent calls allowed by the bulkhead. Default is 25.
+     */
+    public static final ConfigKey<Integer> BULKHEAD_MAX_CONCURRENT_CALLS = new IntegerConfigKey(
+            "bulkhead.maxConcurrentCalls",
+            List.of(KeyType.CONFIG),
+            25);
+
+    /**
+     * Maximum wait time in milliseconds for bulkhead permission. Default is 0 (fail fast).
+     */
+    public static final ConfigKey<Long> BULKHEAD_MAX_WAIT_DURATION_MS = new LongConfigKey(
+            "bulkhead.maxWaitDurationMs",
+            List.of(KeyType.CONFIG),
+            0L);
+
+    // Container-specific Configuration Keys
+
+    /**
+     * Enable container-specific optimizations. Default is false.
+     */
+    public static final ConfigKey<Boolean> CONTAINER_OPTIMIZATIONS_ENABLED = new BooleanConfigKey(
+            "container.optimizations.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Container memory limit in megabytes. Used for JVM heap size calculation.
+     */
+    public static final ConfigKey<Integer> CONTAINER_MEMORY_LIMIT_MB = new IntegerConfigKey(
+            "container.memoryLimitMb",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Container CPU limit. Used for thread pool sizing.
+     */
+    public static final ConfigKey<Double> CONTAINER_CPU_LIMIT = new DoubleConfigKey(
+            "container.cpuLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Container health check endpoint path. Default is "/health".
+     */
+    public static final ConfigKey<String> CONTAINER_HEALTH_CHECK_PATH = new StringConfigKey(
+            "container.healthCheck.path",
+            List.of(KeyType.CONFIG),
+            "/health");
+
+    /**
+     * Container readiness check endpoint path. Default is "/ready".
+     */
+    public static final ConfigKey<String> CONTAINER_READINESS_CHECK_PATH = new StringConfigKey(
+            "container.readinessCheck.path",
+            List.of(KeyType.CONFIG),
+            "/ready");
+
+    /**
+     * Container graceful shutdown timeout in seconds. Default is 30 seconds.
+     */
+    public static final ConfigKey<Integer> CONTAINER_SHUTDOWN_TIMEOUT = new IntegerConfigKey(
+            "container.shutdownTimeout",
+            List.of(KeyType.CONFIG),
+            30);
+
+    /**
+     * Container environment variable prefix for configuration overrides.
+     * Default is "TRACCAR_".
+     */
+    public static final ConfigKey<String> CONTAINER_ENV_PREFIX = new StringConfigKey(
+            "container.envPrefix",
+            List.of(KeyType.CONFIG),
+            "TRACCAR_");
+
+    /**
+     * Enable Kubernetes-specific features when running in a Kubernetes environment.
+     * Default is false.
+     */
+    public static final ConfigKey<Boolean> CONTAINER_KUBERNETES_ENABLED = new BooleanConfigKey(
+            "container.kubernetes.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Kubernetes namespace. Used for service discovery and metadata.
+     */
+    public static final ConfigKey<String> CONTAINER_KUBERNETES_NAMESPACE = new StringConfigKey(
+            "container.kubernetes.namespace",
+            List.of(KeyType.CONFIG),
+            "default");
+
+    /**
+     * Kubernetes pod name. Used for identifying the current instance.
+     */
+    public static final ConfigKey<String> CONTAINER_KUBERNETES_POD_NAME = new StringConfigKey(
+            "container.kubernetes.podName",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Kubernetes node name. Used for identifying the current node.
+     */
+    public static final ConfigKey<String> CONTAINER_KUBERNETES_NODE_NAME = new StringConfigKey(
+            "container.kubernetes.nodeName",
+            List.of(KeyType.CONFIG));
 }
