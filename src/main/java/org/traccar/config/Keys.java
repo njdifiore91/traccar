@@ -757,6 +757,51 @@ public final class Keys {
             "media.path",
             List.of(KeyType.CONFIG),
             "./media");
+            
+    /**
+     * Enable S3-compatible storage for media files. When enabled, media files will be stored in S3 instead of local filesystem.
+     */
+    public static final ConfigKey<Boolean> MEDIA_S3_ENABLED = new BooleanConfigKey(
+            "media.s3.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+            
+    /**
+     * S3 bucket name for media storage.
+     */
+    public static final ConfigKey<String> MEDIA_S3_BUCKET = new StringConfigKey(
+            "media.s3.bucket",
+            List.of(KeyType.CONFIG),
+            "traccar-media");
+            
+    /**
+     * S3 endpoint URL. Required for S3-compatible storage.
+     */
+    public static final ConfigKey<String> MEDIA_S3_ENDPOINT = new StringConfigKey(
+            "media.s3.endpoint",
+            List.of(KeyType.CONFIG));
+            
+    /**
+     * S3 region. Default is "us-east-1".
+     */
+    public static final ConfigKey<String> MEDIA_S3_REGION = new StringConfigKey(
+            "media.s3.region",
+            List.of(KeyType.CONFIG),
+            "us-east-1");
+            
+    /**
+     * S3 access key. Required for S3-compatible storage.
+     */
+    public static final ConfigKey<String> MEDIA_S3_ACCESS_KEY = new StringConfigKey(
+            "media.s3.accessKey",
+            List.of(KeyType.CONFIG));
+            
+    /**
+     * S3 secret key. Required for S3-compatible storage.
+     */
+    public static final ConfigKey<String> MEDIA_S3_SECRET_KEY = new StringConfigKey(
+            "media.s3.secretKey",
+            List.of(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
