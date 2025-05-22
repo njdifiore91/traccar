@@ -22,6 +22,36 @@ public final class Keys {
 
     private Keys() {
     }
+    
+    /**
+     * Service discovery type (consul, kubernetes, none).
+     */
+    public static final ConfigKey SERVICE_DISCOVERY_TYPE = new ConfigKey(
+            "service.discovery.type", String.class);
+            
+    /**
+     * Consul host for service discovery.
+     */
+    public static final ConfigKey SERVICE_CONSUL_HOST = new ConfigKey(
+            "service.consul.host", String.class);
+            
+    /**
+     * Consul port for service discovery.
+     */
+    public static final ConfigKey SERVICE_CONSUL_PORT = new ConfigKey(
+            "service.consul.port", Integer.class);
+            
+    /**
+     * Kubernetes namespace for service discovery.
+     */
+    public static final ConfigKey SERVICE_KUBERNETES_NAMESPACE = new ConfigKey(
+            "service.kubernetes.namespace", String.class);
+            
+    /**
+     * Application version.
+     */
+    public static final ConfigKey VERSION = new ConfigKey(
+            "version", String.class);
 
     /**
      * Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection old
