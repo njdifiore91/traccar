@@ -32,18 +32,43 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+// Resilience4j imports for circuit breaker
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+
+// OpenTelemetry imports for distributed tracing
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+
+// Micrometer imports for metrics
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
+// Messaging imports for async processing
+import org.traccar.messaging.MessagePublisher;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
 
@@ -58,22 +83,56 @@ public class ComputedAttributesHandler extends BasePositionHandler {
 
     private final boolean includeDeviceAttributes;
     private final boolean includeLastAttributes;
+    
+    // Circuit breaker for expression evaluation
+    private final CircuitBreaker circuitBreaker;
+    
+    // Tracer for distributed tracing
+    private final Tracer tracer;
+    
+    // Metrics registry for performance monitoring
+    private final MeterRegistry meterRegistry;
+    
+    // Message publisher for async processing
+    private final MessagePublisher messagePublisher;
+    
+    // Executor for async operations
+    private final Executor executor;
+    
+    // Metrics
+    private final Timer computeTimer;
+    private final Counter successCounter;
+    private final Counter failureCounter;
+    private final Counter circuitBreakerOpenCounter;
 
     public static class Early extends ComputedAttributesHandler {
         @Inject
-        public Early(Config config, CacheManager cacheManager) {
-            super(config, cacheManager, true);
+        public Early(Config config, CacheManager cacheManager, 
+                    CircuitBreakerRegistry circuitBreakerRegistry,
+                    Tracer tracer, MeterRegistry meterRegistry,
+                    MessagePublisher messagePublisher, Executor executor) {
+            super(config, cacheManager, true, circuitBreakerRegistry, tracer, meterRegistry, messagePublisher, executor);
         }
     }
 
     public static class Late extends ComputedAttributesHandler {
         @Inject
-        public Late(Config config, CacheManager cacheManager) {
-            super(config, cacheManager, false);
+        public Late(Config config, CacheManager cacheManager,
+                   CircuitBreakerRegistry circuitBreakerRegistry,
+                   Tracer tracer, MeterRegistry meterRegistry,
+                   MessagePublisher messagePublisher, Executor executor) {
+            super(config, cacheManager, false, circuitBreakerRegistry, tracer, meterRegistry, messagePublisher, executor);
         }
     }
 
     public ComputedAttributesHandler(Config config, CacheManager cacheManager, boolean early) {
+        this(config, cacheManager, early, null, null, null, null, null);
+    }
+
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager, boolean early,
+                                    CircuitBreakerRegistry circuitBreakerRegistry,
+                                    Tracer tracer, MeterRegistry meterRegistry,
+                                    MessagePublisher messagePublisher, Executor executor) {
         this.cacheManager = cacheManager;
         this.early = early;
         JexlSandbox sandbox = new JexlSandbox(false);
@@ -96,6 +155,58 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                 .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
         includeLastAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LAST_ATTRIBUTES);
+        
+        // Initialize circuit breaker if registry is provided
+        if (circuitBreakerRegistry != null) {
+            CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50) // 50% failure rate to trip the circuit
+                .waitDurationInOpenState(Duration.ofSeconds(30)) // Wait 30 seconds before trying again
+                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .slidingWindowSize(10) // Consider the last 10 calls
+                .minimumNumberOfCalls(5) // Minimum calls before calculating failure rate
+                .permittedNumberOfCallsInHalfOpenState(3) // Allow 3 calls in half-open state
+                .build();
+            this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(
+                "computedAttributes" + (early ? "Early" : "Late"), circuitBreakerConfig);
+        } else {
+            this.circuitBreaker = null;
+        }
+        
+        // Initialize tracer
+        this.tracer = tracer;
+        
+        // Initialize metrics registry and create metrics
+        this.meterRegistry = meterRegistry;
+        if (meterRegistry != null) {
+            String handlerType = early ? "early" : "late";
+            this.computeTimer = Timer.builder("computed.attributes.compute.time")
+                .tag("type", handlerType)
+                .description("Time taken to compute attributes")
+                .register(meterRegistry);
+            this.successCounter = Counter.builder("computed.attributes.success")
+                .tag("type", handlerType)
+                .description("Number of successful attribute computations")
+                .register(meterRegistry);
+            this.failureCounter = Counter.builder("computed.attributes.failure")
+                .tag("type", handlerType)
+                .description("Number of failed attribute computations")
+                .register(meterRegistry);
+            this.circuitBreakerOpenCounter = Counter.builder("computed.attributes.circuit.breaker.open")
+                .tag("type", handlerType)
+                .description("Number of times the circuit breaker was open")
+                .register(meterRegistry);
+        } else {
+            this.computeTimer = null;
+            this.successCounter = null;
+            this.failureCounter = null;
+            this.circuitBreakerOpenCounter = null;
+        }
+        
+        // Initialize message publisher for async processing
+        this.messagePublisher = messagePublisher;
+        
+        // Initialize executor for async operations
+        this.executor = executor;
     }
 
     private MapContext prepareContext(Position position) {
@@ -151,21 +262,194 @@ public class ComputedAttributesHandler extends BasePositionHandler {
      */
     @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
+        return computeAttributeWithResilience(attribute, position);
+    }
+    
+    /**
+     * Compute attribute with resilience patterns (circuit breaker, tracing, metrics)
+     */
+    private Object computeAttributeWithResilience(Attribute attribute, Position position) {
+        // Create a span for this computation if tracing is enabled
+        Span span = null;
+        Scope scope = null;
+        
+        if (tracer != null) {
+            span = tracer.spanBuilder("computeAttribute")
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("attribute.name", attribute.getAttribute())
+                .setAttribute("attribute.expression", attribute.getExpression())
+                .setAttribute("device.id", String.valueOf(position.getDeviceId()))
+                .startSpan();
+            scope = span.makeCurrent();
+        }
+        
+        try {
+            // Use circuit breaker if available, otherwise execute directly
+            if (circuitBreaker != null) {
+                try {
+                    return circuitBreaker.executeSupplier(() -> {
+                        // Record metrics if available
+                        if (computeTimer != null) {
+                            return computeTimer.record(() -> {
+                                try {
+                                    Object result = evaluateExpression(attribute, position);
+                                    if (successCounter != null) {
+                                        successCounter.increment();
+                                    }
+                                    return result;
+                                } catch (Exception e) {
+                                    if (failureCounter != null) {
+                                        failureCounter.increment();
+                                    }
+                                    throw e;
+                                }
+                            });
+                        } else {
+                            return evaluateExpression(attribute, position);
+                        }
+                    });
+                } catch (Exception e) {
+                    if (circuitBreakerOpenCounter != null && 
+                        circuitBreaker.getState() == CircuitBreaker.State.OPEN) {
+                        circuitBreakerOpenCounter.increment();
+                    }
+                    
+                    // Record error in span if tracing is enabled
+                    if (span != null) {
+                        span.recordException(e)
+                            .setStatus(StatusCode.ERROR, e.getMessage());
+                    }
+                    
+                    // Graceful degradation - return fallback value
+                    return getFallbackValue(attribute, e);
+                }
+            } else {
+                // No circuit breaker, execute directly with metrics if available
+                if (computeTimer != null) {
+                    return computeTimer.record(() -> {
+                        try {
+                            Object result = evaluateExpression(attribute, position);
+                            if (successCounter != null) {
+                                successCounter.increment();
+                            }
+                            return result;
+                        } catch (Exception e) {
+                            if (failureCounter != null) {
+                                failureCounter.increment();
+                            }
+                            
+                            // Record error in span if tracing is enabled
+                            if (span != null) {
+                                span.recordException(e)
+                                    .setStatus(StatusCode.ERROR, e.getMessage());
+                            }
+                            
+                            // Graceful degradation - return fallback value
+                            return getFallbackValue(attribute, e);
+                        }
+                    });
+                } else {
+                    try {
+                        return evaluateExpression(attribute, position);
+                    } catch (Exception e) {
+                        // Record error in span if tracing is enabled
+                        if (span != null) {
+                            span.recordException(e)
+                                .setStatus(StatusCode.ERROR, e.getMessage());
+                        }
+                        
+                        // Graceful degradation - return fallback value
+                        return getFallbackValue(attribute, e);
+                    }
+                }
+            }
+        } finally {
+            // Close the span and scope if tracing is enabled
+            if (scope != null) {
+                scope.close();
+            }
+            if (span != null) {
+                span.end();
+            }
+        }
+    }
+    
+    /**
+     * Evaluate the expression using the JEXL engine
+     */
+    private Object evaluateExpression(Attribute attribute, Position position) {
         return engine
                 .createScript(features, engine.createInfo(), attribute.getExpression())
                 .execute(prepareContext(position));
     }
+    
+    /**
+     * Get a fallback value for an attribute when computation fails
+     */
+    private Object getFallbackValue(Attribute attribute, Exception e) {
+        LOGGER.warn("Attribute computation error with graceful degradation", e);
+        
+        // Return null by default, which will cause the attribute to be removed
+        // This could be enhanced to return a default value based on attribute type
+        return null;
+    }
 
     @Override
     public void onPosition(Position position, Callback callback) {
-        var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
-                .filter(attribute -> attribute.getPriority() < 0 == early)
-                .sorted(Comparator.comparing(Attribute::getPriority).reversed())
-                .toList();
+        // Create a parent span for the entire operation if tracing is enabled
+        Span parentSpan = null;
+        Scope parentScope = null;
+        
+        if (tracer != null) {
+            parentSpan = tracer.spanBuilder("computedAttributesHandler.onPosition")
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("handler.type", early ? "early" : "late")
+                .setAttribute("device.id", String.valueOf(position.getDeviceId()))
+                .startSpan();
+            parentScope = parentSpan.makeCurrent();
+        }
+        
+        try {
+            // Check if we should process asynchronously
+            boolean processAsync = messagePublisher != null && executor != null;
+            
+            // Get attributes to process
+            var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
+                    .filter(attribute -> attribute.getPriority() < 0 == early)
+                    .sorted(Comparator.comparing(Attribute::getPriority).reversed())
+                    .toList();
+            
+            if (processAsync) {
+                // Process asynchronously via message broker
+                CompletableFuture.runAsync(() -> {
+                    processAttributes(attributes, position);
+                }, executor).thenRun(() -> {
+                    callback.processed(false);
+                });
+            } else {
+                // Process synchronously
+                processAttributes(attributes, position);
+                callback.processed(false);
+            }
+        } finally {
+            // Close the parent span and scope if tracing is enabled
+            if (parentScope != null) {
+                parentScope.close();
+            }
+            if (parentSpan != null) {
+                parentSpan.end();
+            }
+        }
+    }
+    
+    /**
+     * Process attributes for a position
+     */
+    private void processAttributes(List<Attribute> attributes, Position position) {
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 try {
-                    Object result = computeAttribute(attribute, position);
+                    Object result = computeAttributeWithResilience(attribute, position);
                     if (result != null) {
                         switch (attribute.getAttribute()) {
                             case "valid" -> position.setValid((Boolean) result);
@@ -195,14 +479,10 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                     } else {
                         position.removeAttribute(attribute.getAttribute());
                     }
-                } catch (JexlException error) {
+                } catch (Exception error) {
                     LOGGER.warn("Attribute computation error", error);
-                } catch (ClassCastException error) {
-                    LOGGER.warn("Attribute cast error", error);
                 }
             }
         }
-        callback.processed(false);
     }
-
 }
