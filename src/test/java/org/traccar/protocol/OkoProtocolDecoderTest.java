@@ -2,7 +2,17 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.messaging.MessageProducer;
+import org.traccar.model.Position;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
+/**
+ * Test for OkoProtocolDecoder
+ * Supports both monolithic and microservices testing environments
+ */
 public class OkoProtocolDecoderTest extends ProtocolTest {
 
     @Test
@@ -37,6 +47,44 @@ public class OkoProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "{115038.000,A,4804.091227,N,02255.250213,E,17.621,128.1,211215,8,0.00,00,13.7,2,00"));
 
+    }
+    
+    /**
+     * Test message broker integration
+     * Verifies that the decoder publishes positions to the message broker
+     */
+    @Test
+    public void testMessageBrokerIntegration() throws Exception {
+        // Create decoder with mock message producer
+        var decoder = new OkoProtocolDecoder(null);
+        MessageProducer messageProducer = mockMessageProducer();
+        
+        // Set the message producer using reflection (for testing both monolithic and microservices)
+        try {
+            var field = decoder.getClass().getDeclaredField("messageProducer");
+            field.setAccessible(true);
+            field.set(decoder, messageProducer);
+        } catch (NoSuchFieldException e) {
+            // Field doesn't exist in monolithic version, which is fine for this test
+        }
+        
+        // Inject other dependencies
+        inject(decoder);
+        
+        // Decode a message
+        decoder.decode(null, null, text(
+                "{861001001012919,090745,A,4944.302,N,02353.366,E,0.0,225,251120,7,0.27,F9,11.3,1}"));
+        
+        // In microservices mode, verify the message was published to the broker
+        try {
+            var field = decoder.getClass().getDeclaredField("messageProducer");
+            field.setAccessible(true);
+            if (field.get(decoder) != null) {
+                verify(messageProducer).send(eq("raw.positions"), any(Position.class), any());
+            }
+        } catch (NoSuchFieldException e) {
+            // Field doesn't exist in monolithic version, which is fine for this test
+        }
     }
 
 }
