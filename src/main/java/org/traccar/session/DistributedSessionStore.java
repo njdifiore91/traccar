@@ -15,55 +15,136 @@
  */
 package org.traccar.session;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 /**
- * Interface for distributed session storage implementations.
- * Provides methods to store, retrieve, and remove device sessions across multiple instances.
+ * Interface for distributed session storage operations.
+ * Provides methods for storing and retrieving device sessions in a distributed environment,
+ * abstracting the underlying storage mechanism (Redis) and providing a consistent API
+ * for session management across multiple service instances.
  */
 public interface DistributedSessionStore {
 
     /**
-     * Store a device session in the distributed store.
+     * Retrieves a device session by device ID.
      *
-     * @param deviceId The device ID associated with the session
+     * @param deviceId The unique identifier of the device
+     * @return The device session if found, or null if not found
+     */
+    DeviceSession getDeviceSession(long deviceId);
+
+    /**
+     * Stores a device session with the specified device ID.
+     *
+     * @param deviceId The unique identifier of the device
      * @param session The device session to store
-     * @param ttlSeconds Time-to-live in seconds for the session
      */
-    void putSession(long deviceId, DeviceSession session, long ttlSeconds);
+    void setDeviceSession(long deviceId, DeviceSession session);
 
     /**
-     * Retrieve a device session from the distributed store.
+     * Removes a device session with the specified device ID.
      *
-     * @param deviceId The device ID associated with the session
-     * @return The device session, or null if not found
+     * @param deviceId The unique identifier of the device
+     * @return true if the session was removed, false if it didn't exist
      */
-    DeviceSession getSession(long deviceId);
+    boolean removeDeviceSession(long deviceId);
 
     /**
-     * Remove a device session from the distributed store.
+     * Retrieves all device sessions associated with a specific connection key.
      *
-     * @param deviceId The device ID associated with the session
+     * @param connectionKey The connection key (channel and remote address)
+     * @return A map of unique IDs to device sessions for the specified connection key
      */
-    void removeSession(long deviceId);
+    Map<String, DeviceSession> getDeviceSessionsByConnectionKey(ConnectionKey connectionKey);
 
     /**
-     * Check if a session exists in the distributed store.
+     * Stores a device session with the specified connection key and unique ID.
      *
-     * @param deviceId The device ID to check
-     * @return true if the session exists, false otherwise
+     * @param connectionKey The connection key (channel and remote address)
+     * @param uniqueId The unique identifier of the device
+     * @param session The device session to store
      */
-    boolean containsSession(long deviceId);
+    void setDeviceSessionByConnectionKey(ConnectionKey connectionKey, String uniqueId, DeviceSession session);
 
     /**
-     * Update the expiration time for a session.
+     * Removes a device session with the specified connection key and unique ID.
      *
-     * @param deviceId The device ID associated with the session
-     * @param ttlSeconds New time-to-live in seconds for the session
-     * @return true if the session was found and updated, false otherwise
+     * @param connectionKey The connection key (channel and remote address)
+     * @param uniqueId The unique identifier of the device
+     * @return true if the session was removed, false if it didn't exist
      */
-    boolean updateSessionExpiration(long deviceId, long ttlSeconds);
+    boolean removeDeviceSessionByConnectionKey(ConnectionKey connectionKey, String uniqueId);
 
     /**
-     * Close the session store and release any resources.
+     * Removes all device sessions associated with a specific connection key.
+     *
+     * @param connectionKey The connection key (channel and remote address)
+     * @return true if any sessions were removed, false otherwise
      */
-    void close();
+    boolean removeAllDeviceSessionsByConnectionKey(ConnectionKey connectionKey);
+
+    /**
+     * Sets the time-to-live (TTL) for a device session.
+     *
+     * @param deviceId The unique identifier of the device
+     * @param ttl The time-to-live value
+     * @param unit The time unit for the TTL value
+     */
+    void setSessionTTL(long deviceId, long ttl, TimeUnit unit);
+
+    /**
+     * Gets the remaining time-to-live (TTL) for a device session.
+     *
+     * @param deviceId The unique identifier of the device
+     * @return The remaining TTL in milliseconds, or -1 if the session doesn't exist or has no TTL
+     */
+    long getSessionTTL(long deviceId);
+
+    /**
+     * Atomically updates a device session using the provided update function.
+     * This ensures that updates to the session are performed atomically in a distributed environment.
+     *
+     * @param deviceId The unique identifier of the device
+     * @param updateFunction A function that takes the current session and returns the updated session
+     * @return The updated device session, or null if the session doesn't exist
+     */
+    DeviceSession atomicUpdateDeviceSession(long deviceId, Function<DeviceSession, DeviceSession> updateFunction);
+
+    /**
+     * Retrieves all device sessions currently stored in the distributed session store.
+     *
+     * @return A map of device IDs to device sessions
+     */
+    Map<Long, DeviceSession> getAllDeviceSessions();
+
+    /**
+     * Bulk updates multiple device sessions at once.
+     * This is more efficient than updating sessions individually when many sessions need to be updated.
+     *
+     * @param sessions A map of device IDs to device sessions to update
+     */
+    void bulkUpdateDeviceSessions(Map<Long, DeviceSession> sessions);
+
+    /**
+     * Checks if a device session exists for the specified device ID.
+     *
+     * @param deviceId The unique identifier of the device
+     * @return true if a session exists, false otherwise
+     */
+    boolean hasDeviceSession(long deviceId);
+
+    /**
+     * Gets the total number of device sessions currently stored.
+     *
+     * @return The count of device sessions
+     */
+    long getSessionCount();
+
+    /**
+     * Clears all device sessions from the store.
+     * This should be used with caution, typically only during testing or system reset.
+     */
+    void clearAllSessions();
 }
