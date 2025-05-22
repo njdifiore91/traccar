@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,21 @@ package org.traccar.config;
 
 import java.util.List;
 
+/**
+ * Base class for configuration key suffixes that can be combined with prefixes to create complete configuration keys.
+ * Supports microservices configuration patterns including service-specific, environment-specific, and grouped configurations.
+ *
+ * @param <T> The type of the configuration value (String, Boolean, Integer, etc.)
+ */
 public abstract class ConfigSuffix<T> {
 
     protected final String keySuffix;
     protected final List<KeyType> types;
     protected final T defaultValue;
+    
+    private static final String SERVICE_SEPARATOR = ".";
+    private static final String GROUP_SEPARATOR = ".";
+    private static final String ENV_SEPARATOR = ".";
 
     ConfigSuffix(String keySuffix, List<KeyType> types, T defaultValue) {
         this.keySuffix = keySuffix;
@@ -29,8 +39,76 @@ public abstract class ConfigSuffix<T> {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * Creates a ConfigKey with the given prefix.
+     *
+     * @param prefix The prefix to prepend to the key suffix
+     * @return A new ConfigKey with the combined key name
+     */
     public abstract ConfigKey<T> withPrefix(String prefix);
-
+    
+    /**
+     * Creates a ConfigKey specific to a microservice.
+     *
+     * @param serviceName The name of the microservice (e.g., "protocol-service", "position-service")
+     * @return A new ConfigKey with the service-specific prefix
+     */
+    public ConfigKey<T> forService(String serviceName) {
+        return withPrefix(serviceName + SERVICE_SEPARATOR);
+    }
+    
+    /**
+     * Creates a ConfigKey for a group of related services.
+     *
+     * @param groupName The name of the service group (e.g., "messaging", "tracing")
+     * @return A new ConfigKey with the group-specific prefix
+     */
+    public ConfigKey<T> forGroup(String groupName) {
+        return withPrefix(groupName + GROUP_SEPARATOR);
+    }
+    
+    /**
+     * Creates a ConfigKey specific to an environment.
+     *
+     * @param environment The environment name (e.g., "dev", "staging", "prod")
+     * @return A new ConfigKey with the environment-specific prefix
+     */
+    public ConfigKey<T> forEnvironment(String environment) {
+        return withPrefix(environment + ENV_SEPARATOR);
+    }
+    
+    /**
+     * Creates a ConfigKey specific to a service in a particular environment.
+     *
+     * @param serviceName The name of the microservice
+     * @param environment The environment name
+     * @return A new ConfigKey with combined service and environment prefix
+     */
+    public ConfigKey<T> forServiceInEnvironment(String serviceName, String environment) {
+        return withPrefix(environment + ENV_SEPARATOR + serviceName + SERVICE_SEPARATOR);
+    }
+    
+    /**
+     * Generates an environment variable name suitable for containerized environments.
+     * Converts dot notation to uppercase with underscores (e.g., "service.key" becomes "SERVICE_KEY").
+     *
+     * @param prefix The prefix to prepend to the key suffix
+     * @return The environment variable name
+     */
+    public String toEnvironmentVariable(String prefix) {
+        String fullKey = prefix + keySuffix;
+        return fullKey.replaceAll("\\.+", "_").toUpperCase();
+    }
+    
+    /**
+     * Generates a service-specific environment variable name for containerized environments.
+     *
+     * @param serviceName The name of the microservice
+     * @return The service-specific environment variable name
+     */
+    public String toServiceEnvironmentVariable(String serviceName) {
+        return toEnvironmentVariable(serviceName + SERVICE_SEPARATOR);
+    }
 }
 
 class StringConfigSuffix extends ConfigSuffix<String> {
