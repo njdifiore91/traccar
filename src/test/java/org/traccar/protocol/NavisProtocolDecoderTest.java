@@ -1,10 +1,28 @@
 package org.traccar.protocol;
 
+// This test is designed to support both monolithic and microservices architectures
+// It will be gradually migrated to the Protocol Service test folder
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
 
+// Additional imports for microservices testing
+import org.traccar.testutils.MessageBrokerTestSupport;
+import org.traccar.testutils.ProtocolServiceTestSupport;
+import org.traccar.testutils.CrossServiceTestSupport;
+
+/**
+ * Test for Navis protocol decoder.
+ * 
+ * This test has been enhanced to support both monolithic and microservices testing.
+ * It can verify protocol handling across service boundaries and integration with message brokers.
+ */
 public class NavisProtocolDecoderTest extends ProtocolTest {
 
+    /**
+     * Tests decoding of NTCB protocol messages in monolithic mode.
+     */
     @Test
     public void testDecodeNtcb() throws Exception {
 
@@ -37,6 +55,9 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
                 "404e54430100000045635902730081972a3e4101060b7e0e000b171328050d00133029110e00bc6141100200000000000000000000000000d207d307ffffff00fbff00fbff00fbff00fbff00fbff00fbff00fbff02808080ffffffffffff4f1328050d001371cd0302c5109101a60300000000000000003d1b37470000000096009600"));
     }
 
+    /**
+     * Tests decoding of Flex 10 protocol messages in monolithic mode.
+     */
     @Test
     public void testDecodeFlex10() throws Exception {
 
@@ -56,6 +77,9 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
                 "7e4101080000000917c057405c002b001833c057405cbbce030225129101a00300007c6102408900400c1b3cfce3b23a12004710e000000000001bff7f000080bfffff80000080bfffffffffb2"));
     }
 
+    /**
+     * Tests decoding of Flex 20 protocol messages in monolithic mode.
+     */
     @Test
     public void testDecodeFlex20() throws Exception {
 
@@ -75,4 +99,118 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
                 "7e4101270000000b17b16b435c00a9000d4bb26b435caaa2030229f29201620500000000000093004493d53fee892d3e1f001f00ac6c591081f00000001700080a0000000000000609f2"));
     }
 
+    /**
+     * Tests decoding of NTCB protocol messages in microservices mode.
+     * This test verifies that the protocol decoder correctly publishes messages to the broker.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.mode", matches = "microservices")
+    public void testDecodeNtcbMicroservices() throws Exception {
+        // Initialize microservices test support
+        var protocolServiceSupport = new ProtocolServiceTestSupport();
+        var messageBrokerSupport = new MessageBrokerTestSupport();
+        var crossServiceSupport = new CrossServiceTestSupport();
+        
+        // Create and configure the decoder in microservices mode
+        var decoder = protocolServiceSupport.createDecoder(NavisProtocolDecoder.class);
+        
+        // Set up message broker listener for position messages
+        messageBrokerSupport.subscribeToPositionTopic();
+        
+        // Test decoding and verify message broker publication
+        byte[] message = binary(
+                "404e5443010000000000000059009adb2a3e54250000000000ff1500040b0a1008291838001200760ee600000000000000000000000f1500040b0a10ac20703fb1aec23f00000000320149668f430000000000000000000000000000000000000000000000f3808080");
+        
+        // Process the message through the decoder
+        protocolServiceSupport.processMessage(decoder, message);
+        
+        // Verify that a position message was published to the broker
+        messageBrokerSupport.verifyPositionPublished(p -> 
+            p.getLatitude() == 53.74336 && p.getLongitude() == 87.14437);
+        
+        // Verify position was received by the position service
+        crossServiceSupport.verifyPositionProcessed(p -> 
+            p.getLatitude() == 53.74336 && p.getLongitude() == 87.14437);
+    }
+
+    /**
+     * Tests decoding of Flex 10 protocol messages in microservices mode.
+     * This test verifies protocol handling across service boundaries.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.mode", matches = "microservices")
+    public void testDecodeFlex10Microservices() throws Exception {
+        // Initialize microservices test support
+        var protocolServiceSupport = new ProtocolServiceTestSupport();
+        var messageBrokerSupport = new MessageBrokerTestSupport();
+        var crossServiceSupport = new CrossServiceTestSupport();
+        
+        // Create and configure the decoder in microservices mode
+        var decoder = protocolServiceSupport.createDecoder(NavisProtocolDecoder.class);
+        
+        // Set up message broker listener for position messages
+        messageBrokerSupport.subscribeToPositionTopic();
+        
+        // Test decoding and verify message broker publication
+        byte[] message = binary(
+                "7e54040000000400000030129957405c000b00632f9857405ccace03021e129101a103000000000000c4005ba3fe3b00000000120046100000000000001aff7f000080bfffff80000080bfffffffff9f");
+        
+        // Process the message through the decoder
+        protocolServiceSupport.processMessage(decoder, message);
+        
+        // Verify that a position message was published to the broker
+        messageBrokerSupport.verifyPositionPublished(p -> 
+            p.getLatitude() == 56.33996 && p.getLongitude() == 43.80762);
+        
+        // Verify position was received by the position service
+        crossServiceSupport.verifyPositionProcessed(p -> 
+            p.getLatitude() == 56.33996 && p.getLongitude() == 43.80762);
+        
+        // Verify event processing across service boundaries
+        crossServiceSupport.verifyEventProcessed(e -> 
+            e.getPositionId() > 0 && e.getType().equals("deviceOnline"));
+    }
+
+    /**
+     * Tests decoding of Flex 20 protocol messages in microservices mode.
+     * This test verifies end-to-end message flow through the microservices architecture.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.mode", matches = "microservices")
+    public void testDecodeFlex20Microservices() throws Exception {
+        // Initialize microservices test support
+        var protocolServiceSupport = new ProtocolServiceTestSupport();
+        var messageBrokerSupport = new MessageBrokerTestSupport();
+        var crossServiceSupport = new CrossServiceTestSupport();
+        
+        // Create and configure the decoder in microservices mode
+        var decoder = protocolServiceSupport.createDecoder(NavisProtocolDecoder.class);
+        
+        // Set up message broker listeners for various topics
+        messageBrokerSupport.subscribeToPositionTopic();
+        messageBrokerSupport.subscribeToEventTopic();
+        messageBrokerSupport.subscribeToNotificationTopic();
+        
+        // Test decoding and verify message broker publication
+        byte[] message = binary(
+                "7e5428000000280000002111d16b435c00a900154bd16b435ce19e030259f6920133050000b7623e429300c9e7f03f2ba45a3e1f001f007b6c5910850f0100001629080a000000000000060947");
+        
+        // Process the message through the decoder
+        protocolServiceSupport.processMessage(decoder, message);
+        
+        // Verify that a position message was published to the broker
+        messageBrokerSupport.verifyPositionPublished(p -> 
+            p.getLatitude() == 56.31952 && p.getLongitude() == 44.01423);
+        
+        // Verify complete message flow through the system
+        crossServiceSupport.verifyPositionProcessed(p -> 
+            p.getLatitude() == 56.31952 && p.getLongitude() == 44.01423);
+        
+        crossServiceSupport.verifyEventProcessed(e -> 
+            e.getPositionId() > 0);
+        
+        // Verify notification was triggered if configured
+        crossServiceSupport.verifyNotificationTriggered(n -> 
+            n.getType().equals("deviceOnline"));
+    }
 }
