@@ -61,6 +61,24 @@ public final class Keys {
      */
     public static final ConfigKey FORWARD_RETRY_COUNT = new ConfigKey(
             "forward.retry.count", Integer.class);
+            
+    /**
+     * Position forwarding retrying limit.
+     */
+    public static final ConfigKey FORWARD_RETRY_LIMIT = new ConfigKey(
+            "forward.retry.limit", Integer.class);
+            
+    /**
+     * Enable message broker for position forwarding.
+     */
+    public static final ConfigKey FORWARD_USE_MESSAGE_BROKER = new ConfigKey(
+            "forward.use.message.broker", Boolean.class);
+            
+    /**
+     * Topic name for position forwarding via message broker.
+     */
+    public static final ConfigKey FORWARD_TOPIC = new ConfigKey(
+            "forward.topic", String.class);
 
     /**
      * Forward positions to all devices. Might be useful in case of different devices types, e.g. to convert protocols.
