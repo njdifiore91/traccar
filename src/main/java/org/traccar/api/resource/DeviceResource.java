@@ -15,6 +15,14 @@
  */
 package org.traccar.api.resource;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.core.Context;
@@ -24,6 +32,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.MediaManager;
+import org.traccar.discovery.ServiceDiscovery;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
@@ -55,10 +64,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -88,100 +99,165 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private LogAction actionLogger;
+    
+    @Inject
+    private ServiceDiscovery serviceDiscovery;
+    
+    @Inject
+    private Tracer tracer;
+    
+    @Inject
+    private MeterRegistry meterRegistry;
 
     @Context
     private HttpServletRequest request;
+    
+    private final CircuitBreaker circuitBreaker;
 
     public DeviceResource() {
         super(Device.class);
+        
+        // Configure circuit breaker for resilient API calls
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofMillis(1000))
+                .permittedNumberOfCallsInHalfOpenState(2)
+                .slidingWindowSize(10)
+                .build();
+        
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("deviceResourceCircuitBreaker");
+        
+        // Register circuit breaker state transition listener for monitoring
+        this.circuitBreaker.getEventPublisher()
+                .onStateTransition(event -> {
+                    // Log state transition events
+                    System.out.println("Circuit breaker state changed from " + 
+                            event.getStateTransition().getFromState() + " to " + 
+                            event.getStateTransition().getToState());
+                });
     }
 
     @GET
+    @Timed(value = "api.devices.get", description = "Time taken to retrieve devices")
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws StorageException {
+        
+        // Create a span for distributed tracing
+        Span span = tracer.spanBuilder("DeviceResource.get")
+                .setParent(Context.current())
+                .setAttribute("all", String.valueOf(all))
+                .setAttribute("userId", String.valueOf(userId))
+                .setAttribute("uniqueIds.size", String.valueOf(uniqueIds.size()))
+                .setAttribute("deviceIds.size", String.valueOf(deviceIds.size()))
+                .startSpan();
+        
+        try {
+            // Use circuit breaker pattern for resilient API calls
+            return circuitBreaker.executeSupplier(() -> {
+                try {
+                    if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
+                        List<Device> result = new LinkedList<>();
+                        for (String uniqueId : uniqueIds) {
+                            result.addAll(storage.getObjects(Device.class, new Request(
+                                    new Columns.All(),
+                                    new Condition.And(
+                                            new Condition.Equals("uniqueId", uniqueId),
+                                            new Condition.Permission(User.class, getUserId(), Device.class)))));
+                        }
+                        for (Long deviceId : deviceIds) {
+                            result.addAll(storage.getObjects(Device.class, new Request(
+                                    new Columns.All(),
+                                    new Condition.And(
+                                            new Condition.Equals("id", deviceId),
+                                            new Condition.Permission(User.class, getUserId(), Device.class)))));
+                        }
+                        return result;
+                    } else {
+                        var conditions = new LinkedList<Condition>();
 
-        if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
+                        if (all) {
+                            if (permissionsService.notAdmin(getUserId())) {
+                                conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                            }
+                        } else {
+                            if (userId == 0) {
+                                conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                            } else {
+                                permissionsService.checkUser(getUserId(), userId);
+                                conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
+                            }
+                        }
 
-            List<Device> result = new LinkedList<>();
-            for (String uniqueId : uniqueIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("uniqueId", uniqueId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            for (Long deviceId : deviceIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("id", deviceId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            return result;
-
-        } else {
-
-            var conditions = new LinkedList<Condition>();
-
-            if (all) {
-                if (permissionsService.notAdmin(getUserId())) {
-                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                        return storage.getObjects(baseClass, new Request(
+                                new Columns.All(), Condition.merge(conditions), new Order("name")));
+                    }
+                } catch (StorageException e) {
+                    span.recordException(e);
+                    throw e;
                 }
-            } else {
-                if (userId == 0) {
-                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
-                } else {
-                    permissionsService.checkUser(getUserId(), userId);
-                    conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
-                }
-            }
-
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(), Condition.merge(conditions), new Order("name")));
-
+            });
+        } finally {
+            span.end();
         }
     }
 
     @Path("{id}/accumulators")
     @PUT
+    @Timed(value = "api.devices.updateAccumulators", description = "Time taken to update device accumulators")
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
-        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-        permissionsService.checkEdit(getUserId(), Device.class, false, false);
+        Span span = tracer.spanBuilder("DeviceResource.updateAccumulators")
+                .setParent(Context.current())
+                .setAttribute("deviceId", String.valueOf(entity.getDeviceId()))
+                .startSpan();
+        
+        try {
+            return circuitBreaker.executeSupplier(() -> {
+                try {
+                    permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+                    permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
-        Position position = storage.getObject(Position.class, new Request(
-                new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
-        if (position != null) {
-            if (entity.getTotalDistance() != null) {
-                position.getAttributes().put(Position.KEY_TOTAL_DISTANCE, entity.getTotalDistance());
-            }
-            if (entity.getHours() != null) {
-                position.getAttributes().put(Position.KEY_HOURS, entity.getHours());
-            }
-            position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
+                    Position position = storage.getObject(Position.class, new Request(
+                            new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
+                    if (position != null) {
+                        if (entity.getTotalDistance() != null) {
+                            position.getAttributes().put(Position.KEY_TOTAL_DISTANCE, entity.getTotalDistance());
+                        }
+                        if (entity.getHours() != null) {
+                            position.getAttributes().put(Position.KEY_HOURS, entity.getHours());
+                        }
+                        position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
 
-            Device device = new Device();
-            device.setId(position.getDeviceId());
-            device.setPositionId(position.getId());
-            storage.updateObject(device, new Request(
-                    new Columns.Include("positionId"),
-                    new Condition.Equals("id", device.getId())));
+                        Device device = new Device();
+                        device.setId(position.getDeviceId());
+                        device.setPositionId(position.getId());
+                        storage.updateObject(device, new Request(
+                                new Columns.Include("positionId"),
+                                new Condition.Equals("id", device.getId())));
 
-            var key = new Object();
-            try {
-                cacheManager.addDevice(position.getDeviceId(), key);
-                cacheManager.updatePosition(position);
-                connectionManager.updatePosition(true, position);
-            } finally {
-                cacheManager.removeDevice(position.getDeviceId(), key);
-            }
-        } else {
-            throw new IllegalArgumentException();
+                        // Use distributed Redis cache for cache management
+                        cacheManager.addDevice(position.getDeviceId(), entity);
+                        cacheManager.updatePosition(position);
+                        connectionManager.updatePosition(true, position);
+                        
+                        // Use message broker for cross-service communication
+                        broadcastService.updatePosition(position);
+                    } else {
+                        throw new IllegalArgumentException();
+                    }
+
+                    actionLogger.resetAccumulators(request, getUserId(), entity.getDeviceId());
+                    return Response.noContent().build();
+                } catch (Exception e) {
+                    span.recordException(e);
+                    throw e;
+                }
+            });
+        } finally {
+            span.end();
         }
-
-        actionLogger.resetAccumulators(request, getUserId(), entity.getDeviceId());
-        return Response.noContent().build();
     }
 
     private String imageExtension(String type) {
@@ -198,81 +274,117 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/image")
     @POST
     @Consumes("image/*")
+    @Timed(value = "api.devices.uploadImage", description = "Time taken to upload device image")
     public Response uploadImage(
             @PathParam("id") long deviceId, File file,
             @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
+        
+        Span span = tracer.spanBuilder("DeviceResource.uploadImage")
+                .setParent(Context.current())
+                .setAttribute("deviceId", String.valueOf(deviceId))
+                .setAttribute("contentType", type)
+                .startSpan();
+        
+        try {
+            return circuitBreaker.executeSupplier(() -> {
+                try {
+                    Device device = storage.getObject(Device.class, new Request(
+                            new Columns.All(),
+                            new Condition.And(
+                                    new Condition.Equals("id", deviceId),
+                                    new Condition.Permission(User.class, getUserId(), Device.class))));
+                    if (device != null) {
+                        String name = "device";
+                        String extension = imageExtension(type);
+                        try (var input = new FileInputStream(file);
+                                var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
 
-        Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", deviceId),
-                        new Condition.Permission(User.class, getUserId(), Device.class))));
-        if (device != null) {
-            String name = "device";
-            String extension = imageExtension(type);
-            try (var input = new FileInputStream(file);
-                    var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
-
-                long transferred = 0;
-                byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-                int read;
-                while ((read = input.read(buffer, 0, buffer.length)) >= 0) {
-                    output.write(buffer, 0, read);
-                    transferred += read;
-                    if (transferred > IMAGE_SIZE_LIMIT) {
-                        throw new IllegalArgumentException("Image size limit exceeded");
+                            long transferred = 0;
+                            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+                            int read;
+                            while ((read = input.read(buffer, 0, buffer.length)) >= 0) {
+                                output.write(buffer, 0, read);
+                                transferred += read;
+                                if (transferred > IMAGE_SIZE_LIMIT) {
+                                    throw new IllegalArgumentException("Image size limit exceeded");
+                                }
+                            }
+                        }
+                        return Response.ok(name + "." + extension).build();
                     }
+                    return Response.status(Response.Status.NOT_FOUND).build();
+                } catch (Exception e) {
+                    span.recordException(e);
+                    throw e;
                 }
-            }
-            return Response.ok(name + "." + extension).build();
+            });
+        } finally {
+            span.end();
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Path("share")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @POST
+    @Timed(value = "api.devices.shareDevice", description = "Time taken to share device")
     public String shareDevice(
             @FormParam("deviceId") long deviceId,
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+        
+        Span span = tracer.spanBuilder("DeviceResource.shareDevice")
+                .setParent(Context.current())
+                .setAttribute("deviceId", String.valueOf(deviceId))
+                .startSpan();
+        
+        try {
+            return circuitBreaker.executeSupplier(() -> {
+                try {
+                    User user = permissionsService.getUser(getUserId());
+                    if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
+                        throw new SecurityException("Sharing is disabled");
+                    }
+                    if (user.getTemporary()) {
+                        throw new SecurityException("Temporary user");
+                    }
+                    if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
+                        expiration = user.getExpirationTime();
+                    }
 
-        User user = permissionsService.getUser(getUserId());
-        if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
-            throw new SecurityException("Sharing is disabled");
+                    Device device = storage.getObject(Device.class, new Request(
+                            new Columns.All(),
+                            new Condition.And(
+                                    new Condition.Equals("id", deviceId),
+                                    new Condition.Permission(User.class, user.getId(), Device.class))));
+
+                    String shareEmail = user.getEmail() + ":" + device.getUniqueId();
+                    User share = storage.getObject(User.class, new Request(
+                            new Columns.All(), new Condition.Equals("email", shareEmail)));
+
+                    if (share == null) {
+                        share = new User();
+                        share.setName(device.getName());
+                        share.setEmail(shareEmail);
+                        share.setExpirationTime(expiration);
+                        share.setTemporary(true);
+                        share.setReadonly(true);
+                        share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
+                        share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
+
+                        share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
+
+                        storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
+                    }
+
+                    // Use distributed session management for token generation
+                    return tokenManager.generateToken(share.getId(), expiration);
+                } catch (Exception e) {
+                    span.recordException(e);
+                    throw e;
+                }
+            });
+        } finally {
+            span.end();
         }
-        if (user.getTemporary()) {
-            throw new SecurityException("Temporary user");
-        }
-        if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
-            expiration = user.getExpirationTime();
-        }
-
-        Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", deviceId),
-                        new Condition.Permission(User.class, user.getId(), Device.class))));
-
-        String shareEmail = user.getEmail() + ":" + device.getUniqueId();
-        User share = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", shareEmail)));
-
-        if (share == null) {
-            share = new User();
-            share.setName(device.getName());
-            share.setEmail(shareEmail);
-            share.setExpirationTime(expiration);
-            share.setTemporary(true);
-            share.setReadonly(true);
-            share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
-            share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
-
-            share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
-
-            storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
-        }
-
-        return tokenManager.generateToken(share.getId(), expiration);
     }
 
 }
