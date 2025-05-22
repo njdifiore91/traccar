@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,74 +18,134 @@ package org.traccar.schedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.discovery.ServiceDiscovery;
+import org.traccar.discovery.ServiceInstance;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Base class for scheduled tasks that need leader election via service discovery.
- * Only one instance of the task will be active across all service instances.
+ * Provides leader election capabilities for scheduled tasks in a distributed environment.
+ * Uses service discovery to determine which instance should run singleton tasks.
  */
-public abstract class ServiceDiscoveryScheduler implements ScheduleTask {
+public class ServiceDiscoveryScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryScheduler.class);
     
-    private final String leadershipRole;
     private final ServiceDiscovery serviceDiscovery;
+    private final String taskName;
+    private final String instanceId;
     private final AtomicBoolean isLeader = new AtomicBoolean(false);
-    
+    private ScheduledFuture<?> leaderCheckFuture;
+    private ScheduledFuture<?> taskFuture;
+
     /**
-     * Constructor for ServiceDiscoveryScheduler.
-     * 
-     * @param leadershipRole The role name used for leader election
-     * @param serviceDiscovery The service discovery implementation
+     * Creates a new ServiceDiscoveryScheduler.
+     *
+     * @param serviceDiscovery The service discovery implementation to use for leader election
+     * @param taskName The name of the task for which to elect a leader
      */
-    public ServiceDiscoveryScheduler(String leadershipRole, ServiceDiscovery serviceDiscovery) {
-        this.leadershipRole = leadershipRole;
+    public ServiceDiscoveryScheduler(ServiceDiscovery serviceDiscovery, String taskName) {
         this.serviceDiscovery = serviceDiscovery;
+        this.taskName = taskName;
+        this.instanceId = UUID.randomUUID().toString();
+    }
+
+    /**
+     * Schedules a task to run only on the elected leader instance.
+     *
+     * @param executor The executor service to use for scheduling
+     * @param task The task to run
+     * @param initialDelay The initial delay before the first execution
+     * @param period The period between successive executions
+     * @param unit The time unit for the initial delay and period
+     */
+    public void scheduleWithLeaderElection(
+            ScheduledExecutorService executor,
+            Runnable task,
+            long initialDelay,
+            long period,
+            TimeUnit unit) {
         
-        // Start leadership election process
-        startLeaderElection();
+        // Schedule the leader election check to run frequently
+        leaderCheckFuture = executor.scheduleAtFixedRate(
+                this::checkLeadership,
+                0,
+                Math.min(period / 4, 15), // Run leadership check more frequently than the task
+                unit);
+        
+        // Schedule the actual task, but it will only execute if this instance is the leader
+        taskFuture = executor.scheduleAtFixedRate(
+                () -> {
+                    if (isLeader.get()) {
+                        LOGGER.debug("Running task '{}' as leader", taskName);
+                        task.run();
+                    } else {
+                        LOGGER.trace("Skipping task '{}' execution as non-leader", taskName);
+                    }
+                },
+                initialDelay,
+                period,
+                unit);
     }
-    
+
     /**
-     * Start the leader election process.
+     * Checks if this instance should be the leader for the task.
+     * The instance with the lowest ID among healthy instances becomes the leader.
      */
-    private void startLeaderElection() {
+    private void checkLeadership() {
         try {
-            serviceDiscovery.registerLeadershipListener(leadershipRole, this::onLeadershipChange);
-            serviceDiscovery.acquireLeadership(leadershipRole);
-            LOGGER.info("Registered for leadership role: {}", leadershipRole);
+            // Get all healthy instances of this service
+            List<ServiceInstance> instances = serviceDiscovery.findHealthyInstances("traccar");
+            
+            if (instances.isEmpty()) {
+                // If no instances found, assume we're the only one and become leader
+                if (!isLeader.getAndSet(true)) {
+                    LOGGER.info("No other instances found, assuming leadership for task '{}'", taskName);
+                }
+                return;
+            }
+            
+            // Sort instances by ID to ensure consistent leader selection
+            instances.sort((a, b) -> a.getId().compareTo(b.getId()));
+            
+            // The instance with the lowest ID becomes the leader
+            ServiceInstance leader = instances.get(0);
+            boolean shouldBeLeader = leader.getId().equals(instanceId);
+            
+            // Update leadership status if it changed
+            if (shouldBeLeader != isLeader.get()) {
+                isLeader.set(shouldBeLeader);
+                if (shouldBeLeader) {
+                    LOGGER.info("Acquired leadership for task '{}'", taskName);
+                } else {
+                    LOGGER.info("Relinquished leadership for task '{}'", taskName);
+                }
+            }
         } catch (Exception e) {
-            LOGGER.warn("Failed to start leader election for role: {}", leadershipRole, e);
+            LOGGER.warn("Error during leadership check for task '{}'", taskName, e);
         }
     }
-    
+
     /**
-     * Callback when leadership status changes.
-     * 
-     * @param isLeader true if this instance is now the leader, false otherwise
+     * Cancels the scheduled task and leadership check.
      */
-    private void onLeadershipChange(boolean isLeader) {
-        this.isLeader.set(isLeader);
-        if (isLeader) {
-            LOGGER.info("Acquired leadership for role: {}", leadershipRole);
-        } else {
-            LOGGER.info("Lost leadership for role: {}", leadershipRole);
+    public void cancel() {
+        if (leaderCheckFuture != null) {
+            leaderCheckFuture.cancel(false);
+        }
+        if (taskFuture != null) {
+            taskFuture.cancel(false);
         }
     }
-    
+
     /**
-     * Check if this instance is currently the leader.
-     * 
-     * @return true if this instance is the leader, false otherwise
+     * @return true if this instance is currently the leader, false otherwise
      */
-    protected boolean isLeader() {
+    public boolean isLeader() {
         return isLeader.get();
-    }
-    
-    @Override
-    public boolean multipleInstances() {
-        // Always return false since we're using leader election
-        return false;
     }
 }
