@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- Environment variable defaults -->
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>
+    <property name="LOG_FORMAT" value="${LOG_FORMAT:-json}"/>
+    <property name="SERVICE_NAME" value="${SERVICE_NAME:-traccar}"/>
+    <property name="INSTANCE_ID" value="${INSTANCE_ID:-${HOSTNAME}}"/>
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
+    <property name="LOG_ARCHIVE" value="${LOG_PATH:-logs}/archive"/>
+    <property name="LOG_INCLUDE_EXCEPTION_STACKTRACE" value="${LOG_INCLUDE_EXCEPTION_STACKTRACE:-true}"/>
+    <property name="MAX_HISTORY" value="${LOG_MAX_HISTORY:-30}"/>
+    <property name="MAX_FILE_SIZE" value="${LOG_MAX_FILE_SIZE:-10MB}"/>
+    <property name="TOTAL_SIZE_CAP" value="${LOG_TOTAL_SIZE_CAP:-1GB}"/>
+    
+    <!-- Appenders -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>deviceId</includeMdcKeyName>
+            <includeMdcKeyName>protocol</includeMdcKeyName>
+            <customFields>{"serviceName":"${SERVICE_NAME}","instanceId":"${INSTANCE_ID}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+                <stackTrace>exception</stackTrace>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <maxLength>4096</maxLength>
+                <shortenedClassNameLength>36</shortenedClassNameLength>
+                <rootCauseFirst>true</rootCauseFirst>
+                <inlineHash>true</inlineHash>
+                <enabled>${LOG_INCLUDE_EXCEPTION_STACKTRACE}</enabled>
+            </throwableConverter>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/traccar.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/traccar.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>deviceId</includeMdcKeyName>
+            <includeMdcKeyName>protocol</includeMdcKeyName>
+            <customFields>{"serviceName":"${SERVICE_NAME}","instanceId":"${INSTANCE_ID}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+                <stackTrace>exception</stackTrace>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <maxLength>4096</maxLength>
+                <shortenedClassNameLength>36</shortenedClassNameLength>
+                <rootCauseFirst>true</rootCauseFirst>
+                <inlineHash>true</inlineHash>
+                <enabled>${LOG_INCLUDE_EXCEPTION_STACKTRACE}</enabled>
+            </throwableConverter>
+        </encoder>
+    </appender>
+
+    <!-- Async appenders for improved performance -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>false</neverBlock>
+    </appender>
+
+    <!-- Loggers -->
+    <!-- Protocol-specific logging -->
+    <logger name="org.traccar.protocol" level="${LOG_LEVEL_PROTOCOL:-INFO}" />
+    
+    <!-- API logging -->
+    <logger name="org.traccar.api" level="${LOG_LEVEL_API:-INFO}" />
+    
+    <!-- Database logging -->
+    <logger name="org.traccar.database" level="${LOG_LEVEL_DATABASE:-INFO}" />
+    <logger name="org.traccar.storage" level="${LOG_LEVEL_STORAGE:-INFO}" />
+    
+    <!-- Event handling logging -->
+    <logger name="org.traccar.handler.events" level="${LOG_LEVEL_EVENTS:-INFO}" />
+    
+    <!-- Notification logging -->
+    <logger name="org.traccar.notification" level="${LOG_LEVEL_NOTIFICATION:-INFO}" />
+    <logger name="org.traccar.notificators" level="${LOG_LEVEL_NOTIFICATORS:-INFO}" />
+    
+    <!-- Messaging logging -->
+    <logger name="org.traccar.messaging" level="${LOG_LEVEL_MESSAGING:-INFO}" />
+    
+    <!-- Web server logging -->
+    <logger name="org.traccar.web" level="${LOG_LEVEL_WEB:-INFO}" />
+    
+    <!-- Distributed tracing logging -->
+    <logger name="io.opentelemetry" level="${LOG_LEVEL_OPENTELEMETRY:-WARN}" />
+    
+    <!-- Health check logging -->
+    <logger name="org.traccar.health" level="${LOG_LEVEL_HEALTH:-INFO}" />
+    
+    <!-- Service discovery logging -->
+    <logger name="org.traccar.discovery" level="${LOG_LEVEL_DISCOVERY:-INFO}" />
+    
+    <!-- Third-party libraries -->
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <logger name="org.apache.http" level="WARN" />
+    <logger name="org.eclipse.jetty" level="WARN" />
+    <logger name="com.rabbitmq" level="WARN" />
+    <logger name="org.apache.kafka" level="WARN" />
+    <logger name="io.micrometer" level="WARN" />
+    <logger name="io.grpc" level="WARN" />
+    
+    <!-- Root logger -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="ASYNC_CONSOLE" />
+        <appender-ref ref="ASYNC_FILE" />
+    </root>
+
+    <!-- Conditional plain text console logging for development -->
+    <if condition='property("LOG_FORMAT").equalsIgnoreCase("plain")'>
+        <then>
+            <appender name="PLAIN_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId},%X{spanId}] - %msg%n</pattern>
+                </encoder>
+            </appender>
+            <root level="${LOG_LEVEL}">
+                <appender-ref ref="PLAIN_CONSOLE" />
+                <appender-ref ref="ASYNC_FILE" />
+            </root>
+        </then>
+    </if>
+    
+    <!-- MDC setup for OpenTelemetry integration -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+</configuration>
