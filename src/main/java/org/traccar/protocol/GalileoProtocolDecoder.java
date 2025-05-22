@@ -19,14 +19,24 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
+import org.traccar.discovery.ServiceRegistry;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.messaging.MessageProducer;
+import org.traccar.messaging.PositionMessageProducer;
+import org.traccar.messaging.TopicNames;
+import org.traccar.metrics.MessageMetrics;
+import org.traccar.metrics.ProtocolMetrics;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -44,8 +54,23 @@ import java.util.TimeZone;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
+    private final MessageProducer messageProducer;
+    private final Tracer tracer;
+    private final MessageMetrics messageMetrics;
+    private final boolean directCommunication;
+
     public GalileoProtocolDecoder(Protocol protocol) {
+        this(protocol, null, null, null, true);
+    }
+
+    public GalileoProtocolDecoder(Protocol protocol, MessageProducer messageProducer, 
+                                 Tracer tracer, ProtocolMetrics protocolMetrics,
+                                 boolean directCommunication) {
         super(protocol);
+        this.messageProducer = messageProducer;
+        this.tracer = tracer;
+        this.messageMetrics = protocolMetrics != null ? protocolMetrics.getMessageMetrics() : null;
+        this.directCommunication = directCommunication;
     }
 
     private ByteBuf photo;
@@ -192,22 +217,88 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ByteBuf buf = (ByteBuf) msg;
-
-        int header = buf.readUnsignedByte();
-        if (header == 0x01) {
-            if (buf.getUnsignedMedium(buf.readerIndex() + 2) == 0x01001c) {
-                return decodeIridiumPosition(channel, remoteAddress, buf);
-            } else {
-                return decodePositions(channel, remoteAddress, buf);
-            }
-        } else if (header == 0x07) {
-            return decodePhoto(channel, remoteAddress, buf);
-        } else if (header == 0x08) {
-            return decodeCompressedPositions(channel, remoteAddress, buf);
+        // Start a new span for distributed tracing if tracer is available
+        Span span = null;
+        if (tracer != null) {
+            span = tracer.spanBuilder("galileo.decode")
+                    .setSpanKind(SpanKind.CONSUMER)
+                    .setAttribute("protocol", getProtocolName())
+                    .startSpan();
         }
 
-        return null;
+        try {
+            ByteBuf buf = (ByteBuf) msg;
+
+            // Record message metrics if available
+            if (messageMetrics != null) {
+                messageMetrics.messageReceived(getProtocolName(), buf.readableBytes());
+            }
+
+            int header = buf.readUnsignedByte();
+            Object result = null;
+
+            if (header == 0x01) {
+                if (buf.getUnsignedMedium(buf.readerIndex() + 2) == 0x01001c) {
+                    result = decodeIridiumPosition(channel, remoteAddress, buf);
+                } else {
+                    result = decodePositions(channel, remoteAddress, buf);
+                }
+            } else if (header == 0x07) {
+                result = decodePhoto(channel, remoteAddress, buf);
+            } else if (header == 0x08) {
+                result = decodeCompressedPositions(channel, remoteAddress, buf);
+            }
+
+            // Publish positions to message broker if available
+            if (messageProducer != null && result != null) {
+                if (result instanceof Position) {
+                    publishPosition((Position) result, span);
+                } else if (result instanceof List) {
+                    for (Object item : (List<?>) result) {
+                        if (item instanceof Position) {
+                            publishPosition((Position) item, span);
+                        }
+                    }
+                }
+            }
+
+            // Record successful message processing in metrics
+            if (messageMetrics != null && result != null) {
+                if (result instanceof Position) {
+                    messageMetrics.messageProcessed(getProtocolName(), 1);
+                } else if (result instanceof List) {
+                    messageMetrics.messageProcessed(getProtocolName(), ((List<?>) result).size());
+                }
+            }
+
+            // Return the result for direct communication or null for service-based communication
+            return directCommunication ? result : null;
+
+        } catch (Exception e) {
+            // Record error in metrics
+            if (messageMetrics != null) {
+                messageMetrics.messageError(getProtocolName());
+            }
+
+            // Record error in span
+            if (span != null) {
+                span.recordException(e);
+            }
+
+            throw e;
+        } finally {
+            // End the span
+            if (span != null) {
+                span.end();
+            }
+        }
+    }
+
+    private void publishPosition(Position position, Span parentSpan) {
+        if (messageProducer != null) {
+            Context context = parentSpan != null ? Context.current().with(parentSpan) : Context.current();
+            messageProducer.send(TopicNames.POSITIONS_RAW, String.valueOf(position.getDeviceId()), position, context);
+        }
     }
 
     private void decodeMinimalDataSet(Position position, ByteBuf buf) {
