@@ -19,6 +19,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.LongCounter;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.session.DeviceSession;
@@ -28,14 +34,51 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.messaging.MessageProducer;
+import org.traccar.messaging.MessageEnvelope;
+import org.traccar.messaging.MessageHeaders;
+import org.traccar.discovery.ServiceDiscovery;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public GatorProtocolDecoder(Protocol protocol) {
+    private final MessageProducer messageProducer;
+    private final Tracer tracer;
+    private final Meter meter;
+    private final LongCounter positionsCounter;
+    private final LongCounter messagesCounter;
+    private final ServiceDiscovery serviceDiscovery;
+    private final boolean directCommunication;
+
+    @Inject
+    public GatorProtocolDecoder(
+            Protocol protocol,
+            @Named("positionProducer") MessageProducer messageProducer,
+            Tracer tracer,
+            Meter meter,
+            ServiceDiscovery serviceDiscovery) {
         super(protocol);
+        this.messageProducer = messageProducer;
+        this.tracer = tracer;
+        this.meter = meter;
+        this.serviceDiscovery = serviceDiscovery;
+        
+        // Initialize metrics
+        this.positionsCounter = meter.counterBuilder("gator.positions.decoded")
+                .setDescription("Number of positions decoded by the Gator protocol decoder")
+                .build();
+        this.messagesCounter = meter.counterBuilder("gator.messages.received")
+                .setDescription("Number of messages received by the Gator protocol decoder")
+                .build();
+        
+        // Check if we should use direct communication or service-based
+        this.directCommunication = protocol.getConfig().getBoolean("protocol.gator.directCommunication", true);
     }
 
     public static final int MSG_HEARTBEAT = 0x21;
@@ -85,11 +128,34 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
+        // Start tracing for this message
+        Span span = tracer.spanBuilder("gator.decode")
+                .setSpanKind(SpanKind.SERVER)
+                .setAttribute("protocol", "gator")
+                .setAttribute("remoteAddress", remoteAddress.toString())
+                .startSpan();
+        
+        // Increment message counter
+        messagesCounter.add(1);
+        
+        try {
+            Context context = Context.current().with(span);
+            return context.wrap(() -> decodeMessage(channel, remoteAddress, msg, span));
+        } finally {
+            span.end();
+        }
+    }
+    
+    private Object decodeMessage(
+            Channel channel, SocketAddress remoteAddress, Object msg, Span span) throws Exception {
+
         ByteBuf buf = (ByteBuf) msg;
 
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
+        
+        span.setAttribute("message.type", type);
 
         boolean modelM588 = false;
         String imei = null;
@@ -113,6 +179,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(), buf.readUnsignedByte());
             ids = new String[] {"1" + id, id};
         }
+        
+        span.setAttribute("device.id", ids[0]);
 
         sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
 
@@ -171,11 +239,49 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(BitUtil.check(alarm2, 1) ? Position.ALARM_OVERSPEED : null);
                 position.addAlarm(BitUtil.check(alarm2, 4) ? Position.ALARM_CORNERING : null);
             }
+            
+            // Add tracing attributes for the position
+            span.setAttribute("position.valid", position.getValid());
+            span.setAttribute("position.latitude", position.getLatitude());
+            span.setAttribute("position.longitude", position.getLongitude());
+            span.setAttribute("position.speed", position.getSpeed());
+            
+            // Increment position counter
+            positionsCounter.add(1);
+            
+            // If we're using service-based communication, publish the position to the message broker
+            if (!directCommunication) {
+                publishPosition(position, span);
+                return null; // Return null to prevent the position from being processed by the core
+            }
 
             return position;
         }
 
         return null;
     }
-
+    
+    private void publishPosition(Position position, Span span) {
+        try {
+            // Create headers with tracing information
+            Map<String, String> headers = new HashMap<>();
+            headers.put(MessageHeaders.DEVICE_ID, String.valueOf(position.getDeviceId()));
+            headers.put(MessageHeaders.PROTOCOL, getProtocolName());
+            headers.put(MessageHeaders.TIMESTAMP, String.valueOf(position.getFixTime().getTime()));
+            
+            // Create message envelope
+            MessageEnvelope envelope = new MessageEnvelope(
+                    position,
+                    headers,
+                    "position.raw",
+                    span.getSpanContext().getTraceId());
+            
+            // Publish to message broker
+            messageProducer.send(envelope);
+            
+            span.addEvent("Position published to message broker");
+        } catch (Exception e) {
+            span.recordException(e);
+        }
+    }
 }
