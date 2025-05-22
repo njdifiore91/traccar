@@ -16,9 +16,22 @@
  */
 package org.traccar.api.resource;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.SimpleObjectResource;
+import org.traccar.discovery.ServiceDiscovery;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -51,9 +64,12 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
+
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,6 +77,8 @@ import java.util.List;
 public class ReportResource extends SimpleObjectResource<Report> {
 
     private static final String EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String REPORTING_SERVICE = "reporting-service";
+    private static final String CIRCUIT_BREAKER_NAME = "reportingServiceCircuitBreaker";
 
     @Inject
     private CombinedReportProvider combinedReportProvider;
@@ -89,27 +107,96 @@ public class ReportResource extends SimpleObjectResource<Report> {
     @Inject
     private LogAction actionLogger;
 
+    @Inject
+    private ServiceDiscovery serviceDiscovery;
+
+    @Inject
+    private MeterRegistry meterRegistry;
+
+    private final Tracer tracer;
+    private final CircuitBreaker circuitBreaker;
+
     @Context
     private HttpServletRequest request;
 
     public ReportResource() {
         super(Report.class, "description");
+        
+        // Initialize OpenTelemetry tracer
+        tracer = GlobalOpenTelemetry.getTracer("org.traccar.api.resource.ReportResource");
+        
+        // Configure and create circuit breaker
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .slidingWindowSize(10)
+                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .waitDurationInOpenState(Duration.ofSeconds(30))
+                .permittedNumberOfCallsInHalfOpenState(5)
+                .automaticTransitionFromOpenToHalfOpenEnabled(true)
+                .build();
+        
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        circuitBreaker = circuitBreakerRegistry.circuitBreaker(CIRCUIT_BREAKER_NAME);
     }
 
     private Response executeReport(long userId, boolean mail, ReportExecutor executor) {
-        if (mail) {
-            reportMailer.sendAsync(userId, executor);
-            return Response.noContent().build();
-        } else {
-            StreamingOutput stream = output -> {
-                try {
-                    executor.execute(output);
-                } catch (StorageException e) {
-                    throw new WebApplicationException(e);
+        // Create a span for the report execution
+        Span span = tracer.spanBuilder("executeReport")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", userId)
+                .setAttribute("mail", mail)
+                .startSpan();
+        
+        // Create a timer for metrics collection
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            // Check if Reporting Service is available via service discovery
+            if (!serviceDiscovery.isServiceAvailable(REPORTING_SERVICE)) {
+                span.setStatus(StatusCode.ERROR, "Reporting service unavailable");
+                span.end();
+                throw new WebApplicationException("Reporting service unavailable", Response.Status.SERVICE_UNAVAILABLE);
+            }
+            
+            // Execute the report with circuit breaker pattern
+            return circuitBreaker.executeSupplier(() -> {
+                if (mail) {
+                    reportMailer.sendAsync(userId, executor);
+                    return Response.noContent().build();
+                } else {
+                    StreamingOutput stream = output -> {
+                        try {
+                            executor.execute(output);
+                        } catch (StorageException e) {
+                            span.recordException(e);
+                            span.setStatus(StatusCode.ERROR, e.getMessage());
+                            throw new WebApplicationException(e);
+                        }
+                    };
+                    return Response.ok(stream)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx").build();
                 }
-            };
-            return Response.ok(stream)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx").build();
+            });
+        } catch (Exception e) {
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, e.getMessage());
+            
+            // Record metrics for failed report execution
+            sample.stop(meterRegistry.timer("report.execution", "status", "error"));
+            
+            if (e instanceof WebApplicationException) {
+                throw (WebApplicationException) e;
+            } else {
+                throw new WebApplicationException("Error executing report: " + e.getMessage(), e, 
+                        Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        } finally {
+            if (span != null && !span.isRecording()) {
+                span.end();
+            }
+            
+            // Record metrics for successful report execution
+            sample.stop(meterRegistry.timer("report.execution", "status", "success"));
         }
     }
 
@@ -122,7 +209,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "combined", from, to, deviceIds, groupIds);
-        return combinedReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        
+        Span span = tracer.spanBuilder("getCombined")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "combined")
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                combinedReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to),
+                "getCombined");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.combined"));
+        }
     }
 
     @Path("route")
@@ -134,7 +237,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "route", from, to, deviceIds, groupIds);
-        return routeReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        
+        Span span = tracer.spanBuilder("getRoute")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "route")
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                routeReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to),
+                "getRoute");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.route"));
+        }
     }
 
     @Path("route")
@@ -176,7 +295,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "events", from, to, deviceIds, groupIds);
-        return eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, alarms, from, to);
+        
+        Span span = tracer.spanBuilder("getEvents")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "events")
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, alarms, from, to),
+                "getEvents");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.events"));
+        }
     }
 
     @Path("events")
@@ -221,7 +356,24 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("daily") boolean daily) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "summary", from, to, deviceIds, groupIds);
-        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
+        
+        Span span = tracer.spanBuilder("getSummary")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "summary")
+                .setAttribute("daily", daily)
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, daily),
+                "getSummary");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.summary"));
+        }
     }
 
     @Path("summary")
@@ -263,7 +415,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "trips", from, to, deviceIds, groupIds);
-        return tripsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        
+        Span span = tracer.spanBuilder("getTrips")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "trips")
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                tripsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to),
+                "getTrips");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.trips"));
+        }
     }
 
     @Path("trips")
@@ -303,7 +471,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         actionLogger.report(request, getUserId(), false, "stops", from, to, deviceIds, groupIds);
-        return stopsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        
+        Span span = tracer.spanBuilder("getStops")
+                .setSpanKind(SpanKind.CLIENT)
+                .setAttribute("userId", getUserId())
+                .setAttribute("reportType", "stops")
+                .startSpan();
+        
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try (Scope scope = span.makeCurrent()) {
+            return executeWithCircuitBreaker(() -> 
+                stopsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to),
+                "getStops");
+        } finally {
+            span.end();
+            sample.stop(meterRegistry.timer("report.stops"));
+        }
     }
 
     @Path("stops")
@@ -344,5 +528,62 @@ public class ReportResource extends SimpleObjectResource<Report> {
             devicesReportProvider.getExcel(stream, getUserId());
         });
     }
-
+    
+    /**
+     * Helper method to execute a supplier with circuit breaker pattern
+     * 
+     * @param supplier The supplier to execute
+     * @param operationName The name of the operation for metrics and tracing
+     * @return The result of the supplier
+     * @param <T> The return type of the supplier
+     */
+    private <T> T executeWithCircuitBreaker(Supplier<T> supplier, String operationName) {
+        Span span = tracer.spanBuilder("circuitBreaker." + operationName)
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("circuitBreaker.name", CIRCUIT_BREAKER_NAME)
+                .setAttribute("circuitBreaker.state", circuitBreaker.getState().name())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            // Check if Reporting Service is available via service discovery
+            if (!serviceDiscovery.isServiceAvailable(REPORTING_SERVICE)) {
+                span.setStatus(StatusCode.ERROR, "Reporting service unavailable");
+                throw new WebApplicationException("Reporting service unavailable", Response.Status.SERVICE_UNAVAILABLE);
+            }
+            
+            return circuitBreaker.executeSupplier(() -> {
+                try {
+                    return supplier.get();
+                } catch (Exception e) {
+                    span.recordException(e);
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    if (e instanceof WebApplicationException) {
+                        throw (WebApplicationException) e;
+                    } else {
+                        throw new WebApplicationException("Error executing operation: " + e.getMessage(), e, 
+                                Response.Status.INTERNAL_SERVER_ERROR);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, e.getMessage());
+            
+            // If circuit is open, provide a fallback response
+            if (circuitBreaker.getState() == CircuitBreaker.State.OPEN) {
+                meterRegistry.counter("circuitbreaker.fallback", "operation", operationName).increment();
+                throw new WebApplicationException("Service temporarily unavailable, please try again later", 
+                        Response.Status.SERVICE_UNAVAILABLE);
+            }
+            
+            if (e instanceof WebApplicationException) {
+                throw (WebApplicationException) e;
+            } else {
+                throw new WebApplicationException("Error executing operation: " + e.getMessage(), e, 
+                        Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        } finally {
+            span.end();
+        }
+    }
 }
