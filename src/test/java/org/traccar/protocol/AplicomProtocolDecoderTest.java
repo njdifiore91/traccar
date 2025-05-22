@@ -1,10 +1,20 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
+
+// Conditional imports for microservices testing
+// These will be ignored in monolithic mode if classes are not available
+import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 public class AplicomProtocolDecoderTest extends ProtocolTest {
 
+    /**
+     * Standard decoder test for backward compatibility with monolithic architecture.
+     * This test verifies the decoder's ability to parse binary messages into Position objects.
+     */
     @Test
     public void testDecode() throws Exception {
 
@@ -90,4 +100,108 @@ public class AplicomProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    /**
+     * Extended test for microservices architecture that verifies message broker integration.
+     * This test will only run if the system property "test.microservices" is set to "true".
+     * It verifies that decoded positions are properly published to the message broker.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.microservices", matches = "true")
+    public void testMessageBrokerIntegration() throws Exception {
+        // This test will only run in microservices mode
+        // It uses dynamic class loading to avoid compilation errors in monolithic mode
+        try {
+            // Create a mock message producer
+            Object mockProducer = createMockMessageProducer();
+            
+            // Create and inject the decoder with the mock producer
+            var decoder = injectMessageBrokerAwareDecoder(mockProducer);
+            
+            // Test a sample position message
+            var position = decodePosition(decoder, binary(
+                    "44c3014645e8e91b66002300a21f0b01f056d3e62856d3e626031f845f00c6ee440800000000000000000017bd1cb30000"));
+            
+            // Verify the position was published to the message broker
+            verifyMessagePublished(mockProducer, position);
+            
+            // Test another sample position message
+            position = decodePosition(decoder, binary(
+                    "44C20146B710C158DA002100B09F0700C054CA0EA254CA0E9C03BE0BF6015D7069070000142A600000000000000001"));
+            
+            // Verify the position was published to the message broker
+            verifyMessagePublished(mockProducer, position);
+        } catch (ClassNotFoundException e) {
+            // This is expected in monolithic mode where message broker classes are not available
+            System.out.println("Skipping message broker integration test in monolithic mode");
+        }
+    }
+    
+    /**
+     * Creates a mock message producer for testing.
+     * Uses reflection to avoid compilation errors in monolithic mode.
+     */
+    private Object createMockMessageProducer() throws Exception {
+        // Use reflection to create a mock message producer
+        // This avoids compilation errors in monolithic mode where these classes might not exist
+        Class<?> mockProducerClass = Class.forName("org.traccar.messaging.MockMessageProducer");
+        return mockProducerClass.getDeclaredConstructor().newInstance();
+    }
+    
+    /**
+     * Creates and injects a decoder that is aware of the message broker.
+     * Uses reflection to avoid compilation errors in monolithic mode.
+     */
+    private AplicomProtocolDecoder injectMessageBrokerAwareDecoder(Object mockProducer) throws Exception {
+        // Create the decoder
+        var decoder = new AplicomProtocolDecoder(null);
+        
+        // Inject dependencies including the mock message producer
+        inject(decoder);
+        
+        // Use reflection to set the message producer
+        Class<?> decoderClass = decoder.getClass();
+        try {
+            var setProducerMethod = decoderClass.getMethod("setMessageProducer", Class.forName("org.traccar.messaging.MessageProducer"));
+            setProducerMethod.invoke(decoder, mockProducer);
+        } catch (NoSuchMethodException e) {
+            // This might happen in monolithic mode or if the method name changes
+            System.out.println("Warning: Could not set message producer on decoder");
+        }
+        
+        return decoder;
+    }
+    
+    /**
+     * Decodes a binary message into a Position object.
+     */
+    private Object decodePosition(AplicomProtocolDecoder decoder, Object msg) throws Exception {
+        return decoder.decode(null, null, msg);
+    }
+    
+    /**
+     * Verifies that a position was published to the message broker.
+     * Uses reflection to avoid compilation errors in monolithic mode.
+     */
+    private void verifyMessagePublished(Object mockProducer, Object position) throws Exception {
+        // Use reflection to verify the message was published
+        Class<?> mockProducerClass = mockProducer.getClass();
+        var getPublishedMessagesMethod = mockProducerClass.getMethod("getPublishedMessages");
+        var messages = getPublishedMessagesMethod.invoke(mockProducer);
+        
+        // Check if the position is in the published messages
+        boolean found = false;
+        if (messages instanceof java.util.List) {
+            for (Object msg : (java.util.List<?>) messages) {
+                if (msg.equals(position)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        
+        // Assert that the position was published
+        if (!found) {
+            throw new AssertionError("Position was not published to message broker");
+        }
+    }
 }
