@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,126 +15,154 @@
  */
 package org.traccar.discovery;
 
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.kv.model.PutParams;
+import com.ecwid.consul.v1.session.model.NewSession;
+import com.ecwid.consul.v1.session.model.Session;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Service Discovery Manager for registering services with service discovery systems
- * like Consul or Kubernetes.
+ * Manages service discovery and leader election using Consul.
+ * This class is responsible for registering services and acquiring leadership for tasks.
  */
 @Singleton
 public class ServiceDiscoveryManager {
 
-    private static final Logger LOGGER = Logger.getLogger(ServiceDiscoveryManager.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryManager.class);
+    private static final String KEY_PREFIX = "traccar/leader/";
+    private static final int SESSION_TTL_SECONDS = 30;
 
-    private final Config config;
-    private final Map<String, ServiceRegistration> registrations = new ConcurrentHashMap<>();
-    private final ServiceRegistry serviceRegistry;
+    private final ConsulClient consulClient;
+    private final String serviceId;
+    private final Map<String, String> sessionIds = new ConcurrentHashMap<>();
 
-    /**
-     * Constructs a new ServiceDiscoveryManager.
-     *
-     * @param config The configuration
-     */
     @Inject
     public ServiceDiscoveryManager(Config config) {
-        this.config = config;
+        String consulHost = config.getString(Keys.SERVICE_DISCOVERY_CONSUL_HOST, "localhost");
+        int consulPort = config.getInteger(Keys.SERVICE_DISCOVERY_CONSUL_PORT, 8500);
+        this.consulClient = new ConsulClient(consulHost, consulPort);
         
-        // Determine which service registry to use based on configuration
-        String registryType = config.getString(Keys.SERVICE_DISCOVERY_TYPE);
-        if ("consul".equalsIgnoreCase(registryType)) {
-            serviceRegistry = new ConsulServiceRegistry(config);
-        } else if ("kubernetes".equalsIgnoreCase(registryType)) {
-            serviceRegistry = new KubernetesServiceRegistry(config);
-        } else {
-            // Default to no-op registry if not configured
-            serviceRegistry = new NoOpServiceRegistry();
+        // Generate a unique service ID based on hostname and process ID
+        String hostname;
+        try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            LOGGER.warn("Could not determine hostname", e);
+            hostname = "unknown";
         }
-        
-        LOGGER.info("Initialized ServiceDiscoveryManager with " + serviceRegistry.getClass().getSimpleName());
+        this.serviceId = hostname + "-" + ProcessHandle.current().pid();
+        LOGGER.info("Service discovery initialized with service ID: {}", serviceId);
     }
 
     /**
-     * Register a service with the service discovery system.
+     * Attempts to acquire leadership for a task.
      *
-     * @param name The service name
-     * @param host The service host
-     * @param port The service port
-     * @param protocol The service protocol (tcp, udp)
-     * @param secure Whether the service is secure (SSL/TLS)
-     * @return The service ID
+     * @param taskName the name of the task to acquire leadership for
+     * @return true if leadership was acquired, false otherwise
      */
-    public String register(String name, String host, int port, String protocol, boolean secure) {
+    public boolean acquireLeadership(String taskName) {
         try {
-            // Generate a unique ID for this service instance
-            String id = name + "-" + UUID.randomUUID().toString().substring(0, 8);
-            
-            // Resolve hostname if needed
-            String resolvedHost = host;
-            if ("0.0.0.0".equals(host)) {
-                try {
-                    resolvedHost = InetAddress.getLocalHost().getHostAddress();
-                } catch (UnknownHostException e) {
-                    LOGGER.log(Level.WARNING, "Could not resolve local hostname, using fallback", e);
-                    resolvedHost = config.getString(Keys.WEB_ADDRESS, host);
-                }
+            String sessionId = createSession(taskName);
+            if (sessionId == null) {
+                return false;
             }
             
-            // Create metadata for the service
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put("protocol", protocol);
-            metadata.put("secure", String.valueOf(secure));
-            metadata.put("version", config.getString(Keys.VERSION));
+            sessionIds.put(taskName, sessionId);
+            String key = KEY_PREFIX + taskName;
+            PutParams putParams = new PutParams();
+            putParams.setAcquireSession(sessionId);
             
-            // Create service registration
-            ServiceRegistration registration = new ServiceRegistration(id, name, resolvedHost, port, metadata);
-            
-            // Register with the service registry
-            serviceRegistry.register(registration);
-            
-            // Store the registration
-            registrations.put(id, registration);
-            
-            return id;
+            boolean success = consulClient.setKVValue(key, serviceId, putParams).getValue();
+            if (success) {
+                LOGGER.debug("Acquired leadership for task: {} with session: {}", taskName, sessionId);
+            } else {
+                LOGGER.debug("Failed to acquire leadership for task: {}", taskName);
+            }
+            return success;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to register service: " + name, e);
+            LOGGER.error("Error acquiring leadership for task: {}", taskName, e);
+            return false;
+        }
+    }
+
+    /**
+     * Renews leadership for a task.
+     *
+     * @param taskName the name of the task to renew leadership for
+     * @return true if leadership was renewed, false otherwise
+     */
+    public boolean renewLeadership(String taskName) {
+        try {
+            String sessionId = sessionIds.get(taskName);
+            if (sessionId == null) {
+                return false;
+            }
+            
+            // Renew the session
+            consulClient.sessionRenew(sessionId, null);
+            
+            // Verify we still hold the lock
+            String key = KEY_PREFIX + taskName;
+            var response = consulClient.getKVValue(key);
+            if (response.getValue() != null && 
+                response.getValue().getSession() != null && 
+                response.getValue().getSession().equals(sessionId)) {
+                return true;
+            } else {
+                LOGGER.debug("Lost leadership for task: {}", taskName);
+                sessionIds.remove(taskName);
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error renewing leadership for task: {}", taskName, e);
+            sessionIds.remove(taskName);
+            return false;
+        }
+    }
+
+    /**
+     * Releases leadership for a task.
+     *
+     * @param taskName the name of the task to release leadership for
+     */
+    public void releaseLeadership(String taskName) {
+        try {
+            String sessionId = sessionIds.remove(taskName);
+            if (sessionId != null) {
+                String key = KEY_PREFIX + taskName;
+                PutParams putParams = new PutParams();
+                putParams.setReleaseSession(sessionId);
+                consulClient.setKVValue(key, "", putParams);
+                consulClient.sessionDestroy(sessionId, null);
+                LOGGER.debug("Released leadership for task: {}", taskName);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error releasing leadership for task: {}", taskName, e);
+        }
+    }
+
+    private String createSession(String taskName) {
+        try {
+            NewSession newSession = new NewSession();
+            newSession.setName("traccar-" + taskName);
+            newSession.setTtl(SESSION_TTL_SECONDS + "s");
+            newSession.setBehavior(Session.Behavior.RELEASE);
+            String sessionId = consulClient.sessionCreate(newSession, null).getValue();
+            LOGGER.debug("Created session: {} for task: {}", sessionId, taskName);
+            return sessionId;
+        } catch (Exception e) {
+            LOGGER.error("Error creating session for task: {}", taskName, e);
             return null;
-        }
-    }
-
-    /**
-     * Deregister a service from the service discovery system.
-     *
-     * @param id The service ID
-     */
-    public void deregister(String id) {
-        try {
-            ServiceRegistration registration = registrations.remove(id);
-            if (registration != null) {
-                serviceRegistry.deregister(registration);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to deregister service: " + id, e);
-        }
-    }
-
-    /**
-     * Deregister all services.
-     */
-    public void deregisterAll() {
-        for (String id : registrations.keySet()) {
-            deregister(id);
         }
     }
 }
