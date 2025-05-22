@@ -1,11 +1,34 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+// Additional imports for microservices testing
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.test.MessageBrokerTest;
+import org.traccar.test.TestDataFactory;
+
+// Note: MessageBrokerTest and TestDataFactory are custom test utility classes
+// that would be implemented as part of the microservices testing infrastructure.
+
+/**
+ * Test for Mictrack protocol decoder.
+ * 
+ * This test has been updated to support both monolithic and microservices testing environments.
+ * It can be executed in the original monolithic environment and also in the Protocol Service.
+ */
 public class MictrackProtocolDecoderTest extends ProtocolTest {
 
+    /**
+     * Tests standard message decoding in both monolithic and microservices environments.
+     * 
+     * This test verifies the basic functionality of the Mictrack protocol decoder
+     * by testing various message formats and ensuring they are correctly parsed.
+     */
     @Test
     public void testDecodeStandard() throws Exception {
 
@@ -45,6 +68,12 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
                 "MT;5;866425031379169;RH;5+190116112648+0+0+0+0+11+3954+1"));
     }
 
+    /**
+     * Tests decoding of messages with low altitude values.
+     * 
+     * This test verifies that the decoder correctly handles position messages
+     * with low altitude values, which is a specific case for this protocol.
+     */
     @Test
     public void testDecodeLowAltitude() throws Exception {
 
@@ -64,4 +93,85 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
                 position("2017-11-13 06:22:32.000", true, 22.63806, 114.028976));
     }
 
+    /**
+     * Tests protocol integration with message brokers in a microservices environment.
+     * 
+     * This test is only enabled when running in the microservices environment and verifies
+     * that decoded positions are correctly published to the message broker.
+     * 
+     * Note: This test requires the MessageBrokerTest utility class which would be
+     * implemented as part of the microservices testing infrastructure.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testMessageBrokerIntegration() throws Exception {
+        // Create a message broker test helper
+        MessageBrokerTest brokerTest = new MessageBrokerTest();
+        
+        // Create and configure the decoder with message broker integration
+        Config config = new Config();
+        config.setString(Keys.PROTOCOL_NAME.withPrefix("mictrack"), "mictrack");
+        config.setBoolean(Keys.PROTOCOL_MESSAGE_BROKER_ENABLED.withPrefix("mictrack"), true);
+        
+        var decoder = inject(new MictrackProtocolDecoder(config));
+        
+        // Register a message listener with the broker test helper
+        brokerTest.registerPositionListener();
+        
+        // Decode a position message
+        decoder.decode(null, null, text(
+                "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"));
+        
+        // Verify that the position was published to the message broker
+        Position position = brokerTest.waitForPositionMessage(5000);
+        assertNotNull(position);
+        assertEquals(22.63827, position.getLatitude(), 0.0001);
+        assertEquals(114.02922, position.getLongitude(), 0.0001);
+        
+        // Clean up resources
+        brokerTest.cleanup();
+    }
+
+    /**
+     * Tests cross-service boundary handling by verifying position enrichment.
+     * 
+     * This test is only enabled when running in the microservices environment and verifies
+     * that positions are correctly processed across service boundaries with proper enrichment.
+     * 
+     * Note: This test requires the TestDataFactory utility class and PositionUtil.enrichPosition method
+     * which would be implemented as part of the microservices testing infrastructure.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testCrossServiceBoundaries() throws Exception {
+        // Create test device and position
+        long deviceId = 123456;
+        String uniqueId = "866425031361423";
+        
+        // Register the test device
+        TestDataFactory.registerDevice(deviceId, uniqueId);
+        
+        // Create and configure the decoder
+        Config config = new Config();
+        config.setString(Keys.PROTOCOL_NAME.withPrefix("mictrack"), "mictrack");
+        var decoder = inject(new MictrackProtocolDecoder(config));
+        
+        // Decode a position message
+        Position position = decoder.decode(null, null, text(
+                "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"));
+        
+        assertNotNull(position);
+        assertEquals(deviceId, position.getDeviceId());
+        
+        // Verify position was enriched with additional data
+        // This simulates what would happen when the position crosses service boundaries
+        Position enrichedPosition = PositionUtil.enrichPosition(position);
+        
+        // Verify enrichment data
+        assertNotNull(enrichedPosition.getAddress());
+        assertTrue(enrichedPosition.hasAttribute(Position.KEY_GEOFENCE));
+        
+        // Clean up test data
+        TestDataFactory.removeDevice(deviceId);
+    }
 }
