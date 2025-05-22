@@ -1,0 +1,671 @@
+# Traccar Server Configuration
+# Supports both monolithic and microservices deployment modes
+
+# Core Application Settings
+spring:
+  application:
+    name: ${deployment.service-name}
+  profiles:
+    active: ${ENVIRONMENT:production}
+  main:
+    banner-mode: console
+    web-application-type: servlet
+
+# Server Configuration
+server:
+  port: 8082
+  servlet:
+    context-path: /
+    application-display-name: Traccar GPS Tracking Server
+    session:
+      timeout: 3600s
+      cookie:
+        http-only: true
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/json,application/javascript
+    min-response-size: 1024
+  netty:
+    connection-timeout: 60000
+    max-http-header-size: 8KB
+  jetty:
+    threads:
+      min: 10
+      max: 200
+      idle-timeout: 60000
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+  shutdown: graceful
+
+# Deployment Mode Configuration
+deployment:
+  mode: monolithic  # Options: monolithic, microservices
+  service-name: traccar-server
+  instance-id: ${random.uuid}
+  version: 1.0.0
+  environment: production  # Options: development, staging, production
+  region: default
+  zone: default
+  # Service-specific settings based on deployment mode
+  services:
+    protocol:
+      enabled: ${deployment.mode == 'microservices'}
+      url: http://protocol-service:8082
+    position:
+      enabled: ${deployment.mode == 'microservices'}
+      url: http://position-service:8082
+    event:
+      enabled: ${deployment.mode == 'microservices'}
+      url: http://event-service:8082
+    notification:
+      enabled: ${deployment.mode == 'microservices'}
+      url: http://notification-service:8082
+    reporting:
+      enabled: ${deployment.mode == 'microservices'}
+      url: http://reporting-service:8082
+
+# Database Configuration
+database:
+  driver: org.h2.Driver
+  url: jdbc:h2:./data/database
+  username: sa
+  password: 
+  connection-pool:
+    maximum-pool-size: 20
+    minimum-idle: 5
+    idle-timeout: 300000
+    max-lifetime: 1800000
+    connection-timeout: 30000
+    validation-timeout: 5000
+    leak-detection-threshold: 60000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+        show_sql: false
+        use_sql_comments: false
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: default
+    labels: production
+
+# Service Discovery Configuration (used in microservices mode)
+service-discovery:
+  enabled: ${deployment.mode == 'microservices'}
+  type: consul  # Options: consul, kubernetes
+  consul:
+    host: localhost
+    port: 8500
+    service-name: ${deployment.service-name}
+    instance-id: ${deployment.instance-id}
+    health-check-path: /actuator/health
+    health-check-interval: 10s
+    tags:
+      - traccar
+      - gps-tracking
+    register: true
+    deregister: true
+    prefer-ip-address: true
+  kubernetes:
+    namespace: default
+    labels:
+      app: ${deployment.service-name}
+    pod-name: ${HOSTNAME:unknown}
+    discovery-server-url: kubernetes.default.svc
+
+# Message Broker Configuration (used in microservices mode)
+message-broker:
+  enabled: ${deployment.mode == 'microservices'}
+  type: kafka  # Options: kafka, rabbitmq
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ${deployment.service-name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      concurrency: 3
+      session-timeout-ms: 30000
+      heartbeat-interval-ms: 10000
+      auto-commit-interval-ms: 5000
+      isolation-level: read_committed
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      linger-ms: 10
+      compression-type: snappy
+      transaction-id-prefix: tx-
+    topics:
+      raw-positions: raw.positions
+      enriched-positions: enriched.positions
+      events: events
+      device-connections: device.connections
+      device-sessions: device.sessions
+      notification-status: notification.status
+    admin:
+      auto-create-topics: true
+      num-partitions: 3
+      replication-factor: 1
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    ssl:
+      enabled: false
+    connection-timeout: 60000
+    requested-heartbeat: 60
+    cache:
+      channel:
+        size: 25
+    listener:
+      simple:
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 250
+        transaction-size: 10
+        default-requeue-rejected: true
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          multiplier: 2.0
+    publisher-confirms: true
+    publisher-returns: true
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 2.0
+    queues:
+      raw-positions: raw.positions
+      enriched-positions: enriched.positions
+      events: events
+      device-connections: device.connections
+      device-sessions: device.sessions
+      notification-status: notification.status
+
+# Health Check and Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env,configprops
+      base-path: /actuator
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,diskSpace,ping,kafka,rabbitmq
+        liveness:
+          include: ping,diskSpace
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    db:
+      enabled: true
+    diskSpace:
+      enabled: true
+      threshold: 10MB
+    kafka:
+      enabled: ${message-broker.enabled && message-broker.type == 'kafka'}
+    rabbit:
+      enabled: ${message-broker.enabled && message-broker.type == 'rabbitmq'}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms, 500ms
+    tags:
+      application: ${deployment.service-name}
+      instance: ${deployment.instance-id}
+
+# Distributed Tracing Configuration
+tracing:
+  enabled: ${deployment.mode == 'microservices'}
+  service-name: ${deployment.service-name}
+  opentelemetry:
+    exporter:
+      otlp:
+        endpoint: http://localhost:4317
+        protocol: grpc
+        timeout: 10000
+      jaeger:
+        endpoint: http://localhost:14250
+        enabled: false
+      zipkin:
+        endpoint: http://localhost:9411/api/v2/spans
+        enabled: false
+    sampler:
+      probability: 1.0
+      parent-based: true
+    propagation:
+      type: b3,w3c
+    instrumentation:
+      jdbc:
+        enabled: true
+      kafka:
+        enabled: true
+      rabbitmq:
+        enabled: true
+      netty:
+        enabled: true
+      jetty:
+        enabled: true
+      http-client:
+        enabled: true
+      grpc:
+        enabled: true
+    span-processor:
+      batch:
+        max-queue-size: 2048
+        max-export-batch-size: 512
+        schedule-delay-millis: 5000
+        export-timeout-millis: 30000
+
+# Logging Configuration
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId},%X{spanId}] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId},%X{spanId}] %-5level %logger{36} - %msg%n'
+  level:
+    root: INFO
+    org.traccar: INFO
+    org.hibernate: WARN
+    org.apache.kafka: WARN
+    org.springframework.amqp: WARN
+    io.netty: WARN
+    com.zaxxer.hikari: WARN
+  file:
+    name: ./logs/traccar.log
+    max-size: 10MB
+    max-history: 10
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 10
+      total-size-cap: 1GB
+      clean-history-on-start: false
+  json:
+    enabled: ${deployment.mode == 'microservices'}
+    include-pattern: '%d{yyyy-MM-dd HH:mm:ss.SSS} %p %c{1.} [%t] %m%n'
+    additional-fields:
+      service: ${deployment.service-name}
+      instance: ${deployment.instance-id}
+      host: ${HOSTNAME:unknown}
+      environment: ${ENVIRONMENT:production}
+
+# Protocol Configuration
+protocol:
+  # Common protocol settings
+  port: 5000-5150
+  # Connection settings
+  connection:
+    timeout: 60000
+    keepalive: true
+  # Protocol service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: ${deployment.services.protocol.url}
+    connection-timeout: 5000
+    read-timeout: 30000
+    retry:
+      max-attempts: 3
+      initial-backoff: 1000
+      max-backoff: 10000
+      multiplier: 2.0
+  # Individual protocol settings
+  protocols:
+    tk103:
+      port: 5001
+      extended: false
+    meitrack:
+      port: 5002
+    teltonika:
+      port: 5003
+    atrack:
+      port: 5004
+    totem:
+      port: 5005
+    meiligao:
+      port: 5006
+
+# Web Interface Configuration
+web:
+  path: ./web
+  debug: false
+  console: false
+  # CORS configuration
+  cors:
+    enabled: true
+    allowed-origins: "*"
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: Origin,Content-Type,Accept,Authorization
+    exposed-headers: Content-Disposition
+    allow-credentials: true
+    max-age: 3600
+  # Security settings
+  security:
+    csrf:
+      enabled: true
+      header-name: X-CSRF-TOKEN
+    content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.tile.openstreetmap.org"
+    frame-options: SAMEORIGIN
+    xss-protection: 1; mode=block
+    content-type-options: nosniff
+  # Session settings
+  session:
+    timeout: 3600
+    cookie:
+      secure: false
+      http-only: true
+      same-site: Lax
+  # API settings
+  api:
+    version: v1
+    base-path: /api
+    rate-limit:
+      enabled: true
+      requests-per-second: 10
+      burst: 20
+
+# Notification Configuration
+notification:
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: ${deployment.services.notification.url}
+    connection-timeout: 5000
+    read-timeout: 30000
+  # Email notification settings
+  mail:
+    smtp:
+      host: localhost
+      port: 25
+      starttls.enable: false
+      from: traccar@example.com
+      auth: false
+      username: 
+      password: 
+      ssl.enable: false
+      connection-timeout: 10000
+      timeout: 10000
+      write-timeout: 10000
+      debug: false
+  # SMS notification settings
+  sms:
+    enabled: false
+    provider: default  # Options: default, aws, twilio, nexmo
+    aws:
+      region: us-east-1
+      access-key: 
+      secret-key: 
+    twilio:
+      account-sid: 
+      auth-token: 
+      phone-number: 
+    nexmo:
+      api-key: 
+      api-secret: 
+      from: 
+  # Push notification settings
+  push:
+    enabled: false
+    provider: firebase  # Options: firebase, apns, fcm
+    firebase:
+      service-account-path: 
+      database-url: 
+    fcm:
+      server-key: 
+  # Webhook notification settings
+  webhook:
+    enabled: false
+    url: 
+    headers:
+      Content-Type: application/json
+    template: '{"event":"${eventType}","deviceId":${deviceId},"deviceName":"${deviceName}"}'
+  # Template settings
+  templates:
+    directory: ./templates
+    velocity:
+      resource-loader-cache: true
+      resource-loader-cache-size: 100
+
+# Geocoder Configuration
+geocoder:
+  type: nominatim
+  url: https://nominatim.openstreetmap.org/reverse
+  format: json
+  cache:
+    enabled: true
+    size: 1000
+    expireAfterWrite: 86400 # 24 hours in seconds
+  # Additional geocoder providers
+  google:
+    url: https://maps.googleapis.com/maps/api/geocode/json
+    key: 
+  here:
+    url: https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json
+    key: 
+  mapbox:
+    url: https://api.mapbox.com/geocoding/v5/mapbox.places/
+    key: 
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: http://geocoder-service:8082
+    connection-timeout: 5000
+    read-timeout: 30000
+
+# Geolocation Configuration
+geolocation:
+  type: mozilla
+  url: https://location.services.mozilla.com/v1/geolocate
+  key: 
+  # Additional geolocation providers
+  google:
+    url: https://www.googleapis.com/geolocation/v1/geolocate
+    key: 
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: http://geolocation-service:8082
+    connection-timeout: 5000
+    read-timeout: 30000
+
+# Forward Configuration
+forward:
+  enabled: false
+  url: 
+  header: 
+  timeout: 10000
+  # Forward destinations
+  destinations:
+    # MQTT forwarding
+    mqtt:
+      enabled: false
+      url: tcp://localhost:1883
+      topic: traccar/devices/{uniqueId}
+      qos: 0
+      retain: false
+      username: 
+      password: 
+    # Kafka forwarding
+    kafka:
+      enabled: false
+      topic: traccar.positions
+      bootstrap.servers: localhost:9092
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: org.apache.kafka.common.serialization.StringSerializer
+    # Elasticsearch forwarding
+    elasticsearch:
+      enabled: false
+      url: http://localhost:9200
+      index: traccar
+      username: 
+      password: 
+    # Custom HTTP forwarding
+    http:
+      enabled: false
+      url: http://localhost:8080/api/positions
+      header: 
+      timeout: 10000
+
+# Event Configuration
+event:
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: ${deployment.services.event.url}
+    connection-timeout: 5000
+    read-timeout: 30000
+  # Event forwarding
+  forward: false
+  # Event detection settings
+  overspeedGap: 300
+  motion:
+    speedThreshold: 0.01
+    processInvalid: false
+  geofence:
+    processInvalid: false
+  maintenance:
+    checkInterval: 300
+  driver:
+    reminderDistance: 5000
+  ignition:
+    detectOnSpeed: false
+    speedThreshold: 2.0
+  acceleration:
+    minSpeed: 1.0
+    maxSpeed: 150.0
+    minAcceleration: 0.3
+    maxAcceleration: 1.0
+    minBraking: 0.3
+    maxBraking: 1.0
+
+# Filter Configuration
+filter:
+  enable: true
+  future: 300
+  accuracy: 0
+  invalid: true
+  zero: true
+  duplicate: 300
+  skipLimit: 10000
+  skipAttributes: false
+  # Position filtering
+  position:
+    minimum-distance: 0
+    minimum-time: 0
+    maximum-speed: 0
+    maximum-hdop: 0
+    minimum-satellites: 0
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: ${deployment.services.position.url}/filter
+    connection-timeout: 5000
+    read-timeout: 30000
+
+# Report Configuration
+report:
+  # Service integration (for microservices mode)
+  service:
+    enabled: ${deployment.mode == 'microservices'}
+    url: ${deployment.services.reporting.url}
+    connection-timeout: 5000
+    read-timeout: 60000
+  # Trip report settings
+  trip:
+    minimalTripDistance: 500
+    minimalTripDuration: 300
+    minimalParkingDuration: 300
+    minimalNoDataDuration: 3600
+    greedyParking: false
+    useIgnition: false
+  # Route report settings
+  route:
+    maxPoints: 8000
+    splitDistance: 0
+  # Summary report settings
+  summary:
+    stopThreshold: 180
+    includeZero: false
+  # Event report settings
+  event:
+    maxItems: 1000
+  # Export settings
+  export:
+    formats: csv,xlsx,pdf
+    csv:
+      separator: ,
+      includeHeader: true
+    xlsx:
+      includeHeader: true
+      dateFormat: yyyy-MM-dd HH:mm:ss
+    pdf:
+      pageSize: A4
+      landscape: false
+    template:
+      directory: ./templates/report
+  # Scheduled reports
+  schedule:
+    enabled: true
+    threadPoolSize: 2
+    cronExpression: 0 0 0 * * ?
+    emailEnabled: true
+    emailTemplate: ./templates/report/schedule-email.vm
+
+# Backward Compatibility for XML Configuration
+config:
+  xml:
+    enabled: true
+    path: ./conf/traccar.xml
+    override: false  # When true, XML config overrides YAML settings
+    legacy-properties:
+      enabled: true  # Support for legacy property names
+
+# Feature Flags for Gradual Migration
+feature-flags:
+  use-microservices-protocol: ${deployment.mode == 'microservices'}
+  use-microservices-position: ${deployment.mode == 'microservices'}
+  use-microservices-event: ${deployment.mode == 'microservices'}
+  use-microservices-notification: ${deployment.mode == 'microservices'}
+  use-microservices-reporting: ${deployment.mode == 'microservices'}
+  use-distributed-tracing: ${deployment.mode == 'microservices'}
+  use-structured-logging: ${deployment.mode == 'microservices'}
+  use-service-discovery: ${deployment.mode == 'microservices'}
+  use-message-broker: ${deployment.mode == 'microservices'}
