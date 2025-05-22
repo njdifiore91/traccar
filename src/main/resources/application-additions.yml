@@ -1,0 +1,47 @@
+# Service Discovery Configuration
+consul:
+  host: ${CONSUL_HOST:localhost}
+  port: ${CONSUL_PORT:8500}
+
+# Redis Cache Configuration
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  database: ${REDIS_DATABASE:0}
+  ttl: ${REDIS_TTL:300}
+  timeout: ${REDIS_TIMEOUT:5}
+
+# Circuit Breaker Configuration
+circuitbreaker:
+  failureRateThreshold: ${CIRCUIT_BREAKER_FAILURE_RATE:50.0}
+  slowCallRateThreshold: ${CIRCUIT_BREAKER_SLOW_CALL_RATE:50.0}
+  slowCallDurationThreshold: ${CIRCUIT_BREAKER_SLOW_CALL_DURATION:1000}
+  permittedNumberOfCallsInHalfOpenState: ${CIRCUIT_BREAKER_PERMITTED_CALLS:10}
+  slidingWindowSize: ${CIRCUIT_BREAKER_WINDOW_SIZE:100}
+  minimumNumberOfCalls: ${CIRCUIT_BREAKER_MIN_CALLS:10}
+  waitDurationInOpenState: ${CIRCUIT_BREAKER_WAIT_DURATION:60000}
+
+# OpenTelemetry Configuration
+opentelemetry:
+  serviceName: ${OTEL_SERVICE_NAME:api-gateway}
+  endpoint: ${OTEL_ENDPOINT:http://localhost:4317}
+
+# Metrics Configuration
+metrics:
+  type: ${METRICS_TYPE:prometheus}
+  service: ${METRICS_SERVICE:api-gateway}
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
