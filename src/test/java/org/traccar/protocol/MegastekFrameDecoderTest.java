@@ -1,13 +1,20 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
+import org.traccar.TestMessageBroker;
 
+import io.netty.buffer.ByteBuf;
+
+/**
+ * Test case for Megastek Frame Decoder.
+ * This test has been updated to support both monolithic and microservices testing approaches.
+ */
 public class MegastekFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
-
         var decoder = inject(new MegastekFrameDecoder());
 
         verifyFrame(
@@ -25,7 +32,52 @@ public class MegastekFrameDecoderTest extends ProtocolTest {
         verifyFrame(
                 binary("636d643d6169643b757365723d2a2a2a3b7077643d2a2a2a3b6c61743d33382e35353239353338333b6c6f6e3d32312e30353337343530303b706163633d31303030"),
                 decoder.decode(null, null, binary("636d643d6169643b757365723d2a2a2a3b7077643d2a2a2a3b6c61743d33382e35353239353338333b6c6f6e3d32312e30353337343530303b706163633d313030300a")));
-
     }
 
+    /**
+     * Tests the integration with message broker for microservices architecture.
+     * This test is only enabled when running in microservices mode.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.mode", matches = "microservice")
+    public void testMessageBrokerIntegration() throws Exception {
+        // Create a test message broker to verify messages are properly published
+        TestMessageBroker messageBroker = new TestMessageBroker();
+        
+        // Create and inject the decoder with message broker
+        var decoder = inject(new MegastekFrameDecoder(messageBroker));
+
+        // Test frame decoding and verify message is published to broker
+        ByteBuf frame = binary("30313337244d47563030322c3335343535303035303239323636392c4756543930302c522c3134313231352c3033313830342c412c2c532c2c452c30302c30332c30302c332e36372c302e3030302c302e30302c3131372e312c302e302c3531302c31302c2c2c2c303030302c303030302c32322c31322c302c202c202c2c312d312c39382c5057204f4e3b21");
+        ByteBuf decodedFrame = decoder.decode(null, null, frame.retainedDuplicate());
+        
+        // Verify the frame is correctly decoded
+        verifyFrame(frame, decodedFrame);
+        
+        // Verify the decoded frame was published to the message broker
+        messageBroker.verifyMessagePublished("protocol.position.raw", decodedFrame);
+    }
+
+    /**
+     * Tests protocol handling across service boundaries.
+     * This test verifies that the decoded frame can be properly processed by downstream services.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.mode", matches = "microservice")
+    public void testCrossServiceHandling() throws Exception {
+        // Create a test message broker with simulated downstream services
+        TestMessageBroker messageBroker = new TestMessageBroker();
+        messageBroker.simulateDownstreamService("position-service");
+        
+        // Create and inject the decoder with message broker
+        var decoder = inject(new MegastekFrameDecoder(messageBroker));
+
+        // Test frame decoding and cross-service handling
+        ByteBuf frame = binary("244d47563030322c3031333737373030373533363433342c2c522c3031303131342c3030303035372c562c303030302e303030302c4e2c30303030302e303030302c452c30302c30302c30302c39392e392c302e3030302c302e30302c302e302c38302e3236332c3531302c38392c323334322c303330422c2c303030302c303030302c3230302c39362c302c202c202c2c2c2c54696d65723b21");
+        decoder.decode(null, null, frame.retainedDuplicate());
+        
+        // Verify the message was received and acknowledged by the downstream service
+        messageBroker.verifyMessageReceived("position-service", "protocol.position.raw");
+        messageBroker.verifyServiceAcknowledgement("position-service");
+    }
 }
