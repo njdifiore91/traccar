@@ -1,10 +1,22 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
+/**
+ * Test for Aquila protocol decoder.
+ * 
+ * This test has been updated to support both monolithic and microservices testing environments.
+ * It can be run in the original monolithic context or as part of the Protocol Service tests.
+ */
 public class AquilaProtocolDecoderTest extends ProtocolTest {
 
+    /**
+     * Basic protocol decoding test.
+     * This test verifies the decoder can properly parse various message formats.
+     */
     @Test
     public void testDecodeA() throws Exception {
 
@@ -51,4 +63,41 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    /**
+     * Test for message broker integration.
+     * This test verifies that decoded positions can be properly published to a message broker.
+     * It is only enabled when running in the microservices environment with a message broker available.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.broker.enabled", matches = "true")
+    public void testMessageBrokerIntegration() throws Exception {
+        var decoder = inject(new AquilaProtocolDecoder(null));
+        
+        // Parse a position message
+        var message = text("$$CLIENT_1ZF,170215089,20,18.462809,73.824188,170613182744,A,01,123456,*37");
+        var position = decoder.decode(null, null, message);
+        
+        // Verify position was decoded correctly
+        assertNotNull(position);
+        verifyBrokerPublish((Position) position);
+    }
+
+    /**
+     * Test for cross-service boundary handling.
+     * This test verifies that the protocol decoder can properly handle messages across service boundaries.
+     * It is only enabled when running in the microservices environment with service discovery available.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.service.discovery.enabled", matches = "true")
+    public void testCrossServiceBoundaries() throws Exception {
+        var decoder = inject(new AquilaProtocolDecoder(null));
+        
+        // Parse a position message
+        var message = text("$$CLIENT_1ZF,170215089,20,18.462809,73.824188,170613182744,A,01,123456,*37");
+        var position = decoder.decode(null, null, message);
+        
+        // Verify position was decoded correctly
+        assertNotNull(position);
+        verifyPositionService((Position) position);
+    }
 }
