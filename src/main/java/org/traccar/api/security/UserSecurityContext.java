@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,53 @@
 package org.traccar.api.security;
 
 import jakarta.ws.rs.core.SecurityContext;
-import java.security.Principal;
 
+import java.security.Principal;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Security context implementation that supports JWT-based authentication and role-based access control.
+ * This class is used by the API Gateway to authenticate and authorize requests.
+ */
 public class UserSecurityContext implements SecurityContext {
 
     private final UserPrincipal principal;
+    private final Set<String> roles;
+    private final boolean secure;
+    private final String authenticationScheme;
+    private final boolean serviceIdentity;
 
-    public UserSecurityContext(UserPrincipal principal) {
+    /**
+     * Creates a new security context for a user authentication.
+     *
+     * @param principal The user principal
+     * @param roles Set of roles assigned to the user
+     * @param secure Whether the request is secure (HTTPS)
+     */
+    public UserSecurityContext(UserPrincipal principal, Set<String> roles, boolean secure) {
         this.principal = principal;
+        this.roles = roles != null ? new HashSet<>(roles) : Collections.emptySet();
+        this.secure = secure;
+        this.authenticationScheme = BEARER_AUTH;
+        this.serviceIdentity = false;
+    }
+
+    /**
+     * Creates a new security context for a service-to-service authentication.
+     *
+     * @param principal The service principal
+     * @param roles Set of roles assigned to the service
+     * @param secure Whether the request is secure (HTTPS)
+     * @param serviceIdentity Whether this is a service identity
+     */
+    public UserSecurityContext(UserPrincipal principal, Set<String> roles, boolean secure, boolean serviceIdentity) {
+        this.principal = principal;
+        this.roles = roles != null ? new HashSet<>(roles) : Collections.emptySet();
+        this.secure = secure;
+        this.authenticationScheme = BEARER_AUTH;
+        this.serviceIdentity = serviceIdentity;
     }
 
     @Override
@@ -33,17 +72,35 @@ public class UserSecurityContext implements SecurityContext {
 
     @Override
     public boolean isUserInRole(String role) {
-        return true;
+        return roles.contains(role);
     }
 
     @Override
     public boolean isSecure() {
-        return false;
+        return secure;
     }
 
     @Override
     public String getAuthenticationScheme() {
-        return BASIC_AUTH;
+        return authenticationScheme;
     }
 
+    /**
+     * Checks if this security context represents a service identity.
+     * Service identities are used for service-to-service communication.
+     *
+     * @return true if this is a service identity, false otherwise
+     */
+    public boolean isServiceIdentity() {
+        return serviceIdentity;
+    }
+
+    /**
+     * Gets the set of roles assigned to the user or service.
+     *
+     * @return The set of roles
+     */
+    public Set<String> getRoles() {
+        return Collections.unmodifiableSet(roles);
+    }
 }
