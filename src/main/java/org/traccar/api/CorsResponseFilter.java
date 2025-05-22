@@ -16,6 +16,7 @@
 package org.traccar.api;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.prometheus.client.Counter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
@@ -26,10 +27,21 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import java.io.IOException;
 
+/**
+ * CORS response filter that adds appropriate headers to enable cross-origin requests.
+ * This implementation supports distributed tracing headers and collects metrics for CORS requests.
+ */
 @Singleton
 public class CorsResponseFilter implements ContainerResponseFilter {
 
     private final String allowed;
+
+    // Prometheus metrics for CORS requests
+    private static final Counter CORS_REQUESTS = Counter.build()
+            .name("api_cors_requests_total")
+            .help("Total number of CORS requests")
+            .labelNames("origin", "method")
+            .register();
 
     @Inject
     public CorsResponseFilter(Config config) {
@@ -37,11 +49,26 @@ public class CorsResponseFilter implements ContainerResponseFilter {
     }
 
     private static final String ORIGIN_ALL = "*";
-    private static final String HEADERS_ALL = "origin, content-type, accept, authorization";
+    
+    // Updated to include distributed tracing headers
+    private static final String HEADERS_ALL = "origin, content-type, accept, authorization, traceparent, tracestate, "
+            + "x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-request-id, x-ot-span-context, "
+            + "x-cloud-trace-context, grpc-trace-bin, baggage, sentry-trace, x-forwarded-for, x-forwarded-proto, "
+            + "x-forwarded-host, x-forwarded-port";
+    
     private static final String METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
+        // Record metrics for CORS requests
+        String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
+        String method = request.getMethod();
+        
+        if (origin != null) {
+            // Only count actual CORS requests (those with Origin header)
+            CORS_REQUESTS.labels(origin, method).inc();
+        }
+
         if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString())) {
             response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(), HEADERS_ALL);
         }
@@ -54,8 +81,13 @@ public class CorsResponseFilter implements ContainerResponseFilter {
             response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString(), METHODS_ALL);
         }
 
+        // Add header to expose tracing headers to clients
+        if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_EXPOSE_HEADERS.toString())) {
+            response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_EXPOSE_HEADERS.toString(), 
+                    "traceparent, tracestate, x-request-id");
+        }
+
         if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
-            String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
             if (origin == null) {
                 response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), ORIGIN_ALL);
             } else if (allowed == null || allowed.equals(ORIGIN_ALL) || allowed.contains(origin)) {
@@ -63,5 +95,4 @@ public class CorsResponseFilter implements ContainerResponseFilter {
             }
         }
     }
-
 }
