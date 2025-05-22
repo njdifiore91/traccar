@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test-specific logging configuration for Traccar
+  
+  This configuration provides:
+  1. Controlled verbosity during test execution
+  2. Console output for immediate feedback
+  3. File-based logging for detailed analysis
+  4. MDC support for tracking test execution context
+  5. Appropriate log levels for different packages
+-->
+<configuration scan="true" scanPeriod="30 seconds">
+    <!-- Properties for configuration -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{testClass}:%X{testMethod}%X{traceId:-}%X{spanId:-}] - %msg%n"/>
+    <property name="LOG_PATTERN_ERROR" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{testClass}:%X{testMethod}%X{traceId:-}%X{spanId:-}] - %msg%n%xException{full}%n"/>
+    
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- File appender for detailed test logs -->
+    <appender name="TEST_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/test.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Error file appender for capturing errors during tests -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/test-errors.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${LOG_PATTERN_ERROR}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- Async appender for improved performance -->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="TEST_FILE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <!-- Set log levels for different packages -->
+    <!-- Traccar core packages - INFO level by default -->
+    <logger name="org.traccar" level="INFO"/>
+
+    <!-- Protocol-specific logging - can be more verbose during tests -->
+    <logger name="org.traccar.protocol" level="INFO"/>
+    <logger name="org.traccar.handler" level="INFO"/>
+
+    <!-- Test-specific logging - more verbose to aid debugging -->
+    <logger name="org.traccar.test" level="DEBUG"/>
+
+    <!-- Database operations - INFO level to avoid excessive SQL logging -->
+    <logger name="org.traccar.database" level="INFO"/>
+    <logger name="org.traccar.storage" level="INFO"/>
+    <logger name="org.traccar.storage.query" level="INFO"/>
+
+    <!-- Web server - INFO level -->
+    <logger name="org.traccar.web" level="INFO"/>
+    <logger name="org.traccar.api" level="INFO"/>
+    <logger name="org.traccar.api.resource" level="INFO"/>
+    <logger name="org.traccar.api.security" level="INFO"/>
+
+    <!-- Microservices-specific loggers -->
+    <logger name="org.traccar.discovery" level="WARN"/>
+    <logger name="org.traccar.messaging" level="WARN"/>
+    <logger name="org.traccar.health" level="WARN"/>
+    <logger name="org.traccar.metrics" level="WARN"/>
+    <logger name="org.traccar.session" level="INFO"/>
+    <logger name="org.traccar.session.cache" level="INFO"/>
+    <logger name="org.traccar.session.state" level="INFO"/>
+
+    <!-- Notification and event handling -->
+    <logger name="org.traccar.notification" level="INFO"/>
+    <logger name="org.traccar.notificators" level="INFO"/>
+    <logger name="org.traccar.handler.events" level="INFO"/>
+
+    <!-- Third-party libraries - reduce verbosity -->
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="org.glassfish.jersey" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="com.sun.jersey" level="WARN"/>
+    <logger name="io.grpc" level="WARN"/>
+    <logger name="io.micrometer" level="WARN"/>
+    <logger name="io.opentelemetry" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="com.rabbitmq" level="WARN"/>
+    <logger name="com.ecwid.consul" level="WARN"/>
+    <logger name="io.fabric8.kubernetes" level="WARN"/>
+    <logger name="io.github.resilience4j" level="WARN"/>
+
+    <!-- Turn off noisy logs during testing -->
+    <logger name="org.apache.velocity" level="ERROR"/>
+    <logger name="liquibase" level="ERROR"/>
+    <logger name="org.apache.http" level="ERROR"/>
+    <logger name="com.mchange" level="ERROR"/>
+
+    <!-- Root logger configuration -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC" />
+        <appender-ref ref="ERROR_FILE" />
+    </root>
+
+    <!-- JUnit listener to capture test context in MDC -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+    
+    <!-- Turbo filter to enable debug logging for specific tests via system property -->
+    <turboFilter class="ch.qos.logback.classic.turbo.MDCFilter">
+        <MDCKey>enableDebug</MDCKey>
+        <Value>true</Value>
+        <OnMatch>ACCEPT</OnMatch>
+    </turboFilter>
+</configuration>
