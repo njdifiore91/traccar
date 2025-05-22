@@ -25,6 +25,21 @@ import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.apache.velocity.app.VelocityEngine;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
@@ -99,6 +114,23 @@ import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
 import org.traccar.api.security.LoginService;
+import org.traccar.discovery.ServiceDiscoveryManager;
+import org.traccar.discovery.ConsulServiceDiscovery;
+import org.traccar.discovery.KubernetesServiceDiscovery;
+import org.traccar.discovery.NullServiceDiscovery;
+import org.traccar.messaging.MessageBrokerManager;
+import org.traccar.messaging.kafka.KafkaMessageBroker;
+import org.traccar.messaging.rabbitmq.RabbitMqMessageBroker;
+import org.traccar.messaging.NullMessageBroker;
+import org.traccar.metrics.MicrometerMetricsManager;
+import org.traccar.metrics.NullMetricsManager;
+import org.traccar.observability.OpenTelemetryManager;
+import org.traccar.observability.NullTelemetryManager;
+import org.traccar.grpc.GrpcClientManager;
+import org.traccar.grpc.NullGrpcClientManager;
+import org.traccar.resilience.CircuitBreakerManager;
+import org.traccar.resilience.NullCircuitBreakerManager;
+import org.traccar.resilience.Resilience4jCircuitBreakerManager;
 
 import jakarta.annotation.Nullable;
 import jakarta.inject.Singleton;
@@ -413,4 +445,144 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    /**
+     * Provides the service discovery manager based on configuration.
+     * Supports Consul and Kubernetes service discovery mechanisms.
+     */
+    @Singleton
+    @Provides
+    public static ServiceDiscoveryManager provideServiceDiscoveryManager(Config config) {
+        if (!config.getBoolean(Keys.MICROSERVICES_ENABLED, false)) {
+            return new NullServiceDiscovery();
+        }
+        
+        String discoveryType = config.getString(Keys.SERVICE_DISCOVERY_TYPE, "kubernetes");
+        return switch (discoveryType) {
+            case "consul" -> new ConsulServiceDiscovery(config);
+            case "kubernetes" -> new KubernetesServiceDiscovery(config);
+            default -> new NullServiceDiscovery();
+        };
+    }
+
+    /**
+     * Provides the message broker manager based on configuration.
+     * Supports Kafka and RabbitMQ message brokers.
+     */
+    @Singleton
+    @Provides
+    public static MessageBrokerManager provideMessageBrokerManager(
+            Config config, ObjectMapper objectMapper) {
+        if (!config.getBoolean(Keys.MICROSERVICES_ENABLED, false)) {
+            return new NullMessageBroker();
+        }
+        
+        String brokerType = config.getString(Keys.MESSAGE_BROKER_TYPE, "kafka");
+        return switch (brokerType) {
+            case "kafka" -> new KafkaMessageBroker(config, objectMapper);
+            case "rabbitmq" -> new RabbitMqMessageBroker(config, objectMapper);
+            default -> new NullMessageBroker();
+        };
+    }
+
+    /**
+     * Provides the circuit breaker manager based on configuration.
+     * Uses Resilience4j for circuit breaking, retry, and bulkhead patterns.
+     */
+    @Singleton
+    @Provides
+    public static CircuitBreakerManager provideCircuitBreakerManager(Config config) {
+        if (!config.getBoolean(Keys.MICROSERVICES_ENABLED, false) || 
+            !config.getBoolean(Keys.CIRCUIT_BREAKER_ENABLED, false)) {
+            return new NullCircuitBreakerManager();
+        }
+        
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+            .failureRateThreshold(config.getFloat(Keys.CIRCUIT_BREAKER_FAILURE_THRESHOLD, 50.0f))
+            .waitDurationInOpenState(java.time.Duration.ofMillis(
+                config.getLong(Keys.CIRCUIT_BREAKER_WAIT_DURATION, 10000L)))
+            .permittedNumberOfCallsInHalfOpenState(
+                config.getInteger(Keys.CIRCUIT_BREAKER_PERMITTED_CALLS, 10))
+            .slidingWindowSize(config.getInteger(Keys.CIRCUIT_BREAKER_WINDOW_SIZE, 100))
+            .build();
+            
+        RetryConfig retryConfig = RetryConfig.custom()
+            .maxAttempts(config.getInteger(Keys.RETRY_MAX_ATTEMPTS, 3))
+            .waitDuration(java.time.Duration.ofMillis(
+                config.getLong(Keys.RETRY_WAIT_DURATION, 1000L)))
+            .build();
+            
+        return new Resilience4jCircuitBreakerManager(
+            CircuitBreakerRegistry.of(circuitBreakerConfig),
+            RetryRegistry.of(retryConfig));
+    }
+
+    /**
+     * Provides the gRPC client manager for service-to-service communication.
+     */
+    @Singleton
+    @Provides
+    public static GrpcClientManager provideGrpcClientManager(
+            Config config, ServiceDiscoveryManager serviceDiscoveryManager) {
+        if (!config.getBoolean(Keys.MICROSERVICES_ENABLED, false) ||
+            !config.getBoolean(Keys.GRPC_ENABLED, false)) {
+            return new NullGrpcClientManager();
+        }
+        
+        return new GrpcClientManager(config, serviceDiscoveryManager);
+    }
+
+    /**
+     * Provides the OpenTelemetry manager for distributed tracing.
+     */
+    @Singleton
+    @Provides
+    public static OpenTelemetryManager provideOpenTelemetryManager(Config config) {
+        if (!config.getBoolean(Keys.TELEMETRY_ENABLED, false)) {
+            return new NullTelemetryManager();
+        }
+        
+        String exporterType = config.getString(Keys.TELEMETRY_EXPORTER_TYPE, "jaeger");
+        String endpoint = config.getString(Keys.TELEMETRY_EXPORTER_ENDPOINT, "http://localhost:14250");
+        String serviceName = config.getString(Keys.TELEMETRY_SERVICE_NAME, "traccar");
+        
+        SdkTracerProvider tracerProvider;
+        
+        if ("jaeger".equals(exporterType)) {
+            JaegerGrpcSpanExporter exporter = JaegerGrpcSpanExporter.builder()
+                .setEndpoint(endpoint)
+                .build();
+            tracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                .build();
+        } else if ("zipkin".equals(exporterType)) {
+            ZipkinSpanExporter exporter = ZipkinSpanExporter.builder()
+                .setEndpoint(endpoint)
+                .build();
+            tracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                .build();
+        } else {
+            return new NullTelemetryManager();
+        }
+        
+        OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+            .setTracerProvider(tracerProvider)
+            .build();
+            
+        return new OpenTelemetryManager(openTelemetry, serviceName);
+    }
+
+    /**
+     * Provides the Micrometer metrics manager for application metrics.
+     */
+    @Singleton
+    @Provides
+    public static MicrometerMetricsManager provideMicrometerMetricsManager(Config config) {
+        if (!config.getBoolean(Keys.METRICS_ENABLED, false)) {
+            return new NullMetricsManager();
+        }
+        
+        MeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        return new MicrometerMetricsManager(registry, config.getString(Keys.METRICS_SERVICE_NAME, "traccar"));
+    }
 }
