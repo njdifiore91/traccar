@@ -16,9 +16,14 @@
  */
 package org.traccar.api.resource;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.micrometer.core.annotation.Timed;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.extension.annotations.WithSpan;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.api.ServiceDiscovery;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
 import org.traccar.model.UserRestrictions;
@@ -42,24 +47,47 @@ import java.util.Set;
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class PermissionsResource  extends BaseResource {
+public class PermissionsResource extends BaseResource {
 
     @Inject
     private CacheManager cacheManager;
 
     @Inject
     private LogAction actionLogger;
+    
+    @Inject
+    private ServiceDiscovery serviceDiscovery;
 
     @Context
     private HttpServletRequest request;
 
+    /**
+     * Checks if the current user has permission to modify the specified permission.
+     * 
+     * @param permission The permission to check
+     * @throws StorageException If a storage error occurs
+     */
+    @WithSpan("checkPermission")
     private void checkPermission(Permission permission) throws StorageException {
+        Span span = Span.current();
+        span.setAttribute("permission.ownerClass", permission.getOwnerClass());
+        span.setAttribute("permission.ownerId", permission.getOwnerId());
+        span.setAttribute("permission.propertyClass", permission.getPropertyClass());
+        span.setAttribute("permission.propertyId", permission.getPropertyId());
+        
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
             permissionsService.checkPermission(permission.getPropertyClass(), getUserId(), permission.getPropertyId());
         }
     }
 
+    /**
+     * Checks if all entities in the list have the same permission types.
+     * 
+     * @param entities List of permission entities to check
+     * @throws WebApplicationException If entities have different permission types
+     */
+    @WithSpan("checkPermissionTypes")
     private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
         Set<String> keys = null;
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -70,8 +98,18 @@ public class PermissionsResource  extends BaseResource {
         }
     }
 
+    /**
+     * Adds multiple permissions in a single batch operation.
+     * 
+     * @param entities List of permission entities to add
+     * @return Response with no content on success
+     * @throws Exception If an error occurs during permission addition
+     */
     @Path("bulk")
     @POST
+    @Timed(value = "permissions.add.bulk", description = "Time taken to add multiple permissions")
+    @CircuitBreaker(name = "permissionService", fallbackMethod = "addFallback")
+    @WithSpan("addBulkPermissions")
     public Response add(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
@@ -91,13 +129,59 @@ public class PermissionsResource  extends BaseResource {
         return Response.noContent().build();
     }
 
+    /**
+     * Adds a single permission.
+     * 
+     * @param entity Permission entity to add
+     * @return Response with no content on success
+     * @throws Exception If an error occurs during permission addition
+     */
     @POST
+    @Timed(value = "permissions.add.single", description = "Time taken to add a single permission")
+    @CircuitBreaker(name = "permissionService", fallbackMethod = "addFallback")
+    @WithSpan("addPermission")
     public Response add(LinkedHashMap<String, Long> entity) throws Exception {
         return add(Collections.singletonList(entity));
     }
 
+    /**
+     * Fallback method for add operations when circuit breaker is open.
+     * 
+     * @param entities Permission entities that were being added
+     * @param e The exception that triggered the fallback
+     * @return Error response
+     */
+    public Response addFallback(List<LinkedHashMap<String, Long>> entities, Exception e) {
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity("Permission service temporarily unavailable. Please try again later.")
+                .build();
+    }
+    
+    /**
+     * Fallback method for add operations when circuit breaker is open.
+     * 
+     * @param entity Permission entity that was being added
+     * @param e The exception that triggered the fallback
+     * @return Error response
+     */
+    public Response addFallback(LinkedHashMap<String, Long> entity, Exception e) {
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity("Permission service temporarily unavailable. Please try again later.")
+                .build();
+    }
+
+    /**
+     * Removes multiple permissions in a single batch operation.
+     * 
+     * @param entities List of permission entities to remove
+     * @return Response with no content on success
+     * @throws Exception If an error occurs during permission removal
+     */
     @DELETE
     @Path("bulk")
+    @Timed(value = "permissions.remove.bulk", description = "Time taken to remove multiple permissions")
+    @CircuitBreaker(name = "permissionService", fallbackMethod = "removeFallback")
+    @WithSpan("removeBulkPermissions")
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
@@ -117,9 +201,44 @@ public class PermissionsResource  extends BaseResource {
         return Response.noContent().build();
     }
 
+    /**
+     * Removes a single permission.
+     * 
+     * @param entity Permission entity to remove
+     * @return Response with no content on success
+     * @throws Exception If an error occurs during permission removal
+     */
     @DELETE
+    @Timed(value = "permissions.remove.single", description = "Time taken to remove a single permission")
+    @CircuitBreaker(name = "permissionService", fallbackMethod = "removeFallback")
+    @WithSpan("removePermission")
     public Response remove(LinkedHashMap<String, Long> entity) throws Exception {
         return remove(Collections.singletonList(entity));
     }
-
+    
+    /**
+     * Fallback method for remove operations when circuit breaker is open.
+     * 
+     * @param entities Permission entities that were being removed
+     * @param e The exception that triggered the fallback
+     * @return Error response
+     */
+    public Response removeFallback(List<LinkedHashMap<String, Long>> entities, Exception e) {
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity("Permission service temporarily unavailable. Please try again later.")
+                .build();
+    }
+    
+    /**
+     * Fallback method for remove operations when circuit breaker is open.
+     * 
+     * @param entity Permission entity that was being removed
+     * @param e The exception that triggered the fallback
+     * @return Error response
+     */
+    public Response removeFallback(LinkedHashMap<String, Long> entity, Exception e) {
+        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity("Permission service temporarily unavailable. Please try again later.")
+                .build();
+    }
 }
