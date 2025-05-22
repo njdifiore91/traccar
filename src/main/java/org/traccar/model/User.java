@@ -16,18 +16,33 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
 import org.traccar.storage.StorageName;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
+/**
+ * User entity class with validation and serialization annotations for microservices architecture.
+ */
 @StorageName("tc_users")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User extends ExtendedModel implements UserRestrictions, Disableable {
 
+    @NotBlank(message = "Name cannot be empty")
+    @Size(max = 128, message = "Name cannot exceed 128 characters")
     private String name;
 
     public String getName() {
@@ -38,6 +53,8 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.name = name;
     }
 
+    @NotBlank(message = "Login cannot be empty")
+    @Size(min = 3, max = 128, message = "Login must be between 3 and 128 characters")
     private String login;
 
     public String getLogin() {
@@ -48,6 +65,8 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.login = login;
     }
 
+    @Email(message = "Email must be valid")
+    @Size(max = 128, message = "Email cannot exceed 128 characters")
     private String email;
 
     public String getEmail() {
@@ -55,9 +74,10 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
     }
 
     public void setEmail(String email) {
-        this.email = email.trim();
+        this.email = email != null ? email.trim() : null;
     }
 
+    @Size(max = 32, message = "Phone number cannot exceed 32 characters")
     private String phone;
 
     public String getPhone() {
@@ -245,6 +265,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
 
     private String totpKey;
 
+    @JsonIgnore
     public String getTotpKey() {
         return totpKey;
     }
@@ -263,7 +284,12 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.temporary = temporary;
     }
 
+    /**
+     * Password is a write-only field that triggers password hashing when set.
+     * It is never serialized or stored directly.
+     */
     @QueryIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return null;
     }
@@ -303,10 +329,23 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.salt = salt;
     }
 
+    /**
+     * Validates if the provided password matches the stored hashed password.
+     * 
+     * @param password The password to validate
+     * @return true if the password is valid, false otherwise
+     */
     public boolean isPasswordValid(String password) {
         return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
+    /**
+     * Compares this user with another user, excluding specified attributes.
+     * 
+     * @param other The other user to compare with
+     * @param exclusions Attributes to exclude from comparison
+     * @return true if the users are equal (excluding specified attributes), false otherwise
+     */
     public boolean compare(User other, String... exclusions) {
         if (!EqualsBuilder.reflectionEquals(this, other, "attributes", "hashedPassword", "salt")) {
             return false;
@@ -320,4 +359,133 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         return thisAttributes.equals(otherAttributes);
     }
 
+    /**
+     * Merges partial updates from another user object.
+     * Only non-null fields from the source user will be applied to this user.
+     * Sensitive fields like password, hashedPassword, and salt are not merged.
+     * 
+     * @param source The source user containing updates
+     * @return this user instance for method chaining
+     */
+    public User mergePartialUpdate(User source) {
+        if (source == null) {
+            return this;
+        }
+        
+        if (source.name != null) {
+            this.name = source.name;
+        }
+        if (source.login != null) {
+            this.login = source.login;
+        }
+        if (source.email != null) {
+            this.email = source.email;
+        }
+        if (source.phone != null) {
+            this.phone = source.phone;
+        }
+        
+        // Boolean fields and primitive types need special handling
+        // We only update if the source object has explicitly set these fields
+        if (source.getAttributes().containsKey("readonly")) {
+            this.readonly = source.readonly;
+        }
+        if (source.getAttributes().containsKey("administrator")) {
+            this.administrator = source.administrator;
+        }
+        if (source.map != null) {
+            this.map = source.map;
+        }
+        if (source.getAttributes().containsKey("latitude")) {
+            this.latitude = source.latitude;
+        }
+        if (source.getAttributes().containsKey("longitude")) {
+            this.longitude = source.longitude;
+        }
+        if (source.getAttributes().containsKey("zoom")) {
+            this.zoom = source.zoom;
+        }
+        if (source.coordinateFormat != null) {
+            this.coordinateFormat = source.coordinateFormat;
+        }
+        if (source.getAttributes().containsKey("disabled")) {
+            this.disabled = source.disabled;
+        }
+        if (source.expirationTime != null) {
+            this.expirationTime = source.expirationTime;
+        }
+        if (source.getAttributes().containsKey("deviceLimit")) {
+            this.deviceLimit = source.deviceLimit;
+        }
+        if (source.getAttributes().containsKey("userLimit")) {
+            this.userLimit = source.userLimit;
+        }
+        if (source.getAttributes().containsKey("deviceReadonly")) {
+            this.deviceReadonly = source.deviceReadonly;
+        }
+        if (source.getAttributes().containsKey("limitCommands")) {
+            this.limitCommands = source.limitCommands;
+        }
+        if (source.getAttributes().containsKey("disableReports")) {
+            this.disableReports = source.disableReports;
+        }
+        if (source.getAttributes().containsKey("fixedEmail")) {
+            this.fixedEmail = source.fixedEmail;
+        }
+        if (source.poiLayer != null) {
+            this.poiLayer = source.poiLayer;
+        }
+        if (source.getAttributes().containsKey("temporary")) {
+            this.temporary = source.temporary;
+        }
+        
+        // Merge attributes but don't overwrite existing ones
+        if (source.getAttributes() != null && !source.getAttributes().isEmpty()) {
+            source.getAttributes().forEach((key, value) -> {
+                if (value != null) {
+                    this.getAttributes().put(key, value);
+                }
+            });
+        }
+        
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        User user = (User) o;
+        return readonly == user.readonly &&
+                administrator == user.administrator &&
+                Double.compare(user.latitude, latitude) == 0 &&
+                Double.compare(user.longitude, longitude) == 0 &&
+                zoom == user.zoom &&
+                disabled == user.disabled &&
+                deviceLimit == user.deviceLimit &&
+                userLimit == user.userLimit &&
+                deviceReadonly == user.deviceReadonly &&
+                limitCommands == user.limitCommands &&
+                disableReports == user.disableReports &&
+                fixedEmail == user.fixedEmail &&
+                temporary == user.temporary &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(login, user.login) &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(phone, user.phone) &&
+                Objects.equals(map, user.map) &&
+                Objects.equals(coordinateFormat, user.coordinateFormat) &&
+                Objects.equals(expirationTime, user.expirationTime) &&
+                Objects.equals(poiLayer, user.poiLayer) &&
+                Objects.equals(totpKey, user.totpKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name, login, email, phone, readonly, administrator,
+                map, latitude, longitude, zoom, coordinateFormat, disabled, expirationTime,
+                deviceLimit, userLimit, deviceReadonly, limitCommands, disableReports,
+                fixedEmail, poiLayer, totpKey, temporary);
+    }
 }
