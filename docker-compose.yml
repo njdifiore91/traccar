@@ -1,0 +1,339 @@
+version: '3.8'
+
+services:
+  # Message broker for inter-service communication
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: traccar-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=traccar
+      - RABBITMQ_DEFAULT_PASS=traccar
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - traccar-network
+
+  # Service discovery
+  consul:
+    image: consul:1.17.0
+    container_name: traccar-consul
+    ports:
+      - "8500:8500"   # HTTP API and UI
+      - "8600:8600/udp" # DNS interface
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+    volumes:
+      - consul_data:/consul/data
+    healthcheck:
+      test: ["CMD", "consul", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - traccar-network
+
+  # Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: traccar-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=traccar
+      - POSTGRES_PASSWORD=traccar
+      - POSTGRES_DB=traccar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traccar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - traccar-network
+
+  # Protocol Service - Handles device communications
+  protocol-service:
+    image: traccar/protocol-service:latest
+    container_name: traccar-protocol-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000-5100:5000-5100" # Range for device protocols
+      - "5000-5100:5000-5100/udp" # UDP ports for device protocols
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/protocol-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # Position Service - Processes position data
+  position-service:
+    image: traccar/position-service:latest
+    container_name: traccar-position-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      protocol-service:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/position-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # Event Service - Detects and processes events
+  event-service:
+    image: traccar/event-service:latest
+    container_name: traccar-event-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      position-service:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/event-service:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # Notification Service - Manages notifications
+  notification-service:
+    image: traccar/notification-service:latest
+    container_name: traccar-notification-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/notification-service:/app/config
+      - ./templates:/app/templates
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # API Gateway - Provides unified API access
+  api-gateway:
+    image: traccar/api-gateway:latest
+    container_name: traccar-api-gateway
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8082:8082" # API and Web interface
+      - "8083:8083" # WebSocket
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/api-gateway:/app/config
+      - ./web:/app/web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # Reporting Service - Generates reports
+  reporting-service:
+    image: traccar/reporting-service:latest
+    container_name: traccar-reporting-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/traccar
+      - SPRING_DATASOURCE_USERNAME=traccar
+      - SPRING_DATASOURCE_PASSWORD=traccar
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=traccar
+      - SPRING_RABBITMQ_PASSWORD=traccar
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - LOGGING_LEVEL_ORG_TRACCAR=DEBUG
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - ./config/reporting-service:/app/config
+      - ./reports:/app/reports
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traccar-network
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    container_name: traccar-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - traccar-network
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: traccar-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    networks:
+      - traccar-network
+    depends_on:
+      - prometheus
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.52.0
+    container_name: traccar-jaeger
+    ports:
+      - "16686:16686" # UI
+      - "14250:14250" # gRPC collector
+      - "14268:14268" # HTTP collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - traccar-network
+
+networks:
+  traccar-network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  consul_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
