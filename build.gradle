@@ -193,6 +193,9 @@ project(':protocol-service') {
         implementation "io.grpc:grpc-netty-shaded:${ext.grpcVersion}"
         implementation "io.grpc:grpc-protobuf:${ext.grpcVersion}"
         implementation "io.grpc:grpc-stub:${ext.grpcVersion}"
+        
+        // Redis for distributed session storage
+        implementation "io.lettuce:lettuce-core:6.3.2.RELEASE"
     }
 }
 
