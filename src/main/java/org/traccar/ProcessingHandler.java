@@ -16,12 +16,27 @@
 package org.traccar;
 
 import com.google.inject.Injector;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.BufferingManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.handler.BasePositionHandler;
@@ -56,20 +71,30 @@ import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.network.AcknowledgementHandler;
 import org.traccar.helper.PositionLogger;
+import org.traccar.messaging.MessageBrokerClient;
+import org.traccar.messaging.MessageBrokerClientFactory;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.telemetry.MetricsProvider;
+import org.traccar.telemetry.TracingProvider;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
 @ChannelHandler.Sharable
 public class ProcessingHandler extends ChannelInboundHandlerAdapter implements BufferingManager.Callback {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingHandler.class);
 
     private final CacheManager cacheManager;
     private final NotificationManager notificationManager;
@@ -78,6 +103,26 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     private final List<BasePositionHandler> positionHandlers;
     private final List<BaseEventHandler> eventHandlers;
     private final PostProcessHandler postProcessHandler;
+    
+    // Message broker integration
+    private final MessageBrokerClient messageBrokerClient;
+    private final boolean useMessageBroker;
+    private final String positionsTopic;
+    
+    // Distributed tracing
+    private final Tracer tracer;
+    
+    // Metrics collection
+    private final LongCounter positionsProcessedCounter;
+    private final LongCounter positionsFilteredCounter;
+    private final LongCounter positionsPublishedCounter;
+    private final LongCounter processingErrorsCounter;
+    
+    // Circuit breakers
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final CircuitBreaker geocoderCircuitBreaker;
+    private final CircuitBreaker forwardingCircuitBreaker;
+    private final CircuitBreaker messageBrokerCircuitBreaker;
 
     private final Map<Long, Queue<Position>> queues = new HashMap<>();
 
@@ -88,11 +133,61 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     @Inject
     public ProcessingHandler(
             Injector injector, Config config,
-            CacheManager cacheManager, NotificationManager notificationManager, PositionLogger positionLogger) {
+            CacheManager cacheManager, NotificationManager notificationManager, 
+            PositionLogger positionLogger, TracingProvider tracingProvider,
+            MetricsProvider metricsProvider, MessageBrokerClientFactory messageBrokerFactory) {
         this.cacheManager = cacheManager;
         this.notificationManager = notificationManager;
         this.positionLogger = positionLogger;
         bufferingManager = new BufferingManager(config, this);
+        
+        // Initialize distributed tracing
+        this.tracer = tracingProvider.getTracer("org.traccar.processing");
+        
+        // Initialize metrics
+        Meter meter = metricsProvider.getMeter("org.traccar.processing");
+        this.positionsProcessedCounter = meter.counterBuilder("positions.processed")
+                .setDescription("Number of positions processed")
+                .build();
+        this.positionsFilteredCounter = meter.counterBuilder("positions.filtered")
+                .setDescription("Number of positions filtered out")
+                .build();
+        this.positionsPublishedCounter = meter.counterBuilder("positions.published")
+                .setDescription("Number of positions published to message broker")
+                .build();
+        this.processingErrorsCounter = meter.counterBuilder("processing.errors")
+                .setDescription("Number of errors during position processing")
+                .build();
+        
+        // Initialize circuit breakers
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .slowCallRateThreshold(50)
+                .slowCallDurationThreshold(Duration.ofSeconds(2))
+                .permittedNumberOfCallsInHalfOpenState(10)
+                .minimumNumberOfCalls(10)
+                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .slidingWindowSize(100)
+                .waitDurationInOpenState(Duration.ofSeconds(10))
+                .recordExceptions(Exception.class)
+                .build();
+        
+        this.circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        this.geocoderCircuitBreaker = circuitBreakerRegistry.circuitBreaker("geocoder");
+        this.forwardingCircuitBreaker = circuitBreakerRegistry.circuitBreaker("forwarding");
+        this.messageBrokerCircuitBreaker = circuitBreakerRegistry.circuitBreaker("messageBroker");
+        
+        // Initialize message broker client
+        this.useMessageBroker = config.getBoolean(Keys.PROCESSING_REMOTE_ENABLED.getKey());
+        this.positionsTopic = config.getString(Keys.PROCESSING_REMOTE_POSITIONS_TOPIC.getKey(), "positions");
+        
+        if (useMessageBroker) {
+            this.messageBrokerClient = messageBrokerFactory.create();
+            LOGGER.info("Message broker integration enabled, publishing to topic: {}", positionsTopic);
+        } else {
+            this.messageBrokerClient = null;
+            LOGGER.info("Message broker integration disabled, using direct processing");
+        }
 
         positionHandlers = Stream.of(
                 ComputedAttributesHandler.Early.class,
@@ -138,7 +233,23 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position position) {
-            bufferingManager.accept(ctx, position);
+            // Create a new span for position processing
+            Span span = tracer.spanBuilder("process_position")
+                    .setSpanKind(SpanKind.CONSUMER)
+                    .setAttribute("deviceId", position.getDeviceId())
+                    .setAttribute("protocol", position.getProtocol())
+                    .startSpan();
+            
+            try (Scope scope = span.makeCurrent()) {
+                bufferingManager.accept(ctx, position);
+            } catch (Exception e) {
+                span.recordException(e);
+                span.setStatus(StatusCode.ERROR, e.getMessage());
+                processingErrorsCounter.add(1);
+                throw e;
+            } finally {
+                span.end();
+            }
         } else {
             super.channelRead(ctx, msg);
         }
@@ -146,56 +257,264 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
 
     @Override
     public void onReleased(ChannelHandlerContext context, Position position) {
-        Queue<Position> queue = getQueue(position.getDeviceId());
-        boolean queued;
-        synchronized (queue) {
-            queued = !queue.isEmpty();
-            queue.offer(position);
-        }
-        if (!queued) {
-            try {
-                cacheManager.addDevice(position.getDeviceId(), position.getDeviceId());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        // Create a span for position handling
+        Span span = tracer.spanBuilder("handle_position")
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("deviceId", position.getDeviceId())
+                .setAttribute("protocol", position.getProtocol())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            Queue<Position> queue = getQueue(position.getDeviceId());
+            boolean queued;
+            synchronized (queue) {
+                queued = !queue.isEmpty();
+                queue.offer(position);
             }
-            processPositionHandlers(context, position);
-        }
-    }
-
-    private void processPositionHandlers(ChannelHandlerContext ctx, Position position) {
-        var iterator = positionHandlers.iterator();
-        iterator.next().handlePosition(position, new BasePositionHandler.Callback() {
-            @Override
-            public void processed(boolean filtered) {
-                if (!filtered) {
-                    if (iterator.hasNext()) {
-                        iterator.next().handlePosition(position, this);
-                    } else {
-                        processEventHandlers(ctx, position);
-                    }
+            if (!queued) {
+                try {
+                    cacheManager.addDevice(position.getDeviceId(), position.getDeviceId());
+                } catch (Exception e) {
+                    span.recordException(e);
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    processingErrorsCounter.add(1);
+                    throw new RuntimeException(e);
+                }
+                
+                // Determine if we should use message broker or direct processing
+                if (useMessageBroker && messageBrokerClient != null) {
+                    publishPositionToMessageBroker(context, position, span);
                 } else {
-                    finishedProcessing(ctx, position, true);
+                    processPositionHandlers(context, position, span);
                 }
             }
-        });
+        } finally {
+            span.end();
+        }
+    }
+    
+    private void publishPositionToMessageBroker(ChannelHandlerContext ctx, Position position, Span parentSpan) {
+        Span span = tracer.spanBuilder("publish_position_to_broker")
+                .setParent(Context.current().with(parentSpan))
+                .setSpanKind(SpanKind.PRODUCER)
+                .setAttribute("deviceId", position.getDeviceId())
+                .setAttribute("topic", positionsTopic)
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            // Use circuit breaker for message broker publishing
+            Supplier<CompletableFuture<Void>> publishSupplier = () -> {
+                return messageBrokerClient.publish(positionsTopic, position)
+                        .thenApply(result -> {
+                            positionsPublishedCounter.add(1);
+                            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+                            processNextPosition(ctx, position.getDeviceId());
+                            return null;
+                        });
+            };
+            
+            // Execute with circuit breaker
+            try {
+                messageBrokerCircuitBreaker.executeCompletionStage(publishSupplier)
+                        .exceptionally(e -> {
+                            LOGGER.warn("Failed to publish position to message broker, falling back to direct processing", e);
+                            span.recordException(e);
+                            span.setStatus(StatusCode.ERROR, "Message broker publishing failed: " + e.getMessage());
+                            processingErrorsCounter.add(1);
+                            
+                            // Fallback to direct processing
+                            processPositionHandlers(ctx, position, parentSpan);
+                            return null;
+                        }).toCompletableFuture().orTimeout(5, TimeUnit.SECONDS)
+                        .exceptionally(e -> {
+                            LOGGER.error("Timeout publishing position to message broker", e);
+                            span.recordException(e);
+                            span.setStatus(StatusCode.ERROR, "Message broker publishing timed out: " + e.getMessage());
+                            processingErrorsCounter.add(1);
+                            
+                            // Fallback to direct processing
+                            processPositionHandlers(ctx, position, parentSpan);
+                            return null;
+                        });
+            } catch (Exception e) {
+                LOGGER.error("Error executing circuit breaker for message broker", e);
+                span.recordException(e);
+                span.setStatus(StatusCode.ERROR, e.getMessage());
+                processingErrorsCounter.add(1);
+                
+                // Fallback to direct processing
+                processPositionHandlers(ctx, position, parentSpan);
+            }
+        } finally {
+            span.end();
+        }
     }
 
-    private void processEventHandlers(ChannelHandlerContext ctx, Position position) {
-        eventHandlers.forEach(handler -> handler.analyzePosition(
-                position, (event) -> notificationManager.updateEvents(Map.of(event, position))));
-        finishedProcessing(ctx, position, false);
+    private void processPositionHandlers(ChannelHandlerContext ctx, Position position, Span parentSpan) {
+        Span span = tracer.spanBuilder("process_position_handlers")
+                .setParent(Context.current().with(parentSpan))
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("deviceId", position.getDeviceId())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            var iterator = positionHandlers.iterator();
+            processNextHandler(ctx, position, iterator, span);
+        } finally {
+            span.end();
+        }
+    }
+    
+    private void processNextHandler(ChannelHandlerContext ctx, Position position, 
+                                   java.util.Iterator<BasePositionHandler> iterator, Span parentSpan) {
+        if (!iterator.hasNext()) {
+            processEventHandlers(ctx, position, parentSpan);
+            return;
+        }
+        
+        BasePositionHandler handler = iterator.next();
+        String handlerName = handler.getClass().getSimpleName();
+        
+        Span span = tracer.spanBuilder("handler_" + handlerName)
+                .setParent(Context.current().with(parentSpan))
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("handler", handlerName)
+                .setAttribute("deviceId", position.getDeviceId())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            // Apply circuit breaker for specific handlers that make external calls
+            if (handler instanceof GeocoderHandler) {
+                processHandlerWithCircuitBreaker(geocoderCircuitBreaker, handler, position, new BasePositionHandler.Callback() {
+                    @Override
+                    public void processed(boolean filtered) {
+                        span.setAttribute("filtered", filtered);
+                        if (filtered) {
+                            positionsFilteredCounter.add(1);
+                            finishedProcessing(ctx, position, true, parentSpan);
+                        } else {
+                            processNextHandler(ctx, position, iterator, parentSpan);
+                        }
+                    }
+                });
+            } else if (handler instanceof PositionForwardingHandler) {
+                processHandlerWithCircuitBreaker(forwardingCircuitBreaker, handler, position, new BasePositionHandler.Callback() {
+                    @Override
+                    public void processed(boolean filtered) {
+                        span.setAttribute("filtered", filtered);
+                        if (filtered) {
+                            positionsFilteredCounter.add(1);
+                            finishedProcessing(ctx, position, true, parentSpan);
+                        } else {
+                            processNextHandler(ctx, position, iterator, parentSpan);
+                        }
+                    }
+                });
+            } else {
+                // Regular handler processing without circuit breaker
+                handler.handlePosition(position, new BasePositionHandler.Callback() {
+                    @Override
+                    public void processed(boolean filtered) {
+                        span.setAttribute("filtered", filtered);
+                        if (filtered) {
+                            positionsFilteredCounter.add(1);
+                            finishedProcessing(ctx, position, true, parentSpan);
+                        } else {
+                            processNextHandler(ctx, position, iterator, parentSpan);
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error processing handler {}", handlerName, e);
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, e.getMessage());
+            processingErrorsCounter.add(1);
+            
+            // Continue with next handler despite the error for graceful degradation
+            processNextHandler(ctx, position, iterator, parentSpan);
+        } finally {
+            span.end();
+        }
+    }
+    
+    private void processHandlerWithCircuitBreaker(CircuitBreaker circuitBreaker, 
+                                                BasePositionHandler handler, 
+                                                Position position, 
+                                                BasePositionHandler.Callback callback) {
+        try {
+            circuitBreaker.executeSupplier(() -> {
+                handler.handlePosition(position, callback);
+                return true;
+            });
+        } catch (Exception e) {
+            LOGGER.warn("Circuit breaker prevented call to handler {}, using fallback", 
+                    handler.getClass().getSimpleName(), e);
+            // Fallback: continue processing without this handler
+            callback.processed(false);
+        }
     }
 
-    private void finishedProcessing(ChannelHandlerContext ctx, Position position, boolean filtered) {
-        if (!filtered) {
-            postProcessHandler.handlePosition(position, ignore -> {
-                positionLogger.log(ctx, position);
+    private void processEventHandlers(ChannelHandlerContext ctx, Position position, Span parentSpan) {
+        Span span = tracer.spanBuilder("process_event_handlers")
+                .setParent(Context.current().with(parentSpan))
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("deviceId", position.getDeviceId())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            eventHandlers.forEach(handler -> {
+                String handlerName = handler.getClass().getSimpleName();
+                Span eventSpan = tracer.spanBuilder("event_" + handlerName)
+                        .setParent(Context.current())
+                        .setSpanKind(SpanKind.INTERNAL)
+                        .setAttribute("handler", handlerName)
+                        .setAttribute("deviceId", position.getDeviceId())
+                        .startSpan();
+                
+                try (Scope eventScope = eventSpan.makeCurrent()) {
+                    handler.analyzePosition(position, (event) -> {
+                        eventSpan.setAttribute("eventType", event.getType());
+                        notificationManager.updateEvents(Map.of(event, position));
+                    });
+                } catch (Exception e) {
+                    LOGGER.error("Error in event handler {}", handlerName, e);
+                    eventSpan.recordException(e);
+                    eventSpan.setStatus(StatusCode.ERROR, e.getMessage());
+                    processingErrorsCounter.add(1);
+                } finally {
+                    eventSpan.end();
+                }
+            });
+            
+            finishedProcessing(ctx, position, false, parentSpan);
+        } finally {
+            span.end();
+        }
+    }
+
+    private void finishedProcessing(ChannelHandlerContext ctx, Position position, boolean filtered, Span parentSpan) {
+        Span span = tracer.spanBuilder("finish_processing")
+                .setParent(Context.current().with(parentSpan))
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("deviceId", position.getDeviceId())
+                .setAttribute("filtered", filtered)
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            if (!filtered) {
+                positionsProcessedCounter.add(1);
+                postProcessHandler.handlePosition(position, ignore -> {
+                    positionLogger.log(ctx, position);
+                    ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+                    processNextPosition(ctx, position.getDeviceId());
+                });
+            } else {
                 ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
                 processNextPosition(ctx, position.getDeviceId());
-            });
-        } else {
-            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
-            processNextPosition(ctx, position.getDeviceId());
+            }
+        } finally {
+            span.end();
         }
     }
 
@@ -207,10 +526,23 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             nextPosition = queue.peek();
         }
         if (nextPosition != null) {
-            processPositionHandlers(ctx, nextPosition);
+            // Create a new span for the next position
+            Span span = tracer.spanBuilder("process_next_position")
+                    .setSpanKind(SpanKind.INTERNAL)
+                    .setAttribute("deviceId", deviceId)
+                    .startSpan();
+            
+            try (Scope scope = span.makeCurrent()) {
+                if (useMessageBroker && messageBrokerClient != null) {
+                    publishPositionToMessageBroker(ctx, nextPosition, span);
+                } else {
+                    processPositionHandlers(ctx, nextPosition, span);
+                }
+            } finally {
+                span.end();
+            }
         } else {
             cacheManager.removeDevice(deviceId, deviceId);
         }
     }
-
 }
