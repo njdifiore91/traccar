@@ -1975,6 +1975,77 @@ public final class Keys {
     public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
             "broadcast.type",
             List.of(KeyType.CONFIG));
+            
+    /**
+     * Message broker type. Available options are "kafka" and "rabbitmq". Default is "kafka".
+     */
+    public static final ConfigKey<String> BROKER_TYPE = new StringConfigKey(
+            "broker.type",
+            List.of(KeyType.CONFIG),
+            "kafka");
+            
+    /**
+     * Message broker URL for connecting to the broker server.
+     */
+    public static final ConfigKey<String> BROKER_URL = new StringConfigKey(
+            "broker.url",
+            List.of(KeyType.CONFIG));
+            
+    /**
+     * Message broker exchange name for RabbitMQ. Default is "traccar".
+     */
+    public static final ConfigKey<String> BROKER_EXCHANGE = new StringConfigKey(
+            "broker.exchange",
+            List.of(KeyType.CONFIG),
+            "traccar");
+            
+    /**
+     * Message broker acknowledgement mode for Kafka. Default is "all".
+     */
+    public static final ConfigKey<String> BROKER_ACKS = new StringConfigKey(
+            "broker.acks",
+            List.of(KeyType.CONFIG),
+            "all");
+            
+    /**
+     * Enable idempotent producer for Kafka. Default is true.
+     */
+    public static final ConfigKey<Boolean> BROKER_IDEMPOTENCE = new BooleanConfigKey(
+            "broker.idempotence",
+            List.of(KeyType.CONFIG),
+            true);
+            
+    /**
+     * Number of retries for message broker operations. Default is 3.
+     */
+    public static final ConfigKey<Integer> BROKER_RETRIES = new IntegerConfigKey(
+            "broker.retries",
+            List.of(KeyType.CONFIG),
+            3);
+            
+    /**
+     * Maximum number of unacknowledged requests for Kafka. Default is 5.
+     */
+    public static final ConfigKey<Integer> BROKER_MAX_IN_FLIGHT = new IntegerConfigKey(
+            "broker.maxInFlight",
+            List.of(KeyType.CONFIG),
+            5);
+            
+    /**
+     * Enable auto commit for message broker consumer. Default is false.
+     */
+    public static final ConfigKey<Boolean> BROKER_AUTO_COMMIT = new BooleanConfigKey(
+            "broker.autoCommit",
+            List.of(KeyType.CONFIG),
+            false);
+            
+    /**
+     * Auto offset reset policy for message broker consumer. Default is "earliest".
+     */
+    public static final ConfigKey<String> BROKER_OFFSET_RESET = new StringConfigKey(
+            "broker.offsetReset",
+            List.of(KeyType.CONFIG),
+            "earliest");
 
     /**
      * Multicast interface. It can be either an IP address or an interface name.
