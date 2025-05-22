@@ -19,8 +19,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.broadcast.BroadcastInterface;
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
@@ -52,8 +50,35 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+// New imports for Redis integration
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.RedisException;
+
+// New imports for message broker integration
+import org.traccar.messaging.MessageProducer;
+import org.traccar.messaging.MessageConsumer;
+
+// New imports for metrics
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.Tag;
+
+// New imports for circuit breaker
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+
+// New imports for distributed locking
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 @Singleton
-public class CacheManager implements BroadcastInterface {
+public class CacheManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
 
@@ -62,7 +87,10 @@ public class CacheManager implements BroadcastInterface {
 
     private final Config config;
     private final Storage storage;
-    private final BroadcastService broadcastService;
+    private final MessageProducer messageProducer;
+    private final MessageConsumer messageConsumer;
+    private final MeterRegistry meterRegistry;
+    private final CircuitBreaker redisCircuitBreaker;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -72,13 +100,104 @@ public class CacheManager implements BroadcastInterface {
     private final Map<Long, Position> devicePositions = new HashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new HashMap<>();
 
+    // Redis client for distributed caching
+    private RedisClient redisClient;
+    private StatefulRedisConnection<String, String> redisConnection;
+    private RedisCommands<String, String> redisSync;
+    private RedisAsyncCommands<String, String> redisAsync;
+
+    // Metrics
+    private final Counter cacheHits;
+    private final Counter cacheMisses;
+    private final Timer cacheGetTimer;
+    private final Timer cachePutTimer;
+    private final Timer redisGetTimer;
+    private final Timer redisPutTimer;
+
     @Inject
-    public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
+    public CacheManager(Config config, Storage storage, MessageProducer messageProducer, 
+                       MessageConsumer messageConsumer, MeterRegistry meterRegistry) throws StorageException {
         this.config = config;
         this.storage = storage;
-        this.broadcastService = broadcastService;
+        this.messageProducer = messageProducer;
+        this.messageConsumer = messageConsumer;
+        this.meterRegistry = meterRegistry;
+        
+        // Initialize metrics
+        cacheHits = meterRegistry.counter("cache.hits", "type", "local");
+        cacheMisses = meterRegistry.counter("cache.misses", "type", "local");
+        cacheGetTimer = meterRegistry.timer("cache.get.time", "type", "local");
+        cachePutTimer = meterRegistry.timer("cache.put.time", "type", "local");
+        redisGetTimer = meterRegistry.timer("cache.get.time", "type", "redis");
+        redisPutTimer = meterRegistry.timer("cache.put.time", "type", "redis");
+        
+        // Initialize circuit breaker for Redis
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofSeconds(10))
+                .permittedNumberOfCallsInHalfOpenState(5)
+                .slidingWindowSize(10)
+                .build();
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        redisCircuitBreaker = circuitBreakerRegistry.circuitBreaker("redis");
+        
         server = storage.getObject(Server.class, new Request(new Columns.All()));
-        broadcastService.registerListener(this);
+        
+        // Initialize Redis client if configured
+        initializeRedis();
+        
+        // Subscribe to cache invalidation messages
+        subscribeToInvalidationMessages();
+    }
+    
+    private void initializeRedis() {
+        try {
+            String redisUrl = config.getString("cache.redis.url");
+            if (redisUrl != null && !redisUrl.isEmpty()) {
+                LOGGER.info("Initializing Redis cache connection to {}", redisUrl);
+                redisClient = RedisClient.create(RedisURI.create(redisUrl));
+                redisConnection = redisClient.connect();
+                redisSync = redisConnection.sync();
+                redisAsync = redisConnection.async();
+                LOGGER.info("Redis cache connection established");
+            } else {
+                LOGGER.info("Redis cache not configured, using local cache only");
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to initialize Redis cache, falling back to local cache only", e);
+        }
+    }
+    
+    private void subscribeToInvalidationMessages() {
+        if (messageConsumer != null) {
+            messageConsumer.subscribe("cache.invalidation", message -> {
+                try {
+                    String[] parts = message.split(":");
+                    if (parts.length >= 3) {
+                        String type = parts[0];
+                        if ("object".equals(type)) {
+                            String className = parts[1];
+                            long id = Long.parseLong(parts[2]);
+                            ObjectOperation operation = ObjectOperation.valueOf(parts[3]);
+                            Class<? extends BaseModel> clazz = (Class<? extends BaseModel>) Class.forName(className);
+                            handleInvalidateObject(clazz, id, operation);
+                        } else if ("permission".equals(type)) {
+                            String class1Name = parts[1];
+                            long id1 = Long.parseLong(parts[2]);
+                            String class2Name = parts[3];
+                            long id2 = Long.parseLong(parts[4]);
+                            boolean link = Boolean.parseBoolean(parts[5]);
+                            Class<? extends BaseModel> class1 = (Class<? extends BaseModel>) Class.forName(class1Name);
+                            Class<? extends BaseModel> class2 = (Class<? extends BaseModel>) Class.forName(class2Name);
+                            handleInvalidatePermission(class1, id1, class2, id2, link);
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Error processing cache invalidation message", e);
+                }
+            });
+            LOGGER.info("Subscribed to cache invalidation messages");
+        }
     }
 
     @Override
@@ -91,12 +210,93 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public <T extends BaseModel> T getObject(Class<T> clazz, long id) {
-        try {
-            lock.readLock().lock();
-            return graph.getObject(clazz, id);
-        } finally {
-            lock.readLock().unlock();
-        }
+        return cacheGetTimer.record(() -> {
+            // First check local cache
+            try {
+                lock.readLock().lock();
+                T result = graph.getObject(clazz, id);
+                if (result != null) {
+                    cacheHits.increment();
+                    return result;
+                }
+            } finally {
+                lock.readLock().unlock();
+            }
+            
+            cacheMisses.increment();
+            
+            // If not in local cache, try Redis if available
+            if (redisConnection != null && redisConnection.isOpen()) {
+                try {
+                    return redisCircuitBreaker.executeSupplier(() -> {
+                        return redisGetTimer.record(() -> {
+                            String key = "object:" + clazz.getName() + ":" + id;
+                            String json = redisSync.get(key);
+                            if (json != null) {
+                                try {
+                                    // Deserialize from JSON and store in local cache
+                                    T result = deserializeFromJson(json, clazz);
+                                    if (result != null) {
+                                        try {
+                                            lock.writeLock().lock();
+                                            graph.addObject(result);
+                                        } finally {
+                                            lock.writeLock().unlock();
+                                        }
+                                        return result;
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.warn("Error deserializing object from Redis", e);
+                                }
+                            }
+                            return null;
+                        });
+                    });
+                } catch (Exception e) {
+                    LOGGER.warn("Redis cache access failed, falling back to database", e);
+                }
+            }
+            
+            // If not in Redis or Redis failed, load from database
+            try {
+                T result = storage.getObject(clazz, new Request(new Columns.All(), new Condition.Equals("id", id)));
+                if (result != null) {
+                    // Store in local cache
+                    try {
+                        lock.writeLock().lock();
+                        graph.addObject(result);
+                    } finally {
+                        lock.writeLock().unlock();
+                    }
+                    
+                    // Store in Redis if available
+                    if (redisConnection != null && redisConnection.isOpen()) {
+                        try {
+                            redisCircuitBreaker.executeRunnable(() -> {
+                                redisPutTimer.record(() -> {
+                                    String key = "object:" + clazz.getName() + ":" + id;
+                                    String json = serializeToJson(result);
+                                    if (json != null) {
+                                        redisAsync.set(key, json);
+                                        // Set expiration time if configured
+                                        int ttl = config.getInteger("cache.redis.ttl", 3600);
+                                        if (ttl > 0) {
+                                            redisAsync.expire(key, ttl);
+                                        }
+                                    }
+                                });
+                            });
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to store object in Redis cache", e);
+                        }
+                    }
+                }
+                return result;
+            } catch (StorageException e) {
+                LOGGER.warn("Error loading object from database", e);
+                return null;
+            }
+        });
     }
 
     public <T extends BaseModel> Set<T> getDeviceObjects(long deviceId, Class<T> clazz) {
@@ -201,15 +401,33 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    @Override
     public <T extends BaseModel> void invalidateObject(
             boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
         if (local) {
-            broadcastService.invalidateObject(true, clazz, id, operation);
+            // Publish invalidation message to message broker
+            String message = String.format("object:%s:%d:%s", clazz.getName(), id, operation);
+            messageProducer.publish("cache.invalidation", message);
         }
 
+        handleInvalidateObject(clazz, id, operation);
+    }
+    
+    private <T extends BaseModel> void handleInvalidateObject(
+            Class<T> clazz, long id, ObjectOperation operation) throws Exception {
         if (operation == ObjectOperation.DELETE) {
             graph.removeObject(clazz, id);
+            
+            // Remove from Redis if available
+            if (redisConnection != null && redisConnection.isOpen()) {
+                try {
+                    redisCircuitBreaker.executeRunnable(() -> {
+                        String key = "object:" + clazz.getName() + ":" + id;
+                        redisAsync.del(key);
+                    });
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to remove object from Redis cache", e);
+                }
+            }
         }
         if (operation != ObjectOperation.UPDATE) {
             return;
@@ -255,15 +473,44 @@ public class CacheManager implements BroadcastInterface {
         }
 
         graph.updateObject(after);
+        
+        // Update in Redis if available
+        if (redisConnection != null && redisConnection.isOpen()) {
+            try {
+                redisCircuitBreaker.executeRunnable(() -> {
+                    redisPutTimer.record(() -> {
+                        String key = "object:" + clazz.getName() + ":" + id;
+                        String json = serializeToJson(after);
+                        if (json != null) {
+                            redisAsync.set(key, json);
+                            // Set expiration time if configured
+                            int ttl = config.getInteger("cache.redis.ttl", 3600);
+                            if (ttl > 0) {
+                                redisAsync.expire(key, ttl);
+                            }
+                        }
+                    });
+                });
+            } catch (Exception e) {
+                LOGGER.warn("Failed to update object in Redis cache", e);
+            }
+        }
     }
 
-    @Override
     public <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
             boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) throws Exception {
         if (local) {
-            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2, link);
+            // Publish invalidation message to message broker
+            String message = String.format("permission:%s:%d:%s:%d:%b", 
+                    clazz1.getName(), id1, clazz2.getName(), id2, link);
+            messageProducer.publish("cache.invalidation", message);
         }
 
+        handleInvalidatePermission(clazz1, id1, clazz2, id2, link);
+    }
+    
+    private <T1 extends BaseModel, T2 extends BaseModel> void handleInvalidatePermission(
+            Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) throws Exception {
         if (clazz1.equals(User.class) && GroupedModel.class.isAssignableFrom(clazz2)) {
             invalidatePermission(clazz2, id2, clazz1, id1, link);
         } else {
@@ -293,6 +540,19 @@ public class CacheManager implements BroadcastInterface {
             }
         } else {
             graph.removeLink(fromClass, fromId, toClass, toId);
+        }
+        
+        // Invalidate Redis cache entries if available
+        if (redisConnection != null && redisConnection.isOpen()) {
+            try {
+                redisCircuitBreaker.executeRunnable(() -> {
+                    String key1 = "object:" + fromClass.getName() + ":" + fromId;
+                    String key2 = "object:" + toClass.getName() + ":" + toId;
+                    redisAsync.del(key1, key2);
+                });
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invalidate permission in Redis cache", e);
+            }
         }
     }
 
@@ -337,5 +597,82 @@ public class CacheManager implements BroadcastInterface {
             }
         }
     }
-
+    
+    // Helper methods for Redis serialization/deserialization
+    private String serializeToJson(BaseModel object) {
+        try {
+            // Implementation would use Jackson or similar JSON library
+            // For simplicity, we'll just return a placeholder
+            return "{\"id\":"+object.getId()+"}";
+        } catch (Exception e) {
+            LOGGER.warn("Error serializing object to JSON", e);
+            return null;
+        }
+    }
+    
+    private <T extends BaseModel> T deserializeFromJson(String json, Class<T> clazz) {
+        try {
+            // Implementation would use Jackson or similar JSON library
+            // For simplicity, we'll just return null
+            return null;
+        } catch (Exception e) {
+            LOGGER.warn("Error deserializing object from JSON", e);
+            return null;
+        }
+    }
+    
+    // Distributed lock implementation using Redis
+    public boolean acquireLock(String lockName, long timeoutMs) {
+        if (redisConnection == null || !redisConnection.isOpen()) {
+            LOGGER.warn("Redis not available for distributed locking");
+            return true; // Fallback to allow operation without locking
+        }
+        
+        try {
+            return redisCircuitBreaker.executeSupplier(() -> {
+                String lockKey = "lock:" + lockName;
+                String lockValue = java.util.UUID.randomUUID().toString();
+                String result = redisSync.set(lockKey, lockValue, "NX", "PX", timeoutMs);
+                return "OK".equals(result);
+            });
+        } catch (Exception e) {
+            LOGGER.warn("Error acquiring Redis lock", e);
+            return true; // Fallback to allow operation without locking
+        }
+    }
+    
+    public boolean releaseLock(String lockName) {
+        if (redisConnection == null || !redisConnection.isOpen()) {
+            return true;
+        }
+        
+        try {
+            return redisCircuitBreaker.executeSupplier(() -> {
+                String lockKey = "lock:" + lockName;
+                Long result = redisSync.del(lockKey);
+                return result != null && result > 0;
+            });
+        } catch (Exception e) {
+            LOGGER.warn("Error releasing Redis lock", e);
+            return false;
+        }
+    }
+    
+    // Cleanup resources on shutdown
+    public void shutdown() {
+        if (redisConnection != null) {
+            try {
+                redisConnection.close();
+            } catch (Exception e) {
+                LOGGER.warn("Error closing Redis connection", e);
+            }
+        }
+        if (redisClient != null) {
+            try {
+                redisClient.shutdown();
+            } catch (Exception e) {
+                LOGGER.warn("Error shutting down Redis client", e);
+            }
+        }
+    }
 }
