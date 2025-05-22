@@ -15,15 +15,27 @@
  */
 package org.traccar.model;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.traccar.storage.QueryIgnore;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.traccar.storage.StorageName;
 
+// Message broker serialization annotations
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @StorageName("tc_notifications")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public class Notification extends ExtendedModel implements Schedulable {
 
     private String description;
@@ -100,5 +112,146 @@ public class Notification extends ExtendedModel implements Schedulable {
         }
         return result;
     }
-
+    
+    // Distributed tracing context support
+    private String correlationId;
+    
+    @JsonProperty
+    public String getCorrelationId() {
+        return correlationId;
+    }
+    
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+    }
+    
+    /**
+     * Generates a new correlation ID if one doesn't exist yet.
+     * This is used for distributed tracing across services.
+     * 
+     * @return The current or newly generated correlation ID
+     */
+    public String ensureCorrelationId() {
+        if (correlationId == null || correlationId.isEmpty()) {
+            correlationId = UUID.randomUUID().toString();
+        }
+        return correlationId;
+    }
+    
+    // Notification delivery tracking for microservices
+    public enum DeliveryStatus {
+        PENDING,    // Initial state, not yet processed
+        PROCESSING, // Being processed by notification service
+        SENT,       // Sent to delivery channel (email, SMS, etc.)
+        DELIVERED,  // Confirmed delivered to recipient
+        FAILED,     // Delivery failed
+        RETRYING    // Failed but will be retried
+    }
+    
+    private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING;
+    
+    @JsonProperty
+    public DeliveryStatus getDeliveryStatus() {
+        return deliveryStatus;
+    }
+    
+    public void setDeliveryStatus(DeliveryStatus deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
+    
+    // Support for notification status updates across services
+    private String statusMessage;
+    
+    @JsonProperty
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+    
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+    
+    // Timestamps for tracking notification lifecycle
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "UTC")
+    private Instant createdAt;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "UTC")
+    private Instant processedAt;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "UTC")
+    private Instant sentAt;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "UTC")
+    private Instant deliveredAt;
+    
+    @JsonProperty
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    @JsonProperty
+    public Instant getProcessedAt() {
+        return processedAt;
+    }
+    
+    public void setProcessedAt(Instant processedAt) {
+        this.processedAt = processedAt;
+    }
+    
+    @JsonProperty
+    public Instant getSentAt() {
+        return sentAt;
+    }
+    
+    public void setSentAt(Instant sentAt) {
+        this.sentAt = sentAt;
+    }
+    
+    @JsonProperty
+    public Instant getDeliveredAt() {
+        return deliveredAt;
+    }
+    
+    public void setDeliveredAt(Instant deliveredAt) {
+        this.deliveredAt = deliveredAt;
+    }
+    
+    // Retry information for failed notifications
+    private Integer retryCount;
+    private Instant nextRetryAt;
+    
+    @JsonProperty
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+    
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
+    }
+    
+    @JsonProperty
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "UTC")
+    public Instant getNextRetryAt() {
+        return nextRetryAt;
+    }
+    
+    public void setNextRetryAt(Instant nextRetryAt) {
+        this.nextRetryAt = nextRetryAt;
+    }
+    
+    // Additional metadata for cross-service communication
+    private String serviceSource; // Which service created this notification
+    
+    @JsonProperty
+    public String getServiceSource() {
+        return serviceSource;
+    }
+    
+    public void setServiceSource(String serviceSource) {
+        this.serviceSource = serviceSource;
+    }
 }
