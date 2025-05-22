@@ -18,12 +18,22 @@ package org.traccar.model;
 import org.traccar.storage.QueryIgnore;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.traccar.storage.StorageName;
 
+import java.time.Instant;
+
+/**
+ * Command model representing device commands that can be executed across services.
+ * This class has been enhanced to support message broker serialization and distributed tracing.
+ */
 @StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Command extends BaseCommand {
 
+    // Command types
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
@@ -70,6 +80,7 @@ public class Command extends BaseCommand {
     public static final String TYPE_ALARM_FALL = "alarmFall";
     public static final String TYPE_ALARM_VIBRATION = "alarmVibration";
 
+    // Command attribute keys
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_LANGUAGE = "language";
@@ -84,6 +95,14 @@ public class Command extends BaseCommand {
     public static final String KEY_SERVER = "server";
     public static final String KEY_PORT = "port";
     public static final String KEY_NO_QUEUE = "noQueue";
+
+    // Command status values
+    public static final String STATUS_NEW = "new";
+    public static final String STATUS_PENDING = "pending";
+    public static final String STATUS_DELIVERED = "delivered";
+    public static final String STATUS_SUCCESSFUL = "successful";
+    public static final String STATUS_FAILED = "failed";
+    public static final String STATUS_TIMEOUT = "timeout";
 
     @QueryIgnore
     @Override
@@ -107,4 +126,197 @@ public class Command extends BaseCommand {
         this.description = description;
     }
 
+    // Fields for distributed tracing and cross-service execution
+
+    private String correlationId;
+
+    /**
+     * Gets the correlation ID for distributed tracing.
+     * This ID is used to track the command across different services.
+     *
+     * @return The correlation ID
+     */
+    @JsonProperty
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    /**
+     * Sets the correlation ID for distributed tracing.
+     *
+     * @param correlationId The correlation ID to set
+     */
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+    }
+
+    private String parentSpanId;
+
+    /**
+     * Gets the parent span ID for OpenTelemetry tracing.
+     *
+     * @return The parent span ID
+     */
+    @JsonProperty
+    public String getParentSpanId() {
+        return parentSpanId;
+    }
+
+    /**
+     * Sets the parent span ID for OpenTelemetry tracing.
+     *
+     * @param parentSpanId The parent span ID to set
+     */
+    public void setParentSpanId(String parentSpanId) {
+        this.parentSpanId = parentSpanId;
+    }
+
+    private String sourceService;
+
+    /**
+     * Gets the source service that initiated the command.
+     *
+     * @return The source service name
+     */
+    @JsonProperty
+    public String getSourceService() {
+        return sourceService;
+    }
+
+    /**
+     * Sets the source service that initiated the command.
+     *
+     * @param sourceService The source service name to set
+     */
+    public void setSourceService(String sourceService) {
+        this.sourceService = sourceService;
+    }
+
+    private String targetService;
+
+    /**
+     * Gets the target service that should execute the command.
+     *
+     * @return The target service name
+     */
+    @JsonProperty
+    public String getTargetService() {
+        return targetService;
+    }
+
+    /**
+     * Sets the target service that should execute the command.
+     *
+     * @param targetService The target service name to set
+     */
+    public void setTargetService(String targetService) {
+        this.targetService = targetService;
+    }
+
+    // Command status tracking fields
+
+    private String status;
+
+    /**
+     * Gets the current status of the command.
+     *
+     * @return The command status
+     */
+    @JsonProperty
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Sets the current status of the command.
+     *
+     * @param status The command status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    private Instant createdAt;
+
+    /**
+     * Gets the timestamp when the command was created.
+     *
+     * @return The creation timestamp
+     */
+    @JsonProperty
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    /**
+     * Sets the timestamp when the command was created.
+     *
+     * @param createdAt The creation timestamp to set
+     */
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    private Instant updatedAt;
+
+    /**
+     * Gets the timestamp when the command was last updated.
+     *
+     * @return The last update timestamp
+     */
+    @JsonProperty
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    /**
+     * Sets the timestamp when the command was last updated.
+     *
+     * @param updatedAt The last update timestamp to set
+     */
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    private Instant executedAt;
+
+    /**
+     * Gets the timestamp when the command was executed.
+     *
+     * @return The execution timestamp
+     */
+    @JsonProperty
+    public Instant getExecutedAt() {
+        return executedAt;
+    }
+
+    /**
+     * Sets the timestamp when the command was executed.
+     *
+     * @param executedAt The execution timestamp to set
+     */
+    public void setExecutedAt(Instant executedAt) {
+        this.executedAt = executedAt;
+    }
+
+    private String statusMessage;
+
+    /**
+     * Gets the status message with additional details about command execution.
+     *
+     * @return The status message
+     */
+    @JsonProperty
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    /**
+     * Sets the status message with additional details about command execution.
+     *
+     * @param statusMessage The status message to set
+     */
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
 }
