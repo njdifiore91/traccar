@@ -3,10 +3,112 @@
 <properties>
 
     <!-- Documentation: https://www.traccar.org/configuration-file/ -->
+    <!-- Updated for microservices architecture -->
 
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./data/database</entry>
-    <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
+    <!-- Database Configuration -->
+    <entry key='database.driver'>org.postgresql.Driver</entry>
+    <entry key='database.url'>jdbc:postgresql://traccar-database:5432/traccar</entry>
+    <entry key='database.user'>traccar</entry>
+    <entry key='database.password'>changeme</entry>
+    <entry key='database.checkConnection'>true</entry>
+    <entry key='database.maxPoolSize'>20</entry>
+    <entry key='database.connectionTimeout'>30000</entry>
+
+    <!-- Service Discovery Configuration -->
+    <entry key='service.discovery.enabled'>true</entry>
+    <entry key='service.discovery.type'>consul</entry>
+    <entry key='service.discovery.host'>consul.service.consul</entry>
+    <entry key='service.discovery.port'>8500</entry>
+    <entry key='service.discovery.register'>true</entry>
+    <entry key='service.discovery.serviceName'>${SERVICE_NAME:traccar}</entry>
+    <entry key='service.discovery.serviceId'>${SERVICE_ID:${random.uuid}}</entry>
+    <entry key='service.discovery.healthCheckPath'>/health</entry>
+    <entry key='service.discovery.healthCheckInterval'>10s</entry>
+    <entry key='service.discovery.tags'>traccar,${SERVICE_NAME:traccar}</entry>
+
+    <!-- Message Broker Configuration -->
+    <entry key='message.broker.enabled'>true</entry>
+    <entry key='message.broker.type'>kafka</entry>
+    <entry key='message.broker.host'>kafka.service.consul</entry>
+    <entry key='message.broker.port'>9092</entry>
+    <entry key='message.broker.topic.positions'>traccar-positions</entry>
+    <entry key='message.broker.topic.events'>traccar-events</entry>
+    <entry key='message.broker.topic.commands'>traccar-commands</entry>
+    <entry key='message.broker.topic.notifications'>traccar-notifications</entry>
+    <entry key='message.broker.consumer.group'>${SERVICE_NAME:traccar}</entry>
+    <entry key='message.broker.producer.acks'>all</entry>
+    <entry key='message.broker.consumer.auto.offset.reset'>earliest</entry>
+
+    <!-- Health Check and Monitoring Configuration -->
+    <entry key='health.enabled'>true</entry>
+    <entry key='health.port'>8080</entry>
+    <entry key='health.path'>/health</entry>
+    <entry key='health.readiness.path'>/health/readiness</entry>
+    <entry key='health.liveness.path'>/health/liveness</entry>
+    <entry key='health.metrics.path'>/metrics</entry>
+    <entry key='health.prometheus.enabled'>true</entry>
+
+    <!-- Protocol Service Configuration -->
+    <entry key='protocol.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='protocol.service.port.osmand'>5055</entry>
+    <entry key='protocol.service.port.teltonika'>5027</entry>
+    <entry key='protocol.service.connection.timeout'>300</entry>
+    <entry key='protocol.service.processing.threads'>10</entry>
+
+    <!-- Position Service Configuration -->
+    <entry key='position.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='position.service.processing.threads'>10</entry>
+    <entry key='position.service.geocoder.enabled'>true</entry>
+    <entry key='position.service.geocoder.url'>http://geocoder.service.consul:8080</entry>
+    <entry key='position.service.geolocation.enabled'>true</entry>
+    <entry key='position.service.geolocation.url'>http://geolocation.service.consul:8080</entry>
+
+    <!-- Event Service Configuration -->
+    <entry key='event.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='event.service.processing.threads'>5</entry>
+    <entry key='event.service.forward.enabled'>true</entry>
+    <entry key='event.service.forward.url'>http://event-forwarder.service.consul:8080</entry>
+
+    <!-- Notification Service Configuration -->
+    <entry key='notification.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='notification.service.processing.threads'>5</entry>
+    <entry key='notification.service.mail.enabled'>true</entry>
+    <entry key='notification.service.mail.host'>smtp.example.com</entry>
+    <entry key='notification.service.mail.port'>587</entry>
+    <entry key='notification.service.mail.username'>user</entry>
+    <entry key='notification.service.mail.password'>password</entry>
+    <entry key='notification.service.mail.from'>traccar@example.com</entry>
+    <entry key='notification.service.sms.enabled'>false</entry>
+    <entry key='notification.service.push.enabled'>true</entry>
+    <entry key='notification.service.push.url'>http://push.service.consul:8080</entry>
+
+    <!-- API Gateway Configuration -->
+    <entry key='api.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='api.service.port'>8082</entry>
+    <entry key='api.service.websocket.enabled'>true</entry>
+    <entry key='api.service.websocket.port'>8083</entry>
+    <entry key='api.service.cors.enabled'>true</entry>
+    <entry key='api.service.cors.origin'>*</entry>
+    <entry key='api.service.authentication.enabled'>true</entry>
+    <entry key='api.service.authentication.token.expiration'>3600</entry>
+
+    <!-- Reporting Service Configuration -->
+    <entry key='report.service.enabled'>${SERVICE_NAME:traccar}</entry>
+    <entry key='report.service.processing.threads'>2</entry>
+    <entry key='report.service.template.path'>./templates</entry>
+    <entry key='report.service.export.formats'>csv,xlsx,pdf</entry>
+
+    <!-- Circuit Breaker Configuration -->
+    <entry key='circuit.breaker.enabled'>true</entry>
+    <entry key='circuit.breaker.failure.threshold'>50</entry>
+    <entry key='circuit.breaker.wait.duration'>10000</entry>
+    <entry key='circuit.breaker.permitted.calls'>10</entry>
+
+    <!-- Retry Configuration -->
+    <entry key='retry.enabled'>true</entry>
+    <entry key='retry.max.attempts'>3</entry>
+    <entry key='retry.wait.duration'>1000</entry>
+    <entry key='retry.exponential.backoff'>true</entry>
+    <entry key='retry.exponential.multiplier'>2</entry>
 
 </properties>
