@@ -16,9 +16,15 @@
  */
 package org.traccar.notificators;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterConfig;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.mail.MessagingException;
+
 import org.traccar.mail.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -26,25 +32,119 @@ import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+import org.traccar.notification.NotificationMetrics;
+import org.traccar.resilience.CircuitBreakerManager;
+import org.traccar.tracing.DistributedTracingContext;
 
+import java.time.Duration;
+import java.util.function.Supplier;
+
+/**
+ * Email notification handler with circuit breaker, rate limiting, and distributed tracing support.
+ */
 @Singleton
 public class NotificatorMail extends Notificator {
 
     private final MailManager mailManager;
+    private final CircuitBreakerManager circuitBreakerManager;
+    private final DistributedTracingContext tracingContext;
+    private final NotificationMetrics notificationMetrics;
+    private final RateLimiter rateLimiter;
 
+    private static final String CIRCUIT_BREAKER_NAME = "emailNotification";
+    private static final String RATE_LIMITER_NAME = "emailRateLimiter";
+
+    /**
+     * Constructs a new email notificator with circuit breaker, rate limiting, and tracing support.
+     *
+     * @param mailManager           The mail manager for sending emails
+     * @param notificationFormatter The formatter for notification messages
+     * @param circuitBreakerManager The circuit breaker manager for SMTP connections
+     * @param tracingContext        The distributed tracing context
+     * @param notificationMetrics   The metrics collector for notifications
+     */
     @Inject
-    public NotificatorMail(MailManager mailManager, NotificationFormatter notificationFormatter) {
+    public NotificatorMail(MailManager mailManager, 
+                          NotificationFormatter notificationFormatter,
+                          CircuitBreakerManager circuitBreakerManager,
+                          DistributedTracingContext tracingContext,
+                          NotificationMetrics notificationMetrics) {
         super(notificationFormatter, "full");
         this.mailManager = mailManager;
+        this.circuitBreakerManager = circuitBreakerManager;
+        this.tracingContext = tracingContext;
+        this.notificationMetrics = notificationMetrics;
+        
+        // Configure rate limiter for email sending
+        RateLimiterConfig rateLimiterConfig = RateLimiterConfig.custom()
+                .limitRefreshPeriod(Duration.ofMinutes(1))
+                .limitForPeriod(100) // Allow 100 emails per minute
+                .timeoutDuration(Duration.ofSeconds(5))
+                .build();
+        
+        this.rateLimiter = RateLimiter.of(RATE_LIMITER_NAME, rateLimiterConfig);
     }
 
     @Override
     public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
+        // Create a span for distributed tracing
+        Span span = tracingContext.startSpan("email.send");
+        
         try {
-            mailManager.sendMessage(user, false, message.getSubject(), message.getBody());
-        } catch (MessagingException e) {
-            throw new MessageException(e);
+            // Add relevant attributes to the span
+            span.setAttribute("notification.type", "email");
+            span.setAttribute("notification.recipient", user.getEmail());
+            span.setAttribute("notification.subject", message.getSubject());
+            if (event != null) {
+                span.setAttribute("event.type", event.getType());
+                span.setAttribute("event.id", event.getId());
+            }
+            
+            // Get the circuit breaker for SMTP connections
+            CircuitBreaker circuitBreaker = circuitBreakerManager.getCircuitBreaker(CIRCUIT_BREAKER_NAME);
+            
+            // Create a supplier that sends the email
+            Supplier<Void> emailSupplier = () -> {
+                try {
+                    // Start timer for metrics
+                    long startTime = System.currentTimeMillis();
+                    
+                    // Send the email
+                    mailManager.sendMessage(user, false, message.getSubject(), message.getBody());
+                    
+                    // Record metrics
+                    long duration = System.currentTimeMillis() - startTime;
+                    notificationMetrics.recordEmailSent(duration);
+                    
+                    return null;
+                } catch (MessagingException e) {
+                    // Record failure metrics
+                    notificationMetrics.recordEmailFailure(e.getClass().getSimpleName());
+                    
+                    // Add error details to the span
+                    span.recordException(e);
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    
+                    throw new RuntimeException(e);
+                }
+            };
+            
+            // Apply rate limiting and circuit breaker to the email sending operation
+            try {
+                // First apply rate limiting
+                RateLimiter.decorateSupplier(rateLimiter, () -> {
+                    // Then apply circuit breaker
+                    return CircuitBreaker.decorateSupplier(circuitBreaker, emailSupplier).get();
+                }).get();
+            } catch (Exception e) {
+                if (e.getCause() instanceof MessagingException) {
+                    throw new MessageException((MessagingException) e.getCause());
+                }
+                throw new MessageException(e);
+            }
+        } finally {
+            // End the span
+            span.end();
         }
     }
-
 }
