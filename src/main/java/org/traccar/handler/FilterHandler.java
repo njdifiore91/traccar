@@ -15,6 +15,13 @@
  */
 package org.traccar.handler;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +30,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.messaging.MessageProducer;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -35,10 +43,14 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class FilterHandler extends BasePositionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.java);
 
     private final boolean filterInvalid;
     private final boolean filterZero;
@@ -57,14 +69,26 @@ public class FilterHandler extends BasePositionHandler {
     private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
+    private final boolean asyncProcessing;
 
     private final CacheManager cacheManager;
     private final Storage storage;
     private final StatisticsManager statisticsManager;
+    private final MessageProducer messageProducer;
+    private final Tracer tracer;
+    private final MeterRegistry meterRegistry;
+
+    // Metrics
+    private final Counter totalPositionsCounter;
+    private final Counter filteredPositionsCounter;
+    private final Map<String, Counter> filterTypeCounters = new HashMap<>();
+    private final Timer filterProcessingTimer;
 
     @Inject
     public FilterHandler(
-            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
+            Config config, CacheManager cacheManager, Storage storage, 
+            StatisticsManager statisticsManager, MessageProducer messageProducer,
+            Tracer tracer, MeterRegistry meterRegistry) {
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
@@ -82,18 +106,51 @@ public class FilterHandler extends BasePositionHandler {
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
+        asyncProcessing = config.getBoolean(Keys.FILTER_ASYNC_PROCESSING, false);
+        
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.statisticsManager = statisticsManager;
+        this.messageProducer = messageProducer;
+        this.tracer = tracer;
+        this.meterRegistry = meterRegistry;
+        
+        // Initialize metrics
+        totalPositionsCounter = Counter.builder("traccar.filter.positions.total")
+                .description("Total number of positions processed by filter")
+                .register(meterRegistry);
+        
+        filteredPositionsCounter = Counter.builder("traccar.filter.positions.filtered")
+                .description("Number of positions filtered out")
+                .register(meterRegistry);
+        
+        filterProcessingTimer = Timer.builder("traccar.filter.processing.time")
+                .description("Time taken to process position filters")
+                .register(meterRegistry);
     }
 
     private Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
-        return storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", deviceId),
-                        new Condition.Compare("fixTime", "<=", "time", date)),
-                new Order("fixTime", true, 1)));
+        Span span = tracer.spanBuilder("FilterHandler.getPrecedingPosition").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            span.setAttribute("deviceId", deviceId);
+            span.setAttribute("date", date.toString());
+            
+            Position position = storage.getObject(Position.class, new Request(
+                    new Columns.All(),
+                    new Condition.And(
+                            new Condition.Equals("deviceId", deviceId),
+                            new Condition.Compare("fixTime", "<=", "time", date)),
+                    new Order("fixTime", true, 1)));
+            
+            span.setStatus(StatusCode.OK);
+            return position;
+        } catch (StorageException e) {
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, "Failed to get preceding position");
+            throw e;
+        } finally {
+            span.end();
+        }
     }
 
     private boolean filterInvalid(Position position) {
@@ -196,87 +253,170 @@ public class FilterHandler extends BasePositionHandler {
     }
 
     protected boolean filter(Position position) {
+        Span span = tracer.spanBuilder("FilterHandler.filter").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            span.setAttribute("deviceId", position.getDeviceId());
+            span.setAttribute("positionId", position.getId());
+            
+            totalPositionsCounter.increment();
+            Timer.Sample sample = Timer.start(meterRegistry);
+            
+            StringBuilder filterType = new StringBuilder();
 
-        StringBuilder filterType = new StringBuilder();
+            // filter out invalid data
+            if (filterInvalid(position)) {
+                filterType.append("Invalid ");
+                incrementFilterTypeCounter("invalid");
+            }
+            if (filterZero(position)) {
+                filterType.append("Zero ");
+                incrementFilterTypeCounter("zero");
+            }
+            if (filterOutdated(position)) {
+                filterType.append("Outdated ");
+                incrementFilterTypeCounter("outdated");
+            }
+            if (filterFuture(position)) {
+                filterType.append("Future ");
+                incrementFilterTypeCounter("future");
+            }
+            if (filterPast(position)) {
+                filterType.append("Past ");
+                incrementFilterTypeCounter("past");
+            }
+            if (filterAccuracy(position)) {
+                filterType.append("Accuracy ");
+                incrementFilterTypeCounter("accuracy");
+            }
+            if (filterApproximate(position)) {
+                filterType.append("Approximate ");
+                incrementFilterTypeCounter("approximate");
+            }
 
-        // filter out invalid data
-        if (filterInvalid(position)) {
-            filterType.append("Invalid ");
-        }
-        if (filterZero(position)) {
-            filterType.append("Zero ");
-        }
-        if (filterOutdated(position)) {
-            filterType.append("Outdated ");
-        }
-        if (filterFuture(position)) {
-            filterType.append("Future ");
-        }
-        if (filterPast(position)) {
-            filterType.append("Past ");
-        }
-        if (filterAccuracy(position)) {
-            filterType.append("Accuracy ");
-        }
-        if (filterApproximate(position)) {
-            filterType.append("Approximate ");
-        }
-
-        // filter out excessive data
-        long deviceId = position.getDeviceId();
-        if (filterDuplicate || filterStatic
-                || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0 || filterDailyLimit > 0) {
-            Position preceding;
-            if (filterRelative) {
-                try {
-                    Date newFixTime = position.getFixTime();
-                    preceding = getPrecedingPosition(deviceId, newFixTime);
-                } catch (StorageException e) {
-                    LOGGER.warn("Error retrieving preceding position; fall backing to last received position.", e);
+            // filter out excessive data
+            long deviceId = position.getDeviceId();
+            if (filterDuplicate || filterStatic
+                    || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0 || filterDailyLimit > 0) {
+                Position preceding;
+                if (filterRelative) {
+                    try {
+                        Date newFixTime = position.getFixTime();
+                        preceding = getPrecedingPosition(deviceId, newFixTime);
+                    } catch (StorageException e) {
+                        LOGGER.warn("Error retrieving preceding position; fall backing to last received position.", e);
+                        preceding = cacheManager.getPosition(deviceId);
+                    }
+                } else {
                     preceding = cacheManager.getPosition(deviceId);
                 }
+                if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
+                    filterType.append("Duplicate ");
+                    incrementFilterTypeCounter("duplicate");
+                }
+                if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {
+                    filterType.append("Static ");
+                    incrementFilterTypeCounter("static");
+                }
+                if (filterDistance(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
+                    filterType.append("Distance ");
+                    incrementFilterTypeCounter("distance");
+                }
+                if (filterMaxSpeed(position, preceding)) {
+                    filterType.append("MaxSpeed ");
+                    incrementFilterTypeCounter("maxSpeed");
+                }
+                if (filterMinPeriod(position, preceding)) {
+                    filterType.append("MinPeriod ");
+                    incrementFilterTypeCounter("minPeriod");
+                }
+                if (filterDailyLimit(position, preceding)) {
+                    filterType.append("DailyLimit ");
+                    incrementFilterTypeCounter("dailyLimit");
+                }
+            }
+
+            Device device = cacheManager.getObject(Device.class, deviceId);
+            if (device.getCalendarId() > 0) {
+                Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
+                if (!calendar.checkMoment(position.getFixTime())) {
+                    filterType.append("Calendar ");
+                    incrementFilterTypeCounter("calendar");
+                }
+            }
+
+            boolean filtered = !filterType.isEmpty();
+            if (filtered) {
+                LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
+                filteredPositionsCounter.increment();
+                span.setAttribute("filtered", true);
+                span.setAttribute("filterTypes", filterType.toString().trim());
             } else {
-                preceding = cacheManager.getPosition(deviceId);
+                span.setAttribute("filtered", false);
             }
-            if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Duplicate ");
-            }
-            if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Static ");
-            }
-            if (filterDistance(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Distance ");
-            }
-            if (filterMaxSpeed(position, preceding)) {
-                filterType.append("MaxSpeed ");
-            }
-            if (filterMinPeriod(position, preceding)) {
-                filterType.append("MinPeriod ");
-            }
-            if (filterDailyLimit(position, preceding)) {
-                filterType.append("DailyLimit ");
-            }
+            
+            sample.stop(filterProcessingTimer);
+            span.setStatus(StatusCode.OK);
+            return filtered;
+        } finally {
+            span.end();
         }
-
-        Device device = cacheManager.getObject(Device.class, deviceId);
-        if (device.getCalendarId() > 0) {
-            Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
-            if (!calendar.checkMoment(position.getFixTime())) {
-                filterType.append("Calendar ");
-            }
-        }
-
-        if (!filterType.isEmpty()) {
-            LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
-            return true;
-        }
-
-        return false;
+    }
+    
+    private void incrementFilterTypeCounter(String filterType) {
+        filterTypeCounters.computeIfAbsent(filterType, type -> 
+            Counter.builder("traccar.filter.positions.by.type")
+                .tag("type", type)
+                .description("Number of positions filtered by type")
+                .register(meterRegistry))
+            .increment();
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
-        callback.processed(filter(position));
+        Span span = tracer.spanBuilder("FilterHandler.onPosition").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            span.setAttribute("deviceId", position.getDeviceId());
+            span.setAttribute("positionId", position.getId());
+            span.setAttribute("asyncProcessing", asyncProcessing);
+            
+            if (asyncProcessing) {
+                // Process asynchronously via message broker
+                CompletableFuture.supplyAsync(() -> filter(position))
+                    .thenAccept(filtered -> {
+                        if (filtered) {
+                            // If filtered, we don't need to publish to the message broker
+                            callback.processed(true);
+                        } else {
+                            // If not filtered, publish to the message broker for further processing
+                            try {
+                                messageProducer.publishPosition(position);
+                                callback.processed(false);
+                            } catch (Exception e) {
+                                LOGGER.error("Failed to publish position to message broker", e);
+                                // Graceful degradation - fall back to direct processing
+                                callback.processed(false);
+                            }
+                        }
+                    })
+                    .exceptionally(e -> {
+                        LOGGER.error("Error in async filter processing", e);
+                        // Graceful degradation - assume not filtered on error
+                        callback.processed(false);
+                        return null;
+                    });
+            } else {
+                // Process synchronously (direct mode)
+                callback.processed(filter(position));
+            }
+            span.setStatus(StatusCode.OK);
+        } catch (Exception e) {
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, "Error processing position");
+            LOGGER.error("Unexpected error in filter handler", e);
+            // Graceful degradation - assume not filtered on error
+            callback.processed(false);
+        } finally {
+            span.end();
+        }
     }
-
 }
