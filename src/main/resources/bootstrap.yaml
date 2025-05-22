@@ -1,0 +1,138 @@
+# Bootstrap configuration for Traccar microservices
+# This file is loaded before application.yaml to enable service discovery during startup
+
+spring:
+  application:
+    # Service name used for registration with service discovery
+    name: ${TRACCAR_SERVICE_NAME:traccar-service}
+    # Unique instance ID for this service instance
+    instance-id: ${spring.application.name}:${random.uuid}
+  
+  # Cloud configuration for service discovery and config server
+  cloud:
+    # Service discovery configuration
+    discovery:
+      enabled: true
+      # Register this service with the discovery server
+      register: true
+      # Service instance ID format
+      instance-id: ${spring.application.name}:${random.uuid}
+    
+    # Consul configuration (primary service discovery mechanism)
+    consul:
+      enabled: ${CONSUL_ENABLED:true}
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        enabled: ${CONSUL_DISCOVERY_ENABLED:true}
+        # Register with health check endpoint
+        healthCheckPath: /actuator/health/liveness
+        healthCheckInterval: 15s
+        # Use service instance ID as the instance ID
+        instanceId: ${spring.application.instance-id}
+        # Service metadata for additional information
+        metadata:
+          version: ${VERSION:0.0.1}
+          environment: ${ENVIRONMENT:development}
+          service-type: microservice
+    
+    # Kubernetes service discovery (alternative to Consul)
+    kubernetes:
+      enabled: ${KUBERNETES_ENABLED:false}
+      discovery:
+        enabled: ${KUBERNETES_DISCOVERY_ENABLED:false}
+        # Namespace where the service is deployed
+        namespace: ${KUBERNETES_NAMESPACE:default}
+        # Use pod name as instance ID if available
+        instanceId: ${HOSTNAME:${spring.application.instance-id}}
+        # Wait for readiness probe to pass before registering
+        waitForServiceChanges: true
+        # Service port name to use for client-side load balancing
+        primary-port-name: http
+        # Include all namespaces in service discovery
+        all-namespaces: false
+        # Filter services by labels
+        filter:
+          enabled: true
+          label: app.kubernetes.io/part-of=traccar
+    
+    # Config server for centralized configuration management
+    config:
+      enabled: ${CONFIG_SERVER_ENABLED:false}
+      # Config server URI
+      uri: ${CONFIG_SERVER_URI:http://config-server:8888}
+      # Fail fast if config server is not available
+      fail-fast: ${CONFIG_FAIL_FAST:false}
+      # Retry configuration for config server connection
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        max-interval: 2000
+        multiplier: 1.1
+      # Enable discovery first bootstrap mode when using service registry
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:false}
+        service-id: config-server
+
+# Profiles configuration
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  cloud:
+    consul:
+      host: consul-test
+      port: 8500
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  cloud:
+    consul:
+      host: consul-prod
+      port: 8500
+    config:
+      fail-fast: true
+
+---
+# Kubernetes profile is automatically activated when running in Kubernetes
+spring:
+  config:
+    activate:
+      on-profile: kubernetes
+  cloud:
+    consul:
+      enabled: false
+    kubernetes:
+      enabled: true
+      discovery:
+        enabled: true
+        # Use Kubernetes service account for API access
+        service-account-name: default
+        # Enable caching to reduce API server load
+        cache:
+          enabled: true
+          ttl: 60000
+      config:
+        enabled: true
+        # Enable ConfigMap and Secret sources
+        sources:
+          - name: ${spring.application.name}
+            namespace: ${KUBERNETES_NAMESPACE:default}
+      secrets:
+        enabled: true
+        paths:
+          - /etc/secrets/${spring.application.name}
