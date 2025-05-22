@@ -16,14 +16,41 @@
 package org.traccar.model;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
+// Message broker serialization annotations
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+// Bean validation annotations
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+
+// OpenTelemetry annotations for distributed tracing
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.trace.SpanContext;
+
+/**
+ * Position entity representing a device location at a specific point in time.
+ * Enhanced for microservices architecture with message broker serialization,
+ * distributed tracing support, and validation annotations.
+ */
 @StorageName("tc_positions")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "_type")
+@JsonTypeName("position")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Position extends Message {
 
     public static final String KEY_ORIGINAL = "raw";
@@ -152,6 +179,18 @@ public class Position extends Message {
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
 
+    // Fields for distributed tracing context
+    private String traceId;
+    private String spanId;
+    private String traceState;
+    private String baggageItems;
+    
+    // Field for optimistic locking in distributed systems
+    private long version;
+    
+    // Field to track modified attributes for partial updates
+    private Set<String> modifiedFields = new HashSet<>();
+
     public Position() {
     }
 
@@ -161,42 +200,52 @@ public class Position extends Message {
 
     private String protocol;
 
+    @NotNull(message = "Protocol cannot be null")
     public String getProtocol() {
         return protocol;
     }
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+        modifiedFields.add("protocol");
     }
 
     private Date serverTime = new Date();
 
+    @NotNull(message = "Server time cannot be null")
+    @PastOrPresent(message = "Server time must be in the past or present")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     public Date getServerTime() {
         return serverTime;
     }
 
     public void setServerTime(Date serverTime) {
         this.serverTime = serverTime;
+        modifiedFields.add("serverTime");
     }
 
     private Date deviceTime;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     public Date getDeviceTime() {
         return deviceTime;
     }
 
     public void setDeviceTime(Date deviceTime) {
         this.deviceTime = deviceTime;
+        modifiedFields.add("deviceTime");
     }
 
     private Date fixTime;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     public Date getFixTime() {
         return fixTime;
     }
 
     public void setFixTime(Date fixTime) {
         this.fixTime = fixTime;
+        modifiedFields.add("fixTime");
     }
 
     @QueryIgnore
@@ -215,6 +264,7 @@ public class Position extends Message {
     @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
+        modifiedFields.add("outdated");
     }
 
     private boolean valid;
@@ -225,10 +275,13 @@ public class Position extends Message {
 
     public void setValid(boolean valid) {
         this.valid = valid;
+        modifiedFields.add("valid");
     }
 
     private double latitude;
 
+    @Min(value = -90, message = "Latitude must be greater than or equal to -90")
+    @Max(value = 90, message = "Latitude must be less than or equal to 90")
     public double getLatitude() {
         return latitude;
     }
@@ -238,10 +291,13 @@ public class Position extends Message {
             throw new IllegalArgumentException("Latitude out of range");
         }
         this.latitude = latitude;
+        modifiedFields.add("latitude");
     }
 
     private double longitude;
 
+    @Min(value = -180, message = "Longitude must be greater than or equal to -180")
+    @Max(value = 180, message = "Longitude must be less than or equal to 180")
     public double getLongitude() {
         return longitude;
     }
@@ -251,6 +307,7 @@ public class Position extends Message {
             throw new IllegalArgumentException("Longitude out of range");
         }
         this.longitude = longitude;
+        modifiedFields.add("longitude");
     }
 
     private double altitude; // value in meters
@@ -261,26 +318,32 @@ public class Position extends Message {
 
     public void setAltitude(double altitude) {
         this.altitude = altitude;
+        modifiedFields.add("altitude");
     }
 
     private double speed; // value in knots
 
+    @Min(value = 0, message = "Speed cannot be negative")
     public double getSpeed() {
         return speed;
     }
 
     public void setSpeed(double speed) {
         this.speed = speed;
+        modifiedFields.add("speed");
     }
 
     private double course;
 
+    @Min(value = 0, message = "Course must be greater than or equal to 0")
+    @Max(value = 360, message = "Course must be less than or equal to 360")
     public double getCourse() {
         return course;
     }
 
     public void setCourse(double course) {
         this.course = course;
+        modifiedFields.add("course");
     }
 
     private String address;
@@ -291,16 +354,19 @@ public class Position extends Message {
 
     public void setAddress(String address) {
         this.address = address;
+        modifiedFields.add("address");
     }
 
     private double accuracy;
 
+    @Min(value = 0, message = "Accuracy cannot be negative")
     public double getAccuracy() {
         return accuracy;
     }
 
     public void setAccuracy(double accuracy) {
         this.accuracy = accuracy;
+        modifiedFields.add("accuracy");
     }
 
     private Network network;
@@ -311,6 +377,7 @@ public class Position extends Message {
 
     public void setNetwork(Network network) {
         this.network = network;
+        modifiedFields.add("network");
     }
 
     private List<Long> geofenceIds;
@@ -325,6 +392,7 @@ public class Position extends Message {
         } else {
             this.geofenceIds = null;
         }
+        modifiedFields.add("geofenceIds");
     }
 
     public void addAlarm(String alarm) {
@@ -334,6 +402,7 @@ public class Position extends Message {
             } else {
                 set(KEY_ALARM, alarm);
             }
+            modifiedFields.add("attributes");
         }
     }
 
@@ -349,6 +418,242 @@ public class Position extends Message {
     @Override
     public void setType(String type) {
         super.setType(type);
+        modifiedFields.add("type");
+    }
+    
+    // Distributed tracing context methods
+    
+    /**
+     * Gets the trace ID for distributed tracing.
+     * @return the trace ID
+     */
+    public String getTraceId() {
+        return traceId;
     }
 
+    /**
+     * Sets the trace ID for distributed tracing.
+     * @param traceId the trace ID to set
+     */
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+        modifiedFields.add("traceId");
+    }
+
+    /**
+     * Gets the span ID for distributed tracing.
+     * @return the span ID
+     */
+    public String getSpanId() {
+        return spanId;
+    }
+
+    /**
+     * Sets the span ID for distributed tracing.
+     * @param spanId the span ID to set
+     */
+    public void setSpanId(String spanId) {
+        this.spanId = spanId;
+        modifiedFields.add("spanId");
+    }
+
+    /**
+     * Gets the trace state for distributed tracing.
+     * @return the trace state
+     */
+    public String getTraceState() {
+        return traceState;
+    }
+
+    /**
+     * Sets the trace state for distributed tracing.
+     * @param traceState the trace state to set
+     */
+    public void setTraceState(String traceState) {
+        this.traceState = traceState;
+        modifiedFields.add("traceState");
+    }
+
+    /**
+     * Gets the baggage items for distributed tracing.
+     * @return the baggage items as a string
+     */
+    public String getBaggageItems() {
+        return baggageItems;
+    }
+
+    /**
+     * Sets the baggage items for distributed tracing.
+     * @param baggageItems the baggage items to set
+     */
+    public void setBaggageItems(String baggageItems) {
+        this.baggageItems = baggageItems;
+        modifiedFields.add("baggageItems");
+    }
+    
+    /**
+     * Sets the OpenTelemetry span context for distributed tracing.
+     * @param spanContext the span context to set
+     */
+    @JsonIgnore
+    @QueryIgnore
+    public void setSpanContext(SpanContext spanContext) {
+        if (spanContext != null) {
+            this.traceId = spanContext.getTraceId();
+            this.spanId = spanContext.getSpanId();
+            this.traceState = spanContext.getTraceState().asString();
+            modifiedFields.add("traceId");
+            modifiedFields.add("spanId");
+            modifiedFields.add("traceState");
+        }
+    }
+    
+    /**
+     * Sets the OpenTelemetry baggage for distributed tracing.
+     * @param baggage the baggage to set
+     */
+    @JsonIgnore
+    @QueryIgnore
+    public void setBaggage(Baggage baggage) {
+        if (baggage != null) {
+            this.baggageItems = baggage.asString();
+            modifiedFields.add("baggageItems");
+        }
+    }
+    
+    // Version for optimistic locking
+    
+    /**
+     * Gets the version for optimistic locking.
+     * @return the version
+     */
+    public long getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the version for optimistic locking.
+     * @param version the version to set
+     */
+    public void setVersion(long version) {
+        this.version = version;
+        modifiedFields.add("version");
+    }
+    
+    // Methods for partial updates
+    
+    /**
+     * Gets the set of modified fields for partial updates.
+     * @return the set of modified field names
+     */
+    @JsonIgnore
+    @QueryIgnore
+    public Set<String> getModifiedFields() {
+        return modifiedFields;
+    }
+
+    /**
+     * Clears the set of modified fields.
+     */
+    @JsonIgnore
+    @QueryIgnore
+    public void clearModifiedFields() {
+        modifiedFields.clear();
+    }
+    
+    /**
+     * Merges partial updates from another Position object.
+     * Only fields that have been modified in the source object will be updated.
+     * @param source the source Position object with partial updates
+     */
+    @JsonIgnore
+    @QueryIgnore
+    public void mergeFrom(Position source) {
+        if (source == null) {
+            return;
+        }
+        
+        if (source.getModifiedFields().contains("protocol")) {
+            setProtocol(source.getProtocol());
+        }
+        
+        if (source.getModifiedFields().contains("serverTime")) {
+            setServerTime(source.getServerTime());
+        }
+        
+        if (source.getModifiedFields().contains("deviceTime")) {
+            setDeviceTime(source.getDeviceTime());
+        }
+        
+        if (source.getModifiedFields().contains("fixTime")) {
+            setFixTime(source.getFixTime());
+        }
+        
+        if (source.getModifiedFields().contains("outdated")) {
+            setOutdated(source.getOutdated());
+        }
+        
+        if (source.getModifiedFields().contains("valid")) {
+            setValid(source.getValid());
+        }
+        
+        if (source.getModifiedFields().contains("latitude")) {
+            setLatitude(source.getLatitude());
+        }
+        
+        if (source.getModifiedFields().contains("longitude")) {
+            setLongitude(source.getLongitude());
+        }
+        
+        if (source.getModifiedFields().contains("altitude")) {
+            setAltitude(source.getAltitude());
+        }
+        
+        if (source.getModifiedFields().contains("speed")) {
+            setSpeed(source.getSpeed());
+        }
+        
+        if (source.getModifiedFields().contains("course")) {
+            setCourse(source.getCourse());
+        }
+        
+        if (source.getModifiedFields().contains("address")) {
+            setAddress(source.getAddress());
+        }
+        
+        if (source.getModifiedFields().contains("accuracy")) {
+            setAccuracy(source.getAccuracy());
+        }
+        
+        if (source.getModifiedFields().contains("network")) {
+            setNetwork(source.getNetwork());
+        }
+        
+        if (source.getModifiedFields().contains("geofenceIds")) {
+            setGeofenceIds(source.getGeofenceIds());
+        }
+        
+        if (source.getModifiedFields().contains("attributes")) {
+            setAttributes(source.getAttributes());
+        }
+        
+        if (source.getModifiedFields().contains("traceId")) {
+            setTraceId(source.getTraceId());
+        }
+        
+        if (source.getModifiedFields().contains("spanId")) {
+            setSpanId(source.getSpanId());
+        }
+        
+        if (source.getModifiedFields().contains("traceState")) {
+            setTraceState(source.getTraceState());
+        }
+        
+        if (source.getModifiedFields().contains("baggageItems")) {
+            setBaggageItems(source.getBaggageItems());
+        }
+        
+        // Increment version when merging
+        setVersion(getVersion() + 1);
+    }
 }
