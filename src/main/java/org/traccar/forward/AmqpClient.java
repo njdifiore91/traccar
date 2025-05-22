@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,175 +15,226 @@
  */
 package org.traccar.forward;
 
-import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.MessageProperties;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
-
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
-import io.opentelemetry.context.propagation.TextMapPropagator;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-
-import org.traccar.messaging.MessageBrokerManager;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
 /**
- * AMQP client for RabbitMQ message broker integration.
- * Supports distributed tracing, metrics collection, and circuit breaker pattern.
+ * Client for interacting with RabbitMQ message broker.
+ * Provides methods for publishing messages and consuming messages from a queue.
  */
-@Singleton
 public class AmqpClient {
-    private final Channel channel;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpClient.class);
+
+    private final ConnectionFactory factory;
     private final String exchange;
-    private final String topic;
-    private final CircuitBreaker circuitBreaker;
-    private final Tracer tracer;
-    private final MeterRegistry meterRegistry;
-    private final TextMapPropagator propagator;
-    private final Counter messageCounter;
-    private final Timer publishTimer;
-    private final MessageBrokerManager brokerManager;
+    private final String routingKey;
+    private Connection connection;
+    private Channel channel;
+    private String consumerTag;
+    private MessageHandler messageHandler;
 
     /**
-     * Constructs an AmqpClient with the specified connection parameters.
-     *
-     * @param brokerManager The centralized message broker manager
-     * @param exchange The RabbitMQ exchange name
-     * @param topic The routing topic for messages
-     * @param tracer The OpenTelemetry tracer for distributed tracing
-     * @param meterRegistry The Micrometer registry for metrics collection
+     * Interface for handling received messages.
      */
-    @Inject
-    public AmqpClient(
-            MessageBrokerManager brokerManager,
-            String exchange,
-            String topic,
-            Tracer tracer,
-            MeterRegistry meterRegistry) {
-        this.brokerManager = brokerManager;
+    public interface MessageHandler {
+        /**
+         * Handles a received message.
+         *
+         * @param message    The message body as a string
+         * @param properties The AMQP message properties
+         */
+        void handle(String message, AMQP.BasicProperties properties);
+    }
+
+    /**
+     * Creates a new AMQP client with the specified connection parameters.
+     *
+     * @param connectionUrl The URL for connecting to the RabbitMQ server
+     * @param exchange      The exchange to publish messages to
+     * @param routingKey    The routing key for messages
+     */
+    public AmqpClient(String connectionUrl, String exchange, String routingKey) {
+        this.factory = new ConnectionFactory();
+        this.factory.setUri(connectionUrl);
         this.exchange = exchange;
-        this.topic = topic;
-        this.tracer = tracer;
-        this.meterRegistry = meterRegistry;
-        this.propagator = GlobalOpenTelemetry.getPropagators().getTextMapPropagator();
-        
-        // Initialize metrics
-        this.messageCounter = Counter.builder("amqp.messages.published")
-                .tag("exchange", exchange)
-                .tag("topic", topic)
-                .description("Number of messages published to AMQP")
-                .register(meterRegistry);
-        
-        this.publishTimer = Timer.builder("amqp.publish.time")
-                .tag("exchange", exchange)
-                .tag("topic", topic)
-                .description("Time taken to publish messages to AMQP")
-                .register(meterRegistry);
-        
-        // Configure circuit breaker
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-                .failureRateThreshold(50)
-                .waitDurationInOpenState(Duration.ofSeconds(10))
-                .permittedNumberOfCallsInHalfOpenState(5)
-                .slidingWindowSize(10)
-                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                .build();
-        
-        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
-        this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("amqp-client-" + exchange + "-" + topic);
-        
-        // Initialize connection and channel
+        this.routingKey = routingKey;
+        initialize();
+    }
+
+    /**
+     * Initializes the connection and channel to the RabbitMQ server.
+     */
+    private void initialize() {
         try {
-            Connection connection = brokerManager.getAmqpConnection();
-            channel = connection.createChannel();
-            channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, true);
-        } catch (IOException | TimeoutException e) {
-            throw new RuntimeException("Error while creating and configuring RabbitMQ channel", e);
+            this.connection = factory.newConnection();
+            this.channel = connection.createChannel();
+            
+            // Declare the exchange if it doesn't exist
+            channel.exchangeDeclare(exchange, "topic", true);
+            
+            // Declare a queue for the routing key if it doesn't exist
+            channel.queueDeclare(routingKey, true, false, false, null);
+            
+            // Bind the queue to the exchange with the routing key
+            channel.queueBind(routingKey, exchange, routingKey);
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize AMQP connection", e);
+            throw new RuntimeException("Failed to initialize AMQP connection", e);
         }
     }
 
     /**
-     * Publishes a message to the configured exchange and topic.
-     * Includes distributed tracing context propagation and metrics collection.
+     * Publishes a message to the exchange with the configured routing key.
      *
      * @param message The message to publish
-     * @throws IOException If an error occurs during publishing
+     * @throws IOException If an error occurs while publishing the message
      */
     public void publishMessage(String message) throws IOException {
-        // Create a span for the publish operation
-        Span span = tracer.spanBuilder("amqp.publish")
-                .setSpanKind(SpanKind.PRODUCER)
-                .setAttribute("messaging.system", "rabbitmq")
-                .setAttribute("messaging.destination", exchange)
-                .setAttribute("messaging.destination_kind", "topic")
-                .setAttribute("messaging.rabbitmq.routing_key", topic)
-                .startSpan();
+        publishMessage(message, new HashMap<>(), null);
+    }
+
+    /**
+     * Publishes a message to the exchange with the configured routing key and headers.
+     *
+     * @param message The message to publish
+     * @param headers Additional headers to include with the message
+     * @param correlationId Optional correlation ID for the message
+     * @throws IOException If an error occurs while publishing the message
+     */
+    public void publishMessage(String message, Map<String, String> headers, String correlationId) throws IOException {
+        ensureConnection();
         
-        try (Scope scope = span.makeCurrent()) {
-            // Inject the current context into message headers
-            Map<String, String> headers = new HashMap<>();
-            propagator.inject(Context.current(), headers, (carrier, key, value) -> carrier.put(key, value));
+        // Convert string headers to AMQP header format
+        Map<String, Object> amqpHeaders = new HashMap<>();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            amqpHeaders.put(entry.getKey(), entry.getValue());
+        }
+        
+        // Build message properties
+        AMQP.BasicProperties.Builder propertiesBuilder = new AMQP.BasicProperties.Builder()
+                .contentType("application/json")
+                .deliveryMode(2) // persistent
+                .headers(amqpHeaders);
+        
+        if (correlationId != null) {
+            propertiesBuilder.correlationId(correlationId);
+        }
+        
+        // Publish the message
+        channel.basicPublish(
+                exchange,
+                routingKey,
+                propertiesBuilder.build(),
+                message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Sets the message handler for consuming messages.
+     *
+     * @param messageHandler The handler for received messages
+     */
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
+
+    /**
+     * Starts consuming messages from the queue with the specified consumer group.
+     *
+     * @param consumerGroup The consumer group ID
+     */
+    public void startConsuming(String consumerGroup) {
+        if (messageHandler == null) {
+            throw new IllegalStateException("Message handler must be set before starting consumption");
+        }
+        
+        try {
+            ensureConnection();
             
-            // Use circuit breaker to handle connection failures
-            circuitBreaker.executeRunnable(() -> {
-                try {
-                    // Record metrics for the publish operation
-                    publishTimer.record(() -> {
-                        try {
-                            channel.basicPublish(
-                                    exchange,
-                                    topic,
-                                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                                    message.getBytes());
-                            messageCounter.increment();
-                        } catch (IOException e) {
-                            span.setStatus(StatusCode.ERROR, e.getMessage());
-                            span.recordException(e);
-                            throw new RuntimeException("Failed to publish message", e);
-                        }
-                        return null;
-                    });
-                } catch (Exception e) {
-                    span.setStatus(StatusCode.ERROR, e.getMessage());
-                    span.recordException(e);
-                    throw e;
+            // Declare a queue for the consumer group if it doesn't exist
+            String queueName = routingKey + "." + consumerGroup;
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.queueBind(queueName, exchange, routingKey);
+            
+            // Start consuming messages
+            consumerTag = channel.basicConsume(queueName, true, new DefaultConsumer(channel) {
+                @Override
+                public void handleDelivery(String consumerTag, Envelope envelope,
+                                           AMQP.BasicProperties properties, byte[] body) {
+                    String message = new String(body, StandardCharsets.UTF_8);
+                    try {
+                        messageHandler.handle(message, properties);
+                    } catch (Exception e) {
+                        LOGGER.error("Error handling AMQP message", e);
+                    }
                 }
             });
-            
-            span.setStatus(StatusCode.OK);
-        } finally {
-            span.end();
+        } catch (IOException e) {
+            LOGGER.error("Failed to start consuming messages", e);
+            throw new RuntimeException("Failed to start consuming messages", e);
         }
     }
 
     /**
-     * Closes the AMQP channel and connection.
-     * This method should be called during application shutdown to release resources.
+     * Stops consuming messages.
+     */
+    public void stopConsuming() {
+        if (consumerTag != null && channel != null && channel.isOpen()) {
+            try {
+                channel.basicCancel(consumerTag);
+                consumerTag = null;
+            } catch (IOException e) {
+                LOGGER.error("Failed to stop consuming messages", e);
+            }
+        }
+    }
+
+    /**
+     * Ensures that the connection and channel are open, reconnecting if necessary.
+     *
+     * @throws IOException If an error occurs while reconnecting
+     */
+    private void ensureConnection() throws IOException {
+        if (connection == null || !connection.isOpen() || channel == null || !channel.isOpen()) {
+            try {
+                if (channel != null) {
+                    try {
+                        channel.close();
+                    } catch (Exception e) {
+                        LOGGER.warn("Error closing channel", e);
+                    }
+                }
+                
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (Exception e) {
+                        LOGGER.warn("Error closing connection", e);
+                    }
+                }
+                
+                initialize();
+            } catch (Exception e) {
+                LOGGER.error("Failed to reconnect to AMQP server", e);
+                throw new IOException("Failed to reconnect to AMQP server", e);
+            }
+        }
+    }
+
+    /**
+     * Closes the connection and channel to the RabbitMQ server.
      */
     public void close() {
         try {
@@ -191,8 +242,19 @@ public class AmqpClient {
                 channel.close();
             }
         } catch (IOException | TimeoutException e) {
-            // Log the error but don't rethrow as we're shutting down
-            System.err.println("Error closing AMQP channel: " + e.getMessage());
+            LOGGER.warn("Error closing channel", e);
+        } finally {
+            channel = null;
+        }
+        
+        try {
+            if (connection != null && connection.isOpen()) {
+                connection.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Error closing connection", e);
+        } finally {
+            connection = null;
         }
     }
 }
