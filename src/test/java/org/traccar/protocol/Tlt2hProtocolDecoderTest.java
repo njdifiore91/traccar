@@ -1,11 +1,29 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
+// Import for message broker testing
+import org.traccar.test.TestBrokerListener;
+import org.traccar.test.TestMessageChannel;
+import org.traccar.test.TestServiceBridge;
+
+/**
+ * Test for Tlt2h protocol decoder.
+ * This test is designed to work in both monolithic and microservices environments.
+ * 
+ * For microservices testing, set the system property:
+ * -Dtest.microservices=true
+ */
 public class Tlt2hProtocolDecoderTest extends ProtocolTest {
 
+    /**
+     * Standard decoder test for monolithic architecture.
+     * This test will run in both monolithic and microservices environments.
+     */
     @Test
     public void testDecode() throws Exception {
 
@@ -111,4 +129,69 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
                 "#39#262,03,8CE6,A672$GPRMC,115419.00,V,,,,,,,050123,,,A*7D\r\n##\r\n"));
     }
 
+    /**
+     * Test for microservices architecture with message broker integration.
+     * This test will only run if the system property test.microservices=true is set.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.microservices", matches = "true")
+    public void testMessageBrokerIntegration() throws Exception {
+        // Create a test message broker listener
+        TestBrokerListener brokerListener = new TestBrokerListener("positions");
+        
+        // Create the decoder with message broker support
+        var decoder = inject(new Tlt2hProtocolDecoder(null));
+        
+        // Configure the decoder to use the message broker
+        TestMessageChannel messageChannel = new TestMessageChannel();
+        messageChannel.connect(brokerListener);
+        decoder.setMessageChannel(messageChannel);
+        
+        // Process a sample message
+        decoder.decode(null, null, text(
+                "#867198059727390#MT700#0000#AUTO#1\r\n",
+                "#38$GPRMC,105721.00,A,2238.3071,N,11401.7575,E,,96.70,250321,,,A*74\r\n"));
+        
+        // Verify that the message was published to the broker
+        verifyBrokerMessage(brokerListener, 1);
+    }
+    
+    /**
+     * Test for cross-service boundary handling.
+     * This test will only run if the system property test.microservices=true is set.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.microservices", matches = "true")
+    public void testCrossServiceBoundaries() throws Exception {
+        // Create a test service bridge to simulate position service
+        TestServiceBridge positionService = new TestServiceBridge("position-service");
+        
+        // Create the decoder with service bridge support
+        var decoder = inject(new Tlt2hProtocolDecoder(null));
+        decoder.setServiceBridge(positionService);
+        
+        // Process a sample message that should cross service boundaries
+        decoder.decode(null, null, text(
+                "#867198059727390#MT700#0000#AUTO#1\r\n",
+                "#38$GPRMC,105721.00,A,2238.3071,N,11401.7575,E,,96.70,250321,,,A*74\r\n"));
+        
+        // Verify that the position was sent to the position service
+        verifyServiceBridgeCall(positionService, "processPosition", 1);
+    }
+    
+    /**
+     * Helper method to verify messages published to the broker.
+     */
+    private void verifyBrokerMessage(TestBrokerListener listener, int expectedCount) {
+        assertEquals(expectedCount, listener.getMessageCount(), 
+                "Expected " + expectedCount + " messages published to broker");
+    }
+    
+    /**
+     * Helper method to verify calls made across service boundaries.
+     */
+    private void verifyServiceBridgeCall(TestServiceBridge serviceBridge, String methodName, int expectedCount) {
+        assertEquals(expectedCount, serviceBridge.getCallCount(methodName),
+                "Expected " + expectedCount + " calls to " + methodName);
+    }
 }
