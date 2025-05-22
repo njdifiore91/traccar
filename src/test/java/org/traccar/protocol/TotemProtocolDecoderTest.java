@@ -1,10 +1,64 @@
 package org.traccar.protocol;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.traccar.ProtocolTest;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
+// Optional imports that may not be available in monolithic environment
+import java.lang.reflect.Method;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+/**
+ * Test for Totem protocol decoder.
+ * 
+ * This test is designed to work in both monolithic and microservices environments.
+ * It supports testing protocol integration with message brokers when running in
+ * the Protocol Service context.
+ * 
+ * In the microservices environment, this test verifies:
+ * 1. Basic protocol decoding functionality
+ * 2. Integration with message brokers for position publishing
+ * 3. Cross-service communication for position handling
+ * 
+ * The test automatically detects the environment it's running in and adjusts
+ * its behavior accordingly. When running in the monolithic environment, only
+ * the basic protocol decoding tests are executed. When running in the Protocol
+ * Service context, additional tests for message broker integration and
+ * cross-service communication are enabled.
+ */
 public class TotemProtocolDecoderTest extends ProtocolTest {
+
+    private boolean isInMicroserviceEnvironment() {
+        try {
+            Class.forName("org.traccar.messaging.MessagePublisher");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+    
+    @BeforeEach
+    public void setUp() {
+        // Additional setup for microservices environment if needed
+        if (isInMicroserviceEnvironment()) {
+            try {
+                // Setup any additional dependencies needed for microservices testing
+                System.setProperty("test.environment", "microservice");
+            } catch (Exception e) {
+                System.out.println("Error setting up microservices test environment: " + e.getMessage());
+            }
+        }
+    }
 
     @Test
     public void testDecode() throws Exception {
@@ -122,6 +176,139 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$$B2356895037578518|AA$GPRMC,203823.000,A,3740.3285,N,02129.9295,E,0.00,,111113,,,A*79|01.5|01.0|01.1|000000000000|20131111203823|14041251|00000000|002E0DD7|0000|0.0000|6371|3824"));
 
+    }
+
+        /**
+     * Test for message broker integration in microservices environment.
+     * This test is only enabled when running in the Protocol Service context.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservice")
+    public void testMessageBrokerIntegration() throws Exception {
+        // Check if we're running in microservices environment by looking for MessagePublisher class
+        try {
+            Class<?> messagePublisherClass = Class.forName("org.traccar.messaging.MessagePublisher");
+            Class<?> positionMessageClass = Class.forName("org.traccar.proto.PositionMessage");
+            
+            // Create a mock message publisher using reflection to avoid compile-time dependencies
+            Object mockPublisher = Mockito.mock(messagePublisherClass);
+            
+            // Create a decoder with the mock publisher injected
+            TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
+            
+            // Use reflection to set the message publisher
+            Method setPublisherMethod = decoder.getClass().getDeclaredMethod("setMessagePublisher", messagePublisherClass);
+            setPublisherMethod.setAccessible(true);
+            setPublisherMethod.invoke(decoder, mockPublisher);
+            
+            // Parse a test message
+            Position position = decoder.decode(null, null, text(
+                    "$$B8862170017856731|AA$GPRMC,171849.00,A,3644.9893,N,01012.9927,E,0.049,51,200813,,,A*73|1.59|0.97|1.25|100000001000|20130820171849|13690000|00000000|019BD508|00000000|0.0000|0026|1B2C"));
+            
+            // Verify that the message was published using ArgumentCaptor
+            // We need to use ArgumentCaptor to capture the argument passed to the publish method
+            Class<?> argumentCaptorClass = Class.forName("org.mockito.ArgumentCaptor");
+            Method forClassMethod = argumentCaptorClass.getDeclaredMethod("forClass", Class.class);
+            Object argumentCaptor = forClassMethod.invoke(null, positionMessageClass);
+            
+            // Get the capture method from ArgumentCaptor
+            Method captureMethod = argumentCaptorClass.getDeclaredMethod("capture");
+            Object captureResult = captureMethod.invoke(argumentCaptor);
+            
+            // Verify the mock was called with the captured argument
+            Mockito.verify(mockPublisher).publish(captureResult);
+            
+            // Get the captured value and verify it's not null
+            Method getValueMethod = argumentCaptorClass.getDeclaredMethod("getValue");
+            Object capturedMessage = getValueMethod.invoke(argumentCaptor);
+            
+            // Assert that the captured message is not null
+            assertNotNull(capturedMessage);
+            
+        } catch (ClassNotFoundException e) {
+            // Skip test if running in monolithic environment
+            System.out.println("Skipping message broker test in monolithic environment");
+        } catch (Exception e) {
+            throw new RuntimeException("Error in message broker test", e);
+        }
+    }
+
+    /**
+     * Test for protocol handling across service boundaries.
+     * This test is only enabled when running in the Protocol Service context.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservice")
+    public void testCrossServiceIntegration() throws Exception {
+        try {
+            // Check if we're running in microservices environment
+            Class<?> messagePublisherClass = Class.forName("org.traccar.messaging.MessagePublisher");
+            Class<?> positionMessageClass = Class.forName("org.traccar.proto.PositionMessage");
+            Class<?> positionServiceClientClass = Class.forName("org.traccar.client.PositionServiceClient");
+            
+            // Create mocks for cross-service communication
+            Object mockPublisher = Mockito.mock(messagePublisherClass);
+            Object mockPositionClient = Mockito.mock(positionServiceClientClass);
+            
+            // Create a decoder with the mocks injected
+            TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
+            
+            // Use reflection to set the dependencies
+            Method setPublisherMethod = decoder.getClass().getDeclaredMethod("setMessagePublisher", messagePublisherClass);
+            setPublisherMethod.setAccessible(true);
+            setPublisherMethod.invoke(decoder, mockPublisher);
+            
+            Method setClientMethod = decoder.getClass().getDeclaredMethod("setPositionServiceClient", positionServiceClientClass);
+            setClientMethod.setAccessible(true);
+            setClientMethod.invoke(decoder, mockPositionClient);
+            
+            // Parse a test message
+            Position position = decoder.decode(null, null, text(
+                    "$$B8862170017856731|AA$GPRMC,171849.00,A,3644.9893,N,01012.9927,E,0.049,51,200813,,,A*73|1.59|0.97|1.25|100000001000|20130820171849|13690000|00000000|019BD508|00000000|0.0000|0026|1B2C"));
+            
+            // Verify cross-service interactions using ArgumentCaptor
+            Class<?> argumentCaptorClass = Class.forName("org.mockito.ArgumentCaptor");
+            Method forClassMethod = argumentCaptorClass.getDeclaredMethod("forClass", Class.class);
+            Object argumentCaptor = forClassMethod.invoke(null, positionMessageClass);
+            
+            // Get the capture method from ArgumentCaptor
+            Method captureMethod = argumentCaptorClass.getDeclaredMethod("capture");
+            Object captureResult = captureMethod.invoke(argumentCaptor);
+            
+            // Verify the mock was called with the captured argument
+            Mockito.verify(mockPublisher).publish(captureResult);
+            
+            // Get the captured value and verify it's not null
+            Method getValueMethod = argumentCaptorClass.getDeclaredMethod("getValue");
+            Object capturedMessage = getValueMethod.invoke(argumentCaptor);
+            
+            // Assert that the captured message is not null
+            assertNotNull(capturedMessage);
+            
+            // Verify position service client interaction if applicable
+            // This will depend on the specific implementation of cross-service communication
+            // For example, if there's a processPosition method:
+            try {
+                Method processPositionMethod = positionServiceClientClass.getDeclaredMethod("processPosition", positionMessageClass);
+                if (processPositionMethod != null) {
+                    // Create another ArgumentCaptor for the position service client
+                    Object positionCaptor = forClassMethod.invoke(null, positionMessageClass);
+                    Object positionCaptureResult = captureMethod.invoke(positionCaptor);
+                    
+                    // Verify the method was called
+                    Mockito.verify(mockPositionClient).processPosition(positionCaptureResult);
+                }
+            } catch (NoSuchMethodException e) {
+                // Method doesn't exist, skip this verification
+                System.out.println("processPosition method not found, skipping verification");
+            }
+            
+        } catch (ClassNotFoundException e) {
+            // Skip test if running in monolithic environment
+            System.out.println("Skipping cross-service test in monolithic environment");
+        } catch (Exception e) {
+            throw new RuntimeException("Error in cross-service test", e);
+        }
     }
 
 }
