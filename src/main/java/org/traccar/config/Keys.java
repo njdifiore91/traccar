@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,55 +18,145 @@ package org.traccar.config;
 public final class Keys {
 
     /**
-     * Connection timeout value in seconds. Because sometimes there might be no connection for some time.
+     * Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection old
+     * connections stay in open state. On most systems there is a limit on number of open connection, so this leads to
+     * problems with establishing new connections when number of devices is high or devices data connections are
+     * unstable.
      */
     public static final ConfigKey SERVER_TIMEOUT = new ConfigKey(
             "server.timeout", Integer.class);
 
     /**
-     * Reports storage configuration
+     * Enables forwarding locations to other web server.
      */
-    public static final ConfigKey REPORTS_STORAGE_TYPE = new ConfigKey(
-            "reports.storage.type", String.class);
-
-    public static final ConfigKey REPORTS_STORAGE_ENDPOINT = new ConfigKey(
-            "reports.storage.endpoint", String.class);
-
-    public static final ConfigKey REPORTS_STORAGE_BUCKET = new ConfigKey(
-            "reports.storage.bucket", String.class);
-
-    public static final ConfigKey REPORTS_STORAGE_ACCESS_KEY = new ConfigKey(
-            "reports.storage.accessKey", String.class);
-
-    public static final ConfigKey REPORTS_STORAGE_SECRET_KEY = new ConfigKey(
-            "reports.storage.secretKey", String.class);
-
-    public static final ConfigKey REPORTS_STORAGE_REGION = new ConfigKey(
-            "reports.storage.region", String.class);
+    public static final ConfigKey FORWARD_ENABLE = new ConfigKey(
+            "forward.enable", Boolean.class);
 
     /**
-     * OpenTelemetry configuration
+     * URL to forward locations.
      */
-    public static final ConfigKey OPENTELEMETRY_SERVICE_NAME = new ConfigKey(
-            "opentelemetry.service.name", String.class);
+    public static final ConfigKey FORWARD_URL = new ConfigKey(
+            "forward.url", String.class);
 
     /**
-     * Message broker configuration
+     * Additional attributes for forwarding.
      */
-    public static final ConfigKey MESSAGE_BROKER_TYPE = new ConfigKey(
-            "message.broker.type", String.class);
-
-    public static final ConfigKey MESSAGE_BROKER_URL = new ConfigKey(
-            "message.broker.url", String.class);
+    public static final ConfigKey FORWARD_ATTRIBUTES = new ConfigKey(
+            "forward.attributes", String.class);
 
     /**
-     * Service discovery configuration
+     * Position forwarding retrying enable.
      */
-    public static final ConfigKey SERVICE_DISCOVERY_TYPE = new ConfigKey(
-            "service.discovery.type", String.class);
+    public static final ConfigKey FORWARD_RETRY_ENABLE = new ConfigKey(
+            "forward.retry.enable", Boolean.class);
 
-    public static final ConfigKey SERVICE_DISCOVERY_URL = new ConfigKey(
-            "service.discovery.url", String.class);
+    /**
+     * Position forwarding retrying delay in seconds.
+     */
+    public static final ConfigKey FORWARD_RETRY_DELAY = new ConfigKey(
+            "forward.retry.delay", Integer.class);
+
+    /**
+     * Position forwarding retrying count.
+     */
+    public static final ConfigKey FORWARD_RETRY_COUNT = new ConfigKey(
+            "forward.retry.count", Integer.class);
+
+    /**
+     * Forward positions to all devices. Might be useful in case of different devices types, e.g. to convert protocols.
+     */
+    public static final ConfigKey FORWARD_ALL = new ConfigKey(
+            "forward.all", Boolean.class);
+
+    /**
+     * Enable positions forwarding to URL.
+     */
+    public static final ConfigKey EVENT_FORWARD_ENABLE = new ConfigKey(
+            "event.forward.enable", Boolean.class);
+
+    /**
+     * URL to forward events.
+     */
+    public static final ConfigKey EVENT_FORWARD_URL = new ConfigKey(
+            "event.forward.url", String.class);
+
+    /**
+     * Additional attributes for events forwarding.
+     */
+    public static final ConfigKey EVENT_FORWARD_ATTRIBUTES = new ConfigKey(
+            "event.forward.attributes", String.class);
+
+    /**
+     * Event forwarding retrying enable.
+     */
+    public static final ConfigKey EVENT_FORWARD_RETRY_ENABLE = new ConfigKey(
+            "event.forward.retry.enable", Boolean.class);
+
+    /**
+     * Event forwarding retrying delay in seconds.
+     */
+    public static final ConfigKey EVENT_FORWARD_RETRY_DELAY = new ConfigKey(
+            "event.forward.retry.delay", Integer.class);
+
+    /**
+     * Event forwarding retrying count.
+     */
+    public static final ConfigKey EVENT_FORWARD_RETRY_COUNT = new ConfigKey(
+            "event.forward.retry.count", Integer.class);
+
+    /**
+     * Enable user notifications on events.
+     */
+    public static final ConfigKey NOTIFICATION_ENABLE = new ConfigKey(
+            "notification.enable", Boolean.class);
+
+    /**
+     * Enable user notifications on user expiration.
+     */
+    public static final ConfigKey NOTIFICATION_EXPIRATION_USER = new ConfigKey(
+            "notification.expiration.user", Boolean.class);
+
+    /**
+     * User expiration reminder time in milliseconds.
+     */
+    public static final ConfigKey NOTIFICATION_EXPIRATION_USER_REMINDER = new ConfigKey(
+            "notification.expiration.user.reminder", Long.class);
+
+    /**
+     * Enable user notifications on device expiration.
+     */
+    public static final ConfigKey NOTIFICATION_EXPIRATION_DEVICE = new ConfigKey(
+            "notification.expiration.device", Boolean.class);
+
+    /**
+     * Device expiration reminder time in milliseconds.
+     */
+    public static final ConfigKey NOTIFICATION_EXPIRATION_DEVICE_REMINDER = new ConfigKey(
+            "notification.expiration.device.reminder", Long.class);
+
+    /**
+     * Service discovery Consul host.
+     */
+    public static final ConfigKey SERVICE_DISCOVERY_CONSUL_HOST = new ConfigKey(
+            "service.discovery.consul.host", String.class);
+
+    /**
+     * Service discovery Consul port.
+     */
+    public static final ConfigKey SERVICE_DISCOVERY_CONSUL_PORT = new ConfigKey(
+            "service.discovery.consul.port", Integer.class);
+
+    /**
+     * Enable message broker integration.
+     */
+    public static final ConfigKey MESSAGE_BROKER_ENABLED = new ConfigKey(
+            "message.broker.enabled", Boolean.class);
+
+    /**
+     * Kafka bootstrap servers for message broker.
+     */
+    public static final ConfigKey MESSAGE_BROKER_KAFKA_BOOTSTRAP_SERVERS = new ConfigKey(
+            "message.broker.kafka.bootstrap.servers", String.class);
 
     private Keys() {
     }
