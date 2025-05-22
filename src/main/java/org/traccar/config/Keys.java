@@ -643,6 +643,38 @@ public final class Keys {
     public static final ConfigKey<String> LDAP_ADMIN_GROUP = new StringConfigKey(
             "ldap.adminGroup",
             List.of(KeyType.CONFIG));
+            
+    /**
+     * Enable LDAP connection pooling.
+     */
+    public static final ConfigKey<Boolean> LDAP_POOL_ENABLED = new BooleanConfigKey(
+            "ldap.pool.enabled",
+            List.of(KeyType.CONFIG),
+            true);
+            
+    /**
+     * Maximum size of LDAP connection pool.
+     */
+    public static final ConfigKey<Integer> LDAP_POOL_MAX_SIZE = new IntegerConfigKey(
+            "ldap.pool.maxSize",
+            List.of(KeyType.CONFIG),
+            10);
+            
+    /**
+     * Preferred size of LDAP connection pool.
+     */
+    public static final ConfigKey<Integer> LDAP_POOL_PREFERRED_SIZE = new IntegerConfigKey(
+            "ldap.pool.preferredSize",
+            List.of(KeyType.CONFIG),
+            5);
+            
+    /**
+     * LDAP connection pool timeout in milliseconds.
+     */
+    public static final ConfigKey<Long> LDAP_POOL_TIMEOUT = new LongConfigKey(
+            "ldap.pool.timeout",
+            List.of(KeyType.CONFIG),
+            300000L);
 
     /**
      * Force OpenID Connect authentication. When enabled, the Traccar login page will be skipped
