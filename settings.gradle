@@ -1,1 +1,45 @@
 rootProject.name = "tracker-server"
+
+// Include all microservice modules in the project structure
+include 'common'
+include 'protocol-service'
+include 'position-service'
+include 'event-service'
+include 'notification-service'
+include 'api-gateway'
+include 'reporting-service'
+
+// Define module hierarchy with common library dependencies
+// All services depend on the common module for shared code
+project(':protocol-service').projectDir = file('protocol-service')
+project(':position-service').projectDir = file('position-service')
+project(':event-service').projectDir = file('event-service')
+project(':notification-service').projectDir = file('notification-service')
+project(':api-gateway').projectDir = file('api-gateway')
+project(':reporting-service').projectDir = file('reporting-service')
+project(':common').projectDir = file('common')
+
+// Configure project naming convention for microservices
+project(':protocol-service').name = 'traccar-protocol-service'
+project(':position-service').name = 'traccar-position-service'
+project(':event-service').name = 'traccar-event-service'
+project(':notification-service').name = 'traccar-notification-service'
+project(':api-gateway').name = 'traccar-api-gateway'
+project(':reporting-service').name = 'traccar-reporting-service'
+project(':common').name = 'traccar-common'
+
+// Enable composite builds for independent service development
+// This allows developers to work on individual services in isolation
+// while maintaining the ability to build the entire project
+gradle.startParameter.projectProperties.each { prop, value ->
+    if (prop == 'composite' && value == 'true') {
+        // When composite mode is enabled, include only the specified module and common
+        String moduleToInclude = gradle.startParameter.projectProperties.get('module')
+        if (moduleToInclude) {
+            logger.lifecycle("Composite build enabled for module: ${moduleToInclude}")
+            rootProject.children.clear()
+            include 'common'
+            include moduleToInclude
+        }
+    }
+}
