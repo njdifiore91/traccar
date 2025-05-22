@@ -17,12 +17,26 @@ package org.traccar.storage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.semconv.SemanticAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Permission;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -41,39 +55,64 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
+    
+    private static final String INSTRUMENTATION_NAME = "org.traccar.storage";
+    private static final String INSTRUMENTATION_VERSION = "1.0.0";
+    
+    private static final AttributeKey<String> DB_SYSTEM = AttributeKey.stringKey("db.system");
+    private static final AttributeKey<String> DB_OPERATION = AttributeKey.stringKey("db.operation");
+    private static final AttributeKey<String> DB_SERVICE = AttributeKey.stringKey("db.service");
+    private static final AttributeKey<String> DB_STATEMENT = AttributeKey.stringKey("db.statement");
+    private static final AttributeKey<String> DB_QUERY_SUMMARY = AttributeKey.stringKey("db.query.summary");
 
     private final Config config;
     private final ObjectMapper objectMapper;
+    private final MeterRegistry meterRegistry;
+    private final OpenTelemetry openTelemetry;
+    private final Tracer tracer;
+    private final String serviceName;
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
+    private final Map<String, Object> parameters = new HashMap<>();
 
     private QueryBuilder(
             Config config, DataSource dataSource, ObjectMapper objectMapper,
+            MeterRegistry meterRegistry, OpenTelemetry openTelemetry, String serviceName,
             String query, boolean returnGeneratedKeys) throws SQLException {
         this.config = config;
         this.objectMapper = objectMapper;
+        this.meterRegistry = meterRegistry;
+        this.openTelemetry = openTelemetry;
+        this.tracer = openTelemetry.getTracer(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION);
+        this.serviceName = serviceName;
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
-            connection = dataSource.getConnection();
-            String parsedQuery = parse(query.trim(), indexMap);
             try {
-                if (returnGeneratedKeys) {
-                    statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
-                } else {
-                    statement = connection.prepareStatement(parsedQuery);
+                connection = dataSource.getConnection();
+                String parsedQuery = parse(query.trim(), indexMap);
+                try {
+                    if (returnGeneratedKeys) {
+                        statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                    } else {
+                        statement = connection.prepareStatement(parsedQuery);
+                    }
+                } catch (SQLException error) {
+                    connection.close();
+                    throw error;
                 }
             } catch (SQLException error) {
-                connection.close();
+                LOGGER.error("Error creating database connection: {}", error.getMessage());
                 throw error;
             }
         }
@@ -136,14 +175,29 @@ public final class QueryBuilder {
     }
 
     public static QueryBuilder create(
+            Config config, DataSource dataSource, ObjectMapper objectMapper, 
+            MeterRegistry meterRegistry, OpenTelemetry openTelemetry, String serviceName,
+            String query) throws SQLException {
+        return new QueryBuilder(config, dataSource, objectMapper, meterRegistry, openTelemetry, serviceName, query, false);
+    }
+
+    public static QueryBuilder create(
+            Config config, DataSource dataSource, ObjectMapper objectMapper,
+            MeterRegistry meterRegistry, OpenTelemetry openTelemetry, String serviceName,
+            String query, boolean returnGeneratedKeys) throws SQLException {
+        return new QueryBuilder(config, dataSource, objectMapper, meterRegistry, openTelemetry, serviceName, query, returnGeneratedKeys);
+    }
+    
+    // Legacy methods for backward compatibility
+    public static QueryBuilder create(
             Config config, DataSource dataSource, ObjectMapper objectMapper, String query) throws SQLException {
-        return new QueryBuilder(config, dataSource, objectMapper, query, false);
+        return new QueryBuilder(config, dataSource, objectMapper, null, null, null, query, false);
     }
 
     public static QueryBuilder create(
             Config config, DataSource dataSource, ObjectMapper objectMapper, String query,
             boolean returnGeneratedKeys) throws SQLException {
-        return new QueryBuilder(config, dataSource, objectMapper, query, returnGeneratedKeys);
+        return new QueryBuilder(config, dataSource, objectMapper, null, null, null, query, returnGeneratedKeys);
     }
 
     private List<Integer> indexes(String name) {
@@ -159,9 +213,9 @@ public final class QueryBuilder {
         for (int i : indexes(name)) {
             try {
                 statement.setBoolean(i, value);
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -172,9 +226,9 @@ public final class QueryBuilder {
         for (int i : indexes(name)) {
             try {
                 statement.setInt(i, value);
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -190,12 +244,13 @@ public final class QueryBuilder {
             try {
                 if (value == 0 && nullIfZero) {
                     statement.setNull(i, Types.INTEGER);
+                    parameters.put(name, null);
                 } else {
                     statement.setLong(i, value);
+                    parameters.put(name, value);
                 }
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -206,9 +261,9 @@ public final class QueryBuilder {
         for (int i : indexes(name)) {
             try {
                 statement.setDouble(i, value);
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -223,9 +278,9 @@ public final class QueryBuilder {
                 } else {
                     statement.setString(i, value);
                 }
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -240,9 +295,9 @@ public final class QueryBuilder {
                 } else {
                     statement.setTimestamp(i, new Timestamp(value.getTime()));
                 }
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -257,9 +312,9 @@ public final class QueryBuilder {
                 } else {
                     statement.setBytes(i, value);
                 }
+                parameters.put(name, value);
             } catch (SQLException error) {
-                statement.close();
-                connection.close();
+                closeResources(error);
                 throw error;
             }
         }
@@ -400,13 +455,115 @@ public final class QueryBuilder {
             LOGGER.info(query);
         }
     }
+    
+    private void closeResources(SQLException error) {
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            LOGGER.warn("Error closing resources", e);
+        }
+    }
+    
+    private String getQueryOperation() {
+        if (query == null) {
+            return "UNKNOWN";
+        }
+        String upperQuery = query.trim().toUpperCase();
+        if (upperQuery.startsWith("SELECT")) {
+            return "SELECT";
+        } else if (upperQuery.startsWith("INSERT")) {
+            return "INSERT";
+        } else if (upperQuery.startsWith("UPDATE")) {
+            return "UPDATE";
+        } else if (upperQuery.startsWith("DELETE")) {
+            return "DELETE";
+        } else if (upperQuery.startsWith("CREATE")) {
+            return "CREATE";
+        } else if (upperQuery.startsWith("ALTER")) {
+            return "ALTER";
+        } else if (upperQuery.startsWith("DROP")) {
+            return "DROP";
+        } else {
+            return "OTHER";
+        }
+    }
+    
+    private String getQuerySummary() {
+        if (query == null) {
+            return "UNKNOWN";
+        }
+        String operation = getQueryOperation();
+        String[] parts = query.trim().split("\\s+");
+        if (parts.length > 2) {
+            if ("SELECT".equals(operation)) {
+                // Find FROM clause to identify table
+                for (int i = 1; i < parts.length - 1; i++) {
+                    if ("FROM".equalsIgnoreCase(parts[i])) {
+                        return operation + " " + parts[i + 1];
+                    }
+                }
+            } else if ("INSERT".equals(operation)) {
+                // Usually INSERT INTO table
+                if (parts.length > 3 && "INTO".equalsIgnoreCase(parts[1])) {
+                    return operation + " " + parts[2];
+                }
+            } else if ("UPDATE".equals(operation)) {
+                // Usually UPDATE table
+                return operation + " " + parts[1];
+            } else if ("DELETE".equals(operation)) {
+                // Usually DELETE FROM table
+                if (parts.length > 2 && "FROM".equalsIgnoreCase(parts[1])) {
+                    return operation + " " + parts[2];
+                }
+            }
+        }
+        return operation;
+    }
 
     public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
         List<T> result = new LinkedList<>();
 
         if (query != null) {
-
+            Span span = null;
+            Timer.Sample timerSample = null;
+            String operation = getQueryOperation();
+            String querySummary = getQuerySummary();
+            
             try {
+                // Start OpenTelemetry span if available
+                if (tracer != null) {
+                    span = tracer.spanBuilder(querySummary)
+                            .setSpanKind(SpanKind.CLIENT)
+                            .setParent(Context.current())
+                            .setAttribute(SemanticAttributes.DB_SYSTEM, "sql")
+                            .setAttribute(DB_OPERATION, operation)
+                            .setAttribute(DB_STATEMENT, query)
+                            .setAttribute(DB_QUERY_SUMMARY, querySummary)
+                            .startSpan();
+                    
+                    if (serviceName != null) {
+                        span.setAttribute(DB_SERVICE, serviceName);
+                    }
+                    
+                    // Add parameters as attributes if not too many
+                    if (parameters.size() <= 10) {
+                        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                            if (entry.getValue() != null) {
+                                span.setAttribute("db.params." + entry.getKey(), entry.getValue().toString());
+                            }
+                        }
+                    }
+                }
+                
+                // Start Micrometer timer if available
+                if (meterRegistry != null) {
+                    timerSample = Timer.start(meterRegistry);
+                }
 
                 logQuery();
 
@@ -439,6 +596,7 @@ public final class QueryBuilder {
                         }
                     }
 
+                    int rowCount = 0;
                     while (resultSet.next()) {
                         try {
                             T object = clazz.getDeclaredConstructor().newInstance();
@@ -446,15 +604,64 @@ public final class QueryBuilder {
                                 processor.process(object, resultSet);
                             }
                             result.add(object);
+                            rowCount++;
                         } catch (ReflectiveOperationException e) {
                             throw new IllegalArgumentException();
                         }
                     }
+                    
+                    // Record row count in span
+                    if (span != null) {
+                        span.setAttribute("db.result.rows", rowCount);
+                    }
+                }
+                
+                // Record successful completion
+                if (span != null) {
+                    span.setStatus(StatusCode.OK);
+                }
+                
+                // Record timer if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("success", "true")
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
                 }
 
+            } catch (SQLException e) {
+                // Record error in span
+                if (span != null) {
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    span.setAttribute("db.error.code", e.getErrorCode());
+                    span.setAttribute("db.error.message", e.getMessage());
+                    span.setAttribute("db.error.state", e.getSQLState());
+                }
+                
+                // Record timer with error tag if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("success", "false")
+                            .tag("error", e.getClass().getSimpleName())
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
+                }
+                
+                LOGGER.error("Database query error: {}", e.getMessage());
+                throw e;
             } finally {
-                statement.close();
-                connection.close();
+                // Close span if created
+                if (span != null) {
+                    span.end();
+                }
+                
+                closeResources(null);
             }
         }
 
@@ -462,20 +669,110 @@ public final class QueryBuilder {
     }
 
     public long executeUpdate() throws SQLException {
-
         if (query != null) {
+            Span span = null;
+            Timer.Sample timerSample = null;
+            String operation = getQueryOperation();
+            String querySummary = getQuerySummary();
+            
             try {
+                // Start OpenTelemetry span if available
+                if (tracer != null) {
+                    span = tracer.spanBuilder(querySummary)
+                            .setSpanKind(SpanKind.CLIENT)
+                            .setParent(Context.current())
+                            .setAttribute(SemanticAttributes.DB_SYSTEM, "sql")
+                            .setAttribute(DB_OPERATION, operation)
+                            .setAttribute(DB_STATEMENT, query)
+                            .setAttribute(DB_QUERY_SUMMARY, querySummary)
+                            .startSpan();
+                    
+                    if (serviceName != null) {
+                        span.setAttribute(DB_SERVICE, serviceName);
+                    }
+                    
+                    // Add parameters as attributes if not too many
+                    if (parameters.size() <= 10) {
+                        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                            if (entry.getValue() != null) {
+                                span.setAttribute("db.params." + entry.getKey(), entry.getValue().toString());
+                            }
+                        }
+                    }
+                }
+                
+                // Start Micrometer timer if available
+                if (meterRegistry != null) {
+                    timerSample = Timer.start(meterRegistry);
+                }
+
                 logQuery();
                 statement.execute();
+                long generatedKey = 0;
+                
                 if (returnGeneratedKeys) {
                     ResultSet resultSet = statement.getGeneratedKeys();
                     if (resultSet.next()) {
-                        return resultSet.getLong(1);
+                        generatedKey = resultSet.getLong(1);
+                        if (span != null) {
+                            span.setAttribute("db.generated.key", generatedKey);
+                        }
                     }
                 }
+                
+                // Record affected rows in span
+                int affectedRows = statement.getUpdateCount();
+                if (span != null) {
+                    span.setAttribute("db.affected.rows", affectedRows);
+                }
+                
+                // Record successful completion
+                if (span != null) {
+                    span.setStatus(StatusCode.OK);
+                }
+                
+                // Record timer if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("success", "true")
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
+                }
+                
+                return generatedKey;
+            } catch (SQLException e) {
+                // Record error in span
+                if (span != null) {
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    span.setAttribute("db.error.code", e.getErrorCode());
+                    span.setAttribute("db.error.message", e.getMessage());
+                    span.setAttribute("db.error.state", e.getSQLState());
+                }
+                
+                // Record timer with error tag if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("success", "false")
+                            .tag("error", e.getClass().getSimpleName())
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
+                }
+                
+                LOGGER.error("Database update error: {}", e.getMessage());
+                throw e;
             } finally {
-                statement.close();
-                connection.close();
+                // Close span if created
+                if (span != null) {
+                    span.end();
+                }
+                
+                closeResources(null);
             }
         }
         return 0;
@@ -484,10 +781,47 @@ public final class QueryBuilder {
     public List<Permission> executePermissionsQuery() throws SQLException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
+            Span span = null;
+            Timer.Sample timerSample = null;
+            String operation = getQueryOperation();
+            String querySummary = getQuerySummary();
+            
             try {
+                // Start OpenTelemetry span if available
+                if (tracer != null) {
+                    span = tracer.spanBuilder(querySummary)
+                            .setSpanKind(SpanKind.CLIENT)
+                            .setParent(Context.current())
+                            .setAttribute(SemanticAttributes.DB_SYSTEM, "sql")
+                            .setAttribute(DB_OPERATION, operation)
+                            .setAttribute(DB_STATEMENT, query)
+                            .setAttribute(DB_QUERY_SUMMARY, querySummary)
+                            .setAttribute("db.query.type", "permissions")
+                            .startSpan();
+                    
+                    if (serviceName != null) {
+                        span.setAttribute(DB_SERVICE, serviceName);
+                    }
+                    
+                    // Add parameters as attributes if not too many
+                    if (parameters.size() <= 10) {
+                        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                            if (entry.getValue() != null) {
+                                span.setAttribute("db.params." + entry.getKey(), entry.getValue().toString());
+                            }
+                        }
+                    }
+                }
+                
+                // Start Micrometer timer if available
+                if (meterRegistry != null) {
+                    timerSample = Timer.start(meterRegistry);
+                }
+
                 logQuery();
                 try (ResultSet resultSet = statement.executeQuery()) {
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
+                    int rowCount = 0;
                     while (resultSet.next()) {
                         LinkedHashMap<String, Long> map = new LinkedHashMap<>();
                         for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
@@ -495,11 +829,63 @@ public final class QueryBuilder {
                             map.put(label, resultSet.getLong(label));
                         }
                         result.add(new Permission(map));
+                        rowCount++;
+                    }
+                    
+                    // Record row count in span
+                    if (span != null) {
+                        span.setAttribute("db.result.rows", rowCount);
                     }
                 }
+                
+                // Record successful completion
+                if (span != null) {
+                    span.setStatus(StatusCode.OK);
+                }
+                
+                // Record timer if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("type", "permissions")
+                            .tag("success", "true")
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
+                }
+                
+            } catch (SQLException e) {
+                // Record error in span
+                if (span != null) {
+                    span.setStatus(StatusCode.ERROR, e.getMessage());
+                    span.setAttribute("db.error.code", e.getErrorCode());
+                    span.setAttribute("db.error.message", e.getMessage());
+                    span.setAttribute("db.error.state", e.getSQLState());
+                }
+                
+                // Record timer with error tag if available
+                if (timerSample != null && meterRegistry != null) {
+                    timerSample.stop(Timer.builder("db.query.time")
+                            .description("Time spent executing database queries")
+                            .tag("operation", operation)
+                            .tag("summary", querySummary)
+                            .tag("type", "permissions")
+                            .tag("success", "false")
+                            .tag("error", e.getClass().getSimpleName())
+                            .tag("service", serviceName != null ? serviceName : "unknown")
+                            .register(meterRegistry));
+                }
+                
+                LOGGER.error("Database permissions query error: {}", e.getMessage());
+                throw e;
             } finally {
-                statement.close();
-                connection.close();
+                // Close span if created
+                if (span != null) {
+                    span.end();
+                }
+                
+                closeResources(null);
             }
         }
 
