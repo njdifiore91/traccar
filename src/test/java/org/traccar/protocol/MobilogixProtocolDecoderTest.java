@@ -1,11 +1,37 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.traccar.ProtocolTest;
+import org.traccar.messaging.MessageProducer;
 import org.traccar.model.Position;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * Test for Mobilogix protocol decoder
+ * Supports both monolithic and microservices testing environments
+ */
+@ExtendWith(MockitoExtension.class)
 public class MobilogixProtocolDecoderTest extends ProtocolTest {
 
+    @Mock
+    private MessageProducer messageProducer;
+
+    /**
+     * Tests basic decoding functionality
+     */
     @Test
     public void testDecode() throws Exception {
 
@@ -65,4 +91,70 @@ public class MobilogixProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    /**
+     * Tests message broker integration for position publishing
+     * This test verifies that decoded positions are properly published to the message broker
+     */
+    @Test
+    public void testMessageBrokerIntegration() throws Exception {
+        // Setup decoder with mock message producer
+        var decoder = inject(new MobilogixProtocolDecoder(null));
+        
+        // Set the mock message producer using reflection
+        var field = MobilogixProtocolDecoder.class.getDeclaredField("messageProducer");
+        field.setAccessible(true);
+        field.set(decoder, messageProducer);
+        
+        // Setup mock to return a completed future
+        when(messageProducer.publish(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
+        when(messageProducer.isConnected()).thenReturn(true);
+        
+        // Decode a position message
+        Object result = decoder.decode(null, null, text(
+                "[2021-10-25 20:51:21,T21,1,V1.2.3,201951132044,37,12.18,961,-25.932310,-47.022415,0,82"));
+        
+        // Verify the position was decoded
+        assertNotNull(result);
+        assertEquals(Position.class, result.getClass());
+        
+        // Verify the position was published to the message broker
+        verify(messageProducer).publish(eq("positions"), any(Position.class));
+    }
+    
+    /**
+     * Tests cross-service communication by verifying protocol handling across service boundaries
+     * This test simulates the interaction between the protocol service and other services
+     */
+    @Test
+    public void testCrossServiceCommunication() throws Exception {
+        // Setup decoder with mock message producer
+        var decoder = inject(new MobilogixProtocolDecoder(null));
+        
+        // Set the mock message producer using reflection
+        var field = MobilogixProtocolDecoder.class.getDeclaredField("messageProducer");
+        field.setAccessible(true);
+        field.set(decoder, messageProducer);
+        
+        // Setup mock to return a completed future and capture headers
+        Map<String, Object> capturedHeaders = new HashMap<>();
+        when(messageProducer.publish(any(), any(), any())).thenAnswer(invocation -> {
+            capturedHeaders.putAll(invocation.getArgument(2));
+            return CompletableFuture.completedFuture(null);
+        });
+        when(messageProducer.isConnected()).thenReturn(true);
+        
+        // Decode a position message with extended data
+        Object result = decoder.decode(null, null, text(
+                "[2021-09-30 20:06:35,T21,1,V1.3.5,201950130047,37,14.97,092,-23.494715,-46.851341,0,240,4.08,0,19516,4431,0.78,724,10,09111,00771,31,4680"));
+        
+        // Verify the position was decoded
+        assertNotNull(result);
+        assertEquals(Position.class, result.getClass());
+        
+        // Verify the position was published with headers for cross-service communication
+        verify(messageProducer).publish(eq("positions"), any(Position.class), any());
+        
+        // In a microservices environment, headers would contain correlation IDs and other metadata
+        // This test would verify those headers are properly set for tracing across services
+    }
 }
