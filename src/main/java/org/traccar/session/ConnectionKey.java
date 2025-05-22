@@ -17,10 +17,69 @@ package org.traccar.session;
 
 import io.netty.channel.Channel;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 
-public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
+/**
+ * A key used to uniquely identify a connection in the session management system.
+ * This class is serializable to support distributed session storage in Redis.
+ */
+public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) implements Serializable {
+    
+    /**
+     * Serial version UID for serialization compatibility across different versions.
+     */
+    private static final long serialVersionUID = 1L;
+    
+    /**
+     * Creates a ConnectionKey from a Channel and remote address.
+     *
+     * @param channel The Netty channel
+     * @param remoteAddress The remote socket address
+     */
     public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
         this(channel.localAddress(), remoteAddress);
+    }
+    
+    /**
+     * Returns a string representation of this ConnectionKey.
+     * This implementation provides detailed connection information for logging and debugging.
+     *
+     * @return A string representation of this ConnectionKey
+     */
+    @Override
+    public String toString() {
+        return "ConnectionKey[local=" + localAddress + ", remote=" + remoteAddress + "]";
+    }
+    
+    /**
+     * Compares this ConnectionKey with another object for equality.
+     * This implementation ensures proper comparison in distributed environments.
+     *
+     * @param o The object to compare with
+     * @return true if the objects are equal, false otherwise
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        ConnectionKey that = (ConnectionKey) o;
+        
+        if (localAddress != null ? !localAddress.equals(that.localAddress) : that.localAddress != null) return false;
+        return remoteAddress != null ? remoteAddress.equals(that.remoteAddress) : that.remoteAddress == null;
+    }
+    
+    /**
+     * Returns a hash code for this ConnectionKey.
+     * This implementation ensures consistent hashing in distributed environments.
+     *
+     * @return A hash code value for this ConnectionKey
+     */
+    @Override
+    public int hashCode() {
+        int result = localAddress != null ? localAddress.hashCode() : 0;
+        result = 31 * result + (remoteAddress != null ? remoteAddress.hashCode() : 0);
+        return result;
     }
 }
