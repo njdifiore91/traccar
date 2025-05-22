@@ -2069,25 +2069,11 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Message broker server URL. For Kafka, this is a comma-separated list of bootstrap servers.
+     * Message broker connection string. For Kafka, this is a comma-separated list of bootstrap servers.
      * For RabbitMQ, this is the AMQP URL.
      */
-    public static final ConfigKey<String> MESSAGE_BROKER_URL = new StringConfigKey(
-            "message.broker.url",
-            List.of(KeyType.CONFIG));
-
-    /**
-     * Message broker username for authentication.
-     */
-    public static final ConfigKey<String> MESSAGE_BROKER_USERNAME = new StringConfigKey(
-            "message.broker.username",
-            List.of(KeyType.CONFIG));
-
-    /**
-     * Message broker password for authentication.
-     */
-    public static final ConfigKey<String> MESSAGE_BROKER_PASSWORD = new StringConfigKey(
-            "message.broker.password",
+    public static final ConfigKey<String> MESSAGE_BROKER_CONNECTION = new StringConfigKey(
+            "message.broker.connection",
             List.of(KeyType.CONFIG));
 
     /**
@@ -2098,10 +2084,271 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Message broker consumer group ID. Used for Kafka consumer group ID or RabbitMQ consumer tag.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_CONSUMER_GROUP_ID = new StringConfigKey(
+            "message.broker.consumer.groupId",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message serialization format. Available options are "json", "protobuf", and "avro".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SERIALIZATION_FORMAT = new StringConfigKey(
+            "message.broker.serialization.format",
+            List.of(KeyType.CONFIG),
+            "json");
+
+    /**
+     * Schema registry URL for Avro or Protobuf serialization.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SCHEMA_REGISTRY_URL = new StringConfigKey(
+            "message.broker.schema.registry.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable schema validation for messages.
+     */
+    public static final ConfigKey<Boolean> MESSAGE_BROKER_SCHEMA_VALIDATION_ENABLED = new BooleanConfigKey(
+            "message.broker.schema.validation.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Schema evolution strategy. Available options are "backward", "forward", "full", "none".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SCHEMA_EVOLUTION_STRATEGY = new StringConfigKey(
+            "message.broker.schema.evolution.strategy",
+            List.of(KeyType.CONFIG),
+            "backward");
+
+    /**
+     * Topic or exchange name for position data.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_POSITION_TOPIC = new StringConfigKey(
+            "message.broker.topic.position",
+            List.of(KeyType.CONFIG),
+            "positions");
+
+    /**
+     * Topic or exchange name for event data.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_EVENT_TOPIC = new StringConfigKey(
+            "message.broker.topic.event",
+            List.of(KeyType.CONFIG),
+            "events");
+
+    /**
+     * Topic or exchange name for command data.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_COMMAND_TOPIC = new StringConfigKey(
+            "message.broker.topic.command",
+            List.of(KeyType.CONFIG),
+            "commands");
+
+    /**
+     * Topic or exchange name for notification data.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_NOTIFICATION_TOPIC = new StringConfigKey(
+            "message.broker.topic.notification",
+            List.of(KeyType.CONFIG),
+            "notifications");
+
+    /**
+     * Number of partitions for Kafka topics.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_PARTITION_COUNT = new IntegerConfigKey(
+            "message.broker.partitionCount",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Replication factor for Kafka topics.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_REPLICATION_FACTOR = new IntegerConfigKey(
+            "message.broker.replicationFactor",
+            List.of(KeyType.CONFIG),
+            1);
+
+    /**
+     * Producer acknowledgment mode. For Kafka: "0", "1", "all". For RabbitMQ: "none", "single", "multiple".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_PRODUCER_ACKS = new StringConfigKey(
+            "message.broker.producer.acks",
+            List.of(KeyType.CONFIG),
+            "all");
+
+    /**
+     * Maximum in-flight requests per connection for Kafka producer.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_PRODUCER_MAX_IN_FLIGHT = new IntegerConfigKey(
+            "message.broker.producer.maxInFlight",
+            List.of(KeyType.CONFIG),
+            5);
+
+    /**
+     * Batch size for Kafka producer in bytes.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_PRODUCER_BATCH_SIZE = new IntegerConfigKey(
+            "message.broker.producer.batchSize",
+            List.of(KeyType.CONFIG),
+            16384);
+
+    /**
+     * Linger time for Kafka producer in milliseconds.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_PRODUCER_LINGER_MS = new IntegerConfigKey(
+            "message.broker.producer.lingerMs",
+            List.of(KeyType.CONFIG),
+            0);
+
+    /**
+     * Buffer memory for Kafka producer in bytes.
+     */
+    public static final ConfigKey<Long> MESSAGE_BROKER_PRODUCER_BUFFER_MEMORY = new LongConfigKey(
+            "message.broker.producer.bufferMemory",
+            List.of(KeyType.CONFIG),
+            33554432L);
+
+    /**
+     * Compression type for Kafka producer. Available options are "none", "gzip", "snappy", "lz4", "zstd".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_PRODUCER_COMPRESSION_TYPE = new StringConfigKey(
+            "message.broker.producer.compressionType",
+            List.of(KeyType.CONFIG),
+            "none");
+
+    /**
+     * Maximum poll records for Kafka consumer.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_CONSUMER_MAX_POLL_RECORDS = new IntegerConfigKey(
+            "message.broker.consumer.maxPollRecords",
+            List.of(KeyType.CONFIG),
+            500);
+
+    /**
+     * Auto offset reset policy for Kafka consumer. Available options are "earliest", "latest", "none".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_CONSUMER_AUTO_OFFSET_RESET = new StringConfigKey(
+            "message.broker.consumer.autoOffsetReset",
+            List.of(KeyType.CONFIG),
+            "latest");
+
+    /**
+     * Prefetch count for RabbitMQ consumer.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_CONSUMER_PREFETCH_COUNT = new IntegerConfigKey(
+            "message.broker.consumer.prefetchCount",
+            List.of(KeyType.CONFIG),
+            10);
+
+    /**
+     * Queue durability setting for RabbitMQ.
+     */
+    public static final ConfigKey<Boolean> MESSAGE_BROKER_QUEUE_DURABLE = new BooleanConfigKey(
+            "message.broker.queue.durable",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * Exchange durability setting for RabbitMQ.
+     */
+    public static final ConfigKey<Boolean> MESSAGE_BROKER_EXCHANGE_DURABLE = new BooleanConfigKey(
+            "message.broker.exchange.durable",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * Exchange type for RabbitMQ. Available options are "direct", "fanout", "topic", "headers".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_EXCHANGE_TYPE = new StringConfigKey(
+            "message.broker.exchange.type",
+            List.of(KeyType.CONFIG),
+            "topic");
+
+    /**
+     * Retry policy for message delivery. Available options are "none", "simple", "exponential".
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_RETRY_POLICY = new StringConfigKey(
+            "message.broker.retry.policy",
+            List.of(KeyType.CONFIG),
+            "exponential");
+
+    /**
+     * Maximum number of retry attempts for message delivery.
+     */
+    public static final ConfigKey<Integer> MESSAGE_BROKER_MAX_RETRY_ATTEMPTS = new IntegerConfigKey(
+            "message.broker.retry.maxAttempts",
+            List.of(KeyType.CONFIG),
+            3);
+
+    /**
+     * Initial retry interval in milliseconds.
+     */
+    public static final ConfigKey<Long> MESSAGE_BROKER_INITIAL_RETRY_INTERVAL_MS = new LongConfigKey(
+            "message.broker.retry.initialIntervalMs",
+            List.of(KeyType.CONFIG),
+            1000L);
+
+    /**
+     * Maximum retry interval in milliseconds.
+     */
+    public static final ConfigKey<Long> MESSAGE_BROKER_MAX_RETRY_INTERVAL_MS = new LongConfigKey(
+            "message.broker.retry.maxIntervalMs",
+            List.of(KeyType.CONFIG),
+            60000L);
+
+    /**
+     * Retry backoff multiplier.
+     */
+    public static final ConfigKey<Double> MESSAGE_BROKER_RETRY_BACKOFF_MULTIPLIER = new DoubleConfigKey(
+            "message.broker.retry.backoffMultiplier",
+            List.of(KeyType.CONFIG),
+            2.0);
+
+    /**
+     * Dead letter queue or topic name.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_DEAD_LETTER_DESTINATION = new StringConfigKey(
+            "message.broker.deadLetter.destination",
+            List.of(KeyType.CONFIG),
+            "dead-letter");
+
+    /**
+     * Message retention period in milliseconds for Kafka topics.
+     */
+    public static final ConfigKey<Long> MESSAGE_BROKER_MESSAGE_RETENTION_MS = new LongConfigKey(
+            "message.broker.message.retentionMs",
+            List.of(KeyType.CONFIG),
+            604800000L); // 7 days by default
+
+    /**
+     * Message retention size in bytes for Kafka topics.
+     */
+    public static final ConfigKey<Long> MESSAGE_BROKER_MESSAGE_RETENTION_BYTES = new LongConfigKey(
+            "message.broker.message.retentionBytes",
+            List.of(KeyType.CONFIG),
+            -1L); // Unlimited by default
+
+    /**
      * Message broker SSL enabled flag.
      */
     public static final ConfigKey<Boolean> MESSAGE_BROKER_SSL_ENABLED = new BooleanConfigKey(
             "message.broker.ssl.enabled",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
+     * Message broker SSL keystore location.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SSL_KEYSTORE_LOCATION = new StringConfigKey(
+            "message.broker.ssl.keystore.location",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Message broker SSL keystore password.
+     */
+    public static final ConfigKey<String> MESSAGE_BROKER_SSL_KEYSTORE_PASSWORD = new StringConfigKey(
+            "message.broker.ssl.keystore.password",
             List.of(KeyType.CONFIG));
 
     /**
@@ -2117,46 +2364,6 @@ public final class Keys {
     public static final ConfigKey<String> MESSAGE_BROKER_SSL_TRUSTSTORE_PASSWORD = new StringConfigKey(
             "message.broker.ssl.truststore.password",
             List.of(KeyType.CONFIG));
-
-    /**
-     * Kafka specific configuration: number of partitions for auto-created topics.
-     */
-    public static final ConfigKey<Integer> MESSAGE_BROKER_KAFKA_PARTITIONS = new IntegerConfigKey(
-            "message.broker.kafka.partitions",
-            List.of(KeyType.CONFIG),
-            3);
-
-    /**
-     * Kafka specific configuration: replication factor for auto-created topics.
-     */
-    public static final ConfigKey<Integer> MESSAGE_BROKER_KAFKA_REPLICATION_FACTOR = new IntegerConfigKey(
-            "message.broker.kafka.replicationFactor",
-            List.of(KeyType.CONFIG),
-            1);
-
-    /**
-     * RabbitMQ specific configuration: virtual host.
-     */
-    public static final ConfigKey<String> MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST = new StringConfigKey(
-            "message.broker.rabbitmq.virtualHost",
-            List.of(KeyType.CONFIG),
-            "/");
-
-    /**
-     * RabbitMQ specific configuration: exchange type. Default is "topic".
-     */
-    public static final ConfigKey<String> MESSAGE_BROKER_RABBITMQ_EXCHANGE_TYPE = new StringConfigKey(
-            "message.broker.rabbitmq.exchangeType",
-            List.of(KeyType.CONFIG),
-            "topic");
-
-    /**
-     * RabbitMQ specific configuration: exchange durable flag.
-     */
-    public static final ConfigKey<Boolean> MESSAGE_BROKER_RABBITMQ_EXCHANGE_DURABLE = new BooleanConfigKey(
-            "message.broker.rabbitmq.exchangeDurable",
-            List.of(KeyType.CONFIG),
-            true);
 
     // Distributed Tracing Configuration Keys
 
