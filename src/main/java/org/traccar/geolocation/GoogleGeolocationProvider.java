@@ -17,12 +17,43 @@ package org.traccar.geolocation;
 
 import jakarta.ws.rs.client.Client;
 
+import io.opentelemetry.api.trace.Tracer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+/**
+ * Google Geolocation API provider.
+ * Implements circuit breaker pattern for resilience and includes distributed tracing.
+ */
 public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
 
     private static final String URL = "https://www.googleapis.com/geolocation/v1/geolocate";
 
-    public GoogleGeolocationProvider(Client client, String key) {
-        super(client, URL, key);
+    /**
+     * Creates a new instance of the GoogleGeolocationProvider.
+     *
+     * @param client HTTP client for making requests
+     * @param key Google Geolocation API key
+     * @param circuitBreakerFactory Factory for creating circuit breakers
+     * @param tracer OpenTelemetry tracer for distributed tracing
+     * @param metricsCollector Collector for geolocation metrics
+     * @param serviceManager Service manager for service discovery
+     */
+    @Inject
+    public GoogleGeolocationProvider(
+            Client client, 
+            @Named("geolocation.google.key") String key,
+            GeolocationCircuitBreakerFactory circuitBreakerFactory,
+            Tracer tracer,
+            GeolocationMetricsCollector metricsCollector,
+            GeolocationServiceManager serviceManager) {
+        
+        // Use service discovery to get the URL if available, otherwise use the default URL
+        String serviceUrl = serviceManager.getServiceUrl("google-geolocation").orElse(URL);
+        
+        // Pass all dependencies to the parent class constructor
+        super(client, serviceUrl, key, circuitBreakerFactory, tracer, metricsCollector);
     }
 
 }
