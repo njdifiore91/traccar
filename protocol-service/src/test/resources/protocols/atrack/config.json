@@ -1,79 +1,85 @@
 {
-  "default": {
-    "longDate": false,
-    "decimalFuel": false,
-    "custom": false,
-    "frameMask": 0,
-    "form": null
+  "protocol": {
+    "name": "atrack",
+    "description": "Configuration for ATrack protocol tests"
   },
-  "testScenarios": {
-    "longDateMode": {
-      "longDate": true,
-      "decimalFuel": false,
-      "custom": false,
-      "frameMask": 0,
-      "form": null
-    },
-    "customFormat": {
+  "decoder": {
+    "options": {
       "longDate": false,
-      "decimalFuel": false,
       "custom": true,
-      "frameMask": 0,
-      "form": null
+      "decimalFuel": false
     },
-    "customFormatWithForm": {
-      "longDate": false,
-      "decimalFuel": false,
-      "custom": true,
-      "frameMask": 0,
-      "form": "%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT"
+    "formats": {
+      "default": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "extended": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%OB,%J1,%J2",
+      "obd": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%OB"
     },
-    "beaconMode": {
-      "longDate": false,
-      "decimalFuel": false,
-      "custom": true,
-      "frameMask": 1,
-      "form": "%BC"
-    },
-    "decimalFuelMode": {
-      "longDate": false,
-      "decimalFuel": true,
-      "custom": false,
-      "frameMask": 0,
-      "form": null
-    },
-    "combinedMode": {
-      "longDate": true,
-      "decimalFuel": true,
-      "custom": true,
-      "frameMask": 0,
-      "form": "%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF"
+    "frameMasks": {
+      "binary": "0x4050",
+      "ascii": "0x4040"
     }
   },
-  "protocolSettings": {
-    "alarmMap": {
-      "1": "sos",
-      "2": "powerCut",
-      "3": "vibration",
-      "4": "lowBattery",
-      "5": "overspeed",
-      "6": "geofenceEnter",
-      "7": "geofenceExit",
-      "8": "powerOn",
-      "9": "powerOff",
-      "10": "powerRestored"
-    },
-    "customFormats": [
-      "%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT",
-      "%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF",
-      "%CI%BC",
-      "%CI%FL%ML%VN%PD%FC%EL%ET%AT%MF%MV%BV%DT%GN%GV%ME%RL%RP%SA%SM%TR%IA%MP",
-      "%CI%TR%MV%BV%AT%SA%ET%GQ%GS%PC%RP%OD%AV1%XS%VS",
-      "%CI%GQ%GS%CN%CE%MV%SA",
-      "%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV",
-      "%CI%MV%BV",
-      "%CI%SA%MV%BV%GQ%AT",
-      "%BC"
+  "test": {
+    "cases": [
+      {
+        "name": "standardPosition",
+        "description": "Test standard position report parsing",
+        "options": {
+          "longDate": false,
+          "custom": false
+        }
+      },
+      {
+        "name": "longDatePosition",
+        "description": "Test position report with long date format",
+        "options": {
+          "longDate": true,
+          "custom": false
+        }
+      },
+      {
+        "name": "customFormatPosition",
+        "description": "Test position report with custom format",
+        "options": {
+          "longDate": false,
+          "custom": true,
+          "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX"
+        }
+      },
+      {
+        "name": "extendedFormatPosition",
+        "description": "Test position report with extended format including OBD data",
+        "options": {
+          "longDate": false,
+          "custom": true,
+          "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%OB,%J1,%J2"
+        }
+      },
+      {
+        "name": "binaryModePosition",
+        "description": "Test binary mode position report parsing",
+        "options": {
+          "binary": true,
+          "frameMask": "0x4050"
+        }
+      },
+      {
+        "name": "asciiModePosition",
+        "description": "Test ASCII mode position report parsing",
+        "options": {
+          "binary": false,
+          "frameMask": "0x4040"
+        }
+      },
+      {
+        "name": "decimalFuelPosition",
+        "description": "Test position report with decimal fuel value format",
+        "options": {
+          "longDate": false,
+          "custom": true,
+          "decimalFuel": true
+        }
+      }
     ]
   }
 }
