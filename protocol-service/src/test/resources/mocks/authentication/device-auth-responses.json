@@ -1,0 +1,191 @@
+{
+  "version": "1.0.0",
+  "description": "Mock authentication responses for device connections to the Protocol Service",
+  "created": "2025-05-23T10:00:00Z",
+  "lastUpdated": "2025-05-23T10:00:00Z",
+  "authenticationResponses": [
+    {
+      "protocol": "nmea",
+      "deviceType": "generic",
+      "scenarios": [
+        {
+          "scenarioName": "successful_authentication",
+          "request": "$PGKC001,12345678*39\r\n",
+          "response": "$PGKC101,1,12345678*3E\r\n",
+          "description": "Successful authentication with valid device ID",
+          "statusCode": 200,
+          "sessionToken": "nmea-session-12345678-1234",
+          "expiresIn": 3600
+        },
+        {
+          "scenarioName": "invalid_device_id",
+          "request": "$PGKC001,00000000*3F\r\n",
+          "response": "$PGKC101,0,00000000*38\r\n",
+          "description": "Failed authentication due to invalid device ID",
+          "statusCode": 401,
+          "errorCode": "INVALID_DEVICE_ID",
+          "errorMessage": "Device ID not recognized"
+        },
+        {
+          "scenarioName": "expired_device",
+          "request": "$PGKC001,87654321*33\r\n",
+          "response": "$PGKC101,0,87654321*32\r\n",
+          "description": "Failed authentication due to expired device subscription",
+          "statusCode": 403,
+          "errorCode": "EXPIRED_SUBSCRIPTION",
+          "errorMessage": "Device subscription has expired"
+        }
+      ]
+    },
+    {
+      "protocol": "sirf",
+      "deviceType": "sirf3",
+      "scenarios": [
+        {
+          "scenarioName": "successful_authentication",
+          "request": "A0A2002710010123456789ABCDEF0A5C\r\n",
+          "response": "A0A20027110101000123456789ABCDEF0A5D\r\n",
+          "description": "Successful authentication with valid SiRF binary credentials",
+          "statusCode": 200,
+          "sessionToken": "sirf-session-123456789abcdef-5678",
+          "expiresIn": 7200
+        },
+        {
+          "scenarioName": "invalid_checksum",
+          "request": "A0A2002710010123456789ABCDEF0A5D\r\n",
+          "response": "A0A20027110100010000000000000000A5E\r\n",
+          "description": "Failed authentication due to invalid message checksum",
+          "statusCode": 400,
+          "errorCode": "INVALID_CHECKSUM",
+          "errorMessage": "Message checksum verification failed"
+        }
+      ]
+    },
+    {
+      "protocol": "ubx",
+      "deviceType": "ublox",
+      "scenarios": [
+        {
+          "scenarioName": "successful_authentication",
+          "request": "B562060108000100010001000100BC33\r\n",
+          "response": "B56206010800010001000100010100BD33\r\n",
+          "description": "Successful authentication with valid u-blox credentials",
+          "statusCode": 200,
+          "sessionToken": "ubx-session-01010001-9876",
+          "expiresIn": 3600
+        },
+        {
+          "scenarioName": "device_blocked",
+          "request": "B562060108000100010002000100BD34\r\n",
+          "response": "B56206010800010001000200020000BF34\r\n",
+          "description": "Failed authentication due to device being blocked",
+          "statusCode": 403,
+          "errorCode": "DEVICE_BLOCKED",
+          "errorMessage": "Device has been blocked by administrator"
+        },
+        {
+          "scenarioName": "firmware_update_required",
+          "request": "B562060108000100010003000100BE35\r\n",
+          "response": "B56206010800010001000300030000C035\r\n",
+          "description": "Authentication successful but firmware update required",
+          "statusCode": 200,
+          "sessionToken": "ubx-session-01010003-5432",
+          "expiresIn": 3600,
+          "warningCode": "FIRMWARE_UPDATE_REQUIRED",
+          "warningMessage": "Device firmware update required",
+          "firmwareVersion": "1.2.5",
+          "minimumRequiredVersion": "1.3.0"
+        }
+      ]
+    },
+    {
+      "protocol": "teltonika",
+      "deviceType": "fmb920",
+      "scenarios": [
+        {
+          "scenarioName": "successful_authentication",
+          "request": "000F333536333037303432343431303136\r\n",
+          "response": "01\r\n",
+          "description": "Successful authentication with valid IMEI",
+          "statusCode": 200,
+          "sessionToken": "teltonika-session-356307042441016-7890",
+          "expiresIn": 3600
+        },
+        {
+          "scenarioName": "invalid_imei",
+          "request": "000F303030303030303030303030303030\r\n",
+          "response": "00\r\n",
+          "description": "Failed authentication due to invalid IMEI",
+          "statusCode": 401,
+          "errorCode": "INVALID_IMEI",
+          "errorMessage": "IMEI not recognized"
+        },
+        {
+          "scenarioName": "codec8_authentication",
+          "request": "000F333536333037303432343431303136080400000113fc208dff000f14f650209cca80006f00d60400040004030101150316030001460000015d0000000113fc17610b000f14ffe0209cc580006e00c00500010004030101150316010001460000015e0000000113fc284945000f150f00209cd200009501080400000004030101150016030001460000015d0000000113fc267c5b000f150a50209cccc0009300680400000004030101150016030001460000015b000600000042503b\r\n",
+          "response": "000000040D\r\n",
+          "description": "Successful authentication with Codec8 protocol",
+          "statusCode": 200,
+          "sessionToken": "teltonika-codec8-356307042441016-4321",
+          "expiresIn": 7200
+        }
+      ]
+    },
+    {
+      "protocol": "meitrack",
+      "deviceType": "t622g",
+      "scenarios": [
+        {
+          "scenarioName": "successful_authentication",
+          "request": "$$A138,123456789012345,AAA,35,35.123456,139.123456,120101122359,A,7,18,0,0,0,0,0,0,0.0,0.0,0,0,0,0,0,0,0,0,0,0,0000,0000,0,0,0000,0000,*FF\r\n",
+          "response": "$$B138,123456789012345,AAA,OK*FF\r\n",
+          "description": "Successful authentication with valid device ID",
+          "statusCode": 200,
+          "sessionToken": "meitrack-session-123456789012345-5678",
+          "expiresIn": 3600
+        },
+        {
+          "scenarioName": "invalid_device_id",
+          "request": "$$A138,000000000000000,AAA,35,35.123456,139.123456,120101122359,A,7,18,0,0,0,0,0,0,0.0,0.0,0,0,0,0,0,0,0,0,0,0,0000,0000,0,0,0000,0000,*FF\r\n",
+          "response": "$$B138,000000000000000,AAA,FAIL*FF\r\n",
+          "description": "Failed authentication due to invalid device ID",
+          "statusCode": 401,
+          "errorCode": "INVALID_DEVICE_ID",
+          "errorMessage": "Device ID not recognized"
+        },
+        {
+          "scenarioName": "challenge_response_authentication",
+          "request": "$$D138,123456789012345,CHL*FF\r\n",
+          "response": "$$E138,123456789012345,CHL,ABCDEF123456*FF\r\n",
+          "description": "Challenge-response authentication step 1 - server sends challenge",
+          "statusCode": 100,
+          "challenge": "ABCDEF123456",
+          "expiresIn": 60
+        },
+        {
+          "scenarioName": "challenge_response_completion",
+          "request": "$$F138,123456789012345,CHL,ABCDEF123456,98765432ABCDEF*FF\r\n",
+          "response": "$$G138,123456789012345,CHL,OK*FF\r\n",
+          "description": "Challenge-response authentication step 2 - client responds to challenge",
+          "statusCode": 200,
+          "sessionToken": "meitrack-session-123456789012345-9876",
+          "expiresIn": 3600
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "supportedProtocols": ["nmea", "sirf", "ubx", "teltonika", "meitrack", "tk103", "gt06", "h02", "totem", "atrack", "wondex", "eelink", "suntech", "gosafe", "xexun", "minifinder", "watch", "coban", "jt701", "huabao", "t55", "navis", "meiligao", "aplicom", "gotop", "sanav", "gator", "noran", "m2m", "osmand", "easytrack", "taip", "wialon", "carscop", "manpower", "globalsat", "pt3000", "ruptela", "skypatrol", "gt30", "tmg", "tzone", "tlt2h", "taoglas", "aquila", "flextrack", "queclink", "hunterpro", "ardi", "autofon", "gosafe", "xirgo", "calamp", "extremetrack", "teltonica", "techtlt", "starlink", "disha", "thinkrace", "pathaway", "arnavi", "kenji", "astra", "homtecs", "fox", "gnx", "arknav", "supermate", "appello", "idpl", "huayang", "l100", "granit", "carcell", "mxt", "cityeasy", "aquila", "flexcomm", "alten", "xrb28", "megastek", "raveon", "cradlepoint", "arknavx8", "autograde", "cguard", "fifotrack", "prisma", "appello4", "idpl", "huabao", "jointech", "smartsole", "its", "xexun2", "meiligao", "suntech", "eelink", "atrack", "enfora", "globalsat", "xirgo", "mtx", "skypatrol", "genx", "flespi", "avl301"],
+    "authenticationMethods": ["device_id", "imei", "serial_number", "challenge_response", "token", "certificate", "username_password"],
+    "statusCodes": {
+      "100": "Continue - Additional authentication steps required",
+      "200": "OK - Authentication successful",
+      "400": "Bad Request - Malformed authentication request",
+      "401": "Unauthorized - Authentication failed",
+      "403": "Forbidden - Device blocked or subscription expired",
+      "404": "Not Found - Device not registered",
+      "429": "Too Many Requests - Rate limit exceeded",
+      "500": "Internal Server Error - Authentication service error"
+    }
+  }
+}
