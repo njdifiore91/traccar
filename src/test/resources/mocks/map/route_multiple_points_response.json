@@ -1,0 +1,706 @@
+{
+  "code": "Ok",
+  "routes": [
+    {
+      "geometry": "mfr_IcvhpAw@aAcAkAeAcAaAg@w@[kAa@mBm@wCy@sDgAyCaAqAg@o@[e@Yc@]a@a@_@c@]g@[i@[m@mAkDkAuDe@}AEc@",
+      "routeIndex": "1",
+      "legs": [
+        {
+          "steps": [
+            {
+              "geometry": "mfr_IcvhpAw@aAcAkAeAcAaAg@",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4194, 37.7749],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Market Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4194, 37.7749]
+                }
+              ],
+              "weight": 45.8,
+              "duration": 45.8,
+              "distance": 156.2
+            },
+            {
+              "geometry": "ygr_IaphpAw@[kAa@mBm@wCy@sDgA",
+              "maneuver": {
+                "bearing_after": 42,
+                "bearing_before": 37,
+                "location": [-122.4183, 37.7761],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "California Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [42, 217],
+                  "location": [-122.4183, 37.7761]
+                }
+              ],
+              "weight": 83.2,
+              "duration": 83.2,
+              "distance": 312.5
+            },
+            {
+              "geometry": "qor_IyfhpAyCaAqAg@o@[e@Yc@]a@a@_@c@]g@[i@",
+              "maneuver": {
+                "bearing_after": 52,
+                "bearing_before": 42,
+                "location": [-122.4162, 37.7784],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Powell Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [52, 222],
+                  "location": [-122.4162, 37.7784]
+                }
+              ],
+              "weight": 78.5,
+              "duration": 78.5,
+              "distance": 235.6
+            },
+            {
+              "geometry": "ayr_IwxgpA[m@mAkDkAuDe@}AEc@",
+              "maneuver": {
+                "bearing_after": 65,
+                "bearing_before": 52,
+                "location": [-122.4142, 37.7798],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Pine Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [65, 232],
+                  "location": [-122.4142, 37.7798]
+                }
+              ],
+              "weight": 92.3,
+              "duration": 92.3,
+              "distance": 390.0
+            },
+            {
+              "geometry": "e{r_IkjgpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 65,
+                "location": [-122.4102, 37.7814],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Pine Street",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [245],
+                  "location": [-122.4102, 37.7814]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Market Street, California Street",
+          "weight": 299.8,
+          "duration": 299.8,
+          "distance": 1094.3,
+          "annotation": {
+            "distance": [15.2, 18.3, 22.1, 25.6, 28.4, 30.2, 16.4],
+            "duration": [4.5, 5.2, 6.3, 7.3, 8.1, 8.6, 5.8],
+            "speed": [12.5, 13.2, 13.0, 12.8, 12.6, 12.5, 10.2],
+            "congestion": ["low", "low", "low", "low", "low", "low", "moderate"]
+          }
+        },
+        {
+          "steps": [
+            {
+              "geometry": "e{r_IkjgpAKOQSQOSKUGYEYCY@",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4102, 37.7814],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Montgomery Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4102, 37.7814]
+                }
+              ],
+              "weight": 38.6,
+              "duration": 38.6,
+              "distance": 128.7
+            },
+            {
+              "geometry": "sar_IcfgpAa@?]C[E[GYIYKWMSOQQQSOUQWQ]Oa@",
+              "maneuver": {
+                "bearing_after": 92,
+                "bearing_before": 37,
+                "location": [-122.4093, 37.7824],
+                "modifier": "right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Sacramento Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [92, 217],
+                  "location": [-122.4093, 37.7824]
+                }
+              ],
+              "weight": 75.4,
+              "duration": 75.4,
+              "distance": 251.3
+            },
+            {
+              "geometry": "iar_IqtfpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 92,
+                "location": [-122.4064, 37.7821],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Sacramento Street",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [272],
+                  "location": [-122.4064, 37.7821]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Montgomery Street, Sacramento Street",
+          "weight": 114.0,
+          "duration": 114.0,
+          "distance": 380.0
+        },
+        {
+          "steps": [
+            {
+              "geometry": "iar_IqtfpAGKKKMGOEQCQ@QBODMFKH",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4064, 37.7821],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Kearny Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4064, 37.7821]
+                }
+              ],
+              "weight": 32.5,
+              "duration": 32.5,
+              "distance": 108.2
+            },
+            {
+              "geometry": "ygr_IopfpAJCJEHGHIFKDMBM@OAQCOGMIMKIOMSQ",
+              "maneuver": {
+                "bearing_after": 142,
+                "bearing_before": 217,
+                "location": [-122.4057, 37.7830],
+                "modifier": "sharp right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Columbus Avenue",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [142, 37],
+                  "location": [-122.4057, 37.7830]
+                }
+              ],
+              "weight": 62.7,
+              "duration": 62.7,
+              "distance": 209.1
+            },
+            {
+              "geometry": "s`r_IwffpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 142,
+                "location": [-122.4042, 37.7814],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Columbus Avenue",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [322],
+                  "location": [-122.4042, 37.7814]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Kearny Street, Columbus Avenue",
+          "weight": 95.2,
+          "duration": 95.2,
+          "distance": 317.3
+        }
+      ],
+      "weight_name": "duration",
+      "weight": 509.0,
+      "duration": 509.0,
+      "distance": 1791.6
+    },
+    {
+      "geometry": "mfr_IcvhpAw@aAcAkAeAcAaAg@w@[kAa@mBm@wCy@sDgAyCaAqAg@o@[e@Yc@]a@a@_@c@]g@[i@[m@mAkDkAuDe@}AEc@",
+      "routeIndex": "0",
+      "legs": [
+        {
+          "steps": [
+            {
+              "geometry": "mfr_IcvhpAw@aAcAkAeAcAaAg@",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4194, 37.7749],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Market Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4194, 37.7749]
+                }
+              ],
+              "weight": 45.8,
+              "duration": 45.8,
+              "distance": 156.2
+            },
+            {
+              "geometry": "ygr_IaphpAw@[kAa@mBm@wCy@sDgA",
+              "maneuver": {
+                "bearing_after": 42,
+                "bearing_before": 37,
+                "location": [-122.4183, 37.7761],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "California Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [42, 217],
+                  "location": [-122.4183, 37.7761]
+                }
+              ],
+              "weight": 83.2,
+              "duration": 83.2,
+              "distance": 312.5
+            },
+            {
+              "geometry": "qor_IyfhpAyCaAqAg@o@[e@Yc@]a@a@_@c@]g@[i@",
+              "maneuver": {
+                "bearing_after": 52,
+                "bearing_before": 42,
+                "location": [-122.4162, 37.7784],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Powell Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [52, 222],
+                  "location": [-122.4162, 37.7784]
+                }
+              ],
+              "weight": 78.5,
+              "duration": 78.5,
+              "distance": 235.6
+            },
+            {
+              "geometry": "ayr_IwxgpA[m@mAkDkAuDe@}AEc@",
+              "maneuver": {
+                "bearing_after": 65,
+                "bearing_before": 52,
+                "location": [-122.4142, 37.7798],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Pine Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [65, 232],
+                  "location": [-122.4142, 37.7798]
+                }
+              ],
+              "weight": 92.3,
+              "duration": 92.3,
+              "distance": 390.0
+            },
+            {
+              "geometry": "e{r_IkjgpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 65,
+                "location": [-122.4102, 37.7814],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Pine Street",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [245],
+                  "location": [-122.4102, 37.7814]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Market Street, California Street",
+          "weight": 299.8,
+          "duration": 299.8,
+          "distance": 1094.3
+        },
+        {
+          "steps": [
+            {
+              "geometry": "e{r_IkjgpAKOQSQOSKUGYEYCY@",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4102, 37.7814],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Montgomery Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4102, 37.7814]
+                }
+              ],
+              "weight": 38.6,
+              "duration": 38.6,
+              "distance": 128.7,
+              "voiceInstructions": [
+                {
+                  "distanceAlongGeometry": 128.7,
+                  "announcement": "Turn right onto Montgomery Street",
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto Montgomery Street</prosody></amazon:effect></speak>"
+                },
+                {
+                  "distanceAlongGeometry": 60.0,
+                  "announcement": "In 200 feet, turn right onto Sacramento Street",
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 200 feet, turn right onto Sacramento Street</prosody></amazon:effect></speak>"
+                }
+              ],
+              "bannerInstructions": [
+                {
+                  "distanceAlongGeometry": 128.7,
+                  "primary": {
+                    "text": "Sacramento Street",
+                    "type": "turn",
+                    "modifier": "right"
+                  }
+                }
+              ]
+            },
+            {
+              "geometry": "sar_IcfgpAa@?]C[E[GYIYKWMSOQQQSOUQWQ]Oa@",
+              "maneuver": {
+                "bearing_after": 92,
+                "bearing_before": 37,
+                "location": [-122.4093, 37.7824],
+                "modifier": "right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Sacramento Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [92, 217],
+                  "location": [-122.4093, 37.7824]
+                }
+              ],
+              "weight": 75.4,
+              "duration": 75.4,
+              "distance": 251.3
+            },
+            {
+              "geometry": "iar_IqtfpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 92,
+                "location": [-122.4064, 37.7821],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Sacramento Street",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [272],
+                  "location": [-122.4064, 37.7821]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Montgomery Street, Sacramento Street",
+          "weight": 114.0,
+          "duration": 114.0,
+          "distance": 380.0,
+          "annotation": {
+            "distance": [12.5, 14.2, 16.8, 19.3, 22.1, 24.8, 19.0],
+            "duration": [3.8, 4.3, 5.0, 5.8, 6.6, 7.4, 5.7],
+            "speed": [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0],
+            "congestion": ["low", "low", "low", "low", "low", "low", "low"]
+          }
+        },
+        {
+          "steps": [
+            {
+              "geometry": "iar_IqtfpAGKKKMGOEQCQ@QBODMFKH",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [-122.4064, 37.7821],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Kearny Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [-122.4064, 37.7821]
+                }
+              ],
+              "weight": 32.5,
+              "duration": 32.5,
+              "distance": 108.2
+            },
+            {
+              "geometry": "ygr_IopfpAJCJEHGHIFKDMBM@OAQCOGMIMKIOMSQ",
+              "maneuver": {
+                "bearing_after": 142,
+                "bearing_before": 217,
+                "location": [-122.4057, 37.7830],
+                "modifier": "sharp right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Columbus Avenue",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false],
+                  "bearings": [142, 37],
+                  "location": [-122.4057, 37.7830]
+                }
+              ],
+              "weight": 62.7,
+              "duration": 62.7,
+              "distance": 209.1
+            },
+            {
+              "geometry": "s`r_IwffpA",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 142,
+                "location": [-122.4042, 37.7814],
+                "modifier": "left",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Columbus Avenue",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [322],
+                  "location": [-122.4042, 37.7814]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Kearny Street, Columbus Avenue",
+          "weight": 95.2,
+          "duration": 95.2,
+          "distance": 317.3,
+          "annotation": {
+            "distance": [10.8, 12.5, 14.2, 16.8, 19.3, 22.1, 24.8, 19.0],
+            "duration": [3.2, 3.8, 4.3, 5.0, 5.8, 6.6, 7.4, 5.7],
+            "speed": [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0],
+            "congestion": ["low", "low", "low", "low", "low", "low", "low", "low"]
+          }
+        }
+      ],
+      "weight_name": "duration",
+      "weight": 509.0,
+      "duration": 509.0,
+      "distance": 1791.6,
+      "routeOptions": {
+        "baseUrl": "https://api.routing.example.com",
+        "user": "mapbox",
+        "profile": "driving",
+        "coordinates": [
+          [-122.4194, 37.7749],
+          [-122.4102, 37.7814],
+          [-122.4064, 37.7821],
+          [-122.4042, 37.7814]
+        ],
+        "alternatives": true,
+        "language": "en",
+        "continue_straight": true,
+        "roundabout_exits": true,
+        "geometries": "polyline",
+        "overview": "full",
+        "steps": true,
+        "annotations": true,
+        "voice_instructions": true,
+        "banner_instructions": true,
+        "voice_units": "metric",
+        "access_token": "pk.sample_token",
+        "waypoints": [0, 1, 2, 3]
+      }
+    }
+  ],
+  "uuid": "XYZ123abc456def789",
+  "waypoints": [
+    {
+      "name": "Market Street",
+      "location": [-122.4194, 37.7749],
+      "distance": 0.0,
+      "hint": "Jh4BgEUzI4BhAAAACwAAAKIAAABZAAAAkLAjQgpyikBay4dCWsuHQmEAAAALAAAAogAAAFkAAAArAAAAxwB4AARI3AI3AXgAWEbcAgIADwXVhXd1",
+      "waypoint_index": 0
+    },
+    {
+      "name": "Pine Street",
+      "location": [-122.4102, 37.7814],
+      "distance": 0.0,
+      "hint": "Jh4BgEUzI4BhAAAACwAAAKIAAABZAAAAkLAjQgpyikBay4dCWsuHQmEAAAALAAAAogAAAFkAAAArAAAAxwB4AARI3AI3AXgAWEbcAgIADwXVhXd1",
+      "waypoint_index": 1
+    },
+    {
+      "name": "Sacramento Street",
+      "location": [-122.4064, 37.7821],
+      "distance": 0.0,
+      "hint": "Jh4BgEUzI4BhAAAACwAAAKIAAABZAAAAkLAjQgpyikBay4dCWsuHQmEAAAALAAAAogAAAFkAAAArAAAAxwB4AARI3AI3AXgAWEbcAgIADwXVhXd1",
+      "waypoint_index": 2
+    },
+    {
+      "name": "Columbus Avenue",
+      "location": [-122.4042, 37.7814],
+      "distance": 0.0,
+      "hint": "Jh4BgEUzI4BhAAAACwAAAKIAAABZAAAAkLAjQgpyikBay4dCWsuHQmEAAAALAAAAogAAAFkAAAArAAAAxwB4AARI3AI3AXgAWEbcAgIADwXVhXd1",
+      "waypoint_index": 3
+    }
+  ]
+}
