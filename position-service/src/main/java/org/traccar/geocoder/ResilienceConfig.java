@@ -73,6 +73,17 @@ public class ResilienceConfig {
 
         this.retryRegistry = RetryRegistry.of(retryConfig);
     }
+    
+    /**
+     * Constructor with custom registry instances for testing.
+     *
+     * @param circuitBreakerRegistry Custom circuit breaker registry
+     * @param retryRegistry Custom retry registry
+     */
+    public ResilienceConfig(CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry) {
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+        this.retryRegistry = retryRegistry;
+    }
 
     /**
      * Creates or retrieves a circuit breaker for the specified provider.
