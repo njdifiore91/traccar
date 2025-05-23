@@ -1,0 +1,150 @@
+# Protocol Service Test Configuration
+
+# Server Configuration
+server:
+  port: 8091  # Test-specific port to avoid conflicts with development or production
+  servlet:
+    context-path: /protocol
+  compression:
+    enabled: true
+  shutdown: graceful
+
+# Spring Configuration
+spring:
+  application:
+    name: protocol-service
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  # Test-specific datasource configuration (using H2 in-memory database)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+  # Disable JMX export in tests
+  jmx:
+    enabled: false
+
+# Logging Configuration
+logging:
+  level:
+    root: WARN
+    org.traccar: INFO
+    org.traccar.protocol: DEBUG
+    org.springframework: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/protocol-service-test.log
+    max-size: 10MB
+    max-history: 3
+
+# Management Endpoints Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# Protocol Service Specific Configuration
+protocol:
+  # Test-specific protocol settings
+  netty:
+    boss-threads: 1
+    worker-threads: 4
+    connection-timeout: 30000
+    so-keepalive: true
+    tcp-nodelay: true
+    reuse-address: true
+  # Test-specific protocol decoder settings
+  decoder:
+    enable-all: true  # Enable all protocols in test mode
+    buffer-pool-size: 100
+    max-message-size: 10240
+  # Test-specific message handling
+  message:
+    batch-size: 10
+    queue-capacity: 100
+
+# Messaging Configuration for Tests
+messaging:
+  type: kafka  # Can be 'kafka' or 'rabbitmq'
+  # Test-specific Kafka configuration
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      client-id: protocol-service-test
+      acks: 1
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      raw-positions: test-raw-positions
+      device-status: test-device-status
+
+# Service Discovery Configuration for Tests
+discovery:
+  enabled: false  # Disable service discovery in tests by default
+  service-id: protocol-service-test
+  # Test-specific Consul configuration
+  consul:
+    host: localhost
+    port: 8500
+    register: false
+    deregister: false
+    prefer-ip-address: true
+    health-check-path: /actuator/health
+    health-check-interval: 10s
+  # Test-specific Kubernetes configuration
+  kubernetes:
+    enabled: false
+    namespace: default
+    trust-certificates: true
+
+# Resilience Configuration for Tests
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 100ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+# Test-specific feature flags
+features:
+  enable-metrics: true
+  enable-tracing: false
+  enable-protocol-stats: true
+  enable-mock-devices: true  # Enable mock device connections for testing
+  enable-performance-logging: true
