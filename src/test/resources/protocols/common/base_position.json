@@ -1,0 +1,14 @@
+{
+  "deviceId": 123456,
+  "protocol": "test-protocol",
+  "valid": true,
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "altitude": 100.0,
+  "speed": 25.0,
+  "course": 180.0,
+  "time": "2023-01-01T12:00:00.000Z",
+  "attributes": {
+    "original": "raw-data-placeholder"
+  }
+}
