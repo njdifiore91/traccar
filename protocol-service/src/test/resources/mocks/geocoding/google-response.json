@@ -1,0 +1,320 @@
+{
+  "results": [
+    {
+      "address_components": [
+        {
+          "long_name": "1",
+          "short_name": "1",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "Ibn Shaprut Street",
+          "short_name": "Ibn Shaprut St",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Jerusalem",
+          "short_name": "Jerusalem",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Jerusalem District",
+          "short_name": "Jerusalem District",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "Israel",
+          "short_name": "IL",
+          "types": ["country", "political"]
+        }
+      ],
+      "formatted_address": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL",
+      "geometry": {
+        "location": {
+          "lat": 31.776797,
+          "lng": 35.211489
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 31.7781459802915,
+            "lng": 35.2128379802915
+          },
+          "southwest": {
+            "lat": 31.7754480197085,
+            "lng": 35.2101400197085
+          }
+        }
+      },
+      "place_id": "ChIJ_V5XAQbDHRURKLc7LI_6vSM",
+      "plus_code": {
+        "compound_code": "P4QX+PF Jerusalem, Israel",
+        "global_code": "8G3QP4QX+PF"
+      },
+      "types": ["street_address"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "35",
+          "short_name": "35",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "West 9th Street",
+          "short_name": "W 9th St",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Greenwich Village",
+          "short_name": "Greenwich Village",
+          "types": ["neighborhood", "political"]
+        },
+        {
+          "long_name": "Manhattan",
+          "short_name": "Manhattan",
+          "types": ["sublocality_level_1", "sublocality", "political"]
+        },
+        {
+          "long_name": "New York",
+          "short_name": "New York",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "New York County",
+          "short_name": "New York County",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "New York",
+          "short_name": "NY",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "10011",
+          "short_name": "10011",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "35 W 9th St, New York, NY 10011, USA",
+      "geometry": {
+        "location": {
+          "lat": 40.7337807,
+          "lng": -73.9974401
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 40.7351296802915,
+            "lng": -73.9960911197085
+          },
+          "southwest": {
+            "lat": 40.7324317197085,
+            "lng": -73.9987890802915
+          }
+        }
+      },
+      "place_id": "ChIJl4A5xJBZwokRXeS8YBwlngM",
+      "plus_code": {
+        "compound_code": "PX2C+GW New York, United States",
+        "global_code": "87G8PX2C+GW"
+      },
+      "types": ["street_address"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "Rue du Jardinet",
+          "short_name": "Rue du Jardinet",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Paris",
+          "short_name": "Paris",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Paris",
+          "short_name": "Paris",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Île-de-France",
+          "short_name": "Île-de-France",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "France",
+          "short_name": "FR",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "75006",
+          "short_name": "75006",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "Rue du Jardinet, 75006 Paris, France",
+      "geometry": {
+        "location": {
+          "lat": 48.8530000,
+          "lng": 2.3400000
+        },
+        "location_type": "GEOMETRIC_CENTER",
+        "viewport": {
+          "northeast": {
+            "lat": 48.8543489802915,
+            "lng": 2.341348980291502
+          },
+          "southwest": {
+            "lat": 48.8516510197085,
+            "lng": 2.338651019708498
+          }
+        }
+      },
+      "place_id": "ChIJAQAAQBdy5kcRnLJ-6EdkiXs",
+      "plus_code": {
+        "compound_code": "V75V+62 Paris, France",
+        "global_code": "8FW4V75V+62"
+      },
+      "types": ["route"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "604",
+          "short_name": "604",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "Estrella Avenue",
+          "short_name": "Estrella Ave",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Arcadia",
+          "short_name": "Arcadia",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Los Angeles County",
+          "short_name": "Los Angeles County",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "California",
+          "short_name": "CA",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "91006",
+          "short_name": "91006",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "604 Estrella Ave, Arcadia, CA 91006, USA",
+      "geometry": {
+        "location": {
+          "lat": 34.116302,
+          "lng": -118.051519
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 34.1176509802915,
+            "lng": -118.0501700197085
+          },
+          "southwest": {
+            "lat": 34.1149530197085,
+            "lng": -118.0528679802915
+          }
+        }
+      },
+      "place_id": "ChIJP1JYtEPEwoARZ_kE_XD0hCM",
+      "plus_code": {
+        "compound_code": "3R7F+G9 Arcadia, CA, USA",
+        "global_code": "85633R7F+G9"
+      },
+      "types": ["street_address"]
+    },
+    {
+      "address_components": [
+        {
+          "long_name": "123",
+          "short_name": "123",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "Test Protocol Street",
+          "short_name": "Test Protocol St",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Protocol City",
+          "short_name": "Protocol City",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Protocol County",
+          "short_name": "Protocol County",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Protocol State",
+          "short_name": "PS",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "Protocol Country",
+          "short_name": "PC",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "12345",
+          "short_name": "12345",
+          "types": ["postal_code"]
+        }
+      ],
+      "formatted_address": "123 Test Protocol St, Protocol City, PS 12345, PC",
+      "geometry": {
+        "location": {
+          "lat": 0.0,
+          "lng": 0.0
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 0.001,
+            "lng": 0.001
+          },
+          "southwest": {
+            "lat": -0.001,
+            "lng": -0.001
+          }
+        }
+      },
+      "place_id": "ChIJProtocolTestLocationIdentifier",
+      "plus_code": {
+        "compound_code": "PRTCL+00 Protocol City, Protocol Country",
+        "global_code": "PRTCL+00"
+      },
+      "types": ["street_address"],
+      "protocol_specific": {
+        "device_id": "test_device_123",
+        "protocol_name": "test_protocol",
+        "message_type": "location"
+      }
+    }
+  ],
+  "status": "OK"
+}
