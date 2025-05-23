@@ -1,0 +1,162 @@
+# Protocol Service Logging Configuration
+
+# Root logger configuration
+rootLogger:
+  level: INFO
+  appenders:
+    - type: console
+      logFormat: json
+    - type: file
+      currentLogFilename: /var/log/traccar/protocol-service.log
+      archivedLogFilenamePattern: /var/log/traccar/protocol-service-%d{yyyy-MM-dd}-%i.log.gz
+      archivedFileCount: 30
+      maxFileSize: 100MB
+      logFormat: json
+
+# Specific logger configurations
+loggers:
+  # Protocol Service specific loggers
+  - name: org.traccar.protocol
+    level: INFO
+    additivity: false
+    appenders:
+      - type: console
+        logFormat: json
+      - type: file
+        currentLogFilename: /var/log/traccar/protocol.log
+        archivedLogFilenamePattern: /var/log/traccar/protocol-%d{yyyy-MM-dd}-%i.log.gz
+        archivedFileCount: 30
+        maxFileSize: 100MB
+        logFormat: json
+
+  # Health and metrics loggers
+  - name: org.traccar.health
+    level: INFO
+  - name: org.traccar.metrics
+    level: INFO
+
+  # Discovery and messaging loggers
+  - name: org.traccar.discovery
+    level: INFO
+  - name: org.traccar.messaging
+    level: INFO
+
+  # Third-party libraries
+  - name: io.netty
+    level: WARN
+  - name: org.eclipse.jetty
+    level: WARN
+  - name: com.zaxxer.hikari
+    level: WARN
+  - name: org.apache.kafka
+    level: WARN
+  - name: org.springframework
+    level: WARN
+
+# Appender configurations
+appenders:
+  # Console appender
+  - type: console
+    name: CONSOLE
+    logFormat: json
+    includeCallerData: false
+    includeException: true
+    includeStacktrace: true
+    includeThreadName: true
+    customFields:
+      service: protocol-service
+      environment: ${ENVIRONMENT:-production}
+
+  # File appender
+  - type: file
+    name: FILE
+    currentLogFilename: /var/log/traccar/protocol-service.log
+    archivedLogFilenamePattern: /var/log/traccar/protocol-service-%d{yyyy-MM-dd}-%i.log.gz
+    archivedFileCount: 30
+    maxFileSize: 100MB
+    logFormat: json
+    includeCallerData: false
+    includeException: true
+    includeStacktrace: true
+    includeThreadName: true
+    customFields:
+      service: protocol-service
+      environment: ${ENVIRONMENT:-production}
+
+  # Centralized logging appender (Fluentd/Fluent Bit)
+  - type: fluentd
+    name: FLUENTD
+    host: ${FLUENTD_HOST:-fluentd}
+    port: ${FLUENTD_PORT:-24224}
+    tag: protocol-service
+    includeCallerData: false
+    includeException: true
+    includeStacktrace: true
+    includeThreadName: true
+    customFields:
+      service: protocol-service
+      environment: ${ENVIRONMENT:-production}
+
+# JSON format configuration
+jsonFormat:
+  timestampFormat: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+  prettyPrint: false
+  appendNewLine: true
+  includeContextName: true
+  includeLoggerName: true
+  includeMDC: true
+  includeThreadName: true
+  includeExceptionRoot: true
+  customFields:
+    - name: service
+      value: protocol-service
+    - name: instanceId
+      value: ${HOSTNAME:-unknown}
+    - name: environment
+      value: ${ENVIRONMENT:-production}
+
+# MDC (Mapped Diagnostic Context) configuration
+mdcFields:
+  - traceId
+  - spanId
+  - parentSpanId
+  - sampled
+  - deviceId
+  - protocolId
+  - connectionId
+
+# Correlation ID configuration
+correlationId:
+  header: X-Correlation-ID
+  mdc: traceId
+  generateIfMissing: true
+
+# Log level overrides via environment variables
+environmentVariables:
+  - name: LOG_LEVEL
+    property: rootLogger.level
+  - name: LOG_LEVEL_PROTOCOL
+    property: loggers[0].level
+  - name: LOG_FORMAT
+    property: appenders[0].logFormat
+  - name: LOG_FILE_PATH
+    property: appenders[1].currentLogFilename
+  - name: LOG_FILE_ARCHIVE_PATTERN
+    property: appenders[1].archivedLogFilenamePattern
+  - name: LOG_FILE_COUNT
+    property: appenders[1].archivedFileCount
+  - name: LOG_FILE_SIZE
+    property: appenders[1].maxFileSize
+  - name: FLUENTD_HOST
+    property: appenders[2].host
+  - name: FLUENTD_PORT
+    property: appenders[2].port
+
+# OpenTelemetry integration for distributed tracing
+openTelemetry:
+  enabled: true
+  propagateTraceContext: true
+  includeTraceContext: true
+  mdcTraceIdKey: traceId
+  mdcSpanIdKey: spanId
+  mdcSampledKey: sampled
