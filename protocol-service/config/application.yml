@@ -1,0 +1,165 @@
+# Protocol Service Configuration
+
+# Core service properties
+spring:
+  application:
+    name: protocol-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+      - classpath:protocols.yml
+      - classpath:broker.yml
+      - classpath:discovery.yml
+  main:
+    banner-mode: off
+    web-application-type: reactive
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  netty:
+    connection-timeout: 5s
+    max-worker-threads: 64
+    max-connections: 10000
+
+# Protocol service specific configuration
+protocol:
+  # Default protocol ports - can be overridden in protocols.yml
+  ports:
+    osmand: ${PROTOCOL_PORT_OSMAND:5055}
+    teltonika: ${PROTOCOL_PORT_TELTONIKA:5027}
+    meitrack: ${PROTOCOL_PORT_MEITRACK:5020}
+    atrack: ${PROTOCOL_PORT_ATRACK:5013}
+    totem: ${PROTOCOL_PORT_TOTEM:5007}
+    tk103: ${PROTOCOL_PORT_TK103:5006}
+  # Protocol service settings
+  settings:
+    connection-timeout: 60s
+    idle-timeout: 300s
+    position-forwarding-enabled: ${POSITION_FORWARDING_ENABLED:false}
+    protocol-detection-enabled: ${PROTOCOL_DETECTION_ENABLED:true}
+    command-timeout: 15s
+    buffer-size: 1024
+    boss-threads: ${PROTOCOL_BOSS_THREADS:2}
+    worker-threads: ${PROTOCOL_WORKER_THREADS:0}
+  # Message broker publishing configuration
+  messaging:
+    position-topic: ${POSITION_TOPIC:raw-positions}
+    command-topic: ${COMMAND_TOPIC:device-commands}
+    status-topic: ${STATUS_TOPIC:device-status}
+
+# Management endpoints for monitoring and operations
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,broker,discovery
+        liveness:
+          include: livenessState,ping
+    shutdown:
+      enabled: false
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    diskspace:
+      enabled: true
+      threshold: 10MB
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+      region: ${REGION:default}
+      zone: ${ZONE:default}
+
+# Logging configuration
+logging:
+  config: classpath:logback.xml
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    io.netty: WARN
+    org.springframework: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: ${LOG_FILE:logs/protocol-service.log}
+    max-size: ${LOG_FILE_MAX_SIZE:100MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:10}
+
+# Tracing configuration
+opentelemetry:
+  enabled: ${TRACING_ENABLED:true}
+  service-name: ${spring.application.name}
+  sampler:
+    probability: ${TRACING_SAMPLE_RATE:0.1}
+  exporter:
+    jaeger:
+      endpoint: ${JAEGER_ENDPOINT:http://localhost:14250}
+    otlp:
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}
+  propagators: tracecontext,baggage,b3
+
+# Application info for /info endpoint
+info:
+  app:
+    name: ${spring.application.name}
+    description: Traccar Protocol Service for device communication
+    version: @project.version@
+  java:
+    version: ${java.version}
+  os:
+    name: ${os.name}
+  build:
+    timestamp: @build.timestamp@
+    git:
+      commit: @git.commit.id.abbrev@
+      branch: @git.branch@
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      messageBroker:
+        baseConfig: default
+      discoveryService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+    instances:
+      messageBroker:
+        baseConfig: default
+      discoveryService:
+        baseConfig: default
+        maxAttempts: 5
