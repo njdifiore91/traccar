@@ -1,0 +1,69 @@
+{{- if .Values.autoscaling.enabled }}
+# HorizontalPodAutoscaler for the Position Service
+# This HPA automatically scales the Position Service based on resource utilization and custom metrics
+# The Position Service processes and enriches position data with geocoding, geolocation, distance calculation,
+# motion detection, and other contextual information
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "position.fullname" . }}
+  labels:
+    {{- include "position.labels" . | nindent 4 }}
+  annotations:
+    description: "Autoscales the Position Service based on CPU, memory, and message processing rate"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "position.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+  # Scale based on CPU utilization
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  # Scale based on memory utilization
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.autoscaling.customMetrics }}
+  # Custom metrics for scaling (e.g., message processing rate)
+  # Example custom metric in values.yaml:
+  # customMetrics:
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: messages_per_second
+  #     target:
+  #       type: AverageValue
+  #       averageValue: 5000
+  {{- toYaml .Values.autoscaling.customMetrics | nindent 2 }}
+  {{- end }}
+  # Scaling behavior configuration to prevent rapid scaling changes
+  behavior:
+    # Scale up behavior - how quickly to add new pods
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds | default 60 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.behavior.scaleUp.percentValue | default 100 }}
+        periodSeconds: {{ .Values.autoscaling.behavior.scaleUp.periodSeconds | default 60 }}
+    # Scale down behavior - how cautiously to remove pods
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds | default 300 }}
+      policies:
+      - type: Percent
+        value: {{ .Values.autoscaling.behavior.scaleDown.percentValue | default 10 }}
+        periodSeconds: {{ .Values.autoscaling.behavior.scaleDown.periodSeconds | default 120 }}
+{{- end }}
