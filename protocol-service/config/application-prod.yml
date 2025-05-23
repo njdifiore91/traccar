@@ -1,0 +1,401 @@
+# Production Environment Configuration for Protocol Service
+# This file contains optimized settings for production deployments
+
+# Server configuration
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain
+    min-response-size: 2048
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 20
+    max-connections: 10000
+    accept-count: 100
+    connection-timeout: 20000
+  shutdown: graceful
+
+# Spring configuration
+spring:
+  application:
+    name: protocol-service
+  # Production-ready features
+  main:
+    banner-mode: off
+  # Message broker configuration (Kafka)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-broker:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      compression-type: lz4
+      properties:
+        linger.ms: 5
+        request.timeout.ms: 30000
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        isolation.level: read_committed
+        max.poll.records: 500
+        max.poll.interval.ms: 300000
+        heartbeat.interval.ms: 3000
+        session.timeout.ms: 45000
+        fetch.max.wait.ms: 500
+        fetch.min.bytes: 1024
+  # Database configuration
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/traccar}
+    username: ${DB_USERNAME:traccar}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: ProtocolHikariCP
+      # Production-specific optimizations
+      auto-commit: true
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      register-mbeans: true
+  # Cache configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      cache-null-values: false
+  # Redis configuration
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 10000
+    connect-timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1ms
+
+# Logging configuration - optimized for production with minimal verbosity
+logging:
+  level:
+    root: WARN
+    org.traccar: INFO
+    org.springframework: WARN
+    org.apache.kafka: WARN
+    io.netty: WARN
+    # Additional production-specific log levels
+    org.hibernate: ERROR
+    com.zaxxer.hikari: WARN
+    org.apache.catalina: WARN
+    org.flywaydb: INFO
+  pattern:
+    # JSON format for better log aggregation and analysis
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","message":"%message","exception":"%replace(%xException){"\n","\\n"}"}%nopex%n'
+    file: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","message":"%message","exception":"%replace(%xException){"\n","\\n"}"}%nopex%n'
+  file:
+    name: /var/log/traccar/protocol-service.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 3GB
+  # Include correlation IDs for distributed tracing
+  include-application-name: true
+  include-mdc: true
+
+# Management endpoints - production-ready metrics and monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers
+      base-path: /actuator
+      # Secure management endpoints
+      cors:
+        allowed-origins: '*'
+        allowed-methods: GET
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,redis,kafka,diskSpace
+        liveness:
+          include: ping,diskSpace
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    # Circuit breaker health indicators
+    circuitbreakers:
+      enabled: true
+    # Kafka health indicators
+    kafka:
+      consumer:
+        enabled: true
+      producer:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 60s
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        system.cpu.usage: true
+        jvm.memory.used: true
+        kafka.producer.request.latency: true
+        kafka.consumer.fetch.latency: true
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.95, 0.99
+        kafka.producer.request.latency: 0.5, 0.9, 0.95, 0.99
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms, 500ms
+    # Enable JVM metrics
+    enable:
+      jvm: true
+      process: true
+      system: true
+      logback: true
+      tomcat: true
+      kafka: true
+      hikaricp: true
+
+# Resilience4j configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      kafkaProducer:
+        baseConfig: default
+      serviceDiscovery:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+    instances:
+      kafkaProducer:
+        baseConfig: default
+      serviceDiscovery:
+        baseConfig: default
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 0
+    instances:
+      kafkaProducer:
+        baseConfig: default
+
+# Service discovery configuration
+discovery:
+  enabled: true
+  type: ${DISCOVERY_TYPE:consul} # consul or kubernetes
+  consul:
+    host: ${CONSUL_HOST:consul}
+    port: ${CONSUL_PORT:8500}
+    register: true
+    deregister: true
+    prefer-ip-address: true
+    health-check-path: /actuator/health
+    health-check-interval: 15s
+    tags: production,protocol-service
+  kubernetes:
+    namespace: ${KUBERNETES_NAMESPACE:default}
+    trust-certificates: true
+
+# Protocol service specific configuration - optimized for production workloads
+protocol:
+  # Network settings
+  network:
+    # Maximum number of concurrent connections - scaled for production
+    max-connections: 20000
+    # Connection idle timeout in seconds
+    connection-timeout: 60
+    # Socket buffer size in bytes
+    buffer-size: 8192
+    # TCP keep-alive settings
+    keep-alive:
+      enabled: true
+      idle: 60
+      interval: 15
+      count: 8
+    # Additional production network optimizations
+    tcp-no-delay: true
+    reuse-address: true
+    so-backlog: 1024
+    so-linger: -1
+  # Thread pool configuration - optimized for production
+  thread-pool:
+    # Boss thread group size (connection acceptors)
+    boss-threads: ${PROTOCOL_BOSS_THREADS:4}
+    # Worker thread group size (connection handlers)
+    worker-threads: ${PROTOCOL_WORKER_THREADS:32}
+    # Use Epoll on Linux for better performance
+    use-epoll: true
+    # Use direct buffers for better performance
+    use-direct-buffers: true
+    # Thread priority
+    thread-priority: 10
+  # Protocol handling
+  protocols:
+    # Enable protocol auto-detection
+    auto-detect: true
+    # Maximum message size in bytes
+    max-message-size: 8192
+    # Default protocol timeout in seconds
+    default-timeout: 60
+    # Protocol-specific timeouts
+    timeouts:
+      teltonika: 70
+      meitrack: 65
+      atrack: 70
+      suntech: 60
+      totem: 65
+      meiligao: 60
+      tk103: 65
+  # Position processing - optimized for high throughput
+  position:
+    # Queue size for position messages
+    queue-size: 50000
+    # Batch size for sending positions to Kafka
+    batch-size: 200
+    # Maximum wait time for batch in milliseconds
+    batch-timeout: 100
+    # Discard strategy when queue is full
+    discard-strategy: OLDEST
+    # Metrics collection interval in seconds
+    metrics-interval: 60
+  # Security settings - fully enabled for production
+  security:
+    # Enable TLS for secure connections
+    tls:
+      enabled: true
+      key-store: ${TLS_KEYSTORE_PATH:/etc/traccar/keystore.p12}
+      key-store-password: ${TLS_KEYSTORE_PASSWORD:password}
+      key-store-type: PKCS12
+      # Protocols to enable - only secure versions
+      protocols: TLSv1.2,TLSv1.3
+      # Cipher suites to enable (comma-separated list) - only secure ciphers
+      cipher-suites: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      # Session cache size
+      session-cache-size: 10000
+      # Session timeout in seconds
+      session-timeout: 86400
+    # IP filtering
+    ip-filter:
+      enabled: ${IP_FILTER_ENABLED:false}
+      allowed-ips: ${ALLOWED_IPS:}
+      denied-ips: ${DENIED_IPS:}
+    # Rate limiting
+    rate-limit:
+      enabled: true
+      # Max requests per IP per minute
+      max-requests: 1000
+      # IP ban duration in minutes after exceeding limit
+      ban-duration: 10
+
+# OpenTelemetry configuration - production-ready observability
+opentelemetry:
+  enabled: true
+  metrics:
+    export:
+      enabled: true
+      step: 60s
+      batch-size: 512
+  tracing:
+    enabled: true
+    # Lower sampling rate in production to reduce overhead
+    sampler:
+      probability: 0.05
+    # Batch export configuration
+    exporter:
+      otlp:
+        endpoint: ${OTLP_ENDPOINT:http://jaeger:4317}
+        timeout: 10s
+        compression: gzip
+    # Span processing
+    span-processor:
+      batch:
+        max-queue-size: 2048
+        max-export-batch-size: 512
+        export-timeout: 30s
+        schedule-delay: 5s
+    # Propagation
+    propagators: tracecontext,baggage,b3multi
+
+# Netty configuration - optimized for production
+netty:
+  # Disable leak detection in production for performance
+  leak-detection-level: DISABLED
+  # Memory allocator settings
+  allocator:
+    type: POOLED
+    cache-alignment: true
+    page-size: 8192
+    max-order: 11
+    # Use direct buffers for better performance
+    prefer-direct: true
+    # Tinker with these values based on actual memory usage patterns
+    small-cache-size: 1024
+    normal-cache-size: 256
+  # Worker thread configuration
+  worker-threads: ${NETTY_WORKER_THREADS:32}
+  # IO ratio (percentage of time spent doing IO vs other tasks)
+  io-ratio: 70
+
+# Additional production optimizations
+production:
+  # JVM tuning parameters (passed as environment variables)
+  jvm:
+    # Garbage collection settings
+    gc:
+      # Use G1GC for production
+      type: G1GC
+      # Target maximum pause time in milliseconds
+      max-pause-millis: 200
+      # Initial and maximum heap size
+      initial-heap-percent: 40
+      max-heap-percent: 70
+    # Memory settings
+    memory:
+      # Direct memory size in MB
+      direct-memory-size: 1024
+      # Metaspace size in MB
+      metaspace-size: 256
+  # Graceful shutdown settings
+  shutdown:
+    # Timeout in seconds for graceful shutdown
+    timeout: 30
+    # Wait for active connections to complete
+    wait-for-connections: true
