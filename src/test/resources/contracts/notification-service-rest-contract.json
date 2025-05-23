@@ -1,0 +1,267 @@
+{
+  "provider": {
+    "name": "notification-service"
+  },
+  "consumer": {
+    "name": "event-service"
+  },
+  "interactions": [
+    {
+      "description": "a request to send an email notification",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications/email",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "userId": 123,
+          "subject": "Device Alert",
+          "body": "Your device has triggered an alert.",
+          "recipients": ["user@example.com"],
+          "templateId": "device-alert",
+          "templateData": {
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "eventType": "geofenceExit",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "messageId": "{{matchesRegex:[a-f0-9\\-]{36}}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}"
+        }
+      }
+    },
+    {
+      "description": "a request to send an SMS notification",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications/sms",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "userId": 123,
+          "body": "Alert: Vehicle 1 has exited geofence Home at 12:00.",
+          "recipients": ["+12345678901"],
+          "templateId": "device-alert-sms",
+          "templateData": {
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "eventType": "geofenceExit",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "messageId": "{{matchesRegex:[a-f0-9\\-]{36}}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}"
+        }
+      }
+    },
+    {
+      "description": "a request to send a push notification",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications/push",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "userId": 123,
+          "title": "Device Alert",
+          "body": "Your device has triggered an alert.",
+          "deviceTokens": ["fcm-token-123456"],
+          "priority": "high",
+          "data": {
+            "deviceId": 456,
+            "eventType": "geofenceExit",
+            "notificationId": 789
+          },
+          "templateId": "device-alert-push",
+          "templateData": {
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "eventType": "geofenceExit",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "messageId": "{{matchesRegex:[a-f0-9\\-]{36}}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}"
+        }
+      }
+    },
+    {
+      "description": "a request to send a webhook notification",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications/webhook",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "userId": 123,
+          "webhookUrl": "https://example.com/webhook",
+          "payload": {
+            "event": "geofenceExit",
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "timestamp": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          },
+          "headers": {
+            "X-Traccar-Event": "geofenceExit",
+            "X-Traccar-Device-Id": "456"
+          },
+          "templateId": "device-alert-webhook",
+          "templateData": {
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "eventType": "geofenceExit",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "messageId": "{{matchesRegex:[a-f0-9\\-]{36}}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}"
+        }
+      }
+    },
+    {
+      "description": "a request to process a notification template",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications/templates/process",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "templateId": "device-alert",
+          "templateType": "email",
+          "templateData": {
+            "deviceId": 456,
+            "deviceName": "Vehicle 1",
+            "eventType": "geofenceExit",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "position": {
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "speed": 65.5,
+              "course": 45.0,
+              "address": "123 Main St, City"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "subject": "Device Alert: Vehicle 1",
+          "body": "{{matchesRegex:.*Vehicle 1.*geofenceExit.*}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}"
+        }
+      }
+    },
+    {
+      "description": "a request to get notification delivery status",
+      "request": {
+        "method": "GET",
+        "path": "/api/notifications/status/{{messageId}}",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "matchingRules": {
+          "path": {
+            "matcher": "regex",
+            "regex": "\\/api\\/notifications\\/status\\/[a-f0-9\\-]{36}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "messageId": "{{messageId}}",
+          "status": "{{oneOf:[SENT, DELIVERED, FAILED, PENDING]}}",
+          "channel": "{{oneOf:[EMAIL, SMS, PUSH, WEBHOOK]}}",
+          "timestamp": "{{matchesRegex:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z}}",
+          "details": "{{matchesRegex:.*}}"
+        }
+      }
+    }
+  ]
+}
