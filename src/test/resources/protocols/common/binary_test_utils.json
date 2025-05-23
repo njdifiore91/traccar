@@ -1,0 +1,469 @@
+{
+  "version": "1.0.0",
+  "description": "Utilities for testing binary protocols in Traccar",
+  "checksumAlgorithms": {
+    "crc16": {
+      "description": "CRC-16 checksum calculation with different variants",
+      "variants": {
+        "CCITT": {
+          "polynomial": "0x1021",
+          "initialValue": "0xFFFF",
+          "finalXOR": "0x0000",
+          "inputReflected": false,
+          "outputReflected": false,
+          "testValue": "123456789",
+          "expectedResult": "0xE5CC"
+        },
+        "XMODEM": {
+          "polynomial": "0x1021",
+          "initialValue": "0x0000",
+          "finalXOR": "0x0000",
+          "inputReflected": false,
+          "outputReflected": false,
+          "testValue": "123456789",
+          "expectedResult": "0x31C3"
+        },
+        "MODBUS": {
+          "polynomial": "0x8005",
+          "initialValue": "0xFFFF",
+          "finalXOR": "0x0000",
+          "inputReflected": true,
+          "outputReflected": true,
+          "testValue": "123456789",
+          "expectedResult": "0x4B37"
+        },
+        "KERMIT": {
+          "polynomial": "0x1021",
+          "initialValue": "0x0000",
+          "finalXOR": "0x0000",
+          "inputReflected": true,
+          "outputReflected": true,
+          "testValue": "123456789",
+          "expectedResult": "0x2189"
+        }
+      }
+    },
+    "crc32": {
+      "description": "CRC-32 checksum calculation with different variants",
+      "variants": {
+        "IEEE": {
+          "polynomial": "0x04C11DB7",
+          "initialValue": "0xFFFFFFFF",
+          "finalXOR": "0xFFFFFFFF",
+          "inputReflected": true,
+          "outputReflected": true,
+          "testValue": "123456789",
+          "expectedResult": "0xCBF43926"
+        },
+        "MPEG2": {
+          "polynomial": "0x04C11DB7",
+          "initialValue": "0xFFFFFFFF",
+          "finalXOR": "0x00000000",
+          "inputReflected": false,
+          "outputReflected": false,
+          "testValue": "123456789",
+          "expectedResult": "0x0376E6E7"
+        }
+      }
+    },
+    "xor": {
+      "description": "Simple XOR checksum calculation commonly used in GPS protocols",
+      "variants": {
+        "BYTE": {
+          "description": "XOR of all bytes",
+          "testValue": "123456789",
+          "expectedResult": "0x31"
+        },
+        "WORD": {
+          "description": "XOR of all 16-bit words (big-endian)",
+          "testValue": "123456789",
+          "expectedResult": "0x3231"
+        }
+      }
+    },
+    "sum": {
+      "description": "Sum-based checksum calculations",
+      "variants": {
+        "MOD256": {
+          "description": "Sum of all bytes modulo 256",
+          "testValue": "123456789",
+          "expectedResult": "0xDD"
+        },
+        "MOD65536": {
+          "description": "Sum of all bytes modulo 65536",
+          "testValue": "123456789",
+          "expectedResult": "0x01DD"
+        },
+        "FLETCHER16": {
+          "description": "Fletcher's 16-bit checksum",
+          "testValue": "123456789",
+          "expectedResult": "0x1EF0"
+        }
+      }
+    }
+  },
+  "binaryConversion": {
+    "hexToBinary": {
+      "description": "Convert hexadecimal string to binary data",
+      "examples": [
+        {
+          "input": "48656C6C6F",
+          "output": "Hello"
+        },
+        {
+          "input": "7878",
+          "output": "xx"
+        }
+      ]
+    },
+    "binaryToHex": {
+      "description": "Convert binary data to hexadecimal string",
+      "examples": [
+        {
+          "input": "Hello",
+          "output": "48656C6C6F"
+        },
+        {
+          "input": "xx",
+          "output": "7878"
+        }
+      ]
+    },
+    "asciiToHex": {
+      "description": "Convert ASCII string to hexadecimal string",
+      "examples": [
+        {
+          "input": "Hello",
+          "output": "48656C6C6F"
+        },
+        {
+          "input": "123",
+          "output": "313233"
+        }
+      ]
+    },
+    "hexToAscii": {
+      "description": "Convert hexadecimal string to ASCII string",
+      "examples": [
+        {
+          "input": "48656C6C6F",
+          "output": "Hello"
+        },
+        {
+          "input": "313233",
+          "output": "123"
+        }
+      ]
+    },
+    "byteSwap": {
+      "description": "Swap byte order (endianness conversion)",
+      "examples": [
+        {
+          "input": "0102",
+          "output": "0201",
+          "size": 2
+        },
+        {
+          "input": "01020304",
+          "output": "04030201",
+          "size": 4
+        }
+      ]
+    }
+  },
+  "bitManipulation": {
+    "extractBits": {
+      "description": "Extract specific bits from a value",
+      "examples": [
+        {
+          "input": "0xA5",
+          "fromBit": 0,
+          "toBit": 3,
+          "output": "0x5"
+        },
+        {
+          "input": "0xA5",
+          "fromBit": 4,
+          "toBit": 7,
+          "output": "0xA"
+        }
+      ]
+    },
+    "checkBit": {
+      "description": "Check if a specific bit is set",
+      "examples": [
+        {
+          "input": "0xA5",
+          "bitIndex": 0,
+          "output": true
+        },
+        {
+          "input": "0xA5",
+          "bitIndex": 1,
+          "output": false
+        }
+      ]
+    },
+    "setBit": {
+      "description": "Set a specific bit in a value",
+      "examples": [
+        {
+          "input": "0xA5",
+          "bitIndex": 1,
+          "output": "0xA7"
+        },
+        {
+          "input": "0xA5",
+          "bitIndex": 0,
+          "output": "0xA5"
+        }
+      ]
+    },
+    "clearBit": {
+      "description": "Clear a specific bit in a value",
+      "examples": [
+        {
+          "input": "0xA5",
+          "bitIndex": 0,
+          "output": "0xA4"
+        },
+        {
+          "input": "0xA5",
+          "bitIndex": 1,
+          "output": "0xA5"
+        }
+      ]
+    },
+    "toggleBit": {
+      "description": "Toggle a specific bit in a value",
+      "examples": [
+        {
+          "input": "0xA5",
+          "bitIndex": 0,
+          "output": "0xA4"
+        },
+        {
+          "input": "0xA5",
+          "bitIndex": 1,
+          "output": "0xA7"
+        }
+      ]
+    }
+  },
+  "bufferManipulation": {
+    "readSignedInt": {
+      "description": "Read a signed integer from a buffer",
+      "examples": [
+        {
+          "input": "FFFFFF9C",
+          "output": -100
+        },
+        {
+          "input": "0000000A",
+          "output": 10
+        }
+      ]
+    },
+    "readUnsignedInt": {
+      "description": "Read an unsigned integer from a buffer",
+      "examples": [
+        {
+          "input": "FFFFFF9C",
+          "output": 4294967196
+        },
+        {
+          "input": "0000000A",
+          "output": 10
+        }
+      ]
+    },
+    "findPattern": {
+      "description": "Find a pattern in a buffer",
+      "examples": [
+        {
+          "buffer": "48656C6C6F20576F726C64",
+          "pattern": "576F726C64",
+          "output": 6
+        },
+        {
+          "buffer": "48656C6C6F20576F726C64",
+          "pattern": "48656C",
+          "output": 0
+        }
+      ]
+    },
+    "extractSubBuffer": {
+      "description": "Extract a sub-buffer from a buffer",
+      "examples": [
+        {
+          "buffer": "48656C6C6F20576F726C64",
+          "startIndex": 0,
+          "length": 5,
+          "output": "48656C6C6F"
+        },
+        {
+          "buffer": "48656C6C6F20576F726C64",
+          "startIndex": 6,
+          "length": 5,
+          "output": "576F726C64"
+        }
+      ]
+    },
+    "isPrintable": {
+      "description": "Check if a buffer contains only printable ASCII characters",
+      "examples": [
+        {
+          "buffer": "48656C6C6F",
+          "output": true
+        },
+        {
+          "buffer": "0001020304",
+          "output": false
+        }
+      ]
+    }
+  },
+  "protocolPatterns": {
+    "startMarkers": {
+      "description": "Common start markers for binary protocols",
+      "patterns": {
+        "GT06": "7878",
+        "GT06_EXTENDED": "7979",
+        "HUABAO": "7E",
+        "MEITRACK": "2424",
+        "TELTONIKA": "000000",
+        "ATRACK": "24244F",
+        "TOTEM": "2424",
+        "TK103": "2828"
+      }
+    },
+    "endMarkers": {
+      "description": "Common end markers for binary protocols",
+      "patterns": {
+        "GT06": "0D0A",
+        "HUABAO": "7E",
+        "MEITRACK": "0D0A",
+        "TK103": "2929"
+      }
+    },
+    "lengthCalculation": {
+      "description": "Methods for calculating message length in binary protocols",
+      "methods": {
+        "GT06": {
+          "description": "Length is specified in the 3rd byte, excluding header and checksum",
+          "example": {
+            "message": "78780D",
+            "length": 13
+          }
+        },
+        "MEITRACK": {
+          "description": "Length is specified after the start marker, including all bytes except start and end markers",
+          "example": {
+            "message": "24240025",
+            "length": 37
+          }
+        },
+        "TELTONIKA": {
+          "description": "Length is specified in the first 4 bytes as a 32-bit integer",
+          "example": {
+            "message": "00000025",
+            "length": 37
+          }
+        }
+      }
+    },
+    "messageStructures": {
+      "description": "Common message structure templates for binary protocols",
+      "structures": {
+        "GT06": {
+          "description": "GT06 protocol message structure",
+          "fields": [
+            {"name": "header", "length": 2, "type": "hex"},
+            {"name": "length", "length": 1, "type": "int"},
+            {"name": "protocolNumber", "length": 1, "type": "int"},
+            {"name": "data", "length": "variable", "type": "hex"},
+            {"name": "checksum", "length": 2, "type": "hex"},
+            {"name": "footer", "length": 2, "type": "hex"}
+          ]
+        },
+        "MEITRACK": {
+          "description": "Meitrack protocol message structure",
+          "fields": [
+            {"name": "header", "length": 2, "type": "hex"},
+            {"name": "length", "length": 4, "type": "ascii"},
+            {"name": "data", "length": "variable", "type": "ascii"},
+            {"name": "checksum", "length": 2, "type": "hex"},
+            {"name": "footer", "length": 2, "type": "hex"}
+          ]
+        },
+        "TELTONIKA": {
+          "description": "Teltonika protocol message structure",
+          "fields": [
+            {"name": "preamble", "length": 4, "type": "int"},
+            {"name": "data", "length": "variable", "type": "hex"},
+            {"name": "checksum", "length": 4, "type": "hex"}
+          ]
+        }
+      }
+    }
+  },
+  "testHelpers": {
+    "createBinaryMessage": {
+      "description": "Helper for creating binary test messages",
+      "examples": [
+        {
+          "protocol": "GT06",
+          "data": "0100010123456789012345",
+          "output": "78780D0100010123456789012345AB0D0A"
+        },
+        {
+          "protocol": "MEITRACK",
+          "data": "0123456789",
+          "output": "2424000A0123456789BC0D0A"
+        }
+      ]
+    },
+    "validateChecksum": {
+      "description": "Helper for validating checksums in binary messages",
+      "examples": [
+        {
+          "message": "78780D0100010123456789012345AB0D0A",
+          "algorithm": "crc16.CCITT",
+          "dataStart": 2,
+          "dataEnd": 23,
+          "checksumStart": 23,
+          "checksumLength": 2,
+          "output": true
+        },
+        {
+          "message": "2424000A0123456789BC0D0A",
+          "algorithm": "xor.BYTE",
+          "dataStart": 2,
+          "dataEnd": 12,
+          "checksumStart": 12,
+          "checksumLength": 2,
+          "output": true
+        }
+      ]
+    },
+    "extractField": {
+      "description": "Helper for extracting fields from binary messages",
+      "examples": [
+        {
+          "message": "78780D0100010123456789012345AB0D0A",
+          "fieldStart": 4,
+          "fieldLength": 1,
+          "type": "int",
+          "output": 1
+        },
+        {
+          "message": "78780D0100010123456789012345AB0D0A",
+          "fieldStart": 6,
+          "fieldLength": 10,
+          "type": "hex",
+          "output": "0123456789"
+        }
+      ]
+    }
+  }
+}
