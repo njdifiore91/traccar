@@ -1,0 +1,137 @@
+# Protocol Service Network Configuration
+# This file defines Netty-specific settings, connection parameters, and network optimization options
+# for handling device connections. It is crucial for tuning the service's network performance and behavior.
+
+# Thread Pool Configuration
+threads:
+  # Boss threads handle accepting new connections
+  # For high-volume scenarios, increase this value (default: 1)
+  boss: 2
+  
+  # Worker threads handle I/O operations for established connections
+  # Set to 0 to use Netty's default (2 * number of available processors)
+  worker: 0
+  
+  # Maximum number of messages to read per read loop
+  # Higher values can improve throughput but may increase latency
+  maxMessagesPerRead: 16
+
+# Connection Parameters
+connection:
+  # Connection timeout in milliseconds
+  # Adjust based on network conditions and client behavior
+  timeout: 30000
+  
+  # Maximum number of pending connections in the backlog queue
+  # Increase for high-volume connection scenarios
+  backlog: 1024
+  
+  # Maximum number of concurrent connections
+  # Set to 0 for unlimited (limited only by system resources)
+  maxConnections: 0
+
+# Buffer Configuration
+buffer:
+  # Initial size of receive buffer in bytes
+  receiveBufferSize: 65536
+  
+  # Initial size of send buffer in bytes
+  sendBufferSize: 65536
+  
+  # High watermark for write buffer in bytes
+  # When buffer reaches this size, Channel.isWritable() becomes false
+  writeBufferHighWaterMark: 65536
+  
+  # Low watermark for write buffer in bytes
+  # When buffer size drops below this, Channel.isWritable() becomes true again
+  writeBufferLowWaterMark: 32768
+  
+  # Allocator type: pooled, unpooled
+  # Pooled allocators offer better performance but use more memory
+  allocator: "pooled"
+
+# TCP Socket Options
+socket:
+  # Disable Nagle's algorithm for lower latency (recommended for most GPS tracking scenarios)
+  tcpNoDelay: true
+  
+  # Enable TCP keepalive to detect dead connections
+  keepAlive: true
+  
+  # TCP keepalive idle time in seconds
+  keepAliveIdle: 60
+  
+  # TCP keepalive interval in seconds
+  keepAliveInterval: 30
+  
+  # TCP keepalive probes count
+  keepAliveCount: 5
+  
+  # Enable TCP_CORK (Linux) or TCP_NOPUSH (BSD) to optimize packet size
+  # Only enable if throughput is more important than latency
+  tcpCork: false
+  
+  # Enable SO_REUSEADDR to allow socket address reuse
+  reuseAddress: true
+
+# TLS/SSL Configuration
+ssl:
+  # Enable SSL/TLS for secure connections
+  enabled: false
+  
+  # Path to keystore file
+  keystorePath: "keystore.jks"
+  
+  # Keystore password
+  keystorePassword: "changeit"
+  
+  # Keystore type: JKS, PKCS12
+  keystoreType: "JKS"
+  
+  # Protocols to enable (comma-separated)
+  # Recommended: TLSv1.2,TLSv1.3
+  protocols: "TLSv1.2,TLSv1.3"
+  
+  # Cipher suites (comma-separated)
+  # Leave empty to use JVM defaults
+  cipherSuites: ""
+
+# Advanced Netty Options
+advanced:
+  # Enable native transport (epoll on Linux, kqueue on macOS)
+  # Native transport offers better performance but may not be available on all platforms
+  useNativeTransport: true
+  
+  # Enable direct buffers (bypass Java heap)
+  # Direct buffers offer better performance but use off-heap memory
+  useDirectBuffers: true
+  
+  # Write spin count - number of times to try writing to a socket before yielding
+  # Higher values can improve throughput on high-core systems
+  writeSpinCount: 16
+  
+  # Auto read - automatically read data when available
+  # Disable for manual flow control in high-throughput scenarios
+  autoRead: true
+  
+  # IO ratio (0-100) - percentage of time spent doing I/O vs non-I/O tasks
+  # Higher values prioritize I/O operations
+  ioRatio: 70
+
+# Protocol-specific optimizations
+protocol:
+  # Default idle timeout in seconds (0 to disable)
+  # Time after which an idle connection is closed
+  idleTimeout: 300
+  
+  # Enable automatic acknowledgment of received messages
+  # Disable for protocols that require explicit acknowledgment
+  autoAck: true
+  
+  # Maximum frame length in bytes
+  # Adjust based on the maximum expected message size from devices
+  maxFrameLength: 8192
+  
+  # Enable message batching for higher throughput
+  # Only enable if devices support receiving batched responses
+  enableBatching: false
