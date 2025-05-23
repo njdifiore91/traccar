@@ -61,6 +61,18 @@ autoscaling:
         target:
           type: AverageValue
           averageValue: 500
+  # Scaling behavior configuration
+  behavior:
+    # Scale up behavior - how quickly to add new pods
+    scaleUp:
+      stabilizationWindowSeconds: 60  # Wait 60s before scaling up again
+      percentValue: 100               # Double the pods (100% increase)
+      periodSeconds: 60               # Over a 60s period
+    # Scale down behavior - how cautiously to remove pods
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      percentValue: 10                 # Remove 10% of pods
+      periodSeconds: 120               # Over a 2 minute period
 
 ## Message broker configuration
 messageBroker:
