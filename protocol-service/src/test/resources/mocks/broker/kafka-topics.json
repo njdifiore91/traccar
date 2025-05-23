@@ -1,0 +1,81 @@
+{
+  "topics": [
+    {
+      "name": "raw-positions",
+      "partitions": 8,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "description": "Raw position data from devices before processing"
+    },
+    {
+      "name": "raw-positions.DLT",
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "description": "Dead letter topic for raw position data that failed processing"
+    },
+    {
+      "name": "device-commands",
+      "partitions": 4,
+      "replicationFactor": 1,
+      "retentionMs": 43200000,
+      "description": "Commands sent to devices for execution"
+    },
+    {
+      "name": "device-commands.DLT",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "description": "Dead letter topic for device commands that failed delivery"
+    },
+    {
+      "name": "device-status",
+      "partitions": 4,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "description": "Device connection status updates"
+    },
+    {
+      "name": "protocol-metrics",
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 259200000,
+      "description": "Protocol service performance metrics"
+    },
+    {
+      "name": "protocol-logs",
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "description": "Protocol service logs for debugging and monitoring"
+    },
+    {
+      "name": "device-heartbeats",
+      "partitions": 4,
+      "replicationFactor": 1,
+      "retentionMs": 43200000,
+      "description": "Periodic heartbeat messages from connected devices"
+    }
+  ],
+  "consumerGroups": [
+    {
+      "name": "protocol-service-position-consumer",
+      "description": "Consumer group for protocol service position processing"
+    },
+    {
+      "name": "protocol-service-command-consumer",
+      "description": "Consumer group for protocol service command processing"
+    },
+    {
+      "name": "protocol-service-status-consumer",
+      "description": "Consumer group for protocol service status updates"
+    }
+  ],
+  "topicConfig": {
+    "cleanup.policy": "delete",
+    "compression.type": "producer",
+    "min.insync.replicas": 1,
+    "segment.bytes": 1073741824,
+    "retention.bytes": -1
+  }
+}
