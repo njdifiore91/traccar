@@ -1,0 +1,1024 @@
+{
+  "mappings": [
+    {
+      "name": "Google Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "latlng": {
+            "matches": "[0-9.-]+,[0-9.-]+"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "address_components": [
+                {
+                  "long_name": "1",
+                  "short_name": "1",
+                  "types": ["street_number"]
+                },
+                {
+                  "long_name": "Ibn Shaprut St",
+                  "short_name": "Ibn Shaprut St",
+                  "types": ["route"]
+                },
+                {
+                  "long_name": "Jerusalem",
+                  "short_name": "Jerusalem",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Jerusalem District",
+                  "short_name": "Jerusalem District",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "Israel",
+                  "short_name": "IL",
+                  "types": ["country", "political"]
+                }
+              ],
+              "formatted_address": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL",
+              "geometry": {
+                "location": {
+                  "lat": 31.776797,
+                  "lng": 35.211489
+                }
+              },
+              "place_id": "mock_place_id_123",
+              "types": ["street_address"]
+            }
+          ],
+          "status": "OK"
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Nominatim Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "place_id": 12345,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 67890,
+          "lat": "40.7337807",
+          "lon": "-73.9974401",
+          "display_name": "35 West 9th Street, NYC, New York, US",
+          "address": {
+            "house_number": "35",
+            "road": "West 9th Street",
+            "city": "NYC",
+            "state": "New York",
+            "country": "US",
+            "country_code": "us"
+          }
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "Gisgraphy Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reversegeocoding/search",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lng": {
+            "matches": "[0-9.-]+"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "result": {
+            "name": "Rue du Jardinet",
+            "city": "Paris",
+            "state": "Île-de-France",
+            "country": "FR",
+            "lat": 48.8530000,
+            "lng": 2.3400000,
+            "formatedFull": "Rue du Jardinet, Paris, Île-de-France, FR"
+          }
+        },
+        "fixedDelayMilliseconds": 120
+      }
+    },
+    {
+      "name": "OpenCage Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocode/v1/json",
+        "queryParameters": {
+          "q": {
+            "matches": "[0-9.-]+\\+[0-9.-]+"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "formatted": "Charleston Road, California, US",
+              "geometry": {
+                "lat": 34.116302,
+                "lng": -118.051519
+              },
+              "components": {
+                "road": "Charleston Road",
+                "state": "California",
+                "country": "United States",
+                "country_code": "us"
+              }
+            }
+          ],
+          "status": {
+            "code": 200,
+            "message": "OK"
+          }
+        },
+        "fixedDelayMilliseconds": 130
+      }
+    },
+    {
+      "name": "GeocodeFarm Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v3/json/reverse/",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "geocoding_results": {
+            "RESULTS": {
+              "formatted_address": "604 Estrella Ave, Arcadia, CA, United States",
+              "ADDRESS": {
+                "street_number": "604",
+                "street_name": "Estrella Ave",
+                "locality": "Arcadia",
+                "admin_1": "CA",
+                "country": "United States"
+              },
+              "LOCATION": {
+                "latitude": "34.116302",
+                "longitude": "-118.051519"
+              }
+            }
+          }
+        },
+        "fixedDelayMilliseconds": 140
+      }
+    },
+    {
+      "name": "GeocodeXyz Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "locate": {
+            "matches": "[0-9.-]+,[0-9.-]+"
+          },
+          "geoit": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "standard": {
+            "addresst": "605 ESTRELLA AVE",
+            "city": "ARCADIA",
+            "prov": "California",
+            "countryname": "United States of America",
+            "country": "US",
+            "confidence": "0.9"
+          },
+          "longt": -118.051519,
+          "latt": 34.116302
+        },
+        "fixedDelayMilliseconds": 110
+      }
+    },
+    {
+      "name": "Ban Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "lon": {
+            "matches": "[0-9.-]+"
+          },
+          "lat": {
+            "matches": "[0-9.-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "features": [
+            {
+              "properties": {
+                "label": "8 Avenue Gustave Eiffel, Paris, FR",
+                "name": "8 Avenue Gustave Eiffel",
+                "city": "Paris",
+                "country": "France",
+                "country_code": "FR"
+              },
+              "geometry": {
+                "coordinates": [2.2944, 48.8575]
+              }
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 90
+      }
+    },
+    {
+      "name": "Here Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/revgeocode",
+        "queryParameters": {
+          "at": {
+            "matches": "[0-9.-]+,[0-9.-]+"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "items": [
+            {
+              "title": "1 Tour Eiffel, Paris, Île-de-France, FRA",
+              "address": {
+                "label": "1 Tour Eiffel, Paris, Île-de-France, FRA",
+                "houseNumber": "1",
+                "street": "Tour Eiffel",
+                "city": "Paris",
+                "state": "Île-de-France",
+                "country": "France",
+                "countryCode": "FRA"
+              },
+              "position": {
+                "lat": 48.8575,
+                "lng": 2.2944
+              }
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 120
+      }
+    },
+    {
+      "name": "MapmyIndia Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/apis/rev_geocode",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lng": {
+            "matches": "[0-9.-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "formatted_address": "New Delhi, Delhi. 1 m from India Gate pin-110001 (India)",
+              "city": "New Delhi",
+              "state": "Delhi",
+              "pincode": "110001",
+              "lat": "28.6129602407977",
+              "lng": "77.2294557094574",
+              "country": "India"
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 160
+      }
+    },
+    {
+      "name": "PositionStack Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/reverse",
+        "queryParameters": {
+          "query": {
+            "matches": "[0-9.-]+,[0-9.-]+"
+          },
+          "access_key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "data": [
+            {
+              "latitude": 28.6129602407977,
+              "longitude": 77.2294557094574,
+              "label": "India Gate, New Delhi, India",
+              "name": "India Gate",
+              "locality": "New Delhi",
+              "country": "India",
+              "country_code": "IND"
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 130
+      }
+    },
+    {
+      "name": "Mapbox Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoding/v5/mapbox.places/[0-9.-]+,[0-9.-]+.json",
+        "queryParameters": {
+          "access_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "features": [
+            {
+              "place_name": "120 East 13th Street, New York, New York 10003, United States",
+              "text": "East 13th Street",
+              "place_type": ["address"],
+              "center": [-73.989, 40.733],
+              "context": [
+                {
+                  "text": "New York",
+                  "id": "place.123"
+                },
+                {
+                  "text": "New York",
+                  "id": "region.456"
+                },
+                {
+                  "text": "United States",
+                  "id": "country.789"
+                }
+              ]
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 110
+      }
+    },
+    {
+      "name": "MapTiler Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoding/[0-9.-]+/[0-9.-]+.json",
+        "queryParameters": {
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "features": [
+            {
+              "place_name": "East 13th Street, New York City, New York, United States",
+              "text": "East 13th Street",
+              "place_type": ["street"],
+              "center": [-73.989, 40.733],
+              "context": [
+                {
+                  "text": "New York City"
+                },
+                {
+                  "text": "New York"
+                },
+                {
+                  "text": "United States"
+                }
+              ]
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Geoapify Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/geocode/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "features": [
+            {
+              "properties": {
+                "formatted": "114 East 13th Street, New York, New York, US",
+                "address_line1": "114 East 13th Street",
+                "address_line2": "New York, New York, US",
+                "city": "New York",
+                "state": "New York",
+                "country": "United States",
+                "country_code": "us"
+              },
+              "geometry": {
+                "coordinates": [-73.989, 40.733]
+              }
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 120
+      }
+    },
+    {
+      "name": "GeocodeJSON Geocoder - Reverse Geocoding",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
+        "jsonBody": {
+          "features": [
+            {
+              "properties": {
+                "geocoding": {
+                  "label": "35 West 9th Street, New York, New York, US",
+                  "housenumber": "35",
+                  "street": "West 9th Street",
+                  "city": "New York",
+                  "state": "New York",
+                  "country": "United States",
+                  "country_code": "US"
+                }
+              },
+              "geometry": {
+                "coordinates": [-73.9974401, 40.7337807]
+              }
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 140
+      }
+    },
+    {
+      "name": "SMTP Server - Email Sending",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/smtp/send"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": true,
+          "message": "Email sent successfully",
+          "messageId": "{{randomValue length=20 type='ALPHANUMERIC'}}"
+        },
+        "fixedDelayMilliseconds": 200
+      }
+    },
+    {
+      "name": "SMS Gateway - SMS Sending",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/sms/send"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": true,
+          "message": "SMS sent successfully",
+          "messageId": "{{randomValue length=10 type='NUMERIC'}}"
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "Push Notification Service - FCM",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/fcm/send",
+        "headers": {
+          "Authorization": {
+            "matches": "key=.*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "multicast_id": 1234567890,
+          "success": 1,
+          "failure": 0,
+          "canonical_ids": 0,
+          "results": [
+            {
+              "message_id": "{{randomValue length=16 type='ALPHANUMERIC'}}"
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 180
+      }
+    },
+    {
+      "name": "Speed Limit Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/speedlimit",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=3600"
+        },
+        "jsonBody": {
+          "speedLimit": 50,
+          "unit": "km/h",
+          "roadType": "urban",
+          "source": "mock-data",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Weather Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/weather",
+        "queryParameters": {
+          "lat": {
+            "matches": "[0-9.-]+"
+          },
+          "lon": {
+            "matches": "[0-9.-]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=1800"
+        },
+        "jsonBody": {
+          "temperature": 22.5,
+          "humidity": 65,
+          "windSpeed": 10,
+          "conditions": "Partly Cloudy",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 120
+      }
+    },
+    {
+      "name": "Map Tile Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/tiles/[0-9]+/[0-9]+/[0-9]+.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400"
+        },
+        "base64Body": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+        "fixedDelayMilliseconds": 80
+      }
+    },
+    {
+      "name": "Authentication Service - Token",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/auth/token",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.username"
+          },
+          {
+            "matchesJsonPath": "$.password"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+          "expires": "{{now offset='1 hours'}}",
+          "user": {
+            "id": 12345,
+            "username": "testuser",
+            "role": "admin"
+          }
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "Authentication Service - Validate Token",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/auth/validate",
+        "headers": {
+          "Authorization": {
+            "matches": "Bearer .*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": true,
+          "user": {
+            "id": 12345,
+            "username": "testuser",
+            "role": "admin"
+          }
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Service Discovery - Register",
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/v1/agent/service/register"
+      },
+      "response": {
+        "status": 200,
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Service Discovery - Deregister",
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/v1/agent/service/deregister/.*"
+      },
+      "response": {
+        "status": 200,
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Service Discovery - Health Check",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/health/service/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "Node": {
+              "ID": "40e4a748-2192-161a-0510-9bf59fe950b5",
+              "Node": "test-node",
+              "Address": "192.168.1.100"
+            },
+            "Service": {
+              "ID": "test-service-1",
+              "Service": "{{request.pathSegments.[3]}}",
+              "Address": "192.168.1.101",
+              "Port": 8080
+            },
+            "Checks": [
+              {
+                "Node": "test-node",
+                "CheckID": "service:test-service-1",
+                "Name": "Service 'test-service' check",
+                "Status": "passing",
+                "Output": "HTTP GET /health: 200 OK"
+              }
+            ]
+          }
+        ],
+        "fixedDelayMilliseconds": 80
+      }
+    },
+    {
+      "name": "Error Simulation - 500 Internal Server Error",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/error/500"
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal Server Error",
+          "message": "Simulated server error for testing",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Error Simulation - 404 Not Found",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/error/404"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Not Found",
+          "message": "Simulated not found error for testing",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Error Simulation - 401 Unauthorized",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/error/401"
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json",
+          "WWW-Authenticate": "Bearer realm=\"test\""
+        },
+        "jsonBody": {
+          "error": "Unauthorized",
+          "message": "Simulated unauthorized error for testing",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Error Simulation - 429 Too Many Requests",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/error/429"
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "30"
+        },
+        "jsonBody": {
+          "error": "Too Many Requests",
+          "message": "Simulated rate limit exceeded for testing",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 200
+      }
+    },
+    {
+      "name": "Network Simulation - High Latency",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/network/high-latency"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Response after high latency",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 3000
+      }
+    },
+    {
+      "name": "Network Simulation - Random Latency",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/simulate/network/random-latency"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Response after random latency",
+          "timestamp": "{{now}}"
+        },
+        "delayDistribution": {
+          "type": "lognormal",
+          "median": 500,
+          "sigma": 0.4
+        }
+      }
+    },
+    {
+      "name": "Network Simulation - Chunked Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/simulate/network/chunked"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked"
+        },
+        "chunkedDribbleDelay": 200,
+        "jsonBody": {
+          "message": "Chunked response with delay between chunks",
+          "data": [
+            "chunk1",
+            "chunk2",
+            "chunk3",
+            "chunk4",
+            "chunk5"
+          ],
+          "timestamp": "{{now}}"
+        }
+      }
+    },
+    {
+      "name": "Fallback Response - Any Unmatched Request",
+      "priority": 10,
+      "request": {
+        "method": "ANY",
+        "urlPattern": ".*"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Not Found",
+          "message": "No matching mock found for the request",
+          "timestamp": "{{now}}"
+        }
+      }
+    }
+  ]
+}
