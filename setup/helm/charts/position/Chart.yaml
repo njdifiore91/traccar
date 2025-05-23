@@ -1,0 +1,11 @@
+apiVersion: v2
+name: position
+description: Position Processing Service for Traccar - Processes and enriches GPS positions with geocoding, geolocation, distance calculation, motion detection, and other contextual information
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+kubeVersion: ">= 1.23.0-0"
+maintainers:
+  - name: Traccar Team
+    email: support@traccar.org
+    url: https://www.traccar.org
