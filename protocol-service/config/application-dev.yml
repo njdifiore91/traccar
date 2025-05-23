@@ -1,0 +1,209 @@
+# Development Environment Configuration for Protocol Service
+# This configuration is automatically loaded when the 'dev' profile is active
+
+# Server configuration
+server:
+  port: 8080
+  # Enable more detailed error responses in development
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+
+# Spring configuration
+spring:
+  # Development-specific application settings
+  application:
+    name: protocol-service
+  
+  # Use in-memory message broker for development
+  # Can be switched between Kafka and RabbitMQ
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # Development-friendly settings
+      acks: 1
+      retries: 3
+    consumer:
+      group-id: protocol-service-dev
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.traccar.*
+  
+  # Alternative RabbitMQ configuration (commented out by default)
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # Disable RabbitMQ in dev by default (use Kafka instead)
+    # Uncomment to enable RabbitMQ and comment out Kafka configuration
+    enabled: false
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: DEBUG
+    # Set protocol packages to DEBUG for detailed protocol debugging
+    org.traccar.protocol: DEBUG
+    org.traccar.protocol.netty: DEBUG
+    # Reduce noise from some components
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n"
+
+# Management endpoints for development
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose all actuator endpoints in development
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# Service discovery configuration
+# Choose between Consul and Kubernetes based on local environment
+discovery:
+  enabled: true
+  # Consul configuration (default for development)
+  consul:
+    enabled: true
+    host: localhost
+    port: 8500
+    service-name: ${spring.application.name}
+    instance-id: ${spring.application.name}-${random.uuid}
+    health-check-path: /actuator/health
+    health-check-interval: 10s
+    tags:
+      - dev
+      - protocol-service
+  
+  # Kubernetes configuration (alternative, disabled by default)
+  kubernetes:
+    enabled: false
+    namespace: default
+
+# Protocol Service specific configuration
+protocol-service:
+  # Enable development mode features
+  dev-mode: true
+  # Enable protocol debugging
+  debug-protocol: true
+  # Netty configuration for development
+  netty:
+    boss-threads: 1
+    worker-threads: 4
+    connection-timeout: 60
+    # Smaller buffer sizes for development
+    buffer-size: 1024
+    # Disable SSL for easier debugging (unless specifically testing SSL)
+    ssl-enabled: false
+  # Mock external services for development
+  mocks:
+    enabled: true
+    geocoder: true
+    notification: true
+    position-forward: true
+  # Development-specific protocol behavior
+  protocol-behavior:
+    # Store raw protocol messages for debugging
+    store-raw-messages: true
+    # Log all protocol messages
+    log-protocol-messages: true
+    # Simulate device behavior for testing
+    device-simulator:
+      enabled: false  # Enable when needed for testing
+
+# Resilience4j circuit breaker configuration for development
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+# OpenTelemetry configuration for development
+opentelemetry:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    enabled: true
+    exporter:
+      otlp:
+        enabled: false
+      jaeger:
+        enabled: true
+        endpoint: http://localhost:14250
+    sampling:
+      probability: 1.0  # Sample all requests in development
+
+# Micrometer configuration for metrics
+management.metrics:
+  export:
+    prometheus:
+      enabled: true
+  tags:
+    application: ${spring.application.name}
+    environment: dev
+  distribution:
+    percentiles-histogram:
+      http.server.requests: true
+      # Protocol-specific metrics
+      protocol.message.processing.time: true
+
+# Protocol-specific port configuration
+# These override the defaults in protocols.yml for development
+protocols:
+  # Example protocol overrides for development
+  osmand:
+    port: 5055
+    enabled: true
+    debug: true
+  teltonika:
+    port: 5027
+    enabled: true
+    debug: true
+  meitrack:
+    port: 5020
+    enabled: true
+    debug: true
+  tk103:
+    port: 5006
+    enabled: true
+    debug: true
+  atrack:
+    port: 5013
+    enabled: true
+    debug: true
+  totem:
+    port: 5007
+    enabled: true
+    debug: true
+  # Disable less commonly used protocols in development to save resources
+  # Enable specific protocols as needed for testing
+  gl200:
+    enabled: false
+  gt06:
+    enabled: false
+  h02:
+    enabled: false
