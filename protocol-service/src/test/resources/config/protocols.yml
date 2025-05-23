@@ -1,0 +1,830 @@
+# Test configuration for device protocols supported by the Protocol Service
+# This file defines settings for each protocol including port numbers, timeouts, and other protocol-specific parameters
+# Used for testing protocol-specific functionality without affecting production configurations
+
+# General settings applied to all protocols unless overridden
+general:
+  timeout: 60  # Default connection timeout in seconds
+  resetDelay: 0  # Default delay before resetting connection
+  loggerEnabled: true  # Enable protocol message logging for debugging
+  testMode: true  # Enable test mode for all protocols
+  mockResponses: true  # Enable mock responses for testing
+
+# Protocol-specific configurations
+protocols:
+  # GPS103 Protocol (TK103, TK102)
+  gps103:
+    port: 5001
+    timeout: 180
+    extended: true
+    decoder: "org.traccar.protocol.Gps103ProtocolDecoder"
+    encoder: "org.traccar.protocol.Gps103ProtocolEncoder"
+
+  # TK103 Protocol
+  tk103:
+    port: 5002
+    timeout: 180
+    extended: true
+    decoder: "org.traccar.protocol.Tk103ProtocolDecoder"
+    encoder: "org.traccar.protocol.Tk103ProtocolEncoder"
+
+  # H02 Protocol
+  h02:
+    port: 5003
+    timeout: 180
+    decoder: "org.traccar.protocol.H02ProtocolDecoder"
+    encoder: "org.traccar.protocol.H02ProtocolEncoder"
+
+  # GT06 Protocol
+  gt06:
+    port: 5004
+    timeout: 180
+    decoder: "org.traccar.protocol.Gt06ProtocolDecoder"
+    encoder: "org.traccar.protocol.Gt06ProtocolEncoder"
+
+  # GT02 Protocol
+  gt02:
+    port: 5005
+    timeout: 180
+    decoder: "org.traccar.protocol.Gt02ProtocolDecoder"
+
+  # Teltonika Protocol
+  teltonika:
+    port: 5006
+    timeout: 180
+    decoder: "org.traccar.protocol.TeltonikaProtocolDecoder"
+    encoder: "org.traccar.protocol.TeltonikaProtocolEncoder"
+
+  # Meitrack Protocol
+  meitrack:
+    port: 5007
+    timeout: 180
+    decoder: "org.traccar.protocol.MeitrackProtocolDecoder"
+    encoder: "org.traccar.protocol.MeitrackProtocolEncoder"
+
+  # Suntech Protocol
+  suntech:
+    port: 5008
+    timeout: 180
+    type: 1
+    decoder: "org.traccar.protocol.SuntechProtocolDecoder"
+    encoder: "org.traccar.protocol.SuntechProtocolEncoder"
+
+  # Totem Protocol
+  totem:
+    port: 5009
+    timeout: 180
+    decoder: "org.traccar.protocol.TotemProtocolDecoder"
+    encoder: "org.traccar.protocol.TotemProtocolEncoder"
+
+  # Coban Protocol (GPS102)
+  coban:
+    port: 5010
+    timeout: 180
+    decoder: "org.traccar.protocol.CobanProtocolDecoder"
+    encoder: "org.traccar.protocol.CobanProtocolEncoder"
+
+  # Concox Protocol
+  concox:
+    port: 5011
+    timeout: 180
+    decoder: "org.traccar.protocol.ConcoxProtocolDecoder"
+    encoder: "org.traccar.protocol.ConcoxProtocolEncoder"
+
+  # Xexun Protocol
+  xexun:
+    port: 5012
+    timeout: 180
+    decoder: "org.traccar.protocol.XexunProtocolDecoder"
+
+  # Huabao Protocol
+  huabao:
+    port: 5013
+    timeout: 180
+    decoder: "org.traccar.protocol.HuabaoProtocolDecoder"
+    encoder: "org.traccar.protocol.HuabaoProtocolEncoder"
+
+  # Eelink Protocol
+  eelink:
+    port: 5014
+    timeout: 180
+    decoder: "org.traccar.protocol.EelinkProtocolDecoder"
+    encoder: "org.traccar.protocol.EelinkProtocolEncoder"
+
+  # Atrack Protocol
+  atrack:
+    port: 5015
+    timeout: 180
+    longDate: true
+    decimalFuel: true
+    decoder: "org.traccar.protocol.AtrackProtocolDecoder"
+
+  # Wondex Protocol
+  wondex:
+    port: 5016
+    timeout: 180
+    decoder: "org.traccar.protocol.WondexProtocolDecoder"
+    encoder: "org.traccar.protocol.WondexProtocolEncoder"
+
+  # Meiligao Protocol
+  meiligao:
+    port: 5017
+    timeout: 180
+    decoder: "org.traccar.protocol.MeiligaoProtocolDecoder"
+    encoder: "org.traccar.protocol.MeiligaoProtocolEncoder"
+
+  # Galileo Protocol
+  galileo:
+    port: 5018
+    timeout: 180
+    decoder: "org.traccar.protocol.GalileoProtocolDecoder"
+
+  # OsmAnd Protocol (HTTP)
+  osmand:
+    port: 5055
+    timeout: 180
+    decoder: "org.traccar.protocol.OsmAndProtocolDecoder"
+
+  # Watch Protocol
+  watch:
+    port: 5020
+    timeout: 180
+    decoder: "org.traccar.protocol.WatchProtocolDecoder"
+    encoder: "org.traccar.protocol.WatchProtocolEncoder"
+
+  # T800X Protocol
+  t800x:
+    port: 5021
+    timeout: 180
+    decoder: "org.traccar.protocol.T800xProtocolDecoder"
+    encoder: "org.traccar.protocol.T800xProtocolEncoder"
+
+  # Navtelecom Protocol
+  navtelecom:
+    port: 5022
+    timeout: 180
+    decoder: "org.traccar.protocol.NavtelecomProtocolDecoder"
+
+  # Ruptela Protocol
+  ruptela:
+    port: 5023
+    timeout: 180
+    decoder: "org.traccar.protocol.RuptelaProtocolDecoder"
+
+  # Ulbotech Protocol
+  ulbotech:
+    port: 5024
+    timeout: 180
+    decoder: "org.traccar.protocol.UlbotechProtocolDecoder"
+
+  # Tramigo Protocol
+  tramigo:
+    port: 5025
+    timeout: 180
+    decoder: "org.traccar.protocol.TramigoProtocolDecoder"
+
+  # TR900 Protocol
+  tr900:
+    port: 5026
+    timeout: 180
+    decoder: "org.traccar.protocol.Tr900ProtocolDecoder"
+
+  # Queclink Protocol
+  queclink:
+    port: 5027
+    timeout: 180
+    decoder: "org.traccar.protocol.QueclinkProtocolDecoder"
+    encoder: "org.traccar.protocol.QueclinkProtocolEncoder"
+
+  # Laipac Protocol
+  laipac:
+    port: 5028
+    timeout: 180
+    decoder: "org.traccar.protocol.LaipacProtocolDecoder"
+
+  # Aplicom Protocol
+  aplicom:
+    port: 5029
+    timeout: 180
+    decoder: "org.traccar.protocol.AplicomProtocolDecoder"
+
+  # Gotop Protocol
+  gotop:
+    port: 5030
+    timeout: 180
+    decoder: "org.traccar.protocol.GotopProtocolDecoder"
+
+  # Taip Protocol
+  taip:
+    port: 5031
+    timeout: 180
+    decoder: "org.traccar.protocol.TaipProtocolDecoder"
+
+  # Wialon Protocol
+  wialon:
+    port: 5032
+    timeout: 180
+    decoder: "org.traccar.protocol.WialonProtocolDecoder"
+    encoder: "org.traccar.protocol.WialonProtocolEncoder"
+
+  # Carscop Protocol
+  carscop:
+    port: 5033
+    timeout: 180
+    decoder: "org.traccar.protocol.CarscopProtocolDecoder"
+
+  # Apel Protocol
+  apel:
+    port: 5034
+    timeout: 180
+    decoder: "org.traccar.protocol.ApelProtocolDecoder"
+
+  # Manpower Protocol
+  manpower:
+    port: 5035
+    timeout: 180
+    decoder: "org.traccar.protocol.ManPowerProtocolDecoder"
+
+  # GlobalSat Protocol
+  globalsat:
+    port: 5036
+    timeout: 180
+    decoder: "org.traccar.protocol.GlobalSatProtocolDecoder"
+
+  # Pt3000 Protocol
+  pt3000:
+    port: 5037
+    timeout: 180
+    decoder: "org.traccar.protocol.Pt3000ProtocolDecoder"
+
+  # Enfora Protocol
+  enfora:
+    port: 5038
+    timeout: 180
+    decoder: "org.traccar.protocol.EnforaProtocolDecoder"
+
+  # Mta6 Protocol
+  mta6:
+    port: 5039
+    timeout: 180
+    decoder: "org.traccar.protocol.Mta6ProtocolDecoder"
+
+  # Tzone Protocol
+  tzone:
+    port: 5040
+    timeout: 180
+    decoder: "org.traccar.protocol.TzoneProtocolDecoder"
+
+  # Tlt2h Protocol
+  tlt2h:
+    port: 5041
+    timeout: 180
+    decoder: "org.traccar.protocol.Tlt2hProtocolDecoder"
+
+  # Taoglas Protocol
+  taoglas:
+    port: 5042
+    timeout: 180
+    decoder: "org.traccar.protocol.TaoglasProtocolDecoder"
+
+  # Disha Protocol
+  disha:
+    port: 5043
+    timeout: 180
+    decoder: "org.traccar.protocol.DishaProtocolDecoder"
+
+  # Megastek Protocol
+  megastek:
+    port: 5044
+    timeout: 180
+    decoder: "org.traccar.protocol.MegastekProtocolDecoder"
+
+  # Navigil Protocol
+  navigil:
+    port: 5045
+    timeout: 180
+    decoder: "org.traccar.protocol.NavigilProtocolDecoder"
+
+  # GpsGate Protocol
+  gpsgate:
+    port: 5046
+    timeout: 180
+    decoder: "org.traccar.protocol.GpsGateProtocolDecoder"
+
+  # Teltonica Protocol
+  teltonica:
+    port: 5047
+    timeout: 180
+    decoder: "org.traccar.protocol.TeltonicaProtocolDecoder"
+
+  # Skypatrol Protocol
+  skypatrol:
+    port: 5048
+    timeout: 180
+    decoder: "org.traccar.protocol.SkypatrolProtocolDecoder"
+
+  # GT30 Protocol
+  gt30:
+    port: 5049
+    timeout: 180
+    decoder: "org.traccar.protocol.Gt30ProtocolDecoder"
+
+  # Flextrack Protocol
+  flextrack:
+    port: 5050
+    timeout: 180
+    decoder: "org.traccar.protocol.FlextrackProtocolDecoder"
+
+  # Blackkite Protocol
+  blackkite:
+    port: 5051
+    timeout: 180
+    decoder: "org.traccar.protocol.BlackKiteProtocolDecoder"
+
+  # Adm Protocol
+  adm:
+    port: 5052
+    timeout: 180
+    decoder: "org.traccar.protocol.AdmProtocolDecoder"
+
+  # Webfleet Protocol
+  webfleet:
+    port: 5053
+    timeout: 180
+    decoder: "org.traccar.protocol.WebfleetProtocolDecoder"
+
+  # Telik Protocol
+  telik:
+    port: 5054
+    timeout: 180
+    decoder: "org.traccar.protocol.TelikProtocolDecoder"
+
+  # Trackbox Protocol
+  trackbox:
+    port: 5056
+    timeout: 180
+    decoder: "org.traccar.protocol.TrackboxProtocolDecoder"
+
+  # Intellitrac Protocol
+  intellitrac:
+    port: 5057
+    timeout: 180
+    decoder: "org.traccar.protocol.IntellitracProtocolDecoder"
+
+  # Xt7 Protocol
+  xt7:
+    port: 5058
+    timeout: 180
+    decoder: "org.traccar.protocol.Xt7ProtocolDecoder"
+
+  # Wip Protocol
+  wip:
+    port: 5059
+    timeout: 180
+    decoder: "org.traccar.protocol.WipProtocolDecoder"
+
+  # Cartrack Protocol
+  cartrack:
+    port: 5060
+    timeout: 180
+    decoder: "org.traccar.protocol.CartrackProtocolDecoder"
+
+  # MiniFinderProtocol
+  minifinder:
+    port: 5061
+    timeout: 180
+    decoder: "org.traccar.protocol.MiniFinderProtocolDecoder"
+    encoder: "org.traccar.protocol.MiniFinderProtocolEncoder"
+
+  # Haicom Protocol
+  haicom:
+    port: 5062
+    timeout: 180
+    decoder: "org.traccar.protocol.HaicomProtocolDecoder"
+
+  # Orion Protocol
+  orion:
+    port: 5063
+    timeout: 180
+    decoder: "org.traccar.protocol.OrionProtocolDecoder"
+
+  # Other Protocol
+  other:
+    port: 5064
+    timeout: 180
+    decoder: "org.traccar.protocol.OtherProtocolDecoder"
+
+  # Esky Protocol
+  esky:
+    port: 5065
+    timeout: 180
+    decoder: "org.traccar.protocol.EskyProtocolDecoder"
+
+  # Genx Protocol
+  genx:
+    port: 5066
+    timeout: 180
+    decoder: "org.traccar.protocol.GenxProtocolDecoder"
+
+  # Noran Protocol
+  noran:
+    port: 5067
+    timeout: 180
+    decoder: "org.traccar.protocol.NoranProtocolDecoder"
+
+  # M2m Protocol
+  m2m:
+    port: 5068
+    timeout: 180
+    decoder: "org.traccar.protocol.M2mProtocolDecoder"
+
+  # Osmand Protocol
+  osmand:
+    port: 5069
+    timeout: 180
+    decoder: "org.traccar.protocol.OsmAndProtocolDecoder"
+
+  # EasyTrack Protocol
+  easytrack:
+    port: 5070
+    timeout: 180
+    decoder: "org.traccar.protocol.EasyTrackProtocolDecoder"
+
+  # Gator Protocol
+  gator:
+    port: 5071
+    timeout: 180
+    decoder: "org.traccar.protocol.GatorProtocolDecoder"
+    encoder: "org.traccar.protocol.GatorProtocolEncoder"
+
+  # Nxt Protocol
+  nxt:
+    port: 5072
+    timeout: 180
+    decoder: "org.traccar.protocol.NxtProtocolDecoder"
+
+  # Navtelecom Protocol
+  navtelecom:
+    port: 5073
+    timeout: 180
+    decoder: "org.traccar.protocol.NavtelecomProtocolDecoder"
+
+  # Meitrack Protocol
+  meitrack:
+    port: 5074
+    timeout: 180
+    decoder: "org.traccar.protocol.MeitrackProtocolDecoder"
+    encoder: "org.traccar.protocol.MeitrackProtocolEncoder"
+
+  # Starlink Protocol
+  starlink:
+    port: 5075
+    timeout: 180
+    decoder: "org.traccar.protocol.StarlinkProtocolDecoder"
+
+  # Spot Protocol
+  spot:
+    port: 5076
+    timeout: 180
+    decoder: "org.traccar.protocol.SpotProtocolDecoder"
+
+  # Calamp Protocol
+  calamp:
+    port: 5077
+    timeout: 180
+    decoder: "org.traccar.protocol.CalAmpProtocolDecoder"
+
+  # Sanav Protocol
+  sanav:
+    port: 5078
+    timeout: 180
+    decoder: "org.traccar.protocol.SanavProtocolDecoder"
+
+  # Xirgo Protocol
+  xirgo:
+    port: 5079
+    timeout: 180
+    decoder: "org.traccar.protocol.XirgoProtocolDecoder"
+
+  # Mtx Protocol
+  mtx:
+    port: 5080
+    timeout: 180
+    decoder: "org.traccar.protocol.MtxProtocolDecoder"
+
+  # Tytan Protocol
+  tytan:
+    port: 5081
+    timeout: 180
+    decoder: "org.traccar.protocol.TytanProtocolDecoder"
+
+  # Avl301 Protocol
+  avl301:
+    port: 5082
+    timeout: 180
+    decoder: "org.traccar.protocol.Avl301ProtocolDecoder"
+
+  # Castel Protocol
+  castel:
+    port: 5083
+    timeout: 180
+    decoder: "org.traccar.protocol.CastelProtocolDecoder"
+
+  # Mxt Protocol
+  mxt:
+    port: 5084
+    timeout: 180
+    decoder: "org.traccar.protocol.MxtProtocolDecoder"
+
+  # Cityeasy Protocol
+  cityeasy:
+    port: 5085
+    timeout: 180
+    decoder: "org.traccar.protocol.CityeasyProtocolDecoder"
+
+  # Aquila Protocol
+  aquila:
+    port: 5086
+    timeout: 180
+    decoder: "org.traccar.protocol.AquilaProtocolDecoder"
+
+  # Flexcomm Protocol
+  flexcomm:
+    port: 5087
+    timeout: 180
+    decoder: "org.traccar.protocol.FlexcommProtocolDecoder"
+
+  # Blacfox Protocol
+  blackfox:
+    port: 5088
+    timeout: 180
+    decoder: "org.traccar.protocol.BlackfoxProtocolDecoder"
+
+  # Advantrack Protocol
+  advantrack:
+    port: 5089
+    timeout: 180
+    decoder: "org.traccar.protocol.AdvantrackProtocolDecoder"
+
+  # Visiontek Protocol
+  visiontek:
+    port: 5090
+    timeout: 180
+    decoder: "org.traccar.protocol.VisiontekProtocolDecoder"
+
+  # Ardi01 Protocol
+  ardi01:
+    port: 5091
+    timeout: 180
+    decoder: "org.traccar.protocol.Ardi01ProtocolDecoder"
+
+  # Xt013 Protocol
+  xt013:
+    port: 5092
+    timeout: 180
+    decoder: "org.traccar.protocol.Xt013ProtocolDecoder"
+
+  # AutoFon Protocol
+  autofon:
+    port: 5093
+    timeout: 180
+    decoder: "org.traccar.protocol.AutoFonProtocolDecoder"
+
+  # GoSafe Protocol
+  gosafe:
+    port: 5094
+    timeout: 180
+    decoder: "org.traccar.protocol.GoSafeProtocolDecoder"
+
+  # AutoGrade Protocol
+  autograde:
+    port: 5095
+    timeout: 180
+    decoder: "org.traccar.protocol.AutoGradeProtocolDecoder"
+
+  # Tk102 Protocol
+  tk102:
+    port: 5096
+    timeout: 180
+    decoder: "org.traccar.protocol.Tk102ProtocolDecoder"
+
+  # Intellitrac Protocol
+  intellitrac:
+    port: 5097
+    timeout: 180
+    decoder: "org.traccar.protocol.IntellitracProtocolDecoder"
+
+  # Xt2400 Protocol
+  xt2400:
+    port: 5098
+    timeout: 180
+    decoder: "org.traccar.protocol.Xt2400ProtocolDecoder"
+
+  # Maestro Protocol
+  maestro:
+    port: 5099
+    timeout: 180
+    decoder: "org.traccar.protocol.MaestroProtocolDecoder"
+    
+  # JT600 Protocol
+  jt600:
+    port: 5099
+    timeout: 180
+    decoder: "org.traccar.protocol.Jt600ProtocolDecoder"
+    encoder: "org.traccar.protocol.Jt600ProtocolEncoder"
+
+  # Ais Protocol
+  ais:
+    port: 5100
+    timeout: 180
+    decoder: "org.traccar.protocol.AisProtocolDecoder"
+
+  # Gt30 Protocol
+  gt30:
+    port: 5101
+    timeout: 180
+    decoder: "org.traccar.protocol.Gt30ProtocolDecoder"
+    
+  # GL200 Protocol
+  gl200:
+    port: 5159
+    timeout: 180
+    ignoreFixTime: true  # Ignore device reported fix time for testing
+    decoder: "org.traccar.protocol.Gl200ProtocolDecoder"
+    encoder: "org.traccar.protocol.Gl200ProtocolEncoder"
+
+  # Tmg Protocol
+  tmg:
+    port: 5102
+    timeout: 180
+    decoder: "org.traccar.protocol.TmgProtocolDecoder"
+
+  # Pretrace Protocol
+  pretrace:
+    port: 5103
+    timeout: 180
+    decoder: "org.traccar.protocol.PretraceProtocolDecoder"
+
+  # Primetech Protocol
+  primetech:
+    port: 5104
+    timeout: 180
+    decoder: "org.traccar.protocol.PrimetechProtocolDecoder"
+
+  # Alcolock Protocol
+  alcolock:
+    port: 5105
+    timeout: 180
+    decoder: "org.traccar.protocol.AlcolockProtocolDecoder"
+
+  # Idpl Protocol
+  idpl:
+    port: 5106
+    timeout: 180
+    decoder: "org.traccar.protocol.IdplProtocolDecoder"
+
+  # Carsfit Protocol
+  carsfit:
+    port: 5107
+    timeout: 180
+    decoder: "org.traccar.protocol.CarsFitProtocolDecoder"
+
+  # Rcs Protocol
+  rcs:
+    port: 5108
+    timeout: 180
+    decoder: "org.traccar.protocol.RcsProtocolDecoder"
+
+  # Pt60 Protocol
+  pt60:
+    port: 5109
+    timeout: 180
+    decoder: "org.traccar.protocol.Pt60ProtocolDecoder"
+
+  # Ulbotech Protocol
+  ulbotech:
+    port: 5110
+    timeout: 180
+    decoder: "org.traccar.protocol.UlbotechProtocolDecoder"
+
+  # Tramigo Protocol
+  tramigo:
+    port: 5111
+    timeout: 180
+    decoder: "org.traccar.protocol.TramigoProtocolDecoder"
+
+  # Tr900 Protocol
+  tr900:
+    port: 5112
+    timeout: 180
+    decoder: "org.traccar.protocol.Tr900ProtocolDecoder"
+
+  # Ardi01 Protocol
+  ardi01:
+    port: 5113
+    timeout: 180
+    decoder: "org.traccar.protocol.Ardi01ProtocolDecoder"
+
+  # Xt013 Protocol
+  xt013:
+    port: 5114
+    timeout: 180
+    decoder: "org.traccar.protocol.Xt013ProtocolDecoder"
+
+  # AutoFon Protocol
+  autofon:
+    port: 5115
+    timeout: 180
+    decoder: "org.traccar.protocol.AutoFonProtocolDecoder"
+
+  # GoSafe Protocol
+  gosafe:
+    port: 5116
+    timeout: 180
+    decoder: "org.traccar.protocol.GoSafeProtocolDecoder"
+
+  # AutoGrade Protocol
+  autograde:
+    port: 5117
+    timeout: 180
+    decoder: "org.traccar.protocol.AutoGradeProtocolDecoder"
+
+  # Tk102 Protocol
+  tk102:
+    port: 5118
+    timeout: 180
+    decoder: "org.traccar.protocol.Tk102ProtocolDecoder"
+
+  # Intellitrac Protocol
+  intellitrac:
+    port: 5119
+    timeout: 180
+    decoder: "org.traccar.protocol.IntellitracProtocolDecoder"
+
+  # Xt2400 Protocol
+  xt2400:
+    port: 5120
+    timeout: 180
+    decoder: "org.traccar.protocol.Xt2400ProtocolDecoder"
+    
+  # TAIP Protocol
+  taip:
+    port: 5121
+    timeout: 180
+    prefix: true  # Use prefixes for messages in testing
+    decoder: "org.traccar.protocol.TaipProtocolDecoder"
+    
+  # Wialon Protocol
+  wialon:
+    port: 5122
+    timeout: 180
+    decoder: "org.traccar.protocol.WialonProtocolDecoder"
+    encoder: "org.traccar.protocol.WialonProtocolEncoder"
+    
+  # Carscop Protocol
+  carscop:
+    port: 5123
+    timeout: 180
+    decoder: "org.traccar.protocol.CarscopProtocolDecoder"
+    
+  # Apel Protocol
+  apel:
+    port: 5124
+    timeout: 180
+    decoder: "org.traccar.protocol.ApelProtocolDecoder"
+    
+  # Manpower Protocol
+  manpower:
+    port: 5125
+    timeout: 180
+    decoder: "org.traccar.protocol.ManPowerProtocolDecoder"
+    
+  # GlobalSat Protocol
+  globalsat:
+    port: 5126
+    timeout: 180
+    decoder: "org.traccar.protocol.GlobalSatProtocolDecoder"
+    
+  # Astra Protocol
+  astra:
+    port: 5127
+    timeout: 180
+    decoder: "org.traccar.protocol.AstraProtocolDecoder"
+    
+  # Flextrack Protocol
+  flextrack:
+    port: 5128
+    timeout: 180
+    decoder: "org.traccar.protocol.FlextrackProtocolDecoder"
+    
+  # BlackKite Protocol
+  blackkite:
+    port: 5129
+    timeout: 180
+    decoder: "org.traccar.protocol.BlackKiteProtocolDecoder"
+    
+  # Adm Protocol
+  adm:
+    port: 5130
+    timeout: 180
+    decoder: "org.traccar.protocol.AdmProtocolDecoder"
