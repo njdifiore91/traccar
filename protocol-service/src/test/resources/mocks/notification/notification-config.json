@@ -1,0 +1,311 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "description": "Configuration for mocking notification service behavior during Protocol Service tests",
+  "globalSettings": {
+    "defaultResponseLatency": 50,
+    "defaultSuccessRate": 100,
+    "simulateNetworkErrors": false,
+    "simulateServiceUnavailable": false,
+    "simulateRateLimiting": false,
+    "simulateAuthErrors": false,
+    "simulateContentErrors": false,
+    "simulateBrokerFailures": false,
+    "simulateDiscoveryErrors": false,
+    "enableDistributedTracing": true,
+    "correlationIdPropagation": true,
+    "deadLetterQueueEnabled": true,
+    "deadLetterQueueProcessingDelay": 1000,
+    "maxRetryAttempts": 3,
+    "retryBackoffMultiplier": 2
+  },
+  "notificationTypes": {
+    "command": {
+      "enabled": true,
+      "successRate": 95,
+      "responseLatency": {
+        "min": 10,
+        "max": 100,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      }
+    },
+    "web": {
+      "enabled": true,
+      "successRate": 99,
+      "responseLatency": {
+        "min": 5,
+        "max": 50,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "activeSessions": 10
+    },
+    "mail": {
+      "enabled": true,
+      "successRate": 98,
+      "responseLatency": {
+        "min": 100,
+        "max": 500,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "smtpConfigured": true
+    },
+    "sms": {
+      "enabled": true,
+      "successRate": 90,
+      "responseLatency": {
+        "min": 200,
+        "max": 800,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "provider": "http"
+    },
+    "firebase": {
+      "enabled": true,
+      "successRate": 95,
+      "responseLatency": {
+        "min": 100,
+        "max": 300,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "deviceTokensAvailable": true
+    },
+    "traccar": {
+      "enabled": true,
+      "successRate": 99,
+      "responseLatency": {
+        "min": 10,
+        "max": 100,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      }
+    },
+    "telegram": {
+      "enabled": true,
+      "successRate": 90,
+      "responseLatency": {
+        "min": 200,
+        "max": 1000,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "botApiAvailable": true
+    },
+    "pushover": {
+      "enabled": true,
+      "successRate": 90,
+      "responseLatency": {
+        "min": 200,
+        "max": 1000,
+        "distribution": "normal"
+      },
+      "errorSimulation": {
+        "networkErrors": false,
+        "authErrors": false,
+        "rateLimiting": false,
+        "serviceUnavailable": false,
+        "contentErrors": false
+      },
+      "apiAvailable": true
+    }
+  },
+  "errorScenarios": {
+    "networkErrors": {
+      "connectionTimeout": 5000,
+      "readTimeout": 10000,
+      "connectionRefused": false,
+      "dnsResolutionFailure": false
+    },
+    "authErrors": {
+      "invalidCredentials": false,
+      "expiredCredentials": false,
+      "insufficientPermissions": false
+    },
+    "rateLimiting": {
+      "requestsPerMinute": 60,
+      "burstCapacity": 10,
+      "throttlingEnabled": false
+    },
+    "serviceUnavailable": {
+      "downtime": {
+        "enabled": false,
+        "durationSeconds": 300,
+        "intervalSeconds": 3600
+      },
+      "degradedPerformance": {
+        "enabled": false,
+        "latencyMultiplier": 5
+      }
+    },
+    "contentErrors": {
+      "malformedPayload": false,
+      "invalidRecipient": false,
+      "messageTooLarge": false
+    },
+    "brokerFailures": {
+      "publishFailure": false,
+      "consumeFailure": false,
+      "topicUnavailable": false
+    },
+    "discoveryErrors": {
+      "serviceRegistryUnavailable": false,
+      "endpointResolutionFailure": false
+    }
+  },
+  "retryBehavior": {
+    "retryEnabled": true,
+    "initialBackoffMs": 100,
+    "maxBackoffMs": 10000,
+    "backoffMultiplier": 2,
+    "maxRetryAttempts": 3,
+    "retryableErrorCodes": [408, 429, 500, 502, 503, 504],
+    "nonRetryableErrorCodes": [400, 401, 403, 404, 405, 409, 413]
+  },
+  "deadLetterQueue": {
+    "enabled": true,
+    "processingDelay": 1000,
+    "maxProcessingAttempts": 3,
+    "preserveOriginalHeaders": true,
+    "logFailedMessages": true
+  },
+  "distributedTracing": {
+    "enabled": true,
+    "propagateCorrelationId": true,
+    "generateMissingIds": true,
+    "logTraceEvents": true,
+    "includePayloadInTrace": false
+  },
+  "performanceTesting": {
+    "scenarios": {
+      "normal": {
+        "latencyMultiplier": 1.0,
+        "successRate": 100
+      },
+      "degraded": {
+        "latencyMultiplier": 2.0,
+        "successRate": 90
+      },
+      "severe": {
+        "latencyMultiplier": 5.0,
+        "successRate": 70
+      },
+      "catastrophic": {
+        "latencyMultiplier": 10.0,
+        "successRate": 30
+      }
+    },
+    "activeScenario": "normal"
+  },
+  "channelSpecificSettings": {
+    "email": {
+      "smtpConfigured": true,
+      "fallbackToLog": true,
+      "deliveryConfirmation": true
+    },
+    "sms": {
+      "provider": "http",
+      "alternateProviders": ["sns"],
+      "circuitBreakerEnabled": true
+    },
+    "push": {
+      "firebaseConfigured": true,
+      "deviceTokensAvailable": true,
+      "batchSize": 100
+    },
+    "web": {
+      "activeSessionsCount": 10,
+      "webSocketAvailable": true
+    },
+    "external": {
+      "telegramBotConfigured": true,
+      "pushoverApiConfigured": true,
+      "commandHandlerAvailable": true,
+      "circuitBreakerEnabled": true
+    }
+  },
+  "testingProfiles": {
+    "allSuccess": {
+      "globalSuccessRate": 100,
+      "disableAllErrors": true
+    },
+    "networkIssues": {
+      "globalSuccessRate": 70,
+      "enableNetworkErrors": true
+    },
+    "serviceUnavailable": {
+      "globalSuccessRate": 0,
+      "enableServiceUnavailable": true
+    },
+    "rateLimited": {
+      "globalSuccessRate": 50,
+      "enableRateLimiting": true
+    },
+    "authFailures": {
+      "globalSuccessRate": 0,
+      "enableAuthErrors": true
+    },
+    "contentIssues": {
+      "globalSuccessRate": 80,
+      "enableContentErrors": true
+    },
+    "brokerFailures": {
+      "globalSuccessRate": 60,
+      "enableBrokerFailures": true
+    },
+    "discoveryIssues": {
+      "globalSuccessRate": 50,
+      "enableDiscoveryErrors": true
+    },
+    "highLatency": {
+      "globalSuccessRate": 100,
+      "latencyMultiplier": 5.0
+    }
+  },
+  "activeTestingProfile": "allSuccess"
+}
