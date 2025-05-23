@@ -1,0 +1,88 @@
+{{- /*
+Protocol Service - Kubernetes Service Template
+
+This template defines the Kubernetes Service resource that exposes the Protocol Service
+to GPS devices and other services. It creates network endpoints that allow devices to
+connect using various protocols (TCP/UDP) on different ports (5000-5090).
+
+The service can be configured as:
+- LoadBalancer: For production environments where devices connect directly from the internet
+- NodePort: For environments where external load balancers are managed separately
+- ClusterIP: For internal access only (typically used with an Ingress controller)
+
+The service exposes:
+1. A management API port (default: 8090) for health checks and administration
+2. Multiple protocol-specific ports for device connections (configurable in values.yaml)
+
+Cloud provider-specific annotations can be added through values.yaml to configure
+load balancer behavior, SSL termination, connection draining, etc.
+*/ -}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "protocol.fullname" . }}
+  labels:
+    {{- include "protocol.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    # Cloud provider-specific annotations for load balancer configuration
+    # Examples:
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Service type determines how the service is exposed
+  # - LoadBalancer: Exposes the service externally using a cloud provider's load balancer
+  # - NodePort: Exposes the service on each Node's IP at a static port
+  # - ClusterIP: Exposes the service on a cluster-internal IP (default)
+  type: {{ .Values.service.type }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  # LoadBalancer specific configurations
+  {{- if .Values.service.loadBalancerIP }}
+  # Specify the loadBalancerIP to request a specific static IP
+  # Note: This is provider-dependent and not guaranteed on all platforms
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.service.loadBalancerSourceRanges }}
+  # Restrict access to the LoadBalancer to specific IP ranges for security
+  loadBalancerSourceRanges:
+    {{- range .Values.service.loadBalancerSourceRanges }}
+    - {{ . }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  # Controls how external traffic is routed
+  # - Cluster: May cause source IP to be lost but distributes across all nodes
+  # - Local: Preserves client source IP but may cause uneven load distribution
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
+  {{- end }}
+  ports:
+    # Management API port for health checks, metrics, and administration
+    # This port is used for service health monitoring and management operations
+    - port: {{ .Values.service.managementPort | default 8090 }}
+      targetPort: management
+      protocol: TCP
+      name: management
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.managementNodePort }}
+      nodePort: {{ .Values.service.managementNodePort }}
+      {{- end }}
+    
+    # Protocol-specific ports for device connections
+    # These ports are used by GPS devices to connect to the Protocol Service
+    # Each protocol may use a different port and transport protocol (TCP/UDP)
+    {{- range .Values.service.protocolPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      name: {{ .name }}
+      {{- if and (eq $.Values.service.type "NodePort") .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+    {{- end }}
+  # Selector targets pods created by the Protocol Service deployment
+  # This ensures traffic is routed to the correct Protocol Service instances
+  selector:
+    {{- include "protocol.selectorLabels" . | nindent 4 }}
