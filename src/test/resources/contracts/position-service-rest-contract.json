@@ -1,0 +1,1488 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Position Service REST API",
+    "description": "REST API contract for the Position Service, defining endpoints for position data processing, storage, and retrieval",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traccar Support",
+      "url": "https://www.traccar.org/support/",
+      "email": "support@traccar.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Position Service API base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "positions",
+      "description": "Position data operations"
+    },
+    {
+      "name": "enrichment",
+      "description": "Position enrichment operations"
+    },
+    {
+      "name": "health",
+      "description": "Service health and status operations"
+    }
+  ],
+  "paths": {
+    "/positions": {
+      "post": {
+        "tags": ["positions"],
+        "summary": "Add a new position",
+        "description": "Adds a new position to the system for processing and storage",
+        "operationId": "addPosition",
+        "requestBody": {
+          "description": "Position object to be added",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Position successfully added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid position data supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": ["positions"],
+        "summary": "Get positions",
+        "description": "Retrieves positions based on specified filters",
+        "operationId": "getPositions",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID to filter positions",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start time for position retrieval (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End time for position retrieval (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of positions to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/{id}": {
+      "get": {
+        "tags": ["positions"],
+        "summary": "Get position by ID",
+        "description": "Retrieves a specific position by its ID",
+        "operationId": "getPositionById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Position ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/latest": {
+      "get": {
+        "tags": ["positions"],
+        "summary": "Get latest positions",
+        "description": "Retrieves the latest position for each specified device",
+        "operationId": "getLatestPositions",
+        "parameters": [
+          {
+            "name": "deviceIds",
+            "in": "query",
+            "description": "Comma-separated list of device IDs",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1,2,3"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/batch": {
+      "post": {
+        "tags": ["positions"],
+        "summary": "Add multiple positions",
+        "description": "Adds multiple positions to the system in a single batch operation",
+        "operationId": "addPositionsBatch",
+        "requestBody": {
+          "description": "Array of position objects to be added",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PositionRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Positions successfully added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid position data supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/device/{deviceId}/count": {
+      "get": {
+        "tags": ["positions"],
+        "summary": "Count positions for a device",
+        "description": "Returns the count of positions for a specific device within a time range",
+        "operationId": "countPositionsForDevice",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start time for position count (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End time for position count (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of positions for the device"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/enrichment/geocode": {
+      "post": {
+        "tags": ["enrichment"],
+        "summary": "Geocode a position",
+        "description": "Enriches a position with address information through reverse geocoding",
+        "operationId": "geocodePosition",
+        "requestBody": {
+          "description": "Position coordinates to geocode",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeocodingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeocodingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/enrichment/speedlimit": {
+      "post": {
+        "tags": ["enrichment"],
+        "summary": "Get speed limit for a position",
+        "description": "Retrieves the speed limit for a specific location",
+        "operationId": "getSpeedLimit",
+        "requestBody": {
+          "description": "Position coordinates to check for speed limit",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeedLimitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeedLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/positions/enrichment/geofences": {
+      "post": {
+        "tags": ["enrichment"],
+        "summary": "Check geofences for a position",
+        "description": "Determines which geofences a position is located within",
+        "operationId": "checkGeofences",
+        "requestBody": {
+          "description": "Position coordinates to check against geofences",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeofenceCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeofenceCheckResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Get service health status",
+        "description": "Returns the health status of the Position Service",
+        "operationId": "getHealthStatus",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is unhealthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Get service readiness status",
+        "description": "Returns the readiness status of the Position Service",
+        "operationId": "getReadinessStatus",
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Get service metrics",
+        "description": "Returns metrics for the Position Service",
+        "operationId": "getMetrics",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PositionRequest": {
+        "type": "object",
+        "required": [
+          "deviceId",
+          "protocol",
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol used to receive the position"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position was recorded (ISO-8601 format)"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude coordinate"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude coordinate"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Altitude in meters"
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed in knots"
+          },
+          "course": {
+            "type": "number",
+            "format": "double",
+            "description": "Course in degrees"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double",
+            "description": "Position accuracy in meters"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Indicates if the position is valid"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes for the position"
+          }
+        }
+      },
+      "PositionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Position identifier"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol used to receive the position"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position was received by the server (ISO-8601 format)"
+          },
+          "deviceTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position was recorded by the device (ISO-8601 format)"
+          },
+          "fixTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position fix was acquired (ISO-8601 format)"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude coordinate"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude coordinate"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Altitude in meters"
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed in knots"
+          },
+          "course": {
+            "type": "number",
+            "format": "double",
+            "description": "Course in degrees"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double",
+            "description": "Position accuracy in meters"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Indicates if the position is valid"
+          },
+          "address": {
+            "type": "string",
+            "description": "Geocoded address for the position"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes for the position"
+          },
+          "geofenceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "IDs of geofences the position is located within"
+          },
+          "speedLimit": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed limit at the position location in knots"
+          },
+          "processed": {
+            "type": "boolean",
+            "description": "Indicates if the position has been fully processed"
+          }
+        }
+      },
+      "GeocodingRequest": {
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude coordinate"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude coordinate"
+          }
+        }
+      },
+      "GeocodingResponse": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Geocoded address for the position"
+          },
+          "formattedAddress": {
+            "type": "string",
+            "description": "Formatted address string"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country name"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province name"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name"
+          },
+          "street": {
+            "type": "string",
+            "description": "Street name"
+          },
+          "houseNumber": {
+            "type": "string",
+            "description": "House number"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code"
+          }
+        }
+      },
+      "SpeedLimitRequest": {
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude coordinate"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude coordinate"
+          }
+        }
+      },
+      "SpeedLimitResponse": {
+        "type": "object",
+        "properties": {
+          "speedLimit": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed limit in knots"
+          },
+          "speedLimitKmh": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed limit in kilometers per hour"
+          },
+          "speedLimitMph": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed limit in miles per hour"
+          },
+          "roadType": {
+            "type": "string",
+            "description": "Type of road"
+          }
+        }
+      },
+      "GeofenceCheckRequest": {
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude",
+          "deviceId"
+        ],
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude coordinate"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude coordinate"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          }
+        }
+      },
+      "GeofenceCheckResponse": {
+        "type": "object",
+        "properties": {
+          "geofenceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "IDs of geofences the position is located within"
+          },
+          "geofences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Geofence identifier"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Geofence name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Geofence description"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Geofence type (polygon, circle, etc.)"
+                }
+              }
+            },
+            "description": "Details of geofences the position is located within"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["UP", "DOWN"],
+            "description": "Overall health status of the service"
+          },
+          "version": {
+            "type": "string",
+            "description": "Service version"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the health check was performed"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["UP", "DOWN"],
+                  "description": "Status of the specific component"
+                },
+                "details": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Additional details about the component"
+                }
+              }
+            },
+            "description": "Detailed health status of individual components"
+          }
+        }
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["READY", "NOT_READY"],
+            "description": "Readiness status of the service"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the readiness check was performed"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["READY", "NOT_READY"],
+                  "description": "Status of the specific component"
+                },
+                "details": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "Additional details about the component"
+                }
+              }
+            },
+            "description": "Detailed readiness status of individual components"
+          }
+        }
+      },
+      "MetricsResponse": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the metrics were collected"
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "positions": {
+                "type": "object",
+                "properties": {
+                  "processed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of positions processed"
+                  },
+                  "filtered": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of positions filtered out"
+                  },
+                  "processingTime": {
+                    "type": "object",
+                    "properties": {
+                      "min": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Minimum processing time in milliseconds"
+                      },
+                      "max": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Maximum processing time in milliseconds"
+                      },
+                      "avg": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Average processing time in milliseconds"
+                      },
+                      "p95": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "95th percentile processing time in milliseconds"
+                      },
+                      "p99": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "99th percentile processing time in milliseconds"
+                      }
+                    }
+                  }
+                }
+              },
+              "enrichment": {
+                "type": "object",
+                "properties": {
+                  "geocoding": {
+                    "type": "object",
+                    "properties": {
+                      "requests": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of geocoding requests"
+                      },
+                      "success": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of successful geocoding requests"
+                      },
+                      "failure": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of failed geocoding requests"
+                      },
+                      "responseTime": {
+                        "type": "object",
+                        "properties": {
+                          "avg": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Average geocoding response time in milliseconds"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "speedLimit": {
+                    "type": "object",
+                    "properties": {
+                      "requests": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of speed limit requests"
+                      },
+                      "success": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of successful speed limit requests"
+                      },
+                      "failure": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of failed speed limit requests"
+                      },
+                      "responseTime": {
+                        "type": "object",
+                        "properties": {
+                          "avg": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Average speed limit response time in milliseconds"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "messageConsumer": {
+                "type": "object",
+                "properties": {
+                  "received": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of messages received from broker"
+                  },
+                  "processed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of messages successfully processed"
+                  },
+                  "failed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of messages that failed processing"
+                  },
+                  "lag": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Current consumer lag (messages waiting to be processed)"
+                  }
+                }
+              },
+              "messageProducer": {
+                "type": "object",
+                "properties": {
+                  "sent": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of messages sent to broker"
+                  },
+                  "failed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of messages that failed to send"
+                  }
+                }
+              },
+              "database": {
+                "type": "object",
+                "properties": {
+                  "reads": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of database read operations"
+                  },
+                  "writes": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of database write operations"
+                  },
+                  "responseTime": {
+                    "type": "object",
+                    "properties": {
+                      "avg": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Average database response time in milliseconds"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the error occurred"
+          },
+          "path": {
+            "type": "string",
+            "description": "Request path that caused the error"
+          },
+          "traceId": {
+            "type": "string",
+            "description": "Unique identifier for tracing the error"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token-based authentication"
+      },
+      "serviceAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Service-to-service authentication token"
+      }
+    }
+  }
+}
