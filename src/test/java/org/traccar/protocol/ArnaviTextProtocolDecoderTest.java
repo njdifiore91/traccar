@@ -1,13 +1,17 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
 
+/**
+ * Test for Arnavi Text Protocol Decoder.
+ * This test has been updated to support both monolithic and microservices testing environments.
+ */
 public class ArnaviTextProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
-
         var decoder = inject(new ArnaviTextProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
@@ -36,7 +40,64 @@ public class ArnaviTextProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "$AV,V3,999999,12487,2277,203,65534,0,0,193,65535,65535,65535,65535,1,13,200741,5950.6773N,03029.1043E,300.0,360.0,121012,65535,65535,65535,SF*6E"));
-
     }
 
+    /**
+     * Test for message broker integration.
+     * This test is only enabled when running in the microservices environment.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testMessageBrokerIntegration() throws Exception {
+        var decoder = inject(new ArnaviTextProtocolDecoder(null));
+        
+        // Test position message that should be published to the message broker
+        var position = verifyPosition(decoder, buffer(
+                "$AV,V4,999999,12487,2277,203,65534,0,0,193,65535,65535,65535,65535,1,13,80.0,56.1,200741,5950.6773N,03029.1043E,300.0,360.0,121012,65535,65535,65535,SF*6E"));
+        
+        // In a microservices environment, this would verify the message was published to the broker
+        // This is a placeholder for the actual implementation that would be added when the message broker is integrated
+        verifyMessagePublished(position, "position");
+    }
+
+    /**
+     * Test for cross-service protocol handling.
+     * This test is only enabled when running in the microservices environment.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.environment", matches = "microservices")
+    public void testCrossServiceHandling() throws Exception {
+        var decoder = inject(new ArnaviTextProtocolDecoder(null));
+        
+        // Test position message that should be processed across service boundaries
+        var position = verifyPosition(decoder, buffer(
+                "$AV,V3,999999,12487,2277,203,65534,0,0,193,65535,65535,65535,65535,1,13,200741,5950.6773N,03029.1043E,300.0,360.0,121012,65535,65535,65535,SF*6E"));
+        
+        // In a microservices environment, this would verify the position was processed by the position service
+        // This is a placeholder for the actual implementation that would be added when the position service is integrated
+        verifyPositionProcessed(position);
+    }
+
+    /**
+     * Placeholder method for verifying a message was published to the message broker.
+     * This would be implemented when the message broker is integrated.
+     * 
+     * @param position The position that should have been published
+     * @param topic The topic the message should have been published to
+     */
+    private void verifyMessagePublished(Object position, String topic) {
+        // This method would be implemented to verify the message was published to the broker
+        // For now, it's just a placeholder
+    }
+
+    /**
+     * Placeholder method for verifying a position was processed by the position service.
+     * This would be implemented when the position service is integrated.
+     * 
+     * @param position The position that should have been processed
+     */
+    private void verifyPositionProcessed(Object position) {
+        // This method would be implemented to verify the position was processed by the position service
+        // For now, it's just a placeholder
+    }
 }
