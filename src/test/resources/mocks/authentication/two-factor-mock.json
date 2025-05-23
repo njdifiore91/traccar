@@ -1,0 +1,964 @@
+{
+  "totp": {
+    "validation": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "123456"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": true,
+            "timestamp": "2023-05-23T10:15:30Z",
+            "sessionId": "sess_2fa_verified_123456"
+          }
+        }
+      },
+      "invalid_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "111111"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "INVALID_CODE",
+            "message": "The provided verification code is invalid or has expired"
+          }
+        }
+      },
+      "expired_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "222222"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "EXPIRED_CODE",
+            "message": "The verification code has expired, please request a new one"
+          }
+        }
+      },
+      "too_many_attempts": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "333333"
+          }
+        },
+        "response": {
+          "status": 429,
+          "headers": {
+            "Content-Type": "application/json",
+            "Retry-After": "300"
+          },
+          "body": {
+            "verified": false,
+            "error": "TOO_MANY_ATTEMPTS",
+            "message": "Too many verification attempts, please try again later",
+            "retryAfterSeconds": 300
+          }
+        }
+      }
+    },
+    "setup": {
+      "generate_secret": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/setup",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "secret": "JBSWY3DPEHPK3PXP",
+            "qrCodeUrl": "otpauth://totp/Traccar:user123?secret=JBSWY3DPEHPK3PXP&issuer=Traccar",
+            "recoveryCodesCount": 8,
+            "recoveryCodes": [
+              "1234-5678-9012",
+              "2345-6789-0123",
+              "3456-7890-1234",
+              "4567-8901-2345",
+              "5678-9012-3456",
+              "6789-0123-4567",
+              "7890-1234-5678",
+              "8901-2345-6789"
+            ]
+          }
+        }
+      },
+      "confirm_setup": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/confirm",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "123456"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true,
+            "timestamp": "2023-05-23T10:20:45Z"
+          }
+        }
+      },
+      "disable": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/totp/disable",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "userId": "user123",
+            "code": "123456"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": false,
+            "timestamp": "2023-05-23T11:30:15Z"
+          }
+        }
+      }
+    }
+  },
+  "sms": {
+    "send": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+15551234567",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": true,
+            "messageId": "sms_123456789",
+            "expiresInSeconds": 300
+          }
+        }
+      },
+      "invalid_phone": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+1invalid",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 400,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": false,
+            "error": "INVALID_PHONE_NUMBER",
+            "message": "The provided phone number is invalid"
+          }
+        }
+      },
+      "rate_limited": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+15559876543",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 429,
+          "headers": {
+            "Content-Type": "application/json",
+            "Retry-After": "60"
+          },
+          "body": {
+            "sent": false,
+            "error": "RATE_LIMITED",
+            "message": "Too many SMS requests, please try again later",
+            "retryAfterSeconds": 60
+          }
+        }
+      }
+    },
+    "verify": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+15551234567",
+            "userId": "user123",
+            "code": "123456"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": true,
+            "timestamp": "2023-05-23T10:25:30Z",
+            "sessionId": "sess_sms_verified_123456"
+          }
+        }
+      },
+      "invalid_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+15551234567",
+            "userId": "user123",
+            "code": "111111"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "INVALID_CODE",
+            "message": "The provided SMS verification code is invalid"
+          }
+        }
+      },
+      "expired_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/sms/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "phoneNumber": "+15551234567",
+            "userId": "user123",
+            "code": "222222"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "EXPIRED_CODE",
+            "message": "The SMS verification code has expired, please request a new one"
+          }
+        }
+      }
+    }
+  },
+  "email": {
+    "send": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@example.com",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": true,
+            "messageId": "email_123456789",
+            "expiresInSeconds": 600
+          }
+        }
+      },
+      "invalid_email": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "invalid-email",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 400,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": false,
+            "error": "INVALID_EMAIL",
+            "message": "The provided email address is invalid"
+          }
+        }
+      },
+      "rate_limited": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "ratelimited@example.com",
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 429,
+          "headers": {
+            "Content-Type": "application/json",
+            "Retry-After": "300"
+          },
+          "body": {
+            "sent": false,
+            "error": "RATE_LIMITED",
+            "message": "Too many email requests, please try again later",
+            "retryAfterSeconds": 300
+          }
+        }
+      }
+    },
+    "verify": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@example.com",
+            "userId": "user123",
+            "code": "123456"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": true,
+            "timestamp": "2023-05-23T10:35:30Z",
+            "sessionId": "sess_email_verified_123456"
+          }
+        }
+      },
+      "invalid_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@example.com",
+            "userId": "user123",
+            "code": "111111"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "INVALID_CODE",
+            "message": "The provided email verification code is invalid"
+          }
+        }
+      },
+      "expired_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/email/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@example.com",
+            "userId": "user123",
+            "code": "222222"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "EXPIRED_CODE",
+            "message": "The email verification code has expired, please request a new one"
+          }
+        }
+      }
+    }
+  },
+  "recovery": {
+    "verify": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/recovery/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "recoveryCode": "1234-5678-9012"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": true,
+            "timestamp": "2023-05-23T11:45:30Z",
+            "sessionId": "sess_recovery_verified_123456",
+            "remainingCodes": 7
+          }
+        }
+      },
+      "invalid_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/recovery/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "recoveryCode": "0000-0000-0000"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "INVALID_RECOVERY_CODE",
+            "message": "The provided recovery code is invalid"
+          }
+        }
+      },
+      "used_code": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/recovery/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "recoveryCode": "9999-9999-9999"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "USED_RECOVERY_CODE",
+            "message": "This recovery code has already been used"
+          }
+        }
+      },
+      "no_codes_remaining": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/recovery/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user_no_codes",
+            "recoveryCode": "1234-5678-9012"
+          }
+        },
+        "response": {
+          "status": 403,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "error": "NO_RECOVERY_CODES",
+            "message": "No recovery codes remaining, please contact support"
+          }
+        }
+      }
+    },
+    "generate": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/recovery/generate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "recoveryCodesCount": 8,
+            "recoveryCodes": [
+              "1111-2222-3333",
+              "2222-3333-4444",
+              "3333-4444-5555",
+              "4444-5555-6666",
+              "5555-6666-7777",
+              "6666-7777-8888",
+              "7777-8888-9999",
+              "8888-9999-0000"
+            ],
+            "timestamp": "2023-05-23T12:15:30Z"
+          }
+        }
+      }
+    }
+  },
+  "push": {
+    "send": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "deviceId": "device123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": true,
+            "pushId": "push_123456789",
+            "expiresInSeconds": 60
+          }
+        }
+      },
+      "device_not_registered": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/send",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "deviceId": "invalid_device"
+          }
+        },
+        "response": {
+          "status": 404,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "sent": false,
+            "error": "DEVICE_NOT_REGISTERED",
+            "message": "The specified device is not registered for push authentication"
+          }
+        }
+      }
+    },
+    "verify": {
+      "success": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "pushId": "push_123456789"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": true,
+            "timestamp": "2023-05-23T10:45:30Z",
+            "sessionId": "sess_push_verified_123456"
+          }
+        }
+      },
+      "pending": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "pushId": "push_pending"
+          }
+        },
+        "response": {
+          "status": 202,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "status": "PENDING",
+            "message": "Push notification is pending user approval"
+          }
+        }
+      },
+      "rejected": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "pushId": "push_rejected"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "status": "REJECTED",
+            "error": "PUSH_REJECTED",
+            "message": "Push authentication was rejected by the user"
+          }
+        }
+      },
+      "expired": {
+        "request": {
+          "method": "POST",
+          "url": "/api/auth/push/verify",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "pushId": "push_expired"
+          }
+        },
+        "response": {
+          "status": 401,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "verified": false,
+            "status": "EXPIRED",
+            "error": "PUSH_EXPIRED",
+            "message": "Push authentication request has expired"
+          }
+        }
+      }
+    }
+  },
+  "status": {
+    "get": {
+      "success": {
+        "request": {
+          "method": "GET",
+          "url": "/api/auth/2fa/status",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "queryParameters": {
+            "userId": "user123"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user123",
+            "methods": {
+              "totp": {
+                "enabled": true,
+                "lastUsed": "2023-05-23T10:15:30Z"
+              },
+              "sms": {
+                "enabled": true,
+                "lastUsed": "2023-05-22T14:30:45Z",
+                "phoneNumber": "+15551234567"
+              },
+              "email": {
+                "enabled": true,
+                "lastUsed": "2023-05-21T09:45:15Z",
+                "email": "user@example.com"
+              },
+              "push": {
+                "enabled": true,
+                "lastUsed": "2023-05-23T08:20:10Z",
+                "devices": [
+                  {
+                    "id": "device123",
+                    "name": "iPhone 13",
+                    "lastUsed": "2023-05-23T08:20:10Z"
+                  },
+                  {
+                    "id": "device456",
+                    "name": "Pixel 6",
+                    "lastUsed": "2023-05-20T16:40:22Z"
+                  }
+                ]
+              },
+              "recovery": {
+                "enabled": true,
+                "codesRemaining": 7,
+                "lastGenerated": "2023-05-15T11:30:00Z"
+              }
+            },
+            "requiredForLogin": true,
+            "defaultMethod": "totp"
+          }
+        }
+      },
+      "not_configured": {
+        "request": {
+          "method": "GET",
+          "url": "/api/auth/2fa/status",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "queryParameters": {
+            "userId": "user_no_2fa"
+          }
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "userId": "user_no_2fa",
+            "methods": {
+              "totp": {
+                "enabled": false
+              },
+              "sms": {
+                "enabled": false
+              },
+              "email": {
+                "enabled": false
+              },
+              "push": {
+                "enabled": false,
+                "devices": []
+              },
+              "recovery": {
+                "enabled": false,
+                "codesRemaining": 0
+              }
+            },
+            "requiredForLogin": false,
+            "defaultMethod": null
+          }
+        }
+      }
+    }
+  },
+  "system": {
+    "health": {
+      "success": {
+        "request": {
+          "method": "GET",
+          "url": "/api/auth/2fa/health"
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "UP",
+            "providers": {
+              "totp": "UP",
+              "sms": "UP",
+              "email": "UP",
+              "push": "UP"
+            },
+            "version": "1.0.0"
+          }
+        }
+      },
+      "degraded": {
+        "request": {
+          "method": "GET",
+          "url": "/api/auth/2fa/health?simulate=degraded"
+        },
+        "response": {
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "DEGRADED",
+            "providers": {
+              "totp": "UP",
+              "sms": "DEGRADED",
+              "email": "UP",
+              "push": "DOWN"
+            },
+            "version": "1.0.0"
+          }
+        }
+      },
+      "down": {
+        "request": {
+          "method": "GET",
+          "url": "/api/auth/2fa/health?simulate=down"
+        },
+        "response": {
+          "status": 503,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "DOWN",
+            "providers": {
+              "totp": "DOWN",
+              "sms": "DOWN",
+              "email": "DOWN",
+              "push": "DOWN"
+            },
+            "version": "1.0.0",
+            "error": "SERVICE_UNAVAILABLE",
+            "message": "Two-factor authentication service is currently unavailable"
+          }
+        }
+      }
+    }
+  }
+}
