@@ -1,0 +1,366 @@
+{
+  "bind_operations": {
+    "success": {
+      "simple": {
+        "cn=admin,dc=example,dc=com": {
+          "password": "admin_password",
+          "result_code": 0,
+          "result_message": "Success",
+          "server_response": {
+            "dn": "cn=admin,dc=example,dc=com",
+            "attributes": {
+              "cn": ["admin"],
+              "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+              "userPassword": ["admin_password"],
+              "sn": ["Administrator"],
+              "mail": ["admin@example.com"],
+              "description": ["LDAP Administrator"],
+              "memberOf": ["cn=administrators,ou=groups,dc=example,dc=com"]
+            }
+          }
+        },
+        "uid=admin,dc=example,dc=com": {
+          "password": "admin_password",
+          "result_code": 0,
+          "result_message": "Success",
+          "server_response": {
+            "dn": "uid=admin,dc=example,dc=com",
+            "attributes": {
+              "uid": ["admin"],
+              "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+              "userPassword": ["admin_password"],
+              "sn": ["Administrator"],
+              "cn": ["LDAP Admin"],
+              "mail": ["admin@example.com"],
+              "description": ["LDAP Administrator (UID format)"],
+              "memberOf": ["cn=administrators,ou=groups,dc=example,dc=com"]
+            }
+          }
+        },
+        "cn=user1,ou=users,dc=example,dc=com": {
+          "password": "user1_password",
+          "result_code": 0,
+          "result_message": "Success",
+          "server_response": {
+            "dn": "cn=user1,ou=users,dc=example,dc=com",
+            "attributes": {
+              "cn": ["user1"],
+              "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+              "userPassword": ["user1_password"],
+              "sn": ["User"],
+              "givenName": ["Test"],
+              "mail": ["user1@example.com"],
+              "description": ["Test User 1"],
+              "memberOf": ["cn=users,ou=groups,dc=example,dc=com"]
+            }
+          }
+        },
+        "cn=user2,ou=users,dc=example,dc=com": {
+          "password": "user2_password",
+          "result_code": 0,
+          "result_message": "Success",
+          "server_response": {
+            "dn": "cn=user2,ou=users,dc=example,dc=com",
+            "attributes": {
+              "cn": ["user2"],
+              "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+              "userPassword": ["user2_password"],
+              "sn": ["User"],
+              "givenName": ["Another"],
+              "mail": ["user2@example.com"],
+              "description": ["Test User 2"],
+              "memberOf": ["cn=users,ou=groups,dc=example,dc=com", "cn=developers,ou=groups,dc=example,dc=com"]
+            }
+          }
+        }
+      },
+      "anonymous": {
+        "": {
+          "password": "",
+          "result_code": 0,
+          "result_message": "Success",
+          "server_response": {
+            "dn": "",
+            "attributes": {}
+          }
+        }
+      }
+    },
+    "failure": {
+      "invalid_credentials": {
+        "cn=admin,dc=example,dc=com": {
+          "password": "wrong_password",
+          "result_code": 49,
+          "result_message": "Invalid Credentials"
+        },
+        "uid=admin,dc=example,dc=com": {
+          "password": "wrong_password",
+          "result_code": 49,
+          "result_message": "Invalid Credentials"
+        },
+        "cn=user1,ou=users,dc=example,dc=com": {
+          "password": "wrong_password",
+          "result_code": 49,
+          "result_message": "Invalid Credentials"
+        }
+      },
+      "account_locked": {
+        "cn=locked_user,ou=users,dc=example,dc=com": {
+          "password": "any_password",
+          "result_code": 49,
+          "result_message": "Account Locked"
+        }
+      },
+      "account_disabled": {
+        "cn=disabled_user,ou=users,dc=example,dc=com": {
+          "password": "any_password",
+          "result_code": 49,
+          "result_message": "Account Disabled"
+        }
+      },
+      "password_expired": {
+        "cn=expired_password_user,ou=users,dc=example,dc=com": {
+          "password": "expired_password",
+          "result_code": 49,
+          "result_message": "Password Expired"
+        }
+      },
+      "no_such_object": {
+        "cn=nonexistent_user,ou=users,dc=example,dc=com": {
+          "password": "any_password",
+          "result_code": 32,
+          "result_message": "No Such Object"
+        }
+      }
+    }
+  },
+  "user_lookup": {
+    "success": {
+      "cn=admin,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=admin,dc=example,dc=com",
+          "attributes": {
+            "cn": ["admin"],
+            "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+            "sn": ["Administrator"],
+            "mail": ["admin@example.com"],
+            "description": ["LDAP Administrator"],
+            "memberOf": ["cn=administrators,ou=groups,dc=example,dc=com"]
+          }
+        }
+      },
+      "uid=admin,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "uid=admin,dc=example,dc=com",
+          "attributes": {
+            "uid": ["admin"],
+            "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+            "sn": ["Administrator"],
+            "cn": ["LDAP Admin"],
+            "mail": ["admin@example.com"],
+            "description": ["LDAP Administrator (UID format)"],
+            "memberOf": ["cn=administrators,ou=groups,dc=example,dc=com"]
+          }
+        }
+      },
+      "cn=user1,ou=users,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=user1,ou=users,dc=example,dc=com",
+          "attributes": {
+            "cn": ["user1"],
+            "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+            "sn": ["User"],
+            "givenName": ["Test"],
+            "mail": ["user1@example.com"],
+            "description": ["Test User 1"],
+            "memberOf": ["cn=users,ou=groups,dc=example,dc=com"]
+          }
+        }
+      },
+      "cn=user2,ou=users,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=user2,ou=users,dc=example,dc=com",
+          "attributes": {
+            "cn": ["user2"],
+            "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+            "sn": ["User"],
+            "givenName": ["Another"],
+            "mail": ["user2@example.com"],
+            "description": ["Test User 2"],
+            "memberOf": ["cn=users,ou=groups,dc=example,dc=com", "cn=developers,ou=groups,dc=example,dc=com"]
+          }
+        }
+      },
+      "uid=user3,ou=users,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "uid=user3,ou=users,dc=example,dc=com",
+          "attributes": {
+            "uid": ["user3"],
+            "cn": ["User Three"],
+            "objectClass": ["top", "person", "organizationalPerson", "inetOrgPerson"],
+            "sn": ["Three"],
+            "givenName": ["User"],
+            "mail": ["user3@example.com"],
+            "description": ["Test User with UID attribute"],
+            "memberOf": ["cn=users,ou=groups,dc=example,dc=com"]
+          }
+        }
+      }
+    },
+    "failure": {
+      "no_such_object": {
+        "cn=nonexistent_user,ou=users,dc=example,dc=com": {
+          "result_code": 32,
+          "result_message": "No Such Object"
+        }
+      },
+      "insufficient_access_rights": {
+        "cn=restricted_user,ou=users,dc=example,dc=com": {
+          "result_code": 50,
+          "result_message": "Insufficient Access Rights"
+        }
+      }
+    }
+  },
+  "group_membership": {
+    "success": {
+      "cn=administrators,ou=groups,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=administrators,ou=groups,dc=example,dc=com",
+          "attributes": {
+            "cn": ["administrators"],
+            "objectClass": ["top", "groupOfNames"],
+            "description": ["Administrator group"],
+            "member": [
+              "cn=admin,dc=example,dc=com",
+              "uid=admin,dc=example,dc=com"
+            ]
+          }
+        }
+      },
+      "cn=users,ou=groups,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=users,ou=groups,dc=example,dc=com",
+          "attributes": {
+            "cn": ["users"],
+            "objectClass": ["top", "groupOfNames"],
+            "description": ["Regular users group"],
+            "member": [
+              "cn=user1,ou=users,dc=example,dc=com",
+              "cn=user2,ou=users,dc=example,dc=com",
+              "uid=user3,ou=users,dc=example,dc=com"
+            ]
+          }
+        }
+      },
+      "cn=developers,ou=groups,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=developers,ou=groups,dc=example,dc=com",
+          "attributes": {
+            "cn": ["developers"],
+            "objectClass": ["top", "groupOfNames"],
+            "description": ["Developers group"],
+            "member": [
+              "cn=user2,ou=users,dc=example,dc=com"
+            ]
+          }
+        }
+      },
+      "cn=empty_group,ou=groups,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=empty_group,ou=groups,dc=example,dc=com",
+          "attributes": {
+            "cn": ["empty_group"],
+            "objectClass": ["top", "groupOfNames"],
+            "description": ["Empty group for testing"],
+            "member": []
+          }
+        }
+      },
+      "cn=nested_group,ou=groups,dc=example,dc=com": {
+        "result_code": 0,
+        "result_message": "Success",
+        "entry": {
+          "dn": "cn=nested_group,ou=groups,dc=example,dc=com",
+          "attributes": {
+            "cn": ["nested_group"],
+            "objectClass": ["top", "groupOfNames"],
+            "description": ["Group containing other groups"],
+            "member": [
+              "cn=developers,ou=groups,dc=example,dc=com",
+              "cn=users,ou=groups,dc=example,dc=com"
+            ]
+          }
+        }
+      }
+    },
+    "failure": {
+      "no_such_object": {
+        "cn=nonexistent_group,ou=groups,dc=example,dc=com": {
+          "result_code": 32,
+          "result_message": "No Such Object"
+        }
+      }
+    }
+  },
+  "error_scenarios": {
+    "server_unavailable": {
+      "result_code": 52,
+      "result_message": "Unavailable"
+    },
+    "connection_timeout": {
+      "result_code": 85,
+      "result_message": "Timeout"
+    },
+    "invalid_search_base": {
+      "result_code": 32,
+      "result_message": "No Such Object"
+    },
+    "insufficient_permissions": {
+      "result_code": 50,
+      "result_message": "Insufficient Access Rights"
+    },
+    "invalid_filter": {
+      "result_code": 87,
+      "result_message": "Filter Error"
+    },
+    "size_limit_exceeded": {
+      "result_code": 4,
+      "result_message": "Size Limit Exceeded"
+    },
+    "time_limit_exceeded": {
+      "result_code": 3,
+      "result_message": "Time Limit Exceeded"
+    },
+    "busy": {
+      "result_code": 51,
+      "result_message": "Busy"
+    },
+    "unavailable_critical_extension": {
+      "result_code": 12,
+      "result_message": "Unavailable Critical Extension"
+    },
+    "circuit_breaker_open": {
+      "result_code": 80,
+      "result_message": "Other Error - Circuit Breaker Open"
+    }
+  }
+}
