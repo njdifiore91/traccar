@@ -1,0 +1,242 @@
+{
+  "tokens": {
+    "valid": {
+      "service_to_service": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiMTIzNDU2Nzg5MCIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiLCJwb3NpdGlvbjp3cml0ZSJdLCJzZXJ2aWNlX2lkIjoicHJvdG9jb2wtc2VydmljZS0wMDEifQ.signature",
+        "description": "Valid service-to-service token for Protocol Service with read/write scopes",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "1234567890",
+          "scopes": ["protocol:read", "protocol:write", "position:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "position_service": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwb3NpdGlvbi1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiMjM0NTY3ODkwMSIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicG9zaXRpb246cmVhZCIsInBvc2l0aW9uOndyaXRlIl0sInNlcnZpY2VfaWQiOiJwb3NpdGlvbi1zZXJ2aWNlLTAwMSJ9.signature",
+        "description": "Valid token for Position Service with protocol:read scope",
+        "claims": {
+          "sub": "position-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "2345678901",
+          "scopes": ["protocol:read", "position:read", "position:write"],
+          "service_id": "position-service-001"
+        }
+      },
+      "event_service": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJldmVudC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiMzQ1Njc4OTAxMiIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwiZXZlbnQ6cmVhZCIsImV2ZW50OndyaXRlIl0sInNlcnZpY2VfaWQiOiJldmVudC1zZXJ2aWNlLTAwMSJ9.signature",
+        "description": "Valid token for Event Service with protocol:read scope",
+        "claims": {
+          "sub": "event-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "3456789012",
+          "scopes": ["protocol:read", "event:read", "event:write"],
+          "service_id": "event-service-001"
+        }
+      },
+      "admin_user": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImFwaS1nYXRld2F5IiwiYXVkIjpbInByb3RvY29sLXNlcnZpY2UiXSwiZXhwIjoxNzE2OTIzNjAwLCJpYXQiOjE3MTY4MzcyMDAsImp0aSI6IjQ1Njc4OTAxMjMiLCJzY29wZXMiOlsicHJvdG9jb2w6cmVhZCIsInByb3RvY29sOndyaXRlIiwiYWRtaW46YWxsIl0sInVzZXJfaWQiOjEsInJvbGUiOiJhZG1pbiJ9.signature",
+        "description": "Valid token for admin user with all permissions",
+        "claims": {
+          "sub": "admin",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "4567890123",
+          "scopes": ["protocol:read", "protocol:write", "admin:all"],
+          "user_id": 1,
+          "role": "admin"
+        }
+      },
+      "manager_user": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYW5hZ2VyIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiNTY3ODkwMTIzNCIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwidXNlcl9pZCI6Miwicm9sZSI6Im1hbmFnZXIifQ.signature",
+        "description": "Valid token for manager user with protocol read/write permissions",
+        "claims": {
+          "sub": "manager",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "5678901234",
+          "scopes": ["protocol:read", "protocol:write"],
+          "user_id": 2,
+          "role": "manager"
+        }
+      },
+      "regular_user": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiNjc4OTAxMjM0NSIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIl0sInVzZXJfaWQiOjMsInJvbGUiOiJ1c2VyIiwiZGV2aWNlX2lkcyI6WzEwMSwxMDIsMTAzXX0.signature",
+        "description": "Valid token for regular user with protocol read permission and specific device access",
+        "claims": {
+          "sub": "user",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "6789012345",
+          "scopes": ["protocol:read"],
+          "user_id": 3,
+          "role": "user",
+          "device_ids": [101, 102, 103]
+        }
+      },
+      "device_token": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXZpY2UiLCJpc3MiOiJhcGktZ2F0ZXdheSIsImF1ZCI6WyJwcm90b2NvbC1zZXJ2aWNlIl0sImV4cCI6MTcxNjkyMzYwMCwiaWF0IjoxNzE2ODM3MjAwLCJqdGkiOiI3ODkwMTIzNDU2Iiwic2NvcGVzIjpbImRldmljZTphdXRoZW50aWNhdGUiXSwiZGV2aWNlX2lkIjoxMDEsImRldmljZV91bmlxdWVfaWQiOiIzNTc4OTEyMzQ1Njc4OTAiLCJwcm90b2NvbCI6InRlbHRvbmlrYSJ9.signature",
+        "description": "Valid token for device authentication with protocol-specific claims",
+        "claims": {
+          "sub": "device",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "7890123456",
+          "scopes": ["device:authenticate"],
+          "device_id": 101,
+          "device_unique_id": "357891234567890",
+          "protocol": "teltonika"
+        }
+      },
+      "short_lived": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY4MzgxMDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiODkwMTIzNDU2NyIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UtMDAxIn0.signature",
+        "description": "Short-lived token (15 minutes) for testing token expiration",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716838100,
+          "iat": 1716837200,
+          "jti": "8901234567",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "ecdsa_token": {
+        "token": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiOTAxMjM0NTY3OCIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UtMDAxIn0.signature",
+        "description": "Valid token signed with ECDSA (ES256) instead of RSA",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "9012345678",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      }
+    },
+    "invalid": {
+      "expired": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE2ODUzMDEyMDAsImlhdCI6MTY4NTIxNDgwMCwianRpIjoiMDEyMzQ1Njc4OSIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UtMDAxIn0.signature",
+        "description": "Expired token for testing expiration validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1685301200,
+          "iat": 1685214800,
+          "jti": "0123456789",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "invalid_signature": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiMTIzNDU2Nzg5MCIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UtMDAxIn0.invalid_signature",
+        "description": "Token with invalid signature for testing signature validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "1234567890",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "wrong_issuer": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoid3JvbmctaXNzdWVyIiwiYXVkIjpbInByb3RvY29sLXNlcnZpY2UiXSwiZXhwIjoxNzE2OTIzNjAwLCJpYXQiOjE3MTY4MzcyMDAsImp0aSI6IjIzNDU2Nzg5MDEiLCJzY29wZXMiOlsicHJvdG9jb2w6cmVhZCIsInByb3RvY29sOndyaXRlIl0sInNlcnZpY2VfaWQiOiJwcm90b2NvbC1zZXJ2aWNlLTAwMSJ9.signature",
+        "description": "Token with incorrect issuer for testing issuer validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "wrong-issuer",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "2345678901",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "wrong_audience": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsid3JvbmctYXVkaWVuY2UiXSwiZXhwIjoxNzE2OTIzNjAwLCJpYXQiOjE3MTY4MzcyMDAsImp0aSI6IjM0NTY3ODkwMTIiLCJzY29wZXMiOlsicHJvdG9jb2w6cmVhZCIsInByb3RvY29sOndyaXRlIl0sInNlcnZpY2VfaWQiOiJwcm90b2NvbC1zZXJ2aWNlLTAwMSJ9.signature",
+        "description": "Token with incorrect audience for testing audience validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["wrong-audience"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "3456789012",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "insufficient_scope": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3MTY5MjM2MDAsImlhdCI6MTcxNjgzNzIwMCwianRpIjoiNDU2Nzg5MDEyMyIsInNjb3BlcyI6W10sInNlcnZpY2VfaWQiOiJwcm90b2NvbC1zZXJ2aWNlLTAwMSJ9.signature",
+        "description": "Token with empty scopes for testing scope validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "4567890123",
+          "scopes": [],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "malformed": {
+        "token": "not.a.valid.jwt.token",
+        "description": "Completely malformed token for testing token format validation",
+        "claims": {}
+      },
+      "missing_required_claim": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGktZ2F0ZXdheSIsImF1ZCI6WyJwcm90b2NvbC1zZXJ2aWNlIl0sImV4cCI6MTcxNjkyMzYwMCwiaWF0IjoxNzE2ODM3MjAwLCJqdGkiOiI1Njc4OTAxMjM0Iiwic2NvcGVzIjpbInByb3RvY29sOnJlYWQiLCJwcm90b2NvbDp3cml0ZSJdLCJzZXJ2aWNlX2lkIjoicHJvdG9jb2wtc2VydmljZS0wMDEifQ.signature",
+        "description": "Token missing required 'sub' claim for testing required claim validation",
+        "claims": {
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1716923600,
+          "iat": 1716837200,
+          "jti": "5678901234",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      },
+      "not_yet_valid": {
+        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcm90b2NvbC1zZXJ2aWNlIiwiaXNzIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicHJvdG9jb2wtc2VydmljZSJdLCJleHAiOjE3NDg0NTk2MDAsImlhdCI6MTc0ODM3MzIwMCwianRpIjoiNjc4OTAxMjM0NSIsInNjb3BlcyI6WyJwcm90b2NvbDpyZWFkIiwicHJvdG9jb2w6d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UtMDAxIn0.signature",
+        "description": "Token with future issuance time (not yet valid) for testing nbf validation",
+        "claims": {
+          "sub": "protocol-service",
+          "iss": "api-gateway",
+          "aud": ["protocol-service"],
+          "exp": 1748459600,
+          "iat": 1748373200,
+          "jti": "6789012345",
+          "scopes": ["protocol:read", "protocol:write"],
+          "service_id": "protocol-service-001"
+        }
+      }
+    }
+  }
+}
