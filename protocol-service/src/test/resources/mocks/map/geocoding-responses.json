@@ -1,0 +1,947 @@
+{
+  "responses": [
+    {
+      "name": "google_success",
+      "description": "Successful Google geocoding response for downtown coordinates",
+      "input": {
+        "latitude": 40.7128,
+        "longitude": -74.0060
+      },
+      "response": {
+        "status": "OK",
+        "results": [
+          {
+            "formatted_address": "New York, NY 10007, USA",
+            "address_components": [
+              {
+                "long_name": "10007",
+                "short_name": "10007",
+                "types": ["postal_code"]
+              },
+              {
+                "long_name": "Manhattan",
+                "short_name": "Manhattan",
+                "types": ["political", "sublocality", "sublocality_level_1"]
+              },
+              {
+                "long_name": "New York",
+                "short_name": "New York",
+                "types": ["locality", "political"]
+              },
+              {
+                "long_name": "New York County",
+                "short_name": "New York County",
+                "types": ["administrative_area_level_2", "political"]
+              },
+              {
+                "long_name": "New York",
+                "short_name": "NY",
+                "types": ["administrative_area_level_1", "political"]
+              },
+              {
+                "long_name": "United States",
+                "short_name": "US",
+                "types": ["country", "political"]
+              }
+            ],
+            "geometry": {
+              "location": {
+                "lat": 40.7128,
+                "lng": -74.0060
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "google_error",
+      "description": "Error response from Google geocoding API",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "status": "ZERO_RESULTS",
+        "results": [],
+        "error_message": "No results found for the provided coordinates"
+      }
+    },
+    {
+      "name": "google_street_address",
+      "description": "Detailed street address response from Google",
+      "input": {
+        "latitude": 37.4224,
+        "longitude": -122.0841
+      },
+      "response": {
+        "status": "OK",
+        "results": [
+          {
+            "formatted_address": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA",
+            "address_components": [
+              {
+                "long_name": "1600",
+                "short_name": "1600",
+                "types": ["street_number"]
+              },
+              {
+                "long_name": "Amphitheatre Parkway",
+                "short_name": "Amphitheatre Pkwy",
+                "types": ["route"]
+              },
+              {
+                "long_name": "Mountain View",
+                "short_name": "Mountain View",
+                "types": ["locality", "political"]
+              },
+              {
+                "long_name": "Santa Clara County",
+                "short_name": "Santa Clara County",
+                "types": ["administrative_area_level_2", "political"]
+              },
+              {
+                "long_name": "California",
+                "short_name": "CA",
+                "types": ["administrative_area_level_1", "political"]
+              },
+              {
+                "long_name": "United States",
+                "short_name": "US",
+                "types": ["country", "political"]
+              },
+              {
+                "long_name": "94043",
+                "short_name": "94043",
+                "types": ["postal_code"]
+              }
+            ],
+            "geometry": {
+              "location": {
+                "lat": 37.4224,
+                "lng": -122.0841
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "nominatim_success",
+      "description": "Successful Nominatim geocoding response",
+      "input": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "response": {
+        "place_id": 287976923,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "relation",
+        "osm_id": 51513,
+        "lat": "51.5074",
+        "lon": "-0.1278",
+        "display_name": "London, Greater London, England, United Kingdom",
+        "address": {
+          "city": "London",
+          "state_district": "Greater London",
+          "state": "England",
+          "country": "United Kingdom",
+          "country_code": "gb"
+        },
+        "boundingbox": [
+          "51.2867601",
+          "51.6918741",
+          "-0.5103751",
+          "0.3340155"
+        ]
+      }
+    },
+    {
+      "name": "nominatim_error",
+      "description": "Error response from Nominatim",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "error": {
+          "code": 404,
+          "message": "Unable to geocode"
+        }
+      }
+    },
+    {
+      "name": "opencage_success",
+      "description": "Successful OpenCage geocoding response",
+      "input": {
+        "latitude": 48.8566,
+        "longitude": 2.3522
+      },
+      "response": {
+        "documentation": "https://opencagedata.com/api",
+        "licenses": [
+          {
+            "name": "see attribution guide",
+            "url": "https://opencagedata.com/credits"
+          }
+        ],
+        "results": [
+          {
+            "annotations": {
+              "DMS": {
+                "lat": "48° 51' 23.76000'' N",
+                "lng": "2° 21' 7.92000'' E"
+              },
+              "MGRS": "31UDQ5426919255",
+              "Maidenhead": "JN18eu48xg",
+              "Mercator": {
+                "x": 261897.245,
+                "y": 6250879.001
+              },
+              "OSM": {
+                "edit_url": "https://www.openstreetmap.org/edit?node=1848789462#map=17/48.85660/2.35220",
+                "url": "https://www.openstreetmap.org/?mlat=48.85660&mlon=2.35220#map=17/48.85660/2.35220"
+              },
+              "callingcode": 33,
+              "currency": {
+                "alternate_symbols": [],
+                "decimal_mark": ",",
+                "html_entity": "€",
+                "iso_code": "EUR",
+                "iso_numeric": "978",
+                "name": "Euro",
+                "smallest_denomination": 1,
+                "subunit": "Cent",
+                "subunit_to_unit": 100,
+                "symbol": "€",
+                "symbol_first": 0,
+                "thousands_separator": " "
+              },
+              "flag": "🇫🇷",
+              "geohash": "u09tyr01vpz6",
+              "qibla": 119.16,
+              "roadinfo": {
+                "drive_on": "right",
+                "speed_in": "km/h"
+              },
+              "sun": {
+                "rise": {
+                  "apparent": 1604643000,
+                  "astronomical": 1604636760,
+                  "civil": 1604641080,
+                  "nautical": 1604638920
+                },
+                "set": {
+                  "apparent": 1604678100,
+                  "astronomical": 1604684340,
+                  "civil": 1604680020,
+                  "nautical": 1604682180
+                }
+              },
+              "timezone": {
+                "name": "Europe/Paris",
+                "now_in_dst": 0,
+                "offset_sec": 3600,
+                "offset_string": "+0100",
+                "short_name": "CET"
+              },
+              "what3words": {
+                "words": "blots.spans.blots"
+              }
+            },
+            "bounds": {
+              "northeast": {
+                "lat": 48.8566,
+                "lng": 2.3522
+              },
+              "southwest": {
+                "lat": 48.8566,
+                "lng": 2.3522
+              }
+            },
+            "components": {
+              "ISO_3166-1_alpha-2": "FR",
+              "ISO_3166-1_alpha-3": "FRA",
+              "_category": "place",
+              "_type": "neighbourhood",
+              "city": "Paris",
+              "continent": "Europe",
+              "country": "France",
+              "country_code": "fr",
+              "county": "Paris",
+              "neighbourhood": "Quartier Les Halles",
+              "political_union": "European Union",
+              "postcode": "75001",
+              "state": "Île-de-France",
+              "state_code": "IDF",
+              "suburb": "1st Arrondissement"
+            },
+            "confidence": 10,
+            "formatted": "Quartier Les Halles, 1st Arrondissement, Paris, Île-de-France, France",
+            "geometry": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            }
+          }
+        ],
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "stay_informed": {
+          "blog": "https://blog.opencagedata.com",
+          "twitter": "https://twitter.com/OpenCage"
+        },
+        "thanks": "For using an OpenCage API",
+        "timestamp": {
+          "created_http": "Fri, 06 Nov 2020 09:42:29 GMT",
+          "created_unix": 1604656949
+        },
+        "total_results": 1
+      }
+    },
+    {
+      "name": "opencage_error",
+      "description": "Error response from OpenCage",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "documentation": "https://opencagedata.com/api",
+        "licenses": [
+          {
+            "name": "see attribution guide",
+            "url": "https://opencagedata.com/credits"
+          }
+        ],
+        "results": [],
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "total_results": 0
+      }
+    },
+    {
+      "name": "mapbox_success",
+      "description": "Successful Mapbox geocoding response",
+      "input": {
+        "latitude": 34.0522,
+        "longitude": -118.2437
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "query": [
+          -118.2437,
+          34.0522
+        ],
+        "features": [
+          {
+            "id": "address.1234567890",
+            "type": "Feature",
+            "place_type": [
+              "address"
+            ],
+            "relevance": 1,
+            "properties": {
+              "accuracy": "point"
+            },
+            "text": "South Spring Street",
+            "place_name": "200 South Spring Street, Los Angeles, California 90012, United States",
+            "center": [
+              -118.2437,
+              34.0522
+            ],
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -118.2437,
+                34.0522
+              ]
+            },
+            "address": "200",
+            "context": [
+              {
+                "id": "neighborhood.12345",
+                "text": "Downtown"
+              },
+              {
+                "id": "postcode.12345",
+                "text": "90012"
+              },
+              {
+                "id": "place.12345",
+                "wikidata": "Q65",
+                "text": "Los Angeles"
+              },
+              {
+                "id": "region.12345",
+                "wikidata": "Q99",
+                "short_code": "US-CA",
+                "text": "California"
+              },
+              {
+                "id": "country.12345",
+                "wikidata": "Q30",
+                "short_code": "us",
+                "text": "United States"
+              }
+            ]
+          }
+        ],
+        "attribution": "NOTICE: © 2020 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+      }
+    },
+    {
+      "name": "mapbox_error",
+      "description": "Error response from Mapbox",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "query": [
+          0.0,
+          0.0
+        ],
+        "features": [],
+        "attribution": "NOTICE: © 2020 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+      }
+    },
+    {
+      "name": "here_success",
+      "description": "Successful HERE geocoding response",
+      "input": {
+        "latitude": 52.5200,
+        "longitude": 13.4050
+      },
+      "response": {
+        "Response": {
+          "MetaInfo": {
+            "Timestamp": "2020-11-06T09:42:29Z"
+          },
+          "View": [
+            {
+              "_type": "SearchResultsViewType",
+              "ViewId": 0,
+              "Result": [
+                {
+                  "Relevance": 1.0,
+                  "MatchLevel": "street",
+                  "MatchQuality": {
+                    "Country": 1.0,
+                    "State": 1.0,
+                    "County": 1.0,
+                    "City": 1.0,
+                    "District": 1.0,
+                    "Street": [
+                      1.0
+                    ]
+                  },
+                  "Location": {
+                    "LocationId": "NT_abcdefghijklmnopqrst",
+                    "LocationType": "point",
+                    "DisplayPosition": {
+                      "Latitude": 52.5200,
+                      "Longitude": 13.4050
+                    },
+                    "NavigationPosition": [
+                      {
+                        "Latitude": 52.5200,
+                        "Longitude": 13.4050
+                      }
+                    ],
+                    "MapView": {
+                      "TopLeft": {
+                        "Latitude": 52.5210,
+                        "Longitude": 13.4040
+                      },
+                      "BottomRight": {
+                        "Latitude": 52.5190,
+                        "Longitude": 13.4060
+                      }
+                    },
+                    "Address": {
+                      "Label": "Karl-Liebknecht-Straße, 10178 Berlin, Germany",
+                      "Country": "DEU",
+                      "State": "Berlin",
+                      "County": "Berlin",
+                      "City": "Berlin",
+                      "District": "Mitte",
+                      "Street": "Karl-Liebknecht-Straße",
+                      "PostalCode": "10178",
+                      "AdditionalData": [
+                        {
+                          "value": "Germany",
+                          "key": "CountryName"
+                        },
+                        {
+                          "value": "Berlin",
+                          "key": "StateName"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "here_error",
+      "description": "Error response from HERE",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "Response": {
+          "MetaInfo": {
+            "Timestamp": "2020-11-06T09:42:29Z"
+          },
+          "View": []
+        }
+      }
+    },
+    {
+      "name": "tomtom_success",
+      "description": "Successful TomTom geocoding response",
+      "input": {
+        "latitude": 41.8781,
+        "longitude": -87.6298
+      },
+      "response": {
+        "summary": {
+          "queryTime": 35,
+          "numResults": 1
+        },
+        "results": [
+          {
+            "type": "Point Address",
+            "id": "US/PAD/p0/12345678",
+            "score": 10.0,
+            "address": {
+              "streetNumber": "233",
+              "streetName": "South Wacker Drive",
+              "municipalitySubdivision": "Loop, Downtown",
+              "municipality": "Chicago",
+              "countrySecondarySubdivision": "Cook",
+              "countrySubdivision": "IL",
+              "countrySubdivisionName": "Illinois",
+              "postalCode": "60606",
+              "extendedPostalCode": "606061234",
+              "countryCode": "US",
+              "country": "United States",
+              "countryCodeISO3": "USA",
+              "freeformAddress": "233 South Wacker Drive, Chicago, IL 60606",
+              "localName": "Chicago"
+            },
+            "position": {
+              "lat": 41.8781,
+              "lon": -87.6298
+            },
+            "viewport": {
+              "topLeftPoint": {
+                "lat": 41.8791,
+                "lon": -87.6308
+              },
+              "btmRightPoint": {
+                "lat": 41.8771,
+                "lon": -87.6288
+              }
+            },
+            "entryPoints": [
+              {
+                "type": "main",
+                "position": {
+                  "lat": 41.8781,
+                  "lon": -87.6298
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "tomtom_error",
+      "description": "Error response from TomTom",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "summary": {
+          "queryTime": 35,
+          "numResults": 0
+        },
+        "results": []
+      }
+    },
+    {
+      "name": "positionstack_success",
+      "description": "Successful PositionStack geocoding response",
+      "input": {
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "response": {
+        "data": [
+          {
+            "latitude": 55.7558,
+            "longitude": 37.6173,
+            "type": "address",
+            "name": "Red Square",
+            "number": null,
+            "postal_code": "109012",
+            "street": "Red Square",
+            "confidence": 1,
+            "region": "Central Federal District",
+            "region_code": "CFD",
+            "county": "Moscow",
+            "locality": "Moscow",
+            "administrative_area": null,
+            "neighbourhood": "Tverskoy District",
+            "country": "Russia",
+            "country_code": "RUS",
+            "continent": "Europe",
+            "label": "Red Square, Moscow, Russia"
+          }
+        ]
+      }
+    },
+    {
+      "name": "positionstack_error",
+      "description": "Error response from PositionStack",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "geoapify_success",
+      "description": "Successful Geoapify geocoding response",
+      "input": {
+        "latitude": 35.6762,
+        "longitude": 139.6503
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "datasource": {
+                "sourcename": "openstreetmap",
+                "attribution": "© OpenStreetMap contributors",
+                "license": "Open Database License",
+                "url": "https://www.openstreetmap.org/copyright"
+              },
+              "country": "Japan",
+              "country_code": "jp",
+              "state": "Tokyo",
+              "county": "Tokyo",
+              "city": "Tokyo",
+              "district": "Shibuya City",
+              "suburb": "Shibuya",
+              "street": "Dogenzaka",
+              "postcode": "150-0043",
+              "formatted": "Dogenzaka, Shibuya, Tokyo, 150-0043, Japan",
+              "address_line1": "Dogenzaka",
+              "address_line2": "Shibuya, Tokyo, 150-0043, Japan",
+              "category": "building",
+              "result_type": "building",
+              "rank": {
+                "importance": 0.31,
+                "popularity": 9.9,
+                "confidence": 1,
+                "match_type": "full_match"
+              },
+              "place_id": "51c9c29e424e5f614059b9c1c4a0a0df4940f00102f901b1e0010000000000c00207"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                139.6503,
+                35.6762
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "geoapify_error",
+      "description": "Error response from Geoapify",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    {
+      "name": "locationiq_success",
+      "description": "Successful LocationIQ geocoding response",
+      "input": {
+        "latitude": 40.4168,
+        "longitude": -3.7038
+      },
+      "response": {
+        "place_id": "12345678",
+        "licence": "https://locationiq.com/attribution",
+        "osm_type": "way",
+        "osm_id": "12345678",
+        "lat": "40.4168",
+        "lon": "-3.7038",
+        "display_name": "Plaza Mayor, Calle Mayor, Sol, Centro, Madrid, Área metropolitana de Madrid y Corredor del Henares, Community of Madrid, 28012, Spain",
+        "address": {
+          "attraction": "Plaza Mayor",
+          "road": "Calle Mayor",
+          "neighbourhood": "Sol",
+          "suburb": "Centro",
+          "city": "Madrid",
+          "county": "Área metropolitana de Madrid y Corredor del Henares",
+          "state": "Community of Madrid",
+          "postcode": "28012",
+          "country": "Spain",
+          "country_code": "es"
+        },
+        "boundingbox": [
+          "40.4158",
+          "40.4178",
+          "-3.7048",
+          "-3.7028"
+        ]
+      }
+    },
+    {
+      "name": "locationiq_error",
+      "description": "Error response from LocationIQ",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "error": "Unable to geocode"
+      }
+    },
+    {
+      "name": "maptiler_success",
+      "description": "Successful MapTiler geocoding response",
+      "input": {
+        "latitude": 45.4215,
+        "longitude": -75.6972
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -75.6972,
+                45.4215
+              ]
+            },
+            "properties": {
+              "id": "address.12345678",
+              "name": "24 Sussex Drive",
+              "place_name": "24 Sussex Drive, Ottawa, ON K1M 1M4, Canada",
+              "place_type": [
+                "address"
+              ],
+              "street": "Sussex Drive",
+              "housenumber": "24",
+              "postcode": "K1M 1M4",
+              "locality": "Ottawa",
+              "region": "Ontario",
+              "region_code": "ON",
+              "country": "Canada",
+              "country_code": "ca"
+            }
+          }
+        ],
+        "attribution": "© MapTiler © OpenStreetMap contributors"
+      }
+    },
+    {
+      "name": "maptiler_error",
+      "description": "Error response from MapTiler",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    {
+      "name": "ban_success",
+      "description": "Successful BAN (Base Adresse Nationale) geocoding response",
+      "input": {
+        "latitude": 48.8566,
+        "longitude": 2.3522
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "version": "draft",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                2.3522,
+                48.8566
+              ]
+            },
+            "properties": {
+              "label": "Tour Eiffel, 75007 Paris",
+              "score": 0.9876543210987654,
+              "housenumber": "",
+              "id": "75107_1234_00001",
+              "name": "Tour Eiffel",
+              "postcode": "75007",
+              "citycode": "75107",
+              "x": 652123.4,
+              "y": 6861456.7,
+              "city": "Paris",
+              "context": "75, Paris, Île-de-France",
+              "type": "housenumber",
+              "importance": 0.6789,
+              "street": "Avenue Gustave Eiffel"
+            }
+          }
+        ],
+        "attribution": "BAN",
+        "licence": "ETALAB-2.0",
+        "query": "48.8566,2.3522",
+        "limit": 1
+      }
+    },
+    {
+      "name": "ban_error",
+      "description": "Error response from BAN",
+      "input": {
+        "latitude": 0.0,
+        "longitude": 0.0
+      },
+      "response": {
+        "type": "FeatureCollection",
+        "version": "draft",
+        "features": [],
+        "attribution": "BAN",
+        "licence": "ETALAB-2.0",
+        "query": "0.0,0.0",
+        "limit": 1
+      }
+    },
+    {
+      "name": "remote_location",
+      "description": "Response for a remote location with minimal address information",
+      "input": {
+        "latitude": -33.8688,
+        "longitude": 151.2093
+      },
+      "response": {
+        "status": "OK",
+        "results": [
+          {
+            "formatted_address": "Sydney NSW, Australia",
+            "address_components": [
+              {
+                "long_name": "Sydney",
+                "short_name": "Sydney",
+                "types": ["locality", "political"]
+              },
+              {
+                "long_name": "New South Wales",
+                "short_name": "NSW",
+                "types": ["administrative_area_level_1", "political"]
+              },
+              {
+                "long_name": "Australia",
+                "short_name": "AU",
+                "types": ["country", "political"]
+              }
+            ],
+            "geometry": {
+              "location": {
+                "lat": -33.8688,
+                "lng": 151.2093
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "timeout_error",
+      "description": "Simulated timeout error response",
+      "input": {
+        "latitude": 90.0,
+        "longitude": 180.0
+      },
+      "response": {
+        "error": {
+          "code": 408,
+          "message": "Request Timeout"
+        }
+      }
+    },
+    {
+      "name": "server_error",
+      "description": "Simulated server error response",
+      "input": {
+        "latitude": -90.0,
+        "longitude": -180.0
+      },
+      "response": {
+        "error": {
+          "code": 500,
+          "message": "Internal Server Error"
+        }
+      }
+    },
+    {
+      "name": "rate_limit_error",
+      "description": "Simulated rate limit error response",
+      "input": {
+        "latitude": 1.0,
+        "longitude": 1.0
+      },
+      "response": {
+        "error": {
+          "code": 429,
+          "message": "Rate limit exceeded. Try again later."
+        }
+      }
+    },
+    {
+      "name": "invalid_key_error",
+      "description": "Simulated invalid API key error response",
+      "input": {
+        "latitude": 2.0,
+        "longitude": 2.0
+      },
+      "response": {
+        "error": {
+          "code": 403,
+          "message": "Invalid API key or unauthorized access"
+        }
+      }
+    }
+  ]
+}
