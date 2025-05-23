@@ -1,0 +1,92 @@
+{
+  "decoder": {
+    "defaultSettings": {
+      "extended": false,
+      "connectionless": false,
+      "modelOverride": null
+    },
+    "testModes": [
+      {
+        "name": "standardMode",
+        "description": "Standard mode with default settings",
+        "extended": false,
+        "connectionless": false,
+        "modelOverride": null
+      },
+      {
+        "name": "extendedMode",
+        "description": "Extended mode for additional data fields",
+        "extended": true,
+        "connectionless": false,
+        "modelOverride": null
+      },
+      {
+        "name": "connectionlessMode",
+        "description": "Connectionless mode for UDP communications",
+        "extended": false,
+        "connectionless": true,
+        "modelOverride": null
+      },
+      {
+        "name": "fmb130Model",
+        "description": "Test with FMB130 model override",
+        "extended": false,
+        "connectionless": false,
+        "modelOverride": "FMB130"
+      },
+      {
+        "name": "fmb130ExtendedMode",
+        "description": "FMB130 model with extended mode enabled",
+        "extended": true,
+        "connectionless": false,
+        "modelOverride": "FMB130"
+      },
+      {
+        "name": "fmc640Model",
+        "description": "Test with FMC640 model override",
+        "extended": false,
+        "connectionless": false,
+        "modelOverride": "FMC640"
+      },
+      {
+        "name": "fmc650Model",
+        "description": "Test with FMC650 model override",
+        "extended": false,
+        "connectionless": false,
+        "modelOverride": "FMC650"
+      },
+      {
+        "name": "fmm640Model",
+        "description": "Test with FMM640 model override",
+        "extended": false,
+        "connectionless": false,
+        "modelOverride": "FMM640"
+      }
+    ],
+    "codecSettings": {
+      "CODEC_GH3000": 7,
+      "CODEC_8": 8,
+      "CODEC_8_EXT": 142,
+      "CODEC_12": 12,
+      "CODEC_13": 13,
+      "CODEC_16": 16
+    }
+  },
+  "testData": {
+    "sampleMessages": {
+      "login": "000F313233343536373839303132333435",
+      "position": "00000000000000768e010000018fdc4b27cb015b3e33ceefa529030009013f0e0000022400010000000000000000000102240049010f0001c60106babbf36300550202806d0f0001ca01063456555565690202806b0f0001d10106467975425450020280690b0001c90106fa54ba8d00550b0001cf0106cabbf36300550100005455",
+      "photo": "00000000000008130c010d0000080b02598493ED000000000800ffd8ffe000104a46494600010201006000600000"
+    },
+    "expectedAttributes": {
+      "tag1Voltage": 3090,
+      "tag1Battery": 3030,
+      "eyeTemp1": -11.87
+    }
+  },
+  "validationSettings": {
+    "verifyAttributes": true,
+    "verifyPositions": true,
+    "verifyNull": true
+  }
+}
