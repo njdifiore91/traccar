@@ -1,0 +1,198 @@
+# Protocol Service Configuration
+spring:
+  application:
+    name: protocol-service
+  
+  # Message Broker Configuration
+  # Uncomment the appropriate section based on your message broker choice
+  
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: 1
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      properties:
+        linger.ms: 5
+        compression.type: lz4
+    topics:
+      positions: ${KAFKA_TOPIC_POSITIONS:raw-positions}
+
+  # RabbitMQ Configuration (alternative to Kafka)
+  # rabbitmq:
+  #   host: ${RABBITMQ_HOST:localhost}
+  #   port: ${RABBITMQ_PORT:5672}
+  #   username: ${RABBITMQ_USERNAME:guest}
+  #   password: ${RABBITMQ_PASSWORD:guest}
+  #   virtual-host: ${RABBITMQ_VHOST:/}
+  #   publisher-confirm-type: correlated
+  #   publisher-returns: true
+  #   template:
+  #     mandatory: true
+  #     retry:
+  #       enabled: true
+  #       initial-interval: 1000ms
+  #       max-attempts: 3
+  #       max-interval: 10000ms
+  #       multiplier: 2.0
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain
+    min-response-size: 1024
+
+# Netty Server Configuration for Device Connections
+netty:
+  boss-threads: ${NETTY_BOSS_THREADS:1}
+  worker-threads: ${NETTY_WORKER_THREADS:0}
+  so-backlog: 128
+  so-keepalive: true
+  tcp-nodelay: true
+  connection-timeout: 60000
+  idle-timeout: ${NETTY_IDLE_TIMEOUT:600}
+
+# Protocol Configuration
+protocol:
+  # Default protocol ports
+  ports:
+    # Common protocols
+    osmand: ${PROTOCOL_PORT_OSMAND:5055}
+    teltonika: ${PROTOCOL_PORT_TELTONIKA:5027}
+    meitrack: ${PROTOCOL_PORT_MEITRACK:5020}
+    atrack: ${PROTOCOL_PORT_ATRACK:5013}
+    totem: ${PROTOCOL_PORT_TOTEM:5094}
+    tk103: ${PROTOCOL_PORT_TK103:5006}
+    # Add more protocol-specific ports as needed
+  
+  # Protocol-specific settings
+  settings:
+    # Example protocol-specific settings
+    teltonika:
+      timeout: 60
+      extended-format: true
+    meitrack:
+      timeout: 60
+    # Add more protocol-specific settings as needed
+
+# Service Discovery Configuration
+# Uncomment the appropriate section based on your service discovery choice
+
+# Consul Service Discovery
+consul:
+  enabled: ${CONSUL_ENABLED:true}
+  host: ${CONSUL_HOST:localhost}
+  port: ${CONSUL_PORT:8500}
+  discovery:
+    instance-id: ${spring.application.name}:${random.uuid}
+    service-name: ${spring.application.name}
+    health-check-path: /actuator/health
+    health-check-interval: 15s
+    prefer-ip-address: true
+    tags:
+      - protocol-service
+      - traccar
+
+# Kubernetes Service Discovery (alternative to Consul)
+# kubernetes:
+#   enabled: ${KUBERNETES_ENABLED:false}
+#   namespace: ${KUBERNETES_NAMESPACE:default}
+#   service-name: ${spring.application.name}
+
+# Management and Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,diskSpace,db,kafka
+        liveness:
+          include: livenessState,ping
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        netty.connections: true
+
+# OpenTelemetry Configuration
+opentelemetry:
+  enabled: ${OPENTELEMETRY_ENABLED:true}
+  service-name: ${spring.application.name}
+  sampler:
+    probability: ${OPENTELEMETRY_SAMPLER_PROBABILITY:0.1}
+  exporter:
+    otlp:
+      endpoint: ${OPENTELEMETRY_ENDPOINT:http://localhost:4317}
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      messageBroker:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+    instances:
+      messageBroker:
+        baseConfig: default
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL_TRACCAR:INFO}
+    org.traccar.protocol: ${LOG_LEVEL_PROTOCOL:INFO}
+    io.netty: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: ${LOG_FILE:logs/protocol-service.log}
+    max-size: ${LOG_FILE_MAX_SIZE:100MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:10}
+
+# Connection Pool Settings
+connection-pool:
+  max-size: ${CONNECTION_POOL_MAX_SIZE:100}
+  min-idle: ${CONNECTION_POOL_MIN_IDLE:10}
+  max-lifetime: ${CONNECTION_POOL_MAX_LIFETIME:1800000}
+  idle-timeout: ${CONNECTION_POOL_IDLE_TIMEOUT:600000}
+  connection-timeout: ${CONNECTION_POOL_CONNECTION_TIMEOUT:30000}
