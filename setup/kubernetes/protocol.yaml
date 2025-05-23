@@ -1,0 +1,286 @@
+---
+# ConfigMap for Protocol Service configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: protocol-service-config
+  labels:
+    app: protocol-service
+    component: protocol
+data:
+  application.yml: |
+    server:
+      port: 8090
+    
+    spring:
+      application:
+        name: protocol-service
+      
+      # Message broker configuration
+      kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+        consumer:
+          group-id: protocol-service
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    
+    # Protocol service specific configuration
+    traccar:
+      protocol:
+        # Default ports for common protocols
+        ports:
+          osmand: 5055
+          teltonika: 5027
+          meitrack: 5020
+          tk103: 5006
+          atrack: 5013
+          totem: 5029
+        # Connection settings
+        connection:
+          timeout: 300
+          maxThreads: 100
+          workerThreads: 20
+          bossThreads: 5
+      
+      # Service discovery configuration
+      discovery:
+        enabled: true
+        service-name: protocol-service
+        health-check-path: /health/readiness
+        health-check-interval: 10s
+
+  logback-spring.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+      <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+      <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+      
+      <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+      </root>
+      
+      <logger name="org.traccar" level="INFO"/>
+      <logger name="io.netty" level="INFO"/>
+    </configuration>
+---
+# Deployment for Protocol Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protocol-service
+  labels:
+    app: protocol-service
+    component: protocol
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: protocol-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: protocol-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: protocol-service
+        image: traccar/protocol:latest
+        imagePullPolicy: Always
+        ports:
+        # HTTP API port
+        - name: http
+          containerPort: 8090
+          protocol: TCP
+        # Protocol-specific ports
+        - name: osmand
+          containerPort: 5055
+          protocol: TCP
+        - name: teltonika
+          containerPort: 5027
+          protocol: TCP
+        - name: meitrack
+          containerPort: 5020
+          protocol: TCP
+        - name: tk103
+          containerPort: 5006
+          protocol: TCP
+        - name: atrack
+          containerPort: 5013
+          protocol: TCP
+        - name: totem
+          containerPort: 5029
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-headless.kafka.svc.cluster.local:9092"
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        livenessProbe:
+          tcpSocket:
+            port: 5055
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: protocol-service-config
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - protocol-service
+              topologyKey: "kubernetes.io/hostname"
+---
+# Service for Protocol Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: protocol-service
+  labels:
+    app: protocol-service
+    component: protocol
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8090"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8090
+    targetPort: 8090
+    protocol: TCP
+  selector:
+    app: protocol-service
+---
+# External Service for Protocol-specific ports
+apiVersion: v1
+kind: Service
+metadata:
+  name: protocol-service-external
+  labels:
+    app: protocol-service
+    component: protocol
+spec:
+  type: LoadBalancer
+  ports:
+  - name: osmand
+    port: 5055
+    targetPort: 5055
+    protocol: TCP
+  - name: teltonika
+    port: 5027
+    targetPort: 5027
+    protocol: TCP
+  - name: meitrack
+    port: 5020
+    targetPort: 5020
+    protocol: TCP
+  - name: tk103
+    port: 5006
+    targetPort: 5006
+    protocol: TCP
+  - name: atrack
+    port: 5013
+    targetPort: 5013
+    protocol: TCP
+  - name: totem
+    port: 5029
+    targetPort: 5029
+    protocol: TCP
+  selector:
+    app: protocol-service
+---
+# HorizontalPodAutoscaler for Protocol Service
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: protocol-service-hpa
+  labels:
+    app: protocol-service
+    component: protocol
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: protocol-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 120
