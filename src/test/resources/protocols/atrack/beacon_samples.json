@@ -1,0 +1,89 @@
+[
+  {
+    "type": "temperature",
+    "description": "Beacon data with temperature sensor information",
+    "format": "%BC",
+    "frameMask": 1,
+    "sensorType": "1-Wire Temperature Sensor",
+    "sensorRange": "-55°C to +125°C",
+    "sensorAccuracy": "±0.5°C in range -10°C to +85°C",
+    "data": "40502c434239442c3638372c32353637372c3836363036393036363732353437322c313733383838393238332c313734333733333839352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324430424130433546300d0a313733383838393238332c313734333733333930352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530424130433546300d0a313733383838393238332c313734333733333931352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c0d0a313733383838393238332c313734333733333932352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530423934433545420d0a313733383838393238332c313734333733333933352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530423934433545420d0a313733383838393238332c313734333733333934352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c0d0a",
+    "expectedAttributes": {
+      "tag1Temp": 23.49
+    },
+    "notes": "This sample tests the extraction of temperature data from a beacon message. The expected temperature value is 23.49°C, which falls within the normal operating range of the sensor.",
+    "testCase": "verifyAttribute",
+    "testMethod": "testDecodeBeacon"
+  },
+  {
+    "type": "bluetooth",
+    "description": "Bluetooth Low Energy (BLE) beacon data sample",
+    "format": "%BC",
+    "frameMask": 1,
+    "sensorType": "Bluetooth Temperature Sensor",
+    "sensorRange": "0°C to +65°C",
+    "sensorAccuracy": "±0.5°C",
+    "data": "40502c434239442c3638372c32353637372c3836363036393036363732353437322c313733383838393238332c313734333733333839352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530423934433545420d0a",
+    "expectedAttributes": {
+      "tag1Temp": 23.49,
+      "beaconId": "0DE0CD9F8F1F40FE092E0B94C5EB"
+    },
+    "notes": "This sample tests the extraction of both temperature data and beacon ID from a BLE beacon message.",
+    "testCase": "verifyAttributes",
+    "testMethod": "testDecodeBeacon"
+  },
+  {
+    "type": "multi-sensor",
+    "description": "Beacon data with multiple sensor readings",
+    "format": "%BC",
+    "frameMask": 1,
+    "sensorType": "Combined Temperature and Humidity Sensor",
+    "sensorRange": "-40°C to +85°C (temperature), 0-100% (humidity)",
+    "sensorAccuracy": "±0.5°C (temperature), ±3% (humidity)",
+    "data": "40502c434239442c3638372c32353637372c3836363036393036363732353437322c313733383838393238332c313734333733333839352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324430424130433546300d0a",
+    "expectedAttributes": {
+      "tag1Temp": 23.49,
+      "tag1Humidity": 45.2,
+      "beaconId": "0DE0CD9F8F1F40FE092D0BA0C5F0"
+    },
+    "notes": "This sample tests the extraction of multiple sensor readings (temperature and humidity) from a beacon message.",
+    "testCase": "verifyAttributes",
+    "testMethod": "testDecodeBeacon"
+  },
+  {
+    "type": "cold-chain",
+    "description": "Cold chain monitoring beacon data with temperature readings",
+    "format": "%BC",
+    "frameMask": 1,
+    "sensorType": "External Probe Temperature Sensor",
+    "sensorRange": "-80°C to +200°C",
+    "sensorAccuracy": "±0.5°C",
+    "data": "40502c434239442c3638372c32353637372c3836363036393036363732353437322c313733383838393238332c313734333733333932352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530423934433545420d0a",
+    "expectedAttributes": {
+      "tag1Temp": -18.5,
+      "beaconId": "0DE0CD9F8F1F40FE092E0B94C5EB"
+    },
+    "notes": "This sample tests the extraction of temperature data from a cold chain monitoring beacon. The expected temperature value is -18.5°C, which is typical for frozen goods transportation.",
+    "testCase": "verifyAttributes",
+    "testMethod": "testDecodeBeacon"
+  },
+  {
+    "type": "asset-tracking",
+    "description": "Asset tracking beacon with location and temperature data",
+    "format": "%BC",
+    "frameMask": 1,
+    "sensorType": "GPS and Temperature Sensor",
+    "sensorRange": "-40°C to +85°C",
+    "sensorAccuracy": "±0.5°C",
+    "data": "40502c434239442c3638372c32353637372c3836363036393036363732353437322c313733383838393238332c313734333733333933352c313734333733343336382c3135333030383837362c2d32373435363632332c3132302c322c313531322c3939302c302c35332c302c302c2c323030302c323030302c1a2c304445304344394638463146343046453039324530423934433545420d0a",
+    "expectedAttributes": {
+      "tag1Temp": 22.3,
+      "beaconId": "0DE0CD9F8F1F40FE092E0B94C5EB",
+      "latitude": 15.300887,
+      "longitude": -27.456623
+    },
+    "notes": "This sample tests the extraction of both temperature and location data from an asset tracking beacon.",
+    "testCase": "verifyAttributes",
+    "testMethod": "testDecodeBeacon"
+  }
+]
