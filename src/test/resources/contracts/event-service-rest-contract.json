@@ -1,0 +1,521 @@
+{
+  "provider": {
+    "name": "event-service"
+  },
+  "consumers": [
+    {"name": "notification-service"},
+    {"name": "api-gateway"},
+    {"name": "position-service"}
+  ],
+  "interactions": [
+    {
+      "description": "Get event by ID",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/{id}",
+        "pathParameters": {
+          "id": "123"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "id": 123,
+          "type": "deviceMoving",
+          "deviceId": 456,
+          "positionId": 789,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "serverTime": "2023-01-01T12:00:00.000Z",
+          "eventTime": "2023-01-01T12:00:00.000Z",
+          "attributes": {}
+        },
+        "matchers": {
+          "body": {
+            "$.id": { "match": "type" },
+            "$.type": { "match": "type" },
+            "$.deviceId": { "match": "type" },
+            "$.positionId": { "match": "type" },
+            "$.serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.attributes": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get events by device ID",
+      "request": {
+        "method": "GET",
+        "path": "/api/events",
+        "query": {
+          "deviceId": "456",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": 123,
+            "type": "deviceMoving",
+            "deviceId": 456,
+            "positionId": 789,
+            "geofenceId": null,
+            "maintenanceId": null,
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "attributes": {}
+          }
+        ],
+        "matchers": {
+          "body": {
+            "$[0].id": { "match": "type" },
+            "$[0].type": { "match": "type" },
+            "$[0].deviceId": { "match": "type" },
+            "$[0].positionId": { "match": "type" },
+            "$[0].serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].attributes": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Process position for event detection",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/process",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceId": 456,
+          "protocol": "tk103",
+          "positionId": 789,
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "altitude": 100.0,
+          "speed": 50.0,
+          "course": 90.0,
+          "accuracy": 10.0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "motion": true,
+            "ignition": true,
+            "alarm": null,
+            "totalDistance": 1000.0
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": [
+          {
+            "id": 123,
+            "type": "deviceMoving",
+            "deviceId": 456,
+            "positionId": 789,
+            "geofenceId": null,
+            "maintenanceId": null,
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "attributes": {}
+          }
+        ],
+        "matchers": {
+          "body": {
+            "$[0].id": { "match": "type" },
+            "$[0].type": { "match": "type" },
+            "$[0].deviceId": { "match": "type" },
+            "$[0].positionId": { "match": "type" },
+            "$[0].serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].attributes": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Evaluate event rules for device",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/evaluate",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceId": 456,
+          "positionId": 789,
+          "ruleIds": [1, 2, 3]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": [
+          {
+            "id": 123,
+            "type": "geofenceEnter",
+            "deviceId": 456,
+            "positionId": 789,
+            "geofenceId": 10,
+            "maintenanceId": null,
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "eventTime": "2023-01-01T12:00:00.000Z",
+            "attributes": {
+              "rule": 1
+            }
+          }
+        ],
+        "matchers": {
+          "body": {
+            "$[0].id": { "match": "type" },
+            "$[0].type": { "match": "type" },
+            "$[0].deviceId": { "match": "type" },
+            "$[0].positionId": { "match": "type" },
+            "$[0].geofenceId": { "match": "type" },
+            "$[0].serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$[0].attributes.rule": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get event types",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/types",
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": [
+          "deviceOnline",
+          "deviceOffline",
+          "deviceMoving",
+          "deviceStopped",
+          "deviceOverspeed",
+          "geofenceEnter",
+          "geofenceExit",
+          "alarm",
+          "ignitionOn",
+          "ignitionOff",
+          "maintenance",
+          "textMessage",
+          "driverChanged"
+        ]
+      }
+    },
+    {
+      "description": "Process alarm event",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/alarm",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceId": 456,
+          "positionId": 789,
+          "alarmType": "sos"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "id": 123,
+          "type": "alarm",
+          "deviceId": 456,
+          "positionId": 789,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "serverTime": "2023-01-01T12:00:00.000Z",
+          "eventTime": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "alarmType": "sos"
+          }
+        },
+        "matchers": {
+          "body": {
+            "$.id": { "match": "type" },
+            "$.type": { "match": "type" },
+            "$.deviceId": { "match": "type" },
+            "$.positionId": { "match": "type" },
+            "$.serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.attributes.alarmType": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Process motion event",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/motion",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceId": 456,
+          "positionId": 789,
+          "motion": true,
+          "totalDistance": 1000.0
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "id": 123,
+          "type": "deviceMoving",
+          "deviceId": 456,
+          "positionId": 789,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "serverTime": "2023-01-01T12:00:00.000Z",
+          "eventTime": "2023-01-01T12:00:00.000Z",
+          "attributes": {}
+        },
+        "matchers": {
+          "body": {
+            "$.id": { "match": "type" },
+            "$.type": { "match": "type" },
+            "$.deviceId": { "match": "type" },
+            "$.positionId": { "match": "type" },
+            "$.serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.attributes": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Process overspeed event",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/overspeed",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceId": 456,
+          "positionId": 789,
+          "speed": 120.0,
+          "speedLimit": 100.0,
+          "geofenceId": 10
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "id": 123,
+          "type": "deviceOverspeed",
+          "deviceId": 456,
+          "positionId": 789,
+          "geofenceId": 10,
+          "maintenanceId": null,
+          "serverTime": "2023-01-01T12:00:00.000Z",
+          "eventTime": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "speed": 120.0,
+            "speedLimit": 100.0
+          }
+        },
+        "matchers": {
+          "body": {
+            "$.id": { "match": "type" },
+            "$.type": { "match": "type" },
+            "$.deviceId": { "match": "type" },
+            "$.positionId": { "match": "type" },
+            "$.geofenceId": { "match": "type" },
+            "$.serverTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.eventTime": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" },
+            "$.attributes.speed": { "match": "type" },
+            "$.attributes.speedLimit": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get event count by type",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/count",
+        "query": {
+          "deviceId": "456",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z",
+          "type": "deviceMoving"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "count": 5
+        },
+        "matchers": {
+          "body": {
+            "$.count": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get event summary",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/summary",
+        "query": {
+          "deviceId": "456",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "deviceMoving": 5,
+          "deviceStopped": 5,
+          "deviceOverspeed": 2,
+          "geofenceEnter": 3,
+          "geofenceExit": 3,
+          "alarm": 1
+        },
+        "matchers": {
+          "body": {
+            "$.deviceMoving": { "match": "type" },
+            "$.deviceStopped": { "match": "type" },
+            "$.deviceOverspeed": { "match": "type" },
+            "$.geofenceEnter": { "match": "type" },
+            "$.geofenceExit": { "match": "type" },
+            "$.alarm": { "match": "type" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Subscribe to event notifications",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/subscribe",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "consumerId": "notification-service-01",
+          "eventTypes": ["deviceMoving", "deviceStopped", "alarm"],
+          "callbackUrl": "http://notification-service/api/notifications/process"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "subscriptionId": "sub-123456",
+          "status": "active",
+          "createdAt": "2023-01-01T12:00:00.000Z"
+        },
+        "matchers": {
+          "body": {
+            "$.subscriptionId": { "match": "type" },
+            "$.status": { "match": "type" },
+            "$.createdAt": { "match": "regex", "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z" }
+          }
+        }
+      }
+    },
+    {
+      "description": "Unsubscribe from event notifications",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/events/subscribe/{subscriptionId}",
+        "pathParameters": {
+          "subscriptionId": "sub-123456"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "corr-123456789"
+        },
+        "body": {
+          "status": "deleted"
+        }
+      }
+    }
+  ]
+}
