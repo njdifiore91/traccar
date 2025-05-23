@@ -1,0 +1,367 @@
+{
+  "geofences": [
+    {
+      "id": 1,
+      "name": "Circular Geofence 1",
+      "description": "Test circular geofence centered in San Francisco",
+      "type": "circle",
+      "data": {
+        "wkt": "CIRCLE (37.7749 -122.4194, 1000.0)",
+        "center": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "radius": 1000.0,
+        "radiusUnit": "meters"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Polygon Geofence 1",
+      "description": "Test polygon geofence around Central Park, New York",
+      "type": "polygon",
+      "data": {
+        "wkt": "POLYGON ((-73.9583 40.8005, -73.9493 40.7964, -73.9489 40.7677, -73.9737 40.7642, -73.9814 40.7681, -73.9583 40.8005))",
+        "points": [
+          {"latitude": 40.8005, "longitude": -73.9583},
+          {"latitude": 40.7964, "longitude": -73.9493},
+          {"latitude": 40.7677, "longitude": -73.9489},
+          {"latitude": 40.7642, "longitude": -73.9737},
+          {"latitude": 40.7681, "longitude": -73.9814},
+          {"latitude": 40.8005, "longitude": -73.9583}
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "name": "Polyline Geofence 1",
+      "description": "Test polyline geofence along Highway 101",
+      "type": "polyline",
+      "data": {
+        "wkt": "LINESTRING (-122.4071 37.7835, -122.3952 37.7711, -122.3842 37.7599, -122.3768 37.7469)",
+        "points": [
+          {"latitude": 37.7835, "longitude": -122.4071},
+          {"latitude": 37.7711, "longitude": -122.3952},
+          {"latitude": 37.7599, "longitude": -122.3842},
+          {"latitude": 37.7469, "longitude": -122.3768}
+        ],
+        "width": 100.0,
+        "widthUnit": "meters"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Circular Geofence 2",
+      "description": "Test circular geofence with smaller radius",
+      "type": "circle",
+      "data": {
+        "wkt": "CIRCLE (34.0522 -118.2437, 500.0)",
+        "center": {
+          "latitude": 34.0522,
+          "longitude": -118.2437
+        },
+        "radius": 500.0,
+        "radiusUnit": "meters"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Complex Polygon Geofence",
+      "description": "Test complex polygon geofence with multiple vertices",
+      "type": "polygon",
+      "data": {
+        "wkt": "POLYGON ((-118.2437 34.0522, -118.2537 34.0622, -118.2337 34.0722, -118.2237 34.0622, -118.2437 34.0522))",
+        "points": [
+          {"latitude": 34.0522, "longitude": -118.2437},
+          {"latitude": 34.0622, "longitude": -118.2537},
+          {"latitude": 34.0722, "longitude": -118.2337},
+          {"latitude": 34.0622, "longitude": -118.2237},
+          {"latitude": 34.0522, "longitude": -118.2437}
+        ]
+      }
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": 1,
+      "name": "Circular Geofence Entry/Exit Test",
+      "description": "Test entry and exit events for circular geofence",
+      "geofenceId": 1,
+      "deviceId": "test-device-1",
+      "positions": [
+        {
+          "id": 1,
+          "latitude": 37.7849,
+          "longitude": -122.4294,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "Position outside geofence"
+        },
+        {
+          "id": 2,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Position entering geofence (at center)"
+        },
+        {
+          "id": 3,
+          "latitude": 37.7739,
+          "longitude": -122.4184,
+          "timestamp": "2023-06-01T10:10:00Z",
+          "expectedEvent": null,
+          "description": "Position inside geofence"
+        },
+        {
+          "id": 4,
+          "latitude": 37.7849,
+          "longitude": -122.4294,
+          "timestamp": "2023-06-01T10:15:00Z",
+          "expectedEvent": "geofenceExit",
+          "description": "Position exiting geofence"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Polygon Geofence Entry/Exit Test",
+      "description": "Test entry and exit events for polygon geofence",
+      "geofenceId": 2,
+      "deviceId": "test-device-2",
+      "positions": [
+        {
+          "id": 1,
+          "latitude": 40.7500,
+          "longitude": -73.9300,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "Position outside geofence"
+        },
+        {
+          "id": 2,
+          "latitude": 40.7800,
+          "longitude": -73.9600,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Position entering geofence"
+        },
+        {
+          "id": 3,
+          "latitude": 40.7700,
+          "longitude": -73.9650,
+          "timestamp": "2023-06-01T10:10:00Z",
+          "expectedEvent": null,
+          "description": "Position inside geofence"
+        },
+        {
+          "id": 4,
+          "latitude": 40.7500,
+          "longitude": -73.9300,
+          "timestamp": "2023-06-01T10:15:00Z",
+          "expectedEvent": "geofenceExit",
+          "description": "Position exiting geofence"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Polyline Geofence Entry/Exit Test",
+      "description": "Test entry and exit events for polyline geofence",
+      "geofenceId": 3,
+      "deviceId": "test-device-3",
+      "positions": [
+        {
+          "id": 1,
+          "latitude": 37.7935,
+          "longitude": -122.4171,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "Position outside polyline buffer"
+        },
+        {
+          "id": 2,
+          "latitude": 37.7835,
+          "longitude": -122.4071,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Position entering polyline buffer (at start point)"
+        },
+        {
+          "id": 3,
+          "latitude": 37.7711,
+          "longitude": -122.3952,
+          "timestamp": "2023-06-01T10:10:00Z",
+          "expectedEvent": null,
+          "description": "Position inside polyline buffer (at second point)"
+        },
+        {
+          "id": 4,
+          "latitude": 37.7935,
+          "longitude": -122.4171,
+          "timestamp": "2023-06-01T10:15:00Z",
+          "expectedEvent": "geofenceExit",
+          "description": "Position exiting polyline buffer"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Boundary Test for Circular Geofence",
+      "description": "Test positions at the boundary of a circular geofence",
+      "geofenceId": 4,
+      "deviceId": "test-device-4",
+      "positions": [
+        {
+          "id": 1,
+          "latitude": 34.0522,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Position at center of circular geofence"
+        },
+        {
+          "id": 2,
+          "latitude": 34.0567,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": null,
+          "description": "Position at boundary of circular geofence (500m north)"
+        },
+        {
+          "id": 3,
+          "latitude": 34.0568,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:10:00Z",
+          "expectedEvent": "geofenceExit",
+          "description": "Position just outside boundary of circular geofence"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Multiple Protocol Test",
+      "description": "Test different device protocols with the same geofence",
+      "geofenceId": 5,
+      "positions": [
+        {
+          "id": 1,
+          "deviceId": "meitrack-device",
+          "protocol": "meitrack",
+          "latitude": 34.0422,
+          "longitude": -118.2337,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "Meitrack device outside geofence"
+        },
+        {
+          "id": 2,
+          "deviceId": "meitrack-device",
+          "protocol": "meitrack",
+          "latitude": 34.0622,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Meitrack device entering geofence"
+        },
+        {
+          "id": 3,
+          "deviceId": "teltonika-device",
+          "protocol": "teltonika",
+          "latitude": 34.0422,
+          "longitude": -118.2337,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "Teltonika device outside geofence"
+        },
+        {
+          "id": 4,
+          "deviceId": "teltonika-device",
+          "protocol": "teltonika",
+          "latitude": 34.0622,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "Teltonika device entering geofence"
+        },
+        {
+          "id": 5,
+          "deviceId": "atrack-device",
+          "protocol": "atrack",
+          "latitude": 34.0422,
+          "longitude": -118.2337,
+          "timestamp": "2023-06-01T10:00:00Z",
+          "expectedEvent": null,
+          "description": "ATrack device outside geofence"
+        },
+        {
+          "id": 6,
+          "deviceId": "atrack-device",
+          "protocol": "atrack",
+          "latitude": 34.0622,
+          "longitude": -118.2437,
+          "timestamp": "2023-06-01T10:05:00Z",
+          "expectedEvent": "geofenceEnter",
+          "description": "ATrack device entering geofence"
+        }
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "id": 1,
+      "name": "Zero Radius Circle",
+      "description": "Test circular geofence with zero radius",
+      "type": "circle",
+      "data": {
+        "wkt": "CIRCLE (37.7749 -122.4194, 0.0)",
+        "center": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "radius": 0.0,
+        "radiusUnit": "meters"
+      },
+      "expectedBehavior": "Should only match exact coordinates"
+    },
+    {
+      "id": 2,
+      "name": "Self-Intersecting Polygon",
+      "description": "Test polygon geofence with self-intersecting boundary",
+      "type": "polygon",
+      "data": {
+        "wkt": "POLYGON ((-118.2437 34.0522, -118.2337 34.0622, -118.2537 34.0622, -118.2437 34.0522))",
+        "points": [
+          {"latitude": 34.0522, "longitude": -118.2437},
+          {"latitude": 34.0622, "longitude": -118.2337},
+          {"latitude": 34.0622, "longitude": -118.2537},
+          {"latitude": 34.0522, "longitude": -118.2437}
+        ]
+      },
+      "expectedBehavior": "Should handle self-intersecting polygons correctly"
+    },
+    {
+      "id": 3,
+      "name": "Single Point Polyline",
+      "description": "Test polyline geofence with only one point",
+      "type": "polyline",
+      "data": {
+        "wkt": "LINESTRING (-122.4071 37.7835)",
+        "points": [
+          {"latitude": 37.7835, "longitude": -122.4071}
+        ],
+        "width": 100.0,
+        "widthUnit": "meters"
+      },
+      "expectedBehavior": "Should create a circular buffer around the single point"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Test data for geofence-related protocol features",
+    "created": "2023-06-01T00:00:00Z",
+    "supportedGeofenceTypes": ["circle", "polygon", "polyline"],
+    "supportedEventTypes": ["geofenceEnter", "geofenceExit"],
+    "supportedProtocols": ["meitrack", "teltonika", "atrack", "totem", "tk103"]
+  }
+}
