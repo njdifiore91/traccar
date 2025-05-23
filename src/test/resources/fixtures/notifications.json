@@ -1,0 +1,387 @@
+{
+  "notifications": [
+    {
+      "id": 1,
+      "type": "geofence",
+      "eventId": 1001,
+      "deviceId": 100,
+      "userId": 1,
+      "timestamp": "2023-05-15T10:30:00.000Z",
+      "attributes": {
+        "geofenceId": 50,
+        "geofenceName": "Office Zone",
+        "eventType": "geofenceEnter",
+        "positionId": 5001,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "address": "123 Main St, San Francisco, CA",
+        "speed": 0,
+        "course": 0
+      },
+      "channels": [
+        "email",
+        "sms",
+        "push"
+      ],
+      "status": "pending",
+      "priority": "normal"
+    },
+    {
+      "id": 2,
+      "type": "overspeed",
+      "eventId": 1002,
+      "deviceId": 101,
+      "userId": 1,
+      "timestamp": "2023-05-15T11:45:00.000Z",
+      "attributes": {
+        "speedLimit": 80.0,
+        "actualSpeed": 95.5,
+        "positionId": 5002,
+        "latitude": 37.3382,
+        "longitude": -121.8863,
+        "address": "Highway 101, San Jose, CA",
+        "course": 45,
+        "deviceName": "Delivery Truck 101"
+      },
+      "channels": [
+        "email",
+        "push",
+        "web"
+      ],
+      "status": "pending",
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "type": "deviceOffline",
+      "eventId": 1003,
+      "deviceId": 102,
+      "userId": 2,
+      "timestamp": "2023-05-15T14:20:00.000Z",
+      "attributes": {
+        "deviceName": "Field Sensor 102",
+        "lastReportedTime": "2023-05-15T13:50:00.000Z",
+        "offlineDuration": 1800,
+        "lastPositionId": 5003,
+        "lastLatitude": 34.0522,
+        "lastLongitude": -118.2437,
+        "lastAddress": "456 Oak St, Los Angeles, CA"
+      },
+      "channels": [
+        "email",
+        "sms"
+      ],
+      "status": "pending",
+      "priority": "medium"
+    },
+    {
+      "id": 4,
+      "type": "alarm",
+      "eventId": 1004,
+      "deviceId": 103,
+      "userId": 3,
+      "timestamp": "2023-05-15T16:05:00.000Z",
+      "attributes": {
+        "alarmType": "sos",
+        "positionId": 5004,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "address": "789 Pine St, New York, NY",
+        "deviceName": "Personal Tracker 103",
+        "driverName": "John Smith",
+        "speed": 0,
+        "course": 0
+      },
+      "channels": [
+        "email",
+        "sms",
+        "push",
+        "web",
+        "telegram"
+      ],
+      "status": "pending",
+      "priority": "critical"
+    },
+    {
+      "id": 5,
+      "type": "maintenance",
+      "eventId": 1005,
+      "deviceId": 104,
+      "userId": 1,
+      "timestamp": "2023-05-16T09:15:00.000Z",
+      "attributes": {
+        "maintenanceType": "oilChange",
+        "deviceName": "Fleet Vehicle 104",
+        "currentOdometer": 15000,
+        "serviceInterval": 5000,
+        "lastServiceOdometer": 10000,
+        "dueDate": "2023-05-20T00:00:00.000Z"
+      },
+      "channels": [
+        "email",
+        "web"
+      ],
+      "status": "pending",
+      "priority": "low"
+    }
+  ],
+  "templates": [
+    {
+      "id": 1,
+      "type": "geofence",
+      "channel": "email",
+      "subject": "Geofence Alert: ${deviceName} ${eventType} ${geofenceName}",
+      "body": "<html><body><h2>Geofence Alert</h2><p>Device: ${deviceName}</p><p>Event: ${eventType} ${geofenceName}</p><p>Time: ${timestamp}</p><p>Location: ${address}</p><p>Coordinates: ${latitude}, ${longitude}</p></body></html>",
+      "contentType": "text/html"
+    },
+    {
+      "id": 2,
+      "type": "geofence",
+      "channel": "sms",
+      "body": "Traccar Alert: ${deviceName} has ${eventType} ${geofenceName} at ${timestamp}. Location: ${address}",
+      "contentType": "text/plain"
+    },
+    {
+      "id": 3,
+      "type": "geofence",
+      "channel": "push",
+      "title": "Geofence ${eventType}",
+      "body": "${deviceName} has ${eventType} ${geofenceName}",
+      "sound": "default",
+      "contentType": "application/json"
+    },
+    {
+      "id": 4,
+      "type": "overspeed",
+      "channel": "email",
+      "subject": "Speed Alert: ${deviceName} Exceeding Speed Limit",
+      "body": "<html><body><h2>Speed Alert</h2><p>Device: ${deviceName}</p><p>Speed: ${actualSpeed} km/h (Limit: ${speedLimit} km/h)</p><p>Time: ${timestamp}</p><p>Location: ${address}</p></body></html>",
+      "contentType": "text/html"
+    },
+    {
+      "id": 5,
+      "type": "overspeed",
+      "channel": "push",
+      "title": "Speed Alert",
+      "body": "${deviceName} is traveling at ${actualSpeed} km/h in a ${speedLimit} km/h zone",
+      "sound": "alert",
+      "contentType": "application/json"
+    },
+    {
+      "id": 6,
+      "type": "deviceOffline",
+      "channel": "email",
+      "subject": "Device Offline: ${deviceName}",
+      "body": "<html><body><h2>Device Offline Alert</h2><p>Device: ${deviceName}</p><p>Last Reported: ${lastReportedTime}</p><p>Offline Duration: ${offlineDuration} seconds</p><p>Last Known Location: ${lastAddress}</p></body></html>",
+      "contentType": "text/html"
+    },
+    {
+      "id": 7,
+      "type": "deviceOffline",
+      "channel": "sms",
+      "body": "Traccar Alert: ${deviceName} has been offline for ${offlineDuration} seconds. Last seen at ${lastAddress}",
+      "contentType": "text/plain"
+    },
+    {
+      "id": 8,
+      "type": "alarm",
+      "channel": "email",
+      "subject": "URGENT: SOS Alarm from ${deviceName}",
+      "body": "<html><body><h2 style='color:red;'>SOS ALARM</h2><p>Device: ${deviceName}</p><p>Driver: ${driverName}</p><p>Time: ${timestamp}</p><p>Location: ${address}</p><p>Coordinates: ${latitude}, ${longitude}</p><p>Please respond immediately!</p></body></html>",
+      "contentType": "text/html"
+    },
+    {
+      "id": 9,
+      "type": "alarm",
+      "channel": "sms",
+      "body": "URGENT SOS ALARM: ${deviceName} (${driverName}) at ${address}. Respond immediately!",
+      "contentType": "text/plain"
+    },
+    {
+      "id": 10,
+      "type": "alarm",
+      "channel": "push",
+      "title": "SOS ALARM",
+      "body": "${deviceName} (${driverName}) has triggered an SOS alarm",
+      "sound": "emergency",
+      "contentType": "application/json"
+    },
+    {
+      "id": 11,
+      "type": "maintenance",
+      "channel": "email",
+      "subject": "Maintenance Reminder: ${deviceName}",
+      "body": "<html><body><h2>Maintenance Reminder</h2><p>Device: ${deviceName}</p><p>Maintenance Type: ${maintenanceType}</p><p>Current Odometer: ${currentOdometer} km</p><p>Last Service: ${lastServiceOdometer} km</p><p>Due Date: ${dueDate}</p></body></html>",
+      "contentType": "text/html"
+    }
+  ],
+  "recipients": [
+    {
+      "id": 1,
+      "userId": 1,
+      "notificationId": 1,
+      "contactInfo": {
+        "email": "admin@example.com",
+        "phone": "+15551234567",
+        "deviceTokens": ["fcm-token-admin-device1", "fcm-token-admin-device2"],
+        "telegramChatId": "12345678"
+      },
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "notificationId": 2,
+      "contactInfo": {
+        "email": "admin@example.com",
+        "deviceTokens": ["fcm-token-admin-device1", "fcm-token-admin-device2"]
+      },
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "notificationId": 3,
+      "contactInfo": {
+        "email": "manager@example.com",
+        "phone": "+15559876543"
+      },
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "userId": 3,
+      "notificationId": 4,
+      "contactInfo": {
+        "email": "driver@example.com",
+        "phone": "+15552223333",
+        "deviceTokens": ["fcm-token-driver-device"],
+        "telegramChatId": "87654321"
+      },
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "userId": 1,
+      "notificationId": 5,
+      "contactInfo": {
+        "email": "admin@example.com"
+      },
+      "status": "pending"
+    }
+  ],
+  "deliveryAttempts": [
+    {
+      "id": 1,
+      "notificationId": 1,
+      "recipientId": 1,
+      "channel": "email",
+      "timestamp": "2023-05-15T10:31:00.000Z",
+      "status": "success",
+      "statusMessage": "Email delivered successfully",
+      "retryCount": 0,
+      "correlationId": "corr-id-1-email-001"
+    },
+    {
+      "id": 2,
+      "notificationId": 1,
+      "recipientId": 1,
+      "channel": "sms",
+      "timestamp": "2023-05-15T10:31:05.000Z",
+      "status": "success",
+      "statusMessage": "SMS delivered successfully",
+      "retryCount": 0,
+      "correlationId": "corr-id-1-sms-001"
+    },
+    {
+      "id": 3,
+      "notificationId": 1,
+      "recipientId": 1,
+      "channel": "push",
+      "timestamp": "2023-05-15T10:31:10.000Z",
+      "status": "failed",
+      "statusMessage": "FCM token expired",
+      "retryCount": 0,
+      "correlationId": "corr-id-1-push-001"
+    },
+    {
+      "id": 4,
+      "notificationId": 1,
+      "recipientId": 1,
+      "channel": "push",
+      "timestamp": "2023-05-15T10:32:10.000Z",
+      "status": "success",
+      "statusMessage": "Push notification delivered successfully",
+      "retryCount": 1,
+      "correlationId": "corr-id-1-push-002"
+    },
+    {
+      "id": 5,
+      "notificationId": 4,
+      "recipientId": 4,
+      "channel": "telegram",
+      "timestamp": "2023-05-15T16:06:00.000Z",
+      "status": "failed",
+      "statusMessage": "Telegram service unavailable",
+      "retryCount": 0,
+      "correlationId": "corr-id-4-telegram-001"
+    },
+    {
+      "id": 6,
+      "notificationId": 4,
+      "recipientId": 4,
+      "channel": "telegram",
+      "timestamp": "2023-05-15T16:07:00.000Z",
+      "status": "failed",
+      "statusMessage": "Telegram service unavailable",
+      "retryCount": 1,
+      "correlationId": "corr-id-4-telegram-002"
+    },
+    {
+      "id": 7,
+      "notificationId": 4,
+      "recipientId": 4,
+      "channel": "telegram",
+      "timestamp": "2023-05-15T16:09:00.000Z",
+      "status": "success",
+      "statusMessage": "Telegram message delivered successfully",
+      "retryCount": 2,
+      "correlationId": "corr-id-4-telegram-003"
+    }
+  ],
+  "deadLetterQueue": [
+    {
+      "id": 1,
+      "originalNotificationId": 3,
+      "recipientId": 3,
+      "channel": "sms",
+      "timestamp": "2023-05-15T14:21:00.000Z",
+      "errorMessage": "SMS gateway connection timeout",
+      "retryCount": 3,
+      "correlationId": "corr-id-3-sms-003",
+      "originalPayload": {
+        "to": "+15559876543",
+        "body": "Traccar Alert: Field Sensor 102 has been offline for 1800 seconds. Last seen at 456 Oak St, Los Angeles, CA",
+        "priority": "medium"
+      },
+      "status": "pending_review"
+    },
+    {
+      "id": 2,
+      "originalNotificationId": 2,
+      "recipientId": 2,
+      "channel": "push",
+      "timestamp": "2023-05-15T11:46:30.000Z",
+      "errorMessage": "Invalid FCM token",
+      "retryCount": 3,
+      "correlationId": "corr-id-2-push-003",
+      "originalPayload": {
+        "token": "fcm-token-admin-device1",
+        "title": "Speed Alert",
+        "body": "Delivery Truck 101 is traveling at 95.5 km/h in a 80.0 km/h zone",
+        "sound": "alert"
+      },
+      "status": "failed_permanent"
+    }
+  ]
+}
