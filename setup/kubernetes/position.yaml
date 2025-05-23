@@ -1,0 +1,285 @@
+---
+# Position Processing Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-service
+  namespace: traccar-position
+  labels:
+    app: position-service
+    component: processing
+    part-of: traccar
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: position-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: position-service
+        component: processing
+        part-of: traccar
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: position-service
+        image: traccar/position:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8081
+          protocol: TCP
+        - name: grpc
+          containerPort: 9091
+          protocol: TCP
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-headless.traccar-infrastructure:9092"
+        - name: SPRING_CONFIG_LOCATION
+          value: "file:/config/application.yml"
+        - name: JAVA_OPTS
+          value: "-Xms512m -Xmx1536m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: tmp-volume
+          mountPath: /tmp
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: position-service-config
+      - name: tmp-volume
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - position-service
+              topologyKey: "kubernetes.io/hostname"
+
+---
+# Position Processing Service Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: position-service
+  namespace: traccar-position
+  labels:
+    app: position-service
+    component: processing
+    part-of: traccar
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8081"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 8081
+    protocol: TCP
+  - name: grpc
+    port: 9091
+    targetPort: 9091
+    protocol: TCP
+  selector:
+    app: position-service
+
+---
+# Position Processing Service ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: position-service-config
+  namespace: traccar-position
+  labels:
+    app: position-service
+    component: processing
+    part-of: traccar
+data:
+  application.yml: |
+    spring:
+      application:
+        name: position-service
+      cloud:
+        kubernetes:
+          discovery:
+            enabled: true
+        stream:
+          kafka:
+            binder:
+              brokers: ${KAFKA_BOOTSTRAP_SERVERS}
+              required-acks: all
+              auto-create-topics: true
+              min-partition-count: 3
+              replication-factor: 3
+            bindings:
+              position-input:
+                consumer:
+                  enableDlq: true
+                  dlqName: position-input.dlq
+                  retryTemporaryErrors: true
+                  maxAttempts: 5
+          bindings:
+            position-input:
+              destination: raw-positions
+              group: position-service
+              consumer:
+                max-attempts: 3
+            position-output:
+              destination: enriched-positions
+              producer:
+                required-groups: event-service
+    
+    server:
+      port: 8081
+      shutdown: graceful
+    
+    management:
+      endpoints:
+        web:
+          base-path: /
+          exposure:
+            include: health,info,prometheus,metrics
+      endpoint:
+        health:
+          probes:
+            enabled: true
+          show-details: always
+          group:
+            readiness:
+              include: readinessState, kafka, db
+      health:
+        livenessstate:
+          enabled: true
+        readinessstate:
+          enabled: true
+    
+    traccar:
+      position:
+        processing:
+          geocoder:
+            enabled: true
+            type: google
+            url: https://maps.googleapis.com/maps/api/geocode/json
+            cacheSize: 100000
+          geolocation:
+            enabled: true
+            type: mozilla
+            url: https://location.services.mozilla.com/v1/geolocate
+          distance:
+            enabled: true
+            minAccuracy: 100
+          motion:
+            enabled: true
+            speedThreshold: 0.01
+          geofence:
+            enabled: true
+          speedlimit:
+            enabled: true
+            provider: overpass
+            url: https://overpass-api.de/api/interpreter
+
+---
+# Position Processing Service HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: position-service
+  namespace: traccar-position
+  labels:
+    app: position-service
+    component: processing
+    part-of: traccar
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: position-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: messages_per_second
+      target:
+        type: AverageValue
+        averageValue: 500
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 120
