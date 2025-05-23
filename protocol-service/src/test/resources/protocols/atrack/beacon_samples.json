@@ -1,0 +1,239 @@
+{
+  "beaconSamples": [
+    {
+      "description": "Standard temperature beacon with binary data",
+      "binary": "0A1B2C3D4E5F6A7B8C9D",
+      "text": "$ATRK,999999,BEACON,1,12.5,C,1,1,1,190223,121510*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": 12.5,
+        "unit": "C",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:15:10.000Z"
+      }
+    },
+    {
+      "description": "Temperature beacon with Fahrenheit unit",
+      "binary": "0A1B2C3D4E5F6A7B8C9E",
+      "text": "$ATRK,999999,BEACON,1,54.3,F,1,1,1,190223,121520*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": 54.3,
+        "unit": "F",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:15:20.000Z"
+      }
+    },
+    {
+      "description": "Humidity beacon sample",
+      "binary": "0A1B2C3D4E5F6A7B8C9F",
+      "text": "$ATRK,999999,BEACON,2,45.8,P,1,1,1,190223,121530*",
+      "expectedValues": {
+        "type": "humidity",
+        "value": 45.8,
+        "unit": "P",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:15:30.000Z"
+      }
+    },
+    {
+      "description": "Pressure beacon sample",
+      "binary": "0A1B2C3D4E5F6A7B8D9A",
+      "text": "$ATRK,999999,BEACON,3,1013.25,H,1,1,1,190223,121540*",
+      "expectedValues": {
+        "type": "pressure",
+        "value": 1013.25,
+        "unit": "H",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:15:40.000Z"
+      }
+    },
+    {
+      "description": "Low battery temperature beacon",
+      "binary": "0A1B2C3D4E5F6A7B8D9B",
+      "text": "$ATRK,999999,BEACON,1,10.2,C,1,0,1,190223,121550*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": 10.2,
+        "unit": "C",
+        "status": 1,
+        "batteryLevel": 0,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:15:50.000Z"
+      }
+    },
+    {
+      "description": "Weak signal temperature beacon",
+      "binary": "0A1B2C3D4E5F6A7B8D9C",
+      "text": "$ATRK,999999,BEACON,1,11.7,C,1,1,0,190223,121600*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": 11.7,
+        "unit": "C",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 0,
+        "timestamp": "2023-02-19T12:16:00.000Z"
+      }
+    },
+    {
+      "description": "Negative temperature beacon",
+      "binary": "0A1B2C3D4E5F6A7B8D9D",
+      "text": "$ATRK,999999,BEACON,1,-5.3,C,1,1,1,190223,121610*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": -5.3,
+        "unit": "C",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:16:10.000Z"
+      }
+    },
+    {
+      "description": "Extreme high temperature beacon",
+      "binary": "0A1B2C3D4E5F6A7B8D9E",
+      "text": "$ATRK,999999,BEACON,1,85.0,C,2,1,1,190223,121620*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": 85.0,
+        "unit": "C",
+        "status": 2,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:16:20.000Z"
+      }
+    },
+    {
+      "description": "Extreme low temperature beacon",
+      "binary": "0A1B2C3D4E5F6A7B8D9F",
+      "text": "$ATRK,999999,BEACON,1,-40.0,C,3,1,1,190223,121630*",
+      "expectedValues": {
+        "type": "temperature",
+        "value": -40.0,
+        "unit": "C",
+        "status": 3,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:16:30.000Z"
+      }
+    },
+    {
+      "description": "Multi-sensor beacon with temperature and humidity",
+      "binary": "0A1B2C3D4E5F6A7B8E9A",
+      "text": "$ATRK,999999,BEACON,4,22.5,C,1,1,1,65.3,P,190223,121640*",
+      "expectedValues": {
+        "type": "multi",
+        "temperature": 22.5,
+        "temperatureUnit": "C",
+        "humidity": 65.3,
+        "humidityUnit": "P",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:16:40.000Z"
+      }
+    },
+    {
+      "description": "Door sensor beacon (open)",
+      "binary": "0A1B2C3D4E5F6A7B8E9B",
+      "text": "$ATRK,999999,BEACON,5,1,D,1,1,1,190223,121650*",
+      "expectedValues": {
+        "type": "door",
+        "value": 1,
+        "unit": "D",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:16:50.000Z"
+      }
+    },
+    {
+      "description": "Door sensor beacon (closed)",
+      "binary": "0A1B2C3D4E5F6A7B8E9C",
+      "text": "$ATRK,999999,BEACON,5,0,D,1,1,1,190223,121700*",
+      "expectedValues": {
+        "type": "door",
+        "value": 0,
+        "unit": "D",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:17:00.000Z"
+      }
+    },
+    {
+      "description": "Motion sensor beacon (motion detected)",
+      "binary": "0A1B2C3D4E5F6A7B8E9D",
+      "text": "$ATRK,999999,BEACON,6,1,M,1,1,1,190223,121710*",
+      "expectedValues": {
+        "type": "motion",
+        "value": 1,
+        "unit": "M",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:17:10.000Z"
+      }
+    },
+    {
+      "description": "Motion sensor beacon (no motion)",
+      "binary": "0A1B2C3D4E5F6A7B8E9E",
+      "text": "$ATRK,999999,BEACON,6,0,M,1,1,1,190223,121720*",
+      "expectedValues": {
+        "type": "motion",
+        "value": 0,
+        "unit": "M",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:17:20.000Z"
+      }
+    },
+    {
+      "description": "Light sensor beacon",
+      "binary": "0A1B2C3D4E5F6A7B8E9F",
+      "text": "$ATRK,999999,BEACON,7,450.2,L,1,1,1,190223,121730*",
+      "expectedValues": {
+        "type": "light",
+        "value": 450.2,
+        "unit": "L",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:17:30.000Z"
+      }
+    },
+    {
+      "description": "CO2 sensor beacon",
+      "binary": "0A1B2C3D4E5F6A7B8F9A",
+      "text": "$ATRK,999999,BEACON,8,850.5,O,1,1,1,190223,121740*",
+      "expectedValues": {
+        "type": "co2",
+        "value": 850.5,
+        "unit": "O",
+        "status": 1,
+        "batteryLevel": 1,
+        "signalStrength": 1,
+        "timestamp": "2023-02-19T12:17:40.000Z"
+      }
+    },
+    {
+      "description": "Malformed beacon (for error testing)",
+      "binary": "0A1B2C3D4E5F6A7B8F9B",
+      "text": "$ATRK,999999,BEACON,1,XX.Y,C,1,1,1,190223,121750*",
+      "expectedValues": {
+        "error": true,
+        "errorType": "parsing"
+      }
+    }
+  ]
+}
