@@ -1,0 +1,196 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: position-service-config
+  namespace: traccar
+  labels:
+    app: position-service
+    component: config
+data:
+  # Position Service core configuration
+  application.yml: |
+    server:
+      port: 8080
+      shutdown: graceful
+    
+    spring:
+      application:
+        name: position-service
+      lifecycle:
+        timeout-per-shutdown-phase: 30s
+    
+    # Position processing configuration
+    position:
+      # Processing pipeline configuration
+      pipeline:
+        enabled: true
+        handlers:
+          - org.traccar.handler.CopyAttributesHandler
+          - org.traccar.handler.DistanceHandler
+          - org.traccar.handler.EngineHoursHandler
+          - org.traccar.handler.ComputedAttributesHandler
+          - org.traccar.handler.DefaultDataHandler
+          - org.traccar.handler.MotionHandler
+          - org.traccar.handler.GeocoderHandler
+          - org.traccar.handler.GeofenceHandler
+          - org.traccar.handler.SpeedLimitHandler
+        # Handler-specific configurations
+        motion:
+          processInvalidPositions: false
+          speedThreshold: 0.01
+        distance:
+          minimalDistance: 10
+        geocoder:
+          enabled: true
+          ignorePositionsWithoutNetwork: true
+          processInvalidPositions: false
+          reuseDistance: 100
+          cacheSize: 1000
+          cacheExpire: 86400
+        geofence:
+          enabled: true
+          processInvalidPositions: false
+    
+    # Database configuration
+    database:
+      driver: org.postgresql.Driver
+      url: jdbc:postgresql://postgres:5432/traccar
+      username: ${DB_USERNAME:traccar}
+      password: ${DB_PASSWORD:traccar}
+      maxPoolSize: 25
+      connectionTimeout: 30000
+      validationTimeout: 5000
+      idleTimeout: 600000
+      maxLifetime: 1800000
+    
+    # Message broker configuration
+    messaging:
+      type: kafka  # Options: kafka, rabbitmq
+      # Kafka configuration
+      kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+        consumer:
+          group-id: position-service
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          properties:
+            spring.json.trusted.packages: org.traccar.model
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+        topics:
+          position:
+            raw: raw.positions
+            enriched: enriched.positions
+      # RabbitMQ configuration (used if messaging.type is rabbitmq)
+      rabbitmq:
+        host: ${RABBITMQ_HOST:rabbitmq}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
+        virtual-host: ${RABBITMQ_VHOST:/}
+        queues:
+          raw-positions: raw.positions
+          enriched-positions: enriched.positions
+    
+    # Service discovery configuration
+    discovery:
+      enabled: true
+      type: kubernetes  # Options: kubernetes, consul
+      kubernetes:
+        namespace: traccar
+        service-name: position-service
+      consul:
+        host: ${CONSUL_HOST:consul}
+        port: ${CONSUL_PORT:8500}
+    
+    # Geocoding service configuration
+    geocoder:
+      type: google  # Options: google, nominatim, mapbox, here, etc.
+      url: ${GEOCODER_URL:https://maps.googleapis.com/maps/api/geocode/json}
+      key: ${GEOCODER_KEY:}
+      language: en
+      reuseDistance: 100
+      cacheSize: 1000
+      cacheExpire: 86400
+    
+    # Resilience configuration
+    resilience4j:
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+        instances:
+          geocodingService:
+            baseConfig: default
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+        instances:
+          geocodingService:
+            baseConfig: default
+    
+    # Monitoring and observability configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+      health:
+        probes:
+          enabled: true
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+      metrics:
+        export:
+          prometheus:
+            enabled: true
+      tracing:
+        sampling:
+          probability: 1.0
+    
+  # Logging configuration
+  logback.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+      <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+          <includeMdcKeyName>traceId</includeMdcKeyName>
+          <includeMdcKeyName>spanId</includeMdcKeyName>
+          <includeMdcKeyName>deviceId</includeMdcKeyName>
+          <includeMdcKeyName>positionId</includeMdcKeyName>
+        </encoder>
+      </appender>
+      
+      <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+      </root>
+      
+      <!-- Application Loggers -->
+      <logger name="org.traccar" level="INFO" />
+      <logger name="org.traccar.handler" level="INFO" />
+      <logger name="org.traccar.geocoder" level="INFO" />
+      <logger name="org.traccar.processing" level="INFO" />
+      
+      <!-- Framework Loggers -->
+      <logger name="org.springframework" level="WARN" />
+      <logger name="org.hibernate" level="WARN" />
+      <logger name="org.apache.kafka" level="WARN" />
+      <logger name="io.netty" level="WARN" />
+      
+      <!-- Debug specific components if needed -->
+      <!-- <logger name="org.traccar.handler.GeofenceHandler" level="DEBUG" /> -->
+      <!-- <logger name="org.traccar.handler.GeocoderHandler" level="DEBUG" /> -->
+    </configuration>
