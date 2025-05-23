@@ -1,0 +1,79 @@
+# Consul Service Discovery Configuration for Position Processing Service
+
+# Spring Cloud Consul Configuration
+spring:
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      # Service Registration Configuration
+      discovery:
+        enabled: true
+        register: true
+        service-name: position-service
+        instance-id: ${spring.application.name}:${random.uuid}
+        prefer-ip-address: true
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        health-check-timeout: 5s
+        health-check-critical-timeout: 30s
+        tags:
+          - position
+          - processing
+          - traccar
+          - v1
+        metadata:
+          version: ${application.version:1.0.0}
+          environment: ${ENVIRONMENT:production}
+          zone: ${ZONE:default}
+          metrics-endpoint: /actuator/prometheus
+          management-port: ${management.server.port:8081}
+      # Consul Config Configuration
+      config:
+        enabled: true
+        format: YAML
+        prefix: config
+        default-context: position-service
+        profile-separator: ':'
+        data-key: data
+        watch:
+          enabled: true
+          delay: 1000
+
+# Management Endpoints Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+      group:
+        readiness:
+          include: readinessState,db,messageBroker
+        liveness:
+          include: livenessState
+  health:
+    consul:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+
+# Consul ACL Token Configuration (if ACL is enabled)
+consul:
+  token: ${CONSUL_TOKEN:}
+  # Consul Connection Configuration
+  connection:
+    timeout: 5000
+    max-attempts: 3
+    retry-delay: 1000
+  # Consul Watch Configuration
+  watch:
+    enabled: true
+    wait-time: 30
+    timeout: 5
