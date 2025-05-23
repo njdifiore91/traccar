@@ -1,0 +1,201 @@
+[
+  {
+    "location": {
+      "extras": {},
+      "mock": true,
+      "coords": {
+        "speed_accuracy": -1,
+        "speed": -1,
+        "longitude": -122.406417,
+        "ellipsoidal_altitude": 0,
+        "floor": null,
+        "heading_accuracy": -1,
+        "latitude": 37.785834000000001,
+        "accuracy": 5,
+        "altitude_accuracy": -1,
+        "altitude": 0,
+        "heading": -1
+      },
+      "is_moving": false,
+      "age": 188,
+      "odometer": 0,
+      "uuid": "2FB04C65-99CF-42AB-8DD3-EBCB4B108BF8",
+      "event": "motionchange",
+      "battery": {
+        "level": -1,
+        "is_charging": false
+      },
+      "activity": {
+        "type": "unknown",
+        "confidence": 100
+      },
+      "timestamp": "2025-05-09T04:11:30.579Z"
+    },
+    "device_id": "658765"
+  },
+  {
+    "location": {
+      "event": "motionchange",
+      "is_moving": false,
+      "uuid": "0e9a2473-a9a7-4c00-997b-fb97d2154e75",
+      "timestamp": "2021-07-21T08:06:34.444Z",
+      "odometer": 0,
+      "coords": {
+        "latitude": -6.1148096,
+        "longitude": 106.6837015,
+        "accuracy": 3.8,
+        "speed": 18.67,
+        "speed_accuracy": 0.26,
+        "heading": 63,
+        "heading_accuracy": 0.28,
+        "altitude": 35.7,
+        "altitude_accuracy": 3.8
+      },
+      "activity": {
+        "type": "still",
+        "confidence": 100
+      },
+      "battery": {
+        "is_charging": false,
+        "level": 0.79
+      },
+      "extras": {}
+    },
+    "device_id": "8737767034"
+  },
+  {
+    "location": {
+      "event": "geofence",
+      "is_moving": true,
+      "uuid": "5a23c631-b7d9-4e9a-b3c5-e272c81a0f43",
+      "timestamp": "2023-09-15T14:22:53.123Z",
+      "odometer": 1250.5,
+      "coords": {
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "accuracy": 10.2,
+        "speed": 45.32,
+        "speed_accuracy": 1.5,
+        "heading": 180,
+        "heading_accuracy": 0.5,
+        "altitude": 12.3,
+        "altitude_accuracy": 5.0
+      },
+      "activity": {
+        "type": "in_vehicle",
+        "confidence": 95
+      },
+      "battery": {
+        "is_charging": true,
+        "level": 0.45
+      },
+      "extras": {
+        "geofence_identifier": "office_zone",
+        "geofence_action": "EXIT"
+      }
+    },
+    "device_id": "9876543210"
+  },
+  {
+    "location": {
+      "event": "heartbeat",
+      "is_moving": false,
+      "uuid": "b8f7d456-c972-47d0-98e9-2c5b1b6e9a1d",
+      "timestamp": "2024-01-10T09:45:12.789Z",
+      "odometer": 5432.1,
+      "coords": {
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "accuracy": 8.5,
+        "speed": 0.0,
+        "speed_accuracy": 0.1,
+        "heading": 0,
+        "heading_accuracy": 0.0,
+        "altitude": 25.0,
+        "altitude_accuracy": 2.5
+      },
+      "activity": {
+        "type": "still",
+        "confidence": 100
+      },
+      "battery": {
+        "is_charging": true,
+        "level": 0.95
+      },
+      "extras": {
+        "temperature": 22.5,
+        "humidity": 45.2,
+        "signal_strength": 4
+      }
+    },
+    "device_id": "1122334455"
+  },
+  {
+    "location": {
+      "event": "providerchange",
+      "is_moving": true,
+      "uuid": "c7e2a9f8-d6b1-4e3c-8a5d-9f7b3c1d2e0b",
+      "timestamp": "2024-03-22T16:30:45.321Z",
+      "odometer": 8765.4,
+      "coords": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "accuracy": 15.0,
+        "speed": 32.5,
+        "speed_accuracy": 2.0,
+        "heading": 90,
+        "heading_accuracy": 1.0,
+        "altitude": 50.0,
+        "altitude_accuracy": 10.0
+      },
+      "activity": {
+        "type": "in_vehicle",
+        "confidence": 90
+      },
+      "battery": {
+        "is_charging": false,
+        "level": 0.25
+      },
+      "extras": {
+        "provider": "gps",
+        "previous_provider": "network",
+        "satellites": 8
+      }
+    },
+    "device_id": "5566778899"
+  },
+  {
+    "location": {
+      "event": "location",
+      "is_moving": true,
+      "uuid": "d1e2f3a4-b5c6-7d8e-9f0a-1b2c3d4e5f6a",
+      "timestamp": "2024-05-15T12:00:00.000Z",
+      "odometer": 10000.0,
+      "coords": {
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "accuracy": 5.0,
+        "speed": 15.0,
+        "speed_accuracy": 0.5,
+        "heading": 270,
+        "heading_accuracy": 0.2,
+        "altitude": 100.0,
+        "altitude_accuracy": 1.0
+      },
+      "activity": {
+        "type": "walking",
+        "confidence": 85
+      },
+      "battery": {
+        "is_charging": false,
+        "level": 0.60
+      },
+      "extras": {
+        "wifi": "connected",
+        "network_type": "4G",
+        "device_model": "SM-G970F"
+      }
+    },
+    "device_id": "1234567890"
+  }
+]
