@@ -1,0 +1,240 @@
+syntax = "proto3";
+
+package org.traccar.protocol.management;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.protocol.management";
+option java_outer_classname = "ProtocolManagementProto";
+option go_package = "github.com/traccar/traccar/protocol-service/proto/management";
+option csharp_namespace = "Traccar.Protocol.Management";
+option objc_class_prefix = "TPM";
+
+// Protocol Management Service provides an interface for administration services
+// to query and configure protocol implementations in the Protocol Service.
+//
+// This contract defines the gRPC API for managing protocol implementations
+// in the Traccar Protocol Service. It allows administration services to
+// discover, configure, and monitor the status of available protocols.
+service ProtocolManagementService {
+  // Lists all available protocol implementations
+  rpc ListProtocols(ListProtocolsRequest) returns (ListProtocolsResponse) {}
+  
+  // Gets detailed information about a specific protocol
+  rpc GetProtocolInfo(GetProtocolInfoRequest) returns (GetProtocolInfoResponse) {}
+  
+  // Updates configuration for a specific protocol
+  rpc ConfigureProtocol(ConfigureProtocolRequest) returns (ConfigureProtocolResponse) {}
+  
+  // Checks the status of a protocol implementation
+  rpc GetProtocolStatus(GetProtocolStatusRequest) returns (GetProtocolStatusResponse) {}
+  
+  // Enables a specific protocol
+  rpc EnableProtocol(EnableProtocolRequest) returns (EnableProtocolResponse) {}
+  
+  // Disables a specific protocol
+  rpc DisableProtocol(DisableProtocolRequest) returns (DisableProtocolResponse) {}
+}
+
+// Request message for ListProtocols method
+message ListProtocolsRequest {
+  // Optional filter to limit the protocols returned
+  string filter = 1;
+  
+  // Maximum number of protocols to return
+  int32 limit = 2;
+  
+  // Pagination token for large result sets
+  string page_token = 3;
+}
+
+// Response message for ListProtocols method
+message ListProtocolsResponse {
+  // List of available protocols
+  repeated ProtocolSummary protocols = 1;
+  
+  // Pagination token for the next page of results
+  string next_page_token = 2;
+  
+  // Total number of protocols available
+  int32 total_count = 3;
+}
+
+// Summary information about a protocol
+message ProtocolSummary {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+  
+  // Display name of the protocol
+  string name = 2;
+  
+  // Current version of the protocol implementation
+  string version = 3;
+  
+  // Whether the protocol is currently enabled
+  bool enabled = 4;
+  
+  // Number of active connections using this protocol
+  int32 active_connections = 5;
+}
+
+// Request message for GetProtocolInfo method
+message GetProtocolInfoRequest {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+}
+
+// Response message for GetProtocolInfo method
+message GetProtocolInfoResponse {
+  // Detailed information about the protocol
+  ProtocolInfo protocol = 1;
+}
+
+// Detailed information about a protocol
+// Contains comprehensive information about a protocol implementation including
+// its capabilities, configuration, and current status
+message ProtocolInfo {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+  
+  // Display name of the protocol
+  string name = 2;
+  
+  // Current version of the protocol implementation
+  string version = 3;
+  
+  // Whether the protocol is currently enabled
+  bool enabled = 4;
+  
+  // Description of the protocol
+  string description = 5;
+  
+  // List of supported features
+  repeated string capabilities = 6;
+  
+  // Network ports used by the protocol
+  repeated ProtocolPort ports = 7;
+  
+  // Current configuration parameters
+  map<string, string> configuration = 8;
+  
+  // Status information
+  ProtocolStatus status = 9;
+}
+
+// Network port configuration for a protocol
+message ProtocolPort {
+  // Port number
+  int32 port = 1;
+  
+  // Protocol type (TCP, UDP)
+  string type = 2;
+  
+  // Whether the port is currently active
+  bool active = 3;
+}
+
+// Request message for ConfigureProtocol method
+message ConfigureProtocolRequest {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+  
+  // Configuration parameters to update
+  map<string, string> configuration = 2;
+}
+
+// Response message for ConfigureProtocol method
+message ConfigureProtocolResponse {
+  // Whether the configuration was successfully applied
+  bool success = 1;
+  
+  // Error message if configuration failed
+  string error_message = 2;
+  
+  // Updated configuration parameters
+  map<string, string> updated_configuration = 3;
+}
+
+// Request message for GetProtocolStatus method
+message GetProtocolStatusRequest {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+}
+
+// Response message for GetProtocolStatus method
+message GetProtocolStatusResponse {
+  // Status information for the protocol
+  ProtocolStatus status = 1;
+}
+
+// Status information for a protocol
+// Contains runtime information about the protocol's current state and performance metrics
+message ProtocolStatus {
+  // Whether the protocol is currently enabled
+  bool enabled = 1;
+  
+  // Current state of the protocol (RUNNING, STOPPED, ERROR)
+  string state = 2;
+  
+  // Number of active connections
+  int32 active_connections = 3;
+  
+  // Number of messages processed in the last hour
+  int64 messages_processed = 4;
+  
+  // Number of errors encountered in the last hour
+  int32 error_count = 5;
+  
+  // Timestamp of the last received message
+  int64 last_message_timestamp = 6;
+  
+  // Resource usage statistics
+  ResourceUsage resource_usage = 7;
+}
+
+// Resource usage information
+message ResourceUsage {
+  // CPU usage percentage
+  double cpu_usage = 1;
+  
+  // Memory usage in megabytes
+  double memory_usage = 2;
+  
+  // Network bandwidth usage in kilobytes per second
+  double network_bandwidth = 3;
+}
+
+// Request message for EnableProtocol method
+message EnableProtocolRequest {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+}
+
+// Response message for EnableProtocol method
+message EnableProtocolResponse {
+  // Whether the protocol was successfully enabled
+  bool success = 1;
+  
+  // Error message if enabling failed
+  string error_message = 2;
+}
+
+// Request message for DisableProtocol method
+message DisableProtocolRequest {
+  // Unique identifier for the protocol
+  string protocol_id = 1;
+  
+  // Whether to gracefully disconnect existing connections
+  bool graceful = 2;
+}
+
+// Response message for DisableProtocol method
+message DisableProtocolResponse {
+  // Whether the protocol was successfully disabled
+  bool success = 1;
+  
+  // Error message if disabling failed
+  string error_message = 2;
+  
+  // Number of connections that were closed
+  int32 connections_closed = 3;
+}
