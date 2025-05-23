@@ -1,0 +1,150 @@
+# Protocol Service Discovery Configuration
+# This file configures how the Protocol Service registers itself with and discovers other services
+# through Consul or Kubernetes service discovery mechanisms.
+
+# Service Registration Configuration
+service:
+  # Basic service information
+  name: protocol-service
+  id: ${SERVICE_ID:protocol-service-${random.uuid}}
+  version: ${SERVICE_VERSION:1.0.0}
+  
+  # Service metadata and tags
+  tags:
+    - protocol-handler
+    - device-communication
+    - netty
+    - traccar
+  metadata:
+    environment: ${SERVICE_ENVIRONMENT:production}
+    capabilities: protocol-handling,device-command,position-processing
+    dependencies: position-service,event-service
+
+# Discovery Provider Configuration
+discovery:
+  # Enable service discovery
+  enabled: true
+  
+  # Primary discovery mechanism (consul or kubernetes)
+  provider: ${DISCOVERY_PROVIDER:consul}
+  
+  # Automatic deregistration on shutdown
+  deregisterOnShutdown: true
+  
+  # Consul Configuration
+  consul:
+    enabled: ${CONSUL_ENABLED:true}
+    host: ${CONSUL_HOST:consul.service.consul}
+    port: ${CONSUL_PORT:8500}
+    scheme: ${CONSUL_SCHEME:http}
+    # ACL token for Consul authentication if required
+    aclToken: ${CONSUL_ACL_TOKEN:}
+    # Service check-in interval
+    checkInterval: 15s
+    # Timeout for health checks
+    checkTimeout: 5s
+    # Time to wait before registering service
+    registerDelay: 10s
+    # Consul datacenter
+    datacenter: ${CONSUL_DATACENTER:dc1}
+    # Whether to prefer IP address over hostname
+    preferIpAddress: true
+    # Tags to include in Consul registration
+    tags:
+      - protocol-service
+      - microservice
+      - traccar
+      - ${SERVICE_ENVIRONMENT:production}
+  
+  # Kubernetes Configuration
+  kubernetes:
+    enabled: ${K8S_ENABLED:false}
+    # Namespace where service is deployed
+    namespace: ${K8S_NAMESPACE:default}
+    # Whether to trust all certificates (development only)
+    trustCerts: ${K8S_TRUST_CERTS:false}
+    # Master URL if not using in-cluster config
+    masterUrl: ${K8S_MASTER_URL:}
+    # Service account token file path
+    serviceAccountTokenFile: ${K8S_TOKEN_FILE:/var/run/secrets/kubernetes.io/serviceaccount/token}
+    # Whether to watch for service changes
+    watchServices: true
+    # Interval for polling Kubernetes API
+    pollInterval: 30s
+
+# Health Check Configuration
+health:
+  # Path for liveness probe (basic health check)
+  livenessPath: /actuator/health/liveness
+  # Path for readiness probe (ready to accept traffic)
+  readinessPath: /actuator/health/readiness
+  # Path for detailed health metrics
+  metricsPath: /actuator/metrics
+  # Initial delay before health checks start
+  initialDelay: 60s
+  # Interval between health checks
+  interval: 15s
+  # Timeout for health check responses
+  timeout: 5s
+  # Number of consecutive failures before marking unhealthy
+  failureThreshold: 3
+  # Number of consecutive successes before marking healthy
+  successThreshold: 1
+  # Critical dependencies that must be available for service to be healthy
+  criticalDependencies:
+    - message-broker
+  # Non-critical dependencies that can be unavailable without affecting core functionality
+  nonCriticalDependencies:
+    - position-service
+    - event-service
+
+# Service Discovery Client Configuration
+discovery-client:
+  # Enable service discovery client for finding other services
+  enabled: true
+  # Cache discovered services
+  cacheEnabled: true
+  # Cache TTL in seconds
+  cacheTtl: 30
+  # Refresh interval for service discovery cache
+  refreshInterval: 15s
+  # Retry configuration for service discovery
+  retry:
+    maxAttempts: 3
+    initialBackoff: 1000
+    maxBackoff: 10000
+    backoffMultiplier: 2.0
+  # Circuit breaker configuration for service discovery
+  circuitBreaker:
+    enabled: true
+    failureThreshold: 50
+    requestVolumeThreshold: 20
+    sleepWindow: 5000
+    errorThresholdPercentage: 50
+
+# Protocol Service Specific Discovery Settings
+protocol-service:
+  # Network ports to register for device protocols
+  ports:
+    # Standard protocol ports
+    osmand: ${OSMAND_PORT:5055}
+    teltonika: ${TELTONIKA_PORT:5027}
+    meitrack: ${MEITRACK_PORT:5020}
+    tk103: ${TK103_PORT:5006}
+    h02: ${H02_PORT:5008}
+    # Command port for device communication
+    command: ${COMMAND_PORT:5700}
+    # Admin port for management
+    admin: ${ADMIN_PORT:5701}
+    # HTTP API port
+    http: ${HTTP_PORT:8082}
+    # gRPC API port
+    grpc: ${GRPC_PORT:9090}
+  # Protocol capabilities to advertise
+  protocols:
+    - osmand
+    - teltonika
+    - meitrack
+    - tk103
+    - h02
+    # Add more supported protocols as needed
