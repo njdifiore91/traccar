@@ -1,0 +1,329 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "notification.fullname" . }}-config
+  labels:
+    {{- include "notification.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+data:
+  application.yaml: |
+    # Notification Service Configuration
+    
+    # Server Configuration
+    server:
+      port: {{ .Values.service.port }}
+      servlet:
+        context-path: /
+      tomcat:
+        max-threads: 50
+        max-connections: 1000
+        connection-timeout: 30000
+        accesslog:
+          enabled: true
+          directory: logs
+          pattern: '%h %l %u %t "%r" %s %b %D'
+          suffix: .log
+          prefix: access_log
+          rotate: true
+    
+    # Spring Configuration
+    spring:
+      application:
+        name: {{ include "notification.name" . }}
+      main:
+        banner-mode: "off"
+      # Message Broker Configuration
+      cloud:
+        stream:
+          function:
+            definition: processEvent;processNotification
+          bindings:
+            processEvent-in-0:
+              destination: events
+              group: notification-service
+              consumer:
+                maxAttempts: 3
+                backOffInitialInterval: 1000
+                backOffMaxInterval: 10000
+                backOffMultiplier: 2.0
+            emailOutput:
+              destination: email-out
+              producer:
+                required-groups: notification-handlers
+            smsOutput:
+              destination: sms-out
+              producer:
+                required-groups: notification-handlers
+            pushOutput:
+              destination: push-out
+              producer:
+                required-groups: notification-handlers
+            webOutput:
+              destination: web-out
+              producer:
+                required-groups: notification-handlers
+            deadLetterOutput:
+              destination: notification-dlq
+              producer:
+                required-groups: notification-retry
+          kafka:
+            binder:
+              brokers: ${KAFKA_BROKERS:kafka:9092}
+              required-acks: 1
+              auto-create-topics: true
+              configuration:
+                security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+                sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+                sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+                ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+                ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+          rabbit:
+            binder:
+              enabled: ${RABBITMQ_ENABLED:false}
+              nodes: ${RABBITMQ_NODES:rabbitmq:5672}
+              username: ${RABBITMQ_USERNAME:guest}
+              password: ${RABBITMQ_PASSWORD:guest}
+              virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+    
+    # Management (Metrics & Health Checks)
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+          base-path: /actuator
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+          group:
+            readiness:
+              include: readinessState,kafka,mail,diskSpace
+            liveness:
+              include: livenessState
+      metrics:
+        export:
+          prometheus:
+            enabled: true
+      health:
+        livenessstate:
+          enabled: true
+        readinessstate:
+          enabled: true
+        mail:
+          enabled: ${HEALTH_CHECK_MAIL_ENABLED:true}
+    
+    # Logging Configuration
+    logging:
+      level:
+        root: ${LOG_LEVEL_ROOT:INFO}
+        org.traccar: ${LOG_LEVEL_TRACCAR:INFO}
+        org.traccar.notification: ${LOG_LEVEL_NOTIFICATION:INFO}
+      pattern:
+        console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+      file:
+        name: ${LOG_FILE:/tmp/notification-service.log}
+        max-size: ${LOG_FILE_MAX_SIZE:10MB}
+        max-history: ${LOG_FILE_MAX_HISTORY:10}
+    
+    # Notification Service Configuration
+    notification:
+      # General Settings
+      enabled: ${NOTIFICATION_ENABLED:true}
+      # Maximum age of events to process (in milliseconds)
+      max-event-age: ${NOTIFICATION_MAX_EVENT_AGE:300000}
+      
+      # Email Notification Configuration
+      email:
+        enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+        from: ${NOTIFICATION_EMAIL_FROM:no-reply@example.com}
+        smtp:
+          host: ${NOTIFICATION_EMAIL_SMTP_HOST:smtp.example.com}
+          port: ${NOTIFICATION_EMAIL_SMTP_PORT:587}
+          username: ${NOTIFICATION_EMAIL_SMTP_USERNAME:}
+          password: ${NOTIFICATION_EMAIL_SMTP_PASSWORD:}
+          starttls-enable: ${NOTIFICATION_EMAIL_SMTP_STARTTLS:true}
+          ssl-enable: ${NOTIFICATION_EMAIL_SMTP_SSL:false}
+          auth: ${NOTIFICATION_EMAIL_SMTP_AUTH:true}
+          connection-timeout: ${NOTIFICATION_EMAIL_SMTP_TIMEOUT:10000}
+          debug: ${NOTIFICATION_EMAIL_SMTP_DEBUG:false}
+      
+      # SMS Notification Configuration
+      sms:
+        enabled: ${NOTIFICATION_SMS_ENABLED:false}
+        provider: ${NOTIFICATION_SMS_PROVIDER:http}
+        # HTTP Gateway Configuration
+        http:
+          url: ${NOTIFICATION_SMS_HTTP_URL:https://example.com/sms}
+          authorization: ${NOTIFICATION_SMS_HTTP_AUTHORIZATION:}
+          template: ${NOTIFICATION_SMS_HTTP_TEMPLATE:"text":"${message}"}
+          method: ${NOTIFICATION_SMS_HTTP_METHOD:POST}
+          headers: ${NOTIFICATION_SMS_HTTP_HEADERS:Content-Type=application/json}
+        # AWS SNS Configuration
+        aws-sns:
+          access-key: ${NOTIFICATION_SMS_AWS_ACCESS_KEY:}
+          secret-key: ${NOTIFICATION_SMS_AWS_SECRET_KEY:}
+          region: ${NOTIFICATION_SMS_AWS_REGION:us-east-1}
+          sender-id: ${NOTIFICATION_SMS_AWS_SENDER_ID:Traccar}
+      
+      # Push Notification Configuration
+      push:
+        enabled: ${NOTIFICATION_PUSH_ENABLED:false}
+        provider: ${NOTIFICATION_PUSH_PROVIDER:firebase}
+        # Firebase Cloud Messaging Configuration
+        firebase:
+          service-account-json: ${NOTIFICATION_PUSH_FIREBASE_ACCOUNT:}
+          database-url: ${NOTIFICATION_PUSH_FIREBASE_DATABASE:https://traccar.firebaseio.com}
+          # Alternative: Use service account file path
+          service-account-file: ${NOTIFICATION_PUSH_FIREBASE_ACCOUNT_FILE:}
+      
+      # Web Notification Configuration
+      web:
+        enabled: ${NOTIFICATION_WEB_ENABLED:true}
+        # WebSocket connection timeout in milliseconds
+        timeout: ${NOTIFICATION_WEB_TIMEOUT:10000}
+      
+      # External Notification Services
+      external:
+        # Telegram Configuration
+        telegram:
+          enabled: ${NOTIFICATION_TELEGRAM_ENABLED:false}
+          bot-token: ${NOTIFICATION_TELEGRAM_BOT_TOKEN:}
+          chat-id: ${NOTIFICATION_TELEGRAM_CHAT_ID:}
+        
+        # Pushover Configuration
+        pushover:
+          enabled: ${NOTIFICATION_PUSHOVER_ENABLED:false}
+          user-key: ${NOTIFICATION_PUSHOVER_USER_KEY:}
+          app-key: ${NOTIFICATION_PUSHOVER_APP_KEY:}
+        
+        # Command Notification Configuration
+        command:
+          enabled: ${NOTIFICATION_COMMAND_ENABLED:false}
+          command: ${NOTIFICATION_COMMAND:}
+      
+      # Notification Templates Configuration
+      templates:
+        # Default templates for different notification types
+        default:
+          # Event notification templates
+          event:
+            title: "Event: {event.type}"
+            body: "Device: {device.name}\nTime: {event.serverTime}\nType: {event.type}\nLocation: {position.address}"
+          # Command notification templates
+          command:
+            title: "Command: {command.type}"
+            body: "Device: {device.name}\nTime: {command.serverTime}\nType: {command.type}\nResult: {command.result}"
+          # Status notification templates
+          status:
+            title: "Status Update: {device.name}"
+            body: "Device: {device.name}\nTime: {event.serverTime}\nStatus: {device.status}"
+        
+        # Custom templates path (relative to classpath)
+        path: ${NOTIFICATION_TEMPLATES_PATH:templates/}
+        # Refresh interval for template changes (in milliseconds)
+        refresh-interval: ${NOTIFICATION_TEMPLATES_REFRESH:60000}
+        # Template engine (freemarker, velocity, thymeleaf)
+        engine: ${NOTIFICATION_TEMPLATES_ENGINE:freemarker}
+      
+      # Formatter Configuration
+      formatter:
+        # Date format for notifications
+        date-format: ${NOTIFICATION_DATE_FORMAT:yyyy-MM-dd HH:mm:ss}
+        # Coordinate format (decimal, dms)
+        coordinate-format: ${NOTIFICATION_COORDINATE_FORMAT:decimal}
+        # Speed unit (knots, kph, mph)
+        speed-unit: ${NOTIFICATION_SPEED_UNIT:kph}
+        # Distance unit (km, mi, nm)
+        distance-unit: ${NOTIFICATION_DISTANCE_UNIT:km}
+        # Volume unit (liter, gallon)
+        volume-unit: ${NOTIFICATION_VOLUME_UNIT:liter}
+      
+      # Retry Configuration
+      retry:
+        # Maximum number of retry attempts
+        max-attempts: ${NOTIFICATION_RETRY_MAX_ATTEMPTS:3}
+        # Initial backoff interval in milliseconds
+        initial-interval: ${NOTIFICATION_RETRY_INITIAL_INTERVAL:1000}
+        # Maximum backoff interval in milliseconds
+        max-interval: ${NOTIFICATION_RETRY_MAX_INTERVAL:60000}
+        # Backoff multiplier
+        multiplier: ${NOTIFICATION_RETRY_MULTIPLIER:2.0}
+        # Whether to retry on all exceptions
+        retry-all-exceptions: ${NOTIFICATION_RETRY_ALL_EXCEPTIONS:false}
+      
+      # Dead Letter Queue Configuration
+      dead-letter-queue:
+        enabled: ${NOTIFICATION_DLQ_ENABLED:true}
+        # Maximum number of retry attempts from DLQ
+        max-attempts: ${NOTIFICATION_DLQ_MAX_ATTEMPTS:3}
+        # Processing interval in milliseconds
+        processing-interval: ${NOTIFICATION_DLQ_PROCESSING_INTERVAL:60000}
+    
+    # Circuit Breaker Configuration
+    resilience4j:
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+        instances:
+          emailSender:
+            baseConfig: default
+          smsSender:
+            baseConfig: default
+          pushSender:
+            baseConfig: default
+          telegramSender:
+            baseConfig: default
+          pushoverSender:
+            baseConfig: default
+          messageBroker:
+            baseConfig: default
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+            retryExceptions:
+              - org.springframework.mail.MailException
+              - java.io.IOException
+              - java.net.ConnectException
+        instances:
+          notificationSender:
+            baseConfig: default
+            maxAttempts: 5
+      ratelimiter:
+        configs:
+          default:
+            limitForPeriod: 100
+            limitRefreshPeriod: 1s
+            timeoutDuration: 0s
+        instances:
+          notificationProcessing:
+            baseConfig: default
+            limitForPeriod: 1000
+    
+    # Service Discovery Configuration
+    eureka:
+      client:
+        enabled: ${EUREKA_CLIENT_ENABLED:false}
+        serviceUrl:
+          defaultZone: ${EUREKA_SERVICE_URL:http://eureka:8761/eureka/}
+      instance:
+        preferIpAddress: true
+    
+    # OpenTelemetry Configuration
+    opentelemetry:
+      enabled: ${OPENTELEMETRY_ENABLED:true}
+      endpoint: ${OPENTELEMETRY_ENDPOINT:http://otel-collector:4317}
+      resource-attributes:
+        service.name: ${spring.application.name}
+        deployment.environment: ${DEPLOYMENT_ENVIRONMENT:production}
