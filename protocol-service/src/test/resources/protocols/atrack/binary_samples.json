@@ -1,0 +1,168 @@
+{
+  "protocol": {
+    "name": "atrack",
+    "description": "Binary message samples for ATrack protocol decoder testing"
+  },
+  "samples": [
+    {
+      "name": "standardBinaryPosition",
+      "description": "Standard binary position report with basic fields",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "longDateBinaryPosition",
+      "description": "Binary position report with long date format",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "options": {
+        "longDate": true,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "extendedBinaryPosition",
+      "description": "Binary position report with extended format including OBD data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254f42254a31254a32",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%OB,%J1,%J2",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "multiplePositionsBinary",
+      "description": "Multiple binary position reports in a single message",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349005b7229c95b7229c85b722a1ffabad05b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithDecimalFuel",
+      "description": "Binary position report with decimal fuel values",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "decimalFuel": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithOBDData",
+      "description": "Binary position report with OBD diagnostic data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254f42254a31254a32",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%OB,%J1,%J2",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryBeaconData",
+      "description": "Binary beacon data with temperature and sensor readings",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254254",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%BT",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryKeepAlive",
+      "description": "Binary keep-alive message",
+      "data": "fe02000144f5f091138276ab",
+      "options": {
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryAcknowledgment",
+      "description": "Binary acknowledgment message",
+      "data": "fe02000144f5f091138276ac",
+      "options": {
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithCustomFormat",
+      "description": "Binary position with custom format string",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithGSensorData",
+      "description": "Binary position with G-Sensor impact data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254744",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%GD",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithJ1939Data",
+      "description": "Binary position with J1939 CAN bus data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254a31",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%J1",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithJ1708Data",
+      "description": "Binary position with J1708 CAN bus data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254a32",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%J2",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithHumidityData",
+      "description": "Binary position with humidity sensor data",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254855",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%HU",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    },
+    {
+      "name": "binaryPositionWithDTCCodes",
+      "description": "Binary position with diagnostic trouble codes",
+      "data": "405006a9031776ac000144f5f09113825b7229c65b7229c65b722a1ffabace5b029b7326003b74000083d9000601006c0000000007d007d00000785dfe0004bbf400140925434525434e25504b254751254753254349254454",
+      "format": "%TS,%BV,%IO,%DA,%IP,%IG,%GS,%GQ,%CL,%CD,%CE,%LC,%TX,%DT",
+      "options": {
+        "longDate": false,
+        "custom": true,
+        "binary": true
+      }
+    }
+  ]
+}
