@@ -1,0 +1,963 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Protocol Service REST API",
+    "description": "REST API contract for the Protocol Service, defining endpoints for protocol message handling, device connections, and command dispatching.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traccar Support",
+      "url": "https://www.traccar.org/support/",
+      "email": "support@traccar.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Protocol Service API base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "protocol",
+      "description": "Protocol information and management"
+    },
+    {
+      "name": "message",
+      "description": "Protocol message handling"
+    },
+    {
+      "name": "connection",
+      "description": "Device connection management"
+    },
+    {
+      "name": "command",
+      "description": "Device command dispatching"
+    }
+  ],
+  "paths": {
+    "/protocols": {
+      "get": {
+        "tags": ["protocol"],
+        "summary": "Get all supported protocols",
+        "description": "Returns a list of all protocols supported by the Protocol Service",
+        "operationId": "getProtocols",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Protocol"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/protocols/{protocolName}": {
+      "get": {
+        "tags": ["protocol"],
+        "summary": "Get protocol details",
+        "description": "Returns detailed information about a specific protocol",
+        "operationId": "getProtocolByName",
+        "parameters": [
+          {
+            "name": "protocolName",
+            "in": "path",
+            "description": "Name of the protocol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "tk103"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Protocol"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Protocol not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/protocols/{protocolName}/commands": {
+      "get": {
+        "tags": ["protocol"],
+        "summary": "Get supported commands for a protocol",
+        "description": "Returns a list of commands supported by the specified protocol",
+        "operationId": "getProtocolCommands",
+        "parameters": [
+          {
+            "name": "protocolName",
+            "in": "path",
+            "description": "Name of the protocol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "tk103"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Type of commands to retrieve (data, text, or push)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["data", "text", "push", "all"],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dataCommands": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "textCommands": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "pushCommands": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Protocol not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages": {
+      "post": {
+        "tags": ["message"],
+        "summary": "Process a protocol message",
+        "description": "Processes a raw protocol message and returns the decoded position data",
+        "operationId": "processMessage",
+        "requestBody": {
+          "description": "Protocol message details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProtocolMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessedMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid message format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Protocol not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections": {
+      "get": {
+        "tags": ["connection"],
+        "summary": "Get all active device connections",
+        "description": "Returns a list of all currently active device connections",
+        "operationId": "getConnections",
+        "parameters": [
+          {
+            "name": "protocolName",
+            "in": "query",
+            "description": "Filter connections by protocol name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Filter connections by device ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Connection"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/{connectionId}": {
+      "get": {
+        "tags": ["connection"],
+        "summary": "Get connection details",
+        "description": "Returns detailed information about a specific device connection",
+        "operationId": "getConnectionById",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "ID of the connection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Connection not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["connection"],
+        "summary": "Close a device connection",
+        "description": "Closes an active device connection",
+        "operationId": "closeConnection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "ID of the connection to close",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Connection closed successfully"
+          },
+          "404": {
+            "description": "Connection not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices/{deviceId}/status": {
+      "get": {
+        "tags": ["connection"],
+        "summary": "Get device connection status",
+        "description": "Returns the current connection status of a device",
+        "operationId": "getDeviceStatus",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "ID of the device",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/commands": {
+      "post": {
+        "tags": ["command"],
+        "summary": "Send a command to a device",
+        "description": "Sends a command to a device using the appropriate protocol",
+        "operationId": "sendCommand",
+        "requestBody": {
+          "description": "Command details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Command"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Command sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid command format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device or protocol not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/commands/{commandId}": {
+      "get": {
+        "tags": ["command"],
+        "summary": "Get command status",
+        "description": "Returns the status of a previously sent command",
+        "operationId": "getCommandStatus",
+        "parameters": [
+          {
+            "name": "commandId",
+            "in": "path",
+            "description": "ID of the command",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Command not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Protocol": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the protocol",
+            "example": "tk103"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the protocol",
+            "example": "TK103 GPS tracker protocol"
+          },
+          "supportedDataCommands": {
+            "type": "array",
+            "description": "List of supported data commands",
+            "items": {
+              "type": "string"
+            },
+            "example": ["engineStop", "engineResume", "requestLocation"]
+          },
+          "supportedTextCommands": {
+            "type": "array",
+            "description": "List of supported text commands",
+            "items": {
+              "type": "string"
+            },
+            "example": ["custom"]
+          },
+          "supportedPushCommands": {
+            "type": "array",
+            "description": "List of supported push commands",
+            "items": {
+              "type": "string"
+            },
+            "example": ["alarm"]
+          },
+          "ports": {
+            "type": "array",
+            "description": "List of ports used by the protocol",
+            "items": {
+              "type": "object",
+              "properties": {
+                "port": {
+                  "type": "integer",
+                  "description": "Port number",
+                  "example": 5001
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Port type (TCP or UDP)",
+                  "enum": ["tcp", "udp"],
+                  "example": "tcp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ProtocolMessage": {
+        "type": "object",
+        "required": ["protocol", "data"],
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "description": "Name of the protocol",
+            "example": "tk103"
+          },
+          "data": {
+            "type": "string",
+            "description": "Raw message data (Base64 encoded for binary protocols)",
+            "example": "KCgwMTMwMzIzMTIzNDVCUDAxMTIzNDU2Nzg5MDEyMzQ1NjAwMDAwMDAwMDAwMDAwMDAwTDAwMTAyNTAyNS45OTg2LE4wMDAwMDAuMDAwMCwwMDAuMCwwMDAuMDAsMjAxMDEwMTAsMCxGRkZGRkYsMDAsMDAwMDAwLDAwMDAwMCwwMCkp"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device (if known)",
+            "example": 123456
+          },
+          "remoteAddress": {
+            "type": "string",
+            "description": "Remote address of the device",
+            "example": "203.0.113.195"
+          },
+          "isBinary": {
+            "type": "boolean",
+            "description": "Indicates if the message is in binary format",
+            "default": false
+          }
+        }
+      },
+      "ProcessedMessage": {
+        "type": "object",
+        "properties": {
+          "positions": {
+            "type": "array",
+            "description": "List of positions decoded from the message",
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device",
+            "example": 123456
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Name of the protocol used",
+            "example": "tk103"
+          },
+          "messageType": {
+            "type": "string",
+            "description": "Type of the message",
+            "example": "position"
+          }
+        }
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device",
+            "example": 123456
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Name of the protocol",
+            "example": "tk103"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the position",
+            "example": "2023-01-01T12:00:00Z"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude in degrees",
+            "example": 37.7749
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude in degrees",
+            "example": -122.4194
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Altitude in meters",
+            "example": 10.0
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed in knots",
+            "example": 5.0
+          },
+          "course": {
+            "type": "number",
+            "format": "double",
+            "description": "Course in degrees",
+            "example": 45.0
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Indicates if the position is valid",
+            "example": true
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes of the position",
+            "example": {
+              "batteryLevel": 75,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        }
+      },
+      "Connection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique ID of the connection",
+            "example": "conn-123456"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device",
+            "example": 123456
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Name of the protocol",
+            "example": "tk103"
+          },
+          "remoteAddress": {
+            "type": "string",
+            "description": "Remote address of the device",
+            "example": "203.0.113.195"
+          },
+          "connectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the device connected",
+            "example": "2023-01-01T12:00:00Z"
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the last activity",
+            "example": "2023-01-01T12:05:00Z"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the connection",
+            "enum": ["active", "idle", "disconnected"],
+            "example": "active"
+          }
+        }
+      },
+      "DeviceStatus": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device",
+            "example": 123456
+          },
+          "online": {
+            "type": "boolean",
+            "description": "Indicates if the device is online",
+            "example": true
+          },
+          "connectionId": {
+            "type": "string",
+            "description": "ID of the active connection (if online)",
+            "example": "conn-123456"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Name of the protocol used by the device",
+            "example": "tk103"
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the last activity",
+            "example": "2023-01-01T12:05:00Z"
+          }
+        }
+      },
+      "Command": {
+        "type": "object",
+        "required": ["deviceId", "type"],
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the target device",
+            "example": 123456
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the command",
+            "example": "engineStop"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes for the command",
+            "example": {
+              "message": "Please stop the engine"
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the command",
+            "example": "Stop engine command"
+          },
+          "textChannel": {
+            "type": "boolean",
+            "description": "Indicates if the command should be sent via text channel",
+            "default": false
+          },
+          "destAddress": {
+            "type": "string",
+            "description": "Destination address for text commands",
+            "example": "+1234567890"
+          }
+        }
+      },
+      "CommandResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique ID of the command",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the target device",
+            "example": 123456
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the command",
+            "example": "engineStop"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the command",
+            "enum": ["pending", "delivered", "success", "failed"],
+            "example": "delivered"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the command was sent",
+            "example": "2023-01-01T12:00:00Z"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the command was delivered",
+            "example": "2023-01-01T12:00:05Z"
+          },
+          "result": {
+            "type": "string",
+            "description": "Result of the command execution",
+            "example": "Engine stopped successfully"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "Error message if the command failed",
+            "example": "Device not connected"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code",
+            "example": "PROTOCOL_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Protocol 'xyz' not found"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional error details"
+          }
+        }
+      }
+    }
+  }
+}
