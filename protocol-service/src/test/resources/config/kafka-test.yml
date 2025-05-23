@@ -1,0 +1,126 @@
+# Kafka Test Configuration for Protocol Service
+# This configuration is used for testing the Protocol Service's message broker integration
+
+# Kafka broker connection settings
+kafka:
+  # Test broker connection settings
+  bootstrap-servers: localhost:9092
+  # Use a test-specific client ID to avoid conflicts
+  client-id: protocol-service-test
+  # Security settings (disabled for testing)
+  security:
+    enabled: false
+  
+  # Producer configuration
+  producer:
+    # Ensure reliable delivery for tests
+    acks: all
+    # Use a smaller batch size for testing
+    batch-size: 16384
+    # Buffer memory for test environment
+    buffer-memory: 33554432
+    # Compression type for test messages
+    compression-type: snappy
+    # Key serializer
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    # Value serializer for Protocol Buffers
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    # Retries configuration for tests
+    retries: 3
+    # Request timeout for tests (shorter than production)
+    request-timeout-ms: 15000
+    # Enable idempotence for reliable testing
+    enable-idempotence: true
+  
+  # Consumer configuration
+  consumer:
+    # Test-specific consumer group ID
+    group-id: protocol-service-test-group
+    # Auto-offset reset strategy for tests
+    auto-offset-reset: earliest
+    # Key deserializer
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    # Value deserializer for Protocol Buffers
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    # Enable auto-commit for tests
+    enable-auto-commit: true
+    # Auto-commit interval for tests
+    auto-commit-interval-ms: 1000
+    # Maximum poll records for tests
+    max-poll-records: 500
+    # Isolation level for tests
+    isolation-level: read_committed
+    # Trust packages for deserialization
+    properties:
+      spring.json.trusted.packages: org.traccar.*
+
+# Topic configuration
+topics:
+  # Raw position data topic
+  raw-positions:
+    name: test-raw-positions
+    partitions: 3
+    replication-factor: 1
+    retention-ms: 86400000  # 24 hours retention for tests
+  
+  # Command topic for device commands
+  commands:
+    name: test-commands
+    partitions: 3
+    replication-factor: 1
+    retention-ms: 86400000  # 24 hours retention for tests
+  
+  # Status updates topic
+  status-updates:
+    name: test-status-updates
+    partitions: 3
+    replication-factor: 1
+    retention-ms: 86400000  # 24 hours retention for tests
+
+# Consumer groups configuration
+consumer-groups:
+  # Position processing consumer group
+  position-processing:
+    group-id: test-position-processing-group
+    topic: test-raw-positions
+  
+  # Command handling consumer group
+  command-handling:
+    group-id: test-command-handling-group
+    topic: test-commands
+
+# Test-specific Kafka settings
+test:
+  # Enable embedded Kafka for unit tests
+  embedded-kafka:
+    enabled: true
+    # Topics to create in embedded Kafka
+    topics:
+      - test-raw-positions
+      - test-commands
+      - test-status-updates
+  
+  # Mock producer for testing without actual Kafka
+  mock-producer:
+    enabled: false
+    # Simulate producer errors for testing error handling
+    simulate-errors: false
+    # Error rate (0.0-1.0) when simulating errors
+    error-rate: 0.1
+
+# Resilience settings for Kafka
+resilience:
+  # Circuit breaker settings for Kafka producer
+  circuit-breaker:
+    enabled: true
+    failure-rate-threshold: 50
+    wait-duration-in-open-state-ms: 10000
+    permitted-calls-in-half-open-state: 10
+  
+  # Retry settings for Kafka operations
+  retry:
+    enabled: true
+    max-attempts: 3
+    initial-interval-ms: 1000
+    multiplier: 2.0
+    max-interval-ms: 10000
