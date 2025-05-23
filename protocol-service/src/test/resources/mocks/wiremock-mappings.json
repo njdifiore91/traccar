@@ -1,0 +1,474 @@
+{
+  "mappings": [
+    {
+      "name": "Service Discovery - Register Service",
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/v1/agent/service/register",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {}
+      }
+    },
+    {
+      "name": "Service Discovery - Deregister Service",
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/v1/agent/service/deregister/([^/]+)",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {}
+      }
+    },
+    {
+      "name": "Service Discovery - Health Check",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/health/service/([^/]+)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "Node": {
+              "ID": "40e4a748-2192-161a-0510-9bf59fe950b5",
+              "Node": "test-node",
+              "Address": "10.0.0.1"
+            },
+            "Service": {
+              "ID": "{{request.pathSegments.[3]}}",
+              "Service": "{{request.pathSegments.[3]}}",
+              "Address": "127.0.0.1",
+              "Port": 8080,
+              "Meta": {
+                "version": "1.0.0"
+              }
+            },
+            "Checks": [
+              {
+                "Node": "test-node",
+                "CheckID": "service:{{request.pathSegments.[3]}}",
+                "Name": "Service '{{request.pathSegments.[3]}}' check",
+                "Status": "passing",
+                "Output": "HTTP GET /health: 200 OK"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Service Discovery - Health Check with Delay",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/health/service/slow-service"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "Node": {
+              "ID": "40e4a748-2192-161a-0510-9bf59fe950b5",
+              "Node": "test-node",
+              "Address": "10.0.0.1"
+            },
+            "Service": {
+              "ID": "slow-service",
+              "Service": "slow-service",
+              "Address": "127.0.0.1",
+              "Port": 8080,
+              "Meta": {
+                "version": "1.0.0"
+              }
+            },
+            "Checks": [
+              {
+                "Node": "test-node",
+                "CheckID": "service:slow-service",
+                "Name": "Service 'slow-service' check",
+                "Status": "passing",
+                "Output": "HTTP GET /health: 200 OK"
+              }
+            ]
+          }
+        ],
+        "fixedDelayMilliseconds": 2000
+      }
+    },
+    {
+      "name": "Service Discovery - Health Check Failure",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/health/service/failing-service"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "Node": {
+              "ID": "40e4a748-2192-161a-0510-9bf59fe950b5",
+              "Node": "test-node",
+              "Address": "10.0.0.1"
+            },
+            "Service": {
+              "ID": "failing-service",
+              "Service": "failing-service",
+              "Address": "127.0.0.1",
+              "Port": 8080,
+              "Meta": {
+                "version": "1.0.0"
+              }
+            },
+            "Checks": [
+              {
+                "Node": "test-node",
+                "CheckID": "service:failing-service",
+                "Name": "Service 'failing-service' check",
+                "Status": "critical",
+                "Output": "HTTP GET /health: 500 Internal Server Error"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Geocoding Service - Reverse Geocode",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocode/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          },
+          "lon": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "address": {
+            "road": "Main Street",
+            "city": "Anytown",
+            "state": "State",
+            "country": "Country",
+            "postcode": "12345"
+          },
+          "display_name": "Main Street, Anytown, State, Country",
+          "lat": "{{request.query.lat}}",
+          "lon": "{{request.query.lon}}"
+        }
+      }
+    },
+    {
+      "name": "Geocoding Service - Reverse Geocode with Delay",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocode/reverse/slow",
+        "queryParameters": {
+          "lat": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          },
+          "lon": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "address": {
+            "road": "Main Street",
+            "city": "Anytown",
+            "state": "State",
+            "country": "Country",
+            "postcode": "12345"
+          },
+          "display_name": "Main Street, Anytown, State, Country",
+          "lat": "{{request.query.lat}}",
+          "lon": "{{request.query.lon}}"
+        },
+        "fixedDelayMilliseconds": 3000
+      }
+    },
+    {
+      "name": "Geocoding Service - Reverse Geocode Failure",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocode/reverse/error",
+        "queryParameters": {
+          "lat": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          },
+          "lon": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal Server Error",
+          "message": "Geocoding service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "name": "Map Service - Tile Request",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/map/tile/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400"
+        },
+        "base64Body": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+      }
+    },
+    {
+      "name": "Map Service - Tile Request Failure",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/map/tile/error/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Not Found",
+          "message": "Tile not found"
+        }
+      }
+    },
+    {
+      "name": "OpenTelemetry Collector - Trace Export",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/v1/traces",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {}
+      }
+    },
+    {
+      "name": "OpenTelemetry Collector - Metrics Export",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/v1/metrics",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {}
+      }
+    },
+    {
+      "name": "External Service - Connection Refused Simulation",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/fault/connection-refused/.*"
+      },
+      "response": {
+        "fault": "CONNECTION_RESET_BY_PEER"
+      }
+    },
+    {
+      "name": "External Service - Timeout Simulation",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/fault/timeout/.*"
+      },
+      "response": {
+        "fixedDelayMilliseconds": 30000
+      }
+    },
+    {
+      "name": "External Service - Bad Response Simulation",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/fault/bad-response/.*"
+      },
+      "response": {
+        "fault": "MALFORMED_RESPONSE_CHUNK"
+      }
+    },
+    {
+      "name": "External Service - Random Latency Simulation",
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/fault/random-latency/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Response with random latency"
+        },
+        "delayDistribution": {
+          "type": "lognormal",
+          "median": 500,
+          "sigma": 0.4
+        }
+      }
+    },
+    {
+      "name": "Health Check - Liveness",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/health/liveness"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "UP"
+        }
+      }
+    },
+    {
+      "name": "Health Check - Readiness",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/health/readiness"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "UP",
+          "components": {
+            "db": {
+              "status": "UP"
+            },
+            "kafka": {
+              "status": "UP"
+            },
+            "consul": {
+              "status": "UP"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Speed Limit Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/speedlimit",
+        "queryParameters": {
+          "lat": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          },
+          "lon": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "speedLimit": 50,
+          "unit": "km/h",
+          "roadType": "urban",
+          "source": "mock-data"
+        }
+      }
+    },
+    {
+      "name": "Weather Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/weather",
+        "queryParameters": {
+          "lat": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          },
+          "lon": {
+            "matches": "-?\\d+(\\.\\d+)?"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "temperature": 22.5,
+          "humidity": 65,
+          "windSpeed": 10.2,
+          "conditions": "Partly Cloudy",
+          "source": "mock-data"
+        }
+      }
+    }
+  ]
+}
