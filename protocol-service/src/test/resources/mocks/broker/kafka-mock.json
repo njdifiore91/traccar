@@ -1,0 +1,100 @@
+{
+  "connection": {
+    "host": "localhost",
+    "port": 9092,
+    "clientId": "protocol-service-test",
+    "groupId": "protocol-service-test-group",
+    "autoCreateTopics": true,
+    "autoOffsetReset": "earliest",
+    "enableAutoCommit": false,
+    "maxPollRecords": 500,
+    "sessionTimeoutMs": 30000,
+    "heartbeatIntervalMs": 3000
+  },
+  "topics": {
+    "raw-positions": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "enriched-positions": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "events": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "notifications": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    }
+  },
+  "behavior": {
+    "simulateLatency": true,
+    "latencyMs": {
+      "min": 5,
+      "max": 50
+    },
+    "simulateThroughputLimit": true,
+    "maxThroughputMessagesPerSecond": 1000,
+    "simulateErrors": true,
+    "errorRate": 0.01,
+    "errorTypes": [
+      "NETWORK_EXCEPTION",
+      "TIMEOUT_EXCEPTION",
+      "LEADER_NOT_AVAILABLE",
+      "BROKER_NOT_AVAILABLE"
+    ]
+  },
+  "validation": {
+    "validateMessageSchema": true,
+    "validateMessageContent": true,
+    "requiredPositionFields": [
+      "deviceId",
+      "protocol",
+      "timestamp",
+      "latitude",
+      "longitude"
+    ]
+  },
+  "monitoring": {
+    "enableMetrics": true,
+    "metricsIntervalMs": 60000,
+    "logLevel": "INFO",
+    "logMessages": true,
+    "logMessageFormat": "COMPACT"
+  },
+  "security": {
+    "enabled": false,
+    "saslMechanism": "PLAIN",
+    "securityProtocol": "SASL_PLAINTEXT",
+    "username": "test-user",
+    "password": "test-password"
+  },
+  "protocolService": {
+    "positionPublishingEnabled": true,
+    "positionPublishingTopic": "raw-positions",
+    "positionKeyStrategy": "DEVICE_ID",
+    "positionPartitionStrategy": "ROUND_ROBIN",
+    "positionSerializationFormat": "PROTOBUF",
+    "positionCompressionType": "LZ4",
+    "positionHeadersEnabled": true,
+    "positionHeaders": {
+      "source": "protocol-service",
+      "messageType": "position",
+      "version": "1.0"
+    }
+  }
+}
