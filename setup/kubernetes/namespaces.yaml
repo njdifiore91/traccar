@@ -1,0 +1,219 @@
+---
+# Namespace definitions for Traccar microservices architecture
+# This manifest creates isolated environments for each service component
+
+# Protocol Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: protocol
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: protocol-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8090"
+---
+# Resource Quota for Protocol Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: protocol-quota
+  namespace: protocol
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 8Gi
+    limits.cpu: "16"
+    limits.memory: 16Gi
+    pods: "20"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# Position Processing Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: position
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: position-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8081"
+---
+# Resource Quota for Position Processing Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: position-quota
+  namespace: position
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 10Gi
+    limits.cpu: "20"
+    limits.memory: 20Gi
+    pods: "15"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# Event Processing Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: event
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: event-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8082"
+---
+# Resource Quota for Event Processing Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: event-quota
+  namespace: event
+spec:
+  hard:
+    requests.cpu: "5"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
+    pods: "10"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# Notification Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: notification
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: notification-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8083"
+---
+# Resource Quota for Notification Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: notification-quota
+  namespace: notification
+spec:
+  hard:
+    requests.cpu: "3"
+    requests.memory: 3Gi
+    limits.cpu: "5"
+    limits.memory: 5Gi
+    pods: "10"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# API Gateway Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-gateway
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: api-gateway-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8080"
+---
+# Resource Quota for API Gateway Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: api-gateway-quota
+  namespace: api-gateway
+spec:
+  hard:
+    requests.cpu: "3"
+    requests.memory: 3Gi
+    limits.cpu: "5"
+    limits.memory: 5Gi
+    pods: "10"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# Reporting Service Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reporting
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: reporting-service
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+    monitoring.traccar.org/path: "/metrics"
+    monitoring.traccar.org/port: "8084"
+---
+# Resource Quota for Reporting Service Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: reporting-quota
+  namespace: reporting
+spec:
+  hard:
+    requests.cpu: "5"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
+    pods: "10"
+    services: "5"
+    configmaps: "20"
+    secrets: "20"
+---
+# Infrastructure Namespace (for shared components like message broker, service discovery, etc.)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infrastructure
+  labels:
+    app.kubernetes.io/part-of: traccar
+    app.kubernetes.io/component: shared-infrastructure
+    environment: production
+  annotations:
+    monitoring.traccar.org/scrape: "true"
+---
+# Resource Quota for Infrastructure Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: infrastructure-quota
+  namespace: infrastructure
+spec:
+  hard:
+    requests.cpu: "12"
+    requests.memory: 16Gi
+    limits.cpu: "24"
+    limits.memory: 32Gi
+    pods: "30"
+    services: "15"
+    configmaps: "50"
+    secrets: "50"
+    persistentvolumeclaims: "20"
