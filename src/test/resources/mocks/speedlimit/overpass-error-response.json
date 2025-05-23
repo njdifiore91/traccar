@@ -1,0 +1,20 @@
+{
+  "request": {
+    "urlPathPattern": "/api/interpreter",
+    "method": "GET",
+    "queryParameters": {
+      "data": {
+        "matches": "\\[out:json\\];way\\[maxspeed\\]\\(around:[0-9]+,[0-9.-]+,[0-9.-]+\\);out%20tags;"
+      }
+    }
+  },
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache"
+    },
+    "body": "Runtime error: Overpass API server is temporarily unavailable due to high load or maintenance. Please try again later.",
+    "fixedDelayMilliseconds": 500
+  }
+}
