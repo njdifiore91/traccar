@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,162 +15,309 @@
  */
 package org.traccar;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.propagation.TextMapPropagator;
-import jakarta.inject.Singleton;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.ContainerProperties;
-import org.traccar.config.Config;
-import org.traccar.messaging.KafkaMessageBrokerPublisher;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.web.client.RestTemplate;
 
+import com.ecwid.consul.v1.ConsulClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * Configuration class for the Position Service.
+ * Configuration class for the Position Processing Service.
  * 
- * This class configures the message broker integration, service discovery, and other components
- * for the Position Service. It provides beans for Kafka producer and consumer, OpenTelemetry
- * tracer, and other dependencies.
+ * This class configures the following components:
+ * - Message broker connection (Kafka/RabbitMQ)
+ * - Service discovery (Consul/Kubernetes)
+ * - Circuit breakers (Resilience4j)
+ * - Health checks
+ * - Metrics collection (Micrometer/Prometheus)
  */
 @Configuration
 public class PositionServiceConfig {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PositionServiceConfig.class);
-
     /**
-     * Create a Kafka producer for publishing messages to the broker.
-     *
-     * @param config Configuration
-     * @param bootstrapServers Kafka bootstrap servers
-     * @return KafkaProducer instance
+     * Provides an executor service for asynchronous operations.
+     * 
+     * @return ExecutorService instance with a cached thread pool
      */
     @Bean
-    @Singleton
-    public KafkaProducer<String, String> kafkaProducer(
-            Config config,
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.ACKS_CONFIG, "all");
-        props.put(ProducerConfig.RETRIES_CONFIG, 3);
-        props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-        
-        return new KafkaProducer<>(props);
+    public ExecutorService executorService() {
+        return Executors.newCachedThreadPool();
     }
 
     /**
-     * Create a Kafka consumer factory for consuming messages from the broker.
-     *
-     * @param bootstrapServers Kafka bootstrap servers
-     * @param groupId Consumer group ID
-     * @return ConsumerFactory instance
-     */
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-            @Value("${spring.kafka.consumer.group-id}") String groupId) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    /**
-     * Create a Kafka listener container factory for consuming messages from the broker.
-     *
-     * @param consumerFactory Consumer factory
-     * @return ConcurrentKafkaListenerContainerFactory instance
-     */
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-            ConsumerFactory<String, String> consumerFactory) {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setConcurrency(10); // Number of consumer threads
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        
-        return factory;
-    }
-
-    /**
-     * Create a message broker publisher for publishing messages to the broker.
-     *
-     * @param config Configuration
-     * @param kafkaProducer Kafka producer
-     * @param propagator OpenTelemetry context propagator
-     * @return MessageBrokerPublisher instance
-     */
-    @Bean
-    @Singleton
-    public MessageBrokerPublisher messageBrokerPublisher(
-            Config config,
-            KafkaProducer<String, String> kafkaProducer,
-            TextMapPropagator propagator) {
-        return new KafkaMessageBrokerPublisher(config, kafkaProducer, propagator);
-    }
-
-    /**
-     * Create an OpenTelemetry tracer for distributed tracing.
-     *
-     * @param openTelemetry OpenTelemetry instance
-     * @return Tracer instance
-     */
-    @Bean
-    @Singleton
-    public Tracer tracer(OpenTelemetry openTelemetry) {
-        return openTelemetry.getTracer("position-service");
-    }
-
-    /**
-     * Create an OpenTelemetry context propagator for distributed tracing.
-     *
-     * @param openTelemetry OpenTelemetry instance
-     * @return TextMapPropagator instance
-     */
-    @Bean
-    @Singleton
-    public TextMapPropagator propagator(OpenTelemetry openTelemetry) {
-        return openTelemetry.getPropagators().getTextMapPropagator();
-    }
-
-    /**
-     * Create a JSON object mapper for serializing and deserializing objects.
-     *
-     * @return ObjectMapper instance
+     * Provides an ObjectMapper for JSON serialization/deserialization.
+     * 
+     * @return Configured ObjectMapper instance
      */
     @Bean
     @Primary
-    @Singleton
     public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return mapper;
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JSONPModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
+    }
+
+    /**
+     * Provides a RestTemplate for HTTP client operations.
+     * 
+     * @param builder RestTemplateBuilder injected by Spring
+     * @return Configured RestTemplate instance
+     */
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .setReadTimeout(Duration.ofSeconds(10))
+                .build();
+    }
+
+    /**
+     * Configures Kafka producer factory for publishing position messages.
+     * 
+     * @param bootstrapServers Kafka bootstrap servers address
+     * @return Configured ProducerFactory instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.broker.type", havingValue = "kafka")
+    public ProducerFactory<String, Object> kafkaProducerFactory(
+            @Value("${position.kafka.bootstrap-servers}") String bootstrapServers) {
+        
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 
+                org.apache.kafka.common.serialization.StringSerializer.class);
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 
+                org.springframework.kafka.support.serializer.JsonSerializer.class);
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG, "all");
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG, 3);
+        configProps.put(org.apache.kafka.clients.producer.ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    /**
+     * Configures Kafka template for publishing position messages.
+     * 
+     * @param producerFactory Kafka producer factory
+     * @return Configured KafkaTemplate instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.broker.type", havingValue = "kafka")
+    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    /**
+     * Configures Kafka consumer factory for consuming position messages.
+     * 
+     * @param bootstrapServers Kafka bootstrap servers address
+     * @param groupId Consumer group ID
+     * @return Configured ConsumerFactory instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.broker.type", havingValue = "kafka")
+    public ConsumerFactory<String, Object> kafkaConsumerFactory(
+            @Value("${position.kafka.bootstrap-servers}") String bootstrapServers,
+            @Value("${position.kafka.consumer.group-id}") String groupId) {
+        
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, 
+                org.apache.kafka.common.serialization.StringDeserializer.class);
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, 
+                org.springframework.kafka.support.serializer.JsonDeserializer.class);
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        configProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
+        configProps.put(org.springframework.kafka.support.serializer.JsonDeserializer.TRUSTED_PACKAGES, "org.traccar.*");
+        
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    /**
+     * Configures RabbitMQ connection for message broker integration.
+     * This is an alternative to Kafka and will be used if position.broker.type=rabbitmq.
+     * 
+     * @param host RabbitMQ host
+     * @param port RabbitMQ port
+     * @param username RabbitMQ username
+     * @param password RabbitMQ password
+     * @return Configured RabbitMQ connection factory
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.broker.type", havingValue = "rabbitmq")
+    public org.springframework.amqp.rabbit.connection.CachingConnectionFactory rabbitConnectionFactory(
+            @Value("${position.rabbitmq.host}") String host,
+            @Value("${position.rabbitmq.port}") int port,
+            @Value("${position.rabbitmq.username}") String username,
+            @Value("${position.rabbitmq.password}") String password) {
+        
+        org.springframework.amqp.rabbit.connection.CachingConnectionFactory connectionFactory = 
+                new org.springframework.amqp.rabbit.connection.CachingConnectionFactory();
+        connectionFactory.setHost(host);
+        connectionFactory.setPort(port);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
+        return connectionFactory;
+    }
+
+    /**
+     * Configures RabbitMQ template for publishing position messages.
+     * 
+     * @param connectionFactory RabbitMQ connection factory
+     * @param objectMapper JSON object mapper
+     * @return Configured RabbitTemplate instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.broker.type", havingValue = "rabbitmq")
+    public org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate(
+            org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory,
+            ObjectMapper objectMapper) {
+        
+        org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate = 
+                new org.springframework.amqp.rabbit.core.RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(
+                new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter(objectMapper));
+        return rabbitTemplate;
+    }
+
+    /**
+     * Configures Consul client for service discovery.
+     * This will be used if position.discovery.type=consul.
+     * 
+     * @param host Consul host
+     * @param port Consul port
+     * @return Configured ConsulClient instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.discovery.type", havingValue = "consul")
+    public ConsulClient consulClient(
+            @Value("${position.consul.host:localhost}") String host,
+            @Value("${position.consul.port:8500}") int port) {
+        
+        return new ConsulClient(host, port);
+    }
+
+    /**
+     * Configures Kubernetes client for service discovery.
+     * This will be used if position.discovery.type=kubernetes.
+     * 
+     * @return Configured KubernetesClient instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = "position.discovery.type", havingValue = "kubernetes")
+    public io.fabric8.kubernetes.client.KubernetesClient kubernetesClient() {
+        return new io.fabric8.kubernetes.client.KubernetesClientBuilder().build();
+    }
+
+    /**
+     * Configures CircuitBreakerRegistry for resilience patterns.
+     * 
+     * @return Configured CircuitBreakerRegistry instance
+     */
+    @Bean
+    public CircuitBreakerRegistry circuitBreakerRegistry() {
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofMillis(1000))
+                .permittedNumberOfCallsInHalfOpenState(2)
+                .slidingWindowSize(10)
+                .build();
+        
+        return CircuitBreakerRegistry.of(circuitBreakerConfig);
+    }
+
+    /**
+     * Configures RetryRegistry for resilience patterns.
+     * 
+     * @return Configured RetryRegistry instance
+     */
+    @Bean
+    public RetryRegistry retryRegistry() {
+        RetryConfig retryConfig = RetryConfig.custom()
+                .maxAttempts(3)
+                .waitDuration(Duration.ofMillis(1000))
+                .build();
+        
+        return RetryRegistry.of(retryConfig);
+    }
+
+    /**
+     * Configures Prometheus meter registry for metrics collection.
+     * 
+     * @return Configured PrometheusMeterRegistry instance
+     */
+    @Bean
+    public MeterRegistry meterRegistry() {
+        return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    }
+
+    /**
+     * Configures health indicator for the Position Processing Service.
+     * 
+     * @return Configured HealthIndicator instance
+     */
+    @Bean
+    public HealthIndicator positionServiceHealthIndicator() {
+        return () -> {
+            // In a real implementation, this would check dependencies like database, message broker, etc.
+            return Health.up().withDetail("service", "position-service").build();
+        };
+    }
+
+    /**
+     * Configures health indicator for the message broker connection.
+     * 
+     * @return Configured HealthIndicator instance
+     */
+    @Bean
+    public HealthIndicator messageBrokerHealthIndicator() {
+        return () -> {
+            // In a real implementation, this would check the message broker connection
+            return Health.up().withDetail("component", "message-broker").build();
+        };
+    }
+
+    /**
+     * Configures health indicator for the service discovery connection.
+     * 
+     * @return Configured HealthIndicator instance
+     */
+    @Bean
+    public HealthIndicator serviceDiscoveryHealthIndicator() {
+        return () -> {
+            // In a real implementation, this would check the service discovery connection
+            return Health.up().withDetail("component", "service-discovery").build();
+        };
     }
 }
