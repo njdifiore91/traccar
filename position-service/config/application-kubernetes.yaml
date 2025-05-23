@@ -1,0 +1,151 @@
+# ===================================================================
+# Kubernetes-specific configuration for Position Processing Service
+# ===================================================================
+
+# Spring Cloud Kubernetes configuration
+spring:
+  cloud:
+    kubernetes:
+      enabled: true
+      config:
+        enabled: true
+        sources:
+          - namespace: ${KUBERNETES_NAMESPACE:position-service}
+            name: position-service-config
+      reload:
+        enabled: true
+        mode: polling
+        period: 60000
+      discovery:
+        enabled: true
+        all-namespaces: false
+        namespace: ${KUBERNETES_NAMESPACE:position-service}
+        service-labels:
+          app: position-service
+        primary-port-name: http
+        filter: metadata.name eq 'position-service'
+        include-not-ready-addresses: false
+        wait-cache-ready: true
+        catalog-services-watch-delay: 30
+        catalog-services-watch-timeout: 90
+      client:
+        master-url: ${KUBERNETES_MASTER_URL:https://kubernetes.default.svc}
+        namespace: ${KUBERNETES_NAMESPACE:position-service}
+        trust-certs: true
+        ca-cert-file: ${KUBERNETES_CA_CERT_FILE:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt}
+        token-file: ${KUBERNETES_TOKEN_FILE:/var/run/secrets/kubernetes.io/serviceaccount/token}
+      secrets:
+        enabled: true
+        enable-api: true
+        paths:
+          - /var/run/secrets/kubernetes.io/serviceaccount/
+        name: position-service-secrets
+
+# Management endpoints for Kubernetes probes
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db,kafka,redis
+        liveness:
+          include: livenessState
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    kubernetes:
+      enabled: true
+
+# Position Service specific Kubernetes settings
+position:
+  kubernetes:
+    enabled: true
+    service-name: position-service
+    pod-name: ${HOSTNAME:unknown}
+    namespace: ${KUBERNETES_NAMESPACE:position-service}
+    labels:
+      app: position-service
+      component: processing
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '8081'
+      prometheus.io/path: '/metrics'
+
+# Service discovery configuration for dependent services
+service-discovery:
+  kubernetes:
+    enabled: true
+    protocol-service:
+      namespace: protocol-service
+      service-name: protocol-service
+      port: 8090
+      labels:
+        app: protocol-service
+    event-service:
+      namespace: event-service
+      service-name: event-service
+      port: 8082
+      labels:
+        app: event-service
+    notification-service:
+      namespace: notification-service
+      service-name: notification-service
+      port: 8083
+      labels:
+        app: notification-service
+
+# Messaging configuration for Kubernetes
+messaging:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka.infrastructure:9092}
+    consumer:
+      group-id: position-service-${KUBERNETES_NAMESPACE:position-service}
+
+# Resilience4j circuit breaker configuration for Kubernetes environment
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      geocodingService:
+        baseConfig: default
+      speedLimitService:
+        baseConfig: default
+        failureRateThreshold: 30
+      databaseService:
+        baseConfig: default
+        waitDurationInOpenState: 30s
+
+# Distributed tracing configuration for Kubernetes
+tracing:
+  enabled: true
+  service-name: position-service
+  sampler:
+    probability: 1.0
+  opentelemetry:
+    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://opentelemetry-collector.monitoring:4317}
+
+# Logging configuration for Kubernetes environment
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n'
+  level:
+    root: INFO
+    org.traccar: INFO
+    org.springframework.cloud.kubernetes: INFO
