@@ -1,0 +1,796 @@
+{
+  "google": {
+    "31.776797,35.211489": {
+      "status": "OK",
+      "results": [
+        {
+          "formatted_address": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL",
+          "address_components": [
+            {
+              "long_name": "1",
+              "short_name": "1",
+              "types": ["street_number"]
+            },
+            {
+              "long_name": "Ibn Shaprut St",
+              "short_name": "Ibn Shaprut St",
+              "types": ["route"]
+            },
+            {
+              "long_name": "Jerusalem",
+              "short_name": "Jerusalem",
+              "types": ["locality", "political"]
+            },
+            {
+              "long_name": "Jerusalem District",
+              "short_name": "Jerusalem District",
+              "types": ["administrative_area_level_1", "political"]
+            },
+            {
+              "long_name": "Israel",
+              "short_name": "IL",
+              "types": ["country", "political"]
+            }
+          ],
+          "geometry": {
+            "location": {
+              "lat": 31.776797,
+              "lng": 35.211489
+            }
+          }
+        }
+      ]
+    },
+    "40.7337807,-73.9974401": {
+      "status": "OK",
+      "results": [
+        {
+          "formatted_address": "35 West 9th Street, New York, NY 10011, USA",
+          "address_components": [
+            {
+              "long_name": "35",
+              "short_name": "35",
+              "types": ["street_number"]
+            },
+            {
+              "long_name": "West 9th Street",
+              "short_name": "W 9th St",
+              "types": ["route"]
+            },
+            {
+              "long_name": "Greenwich Village",
+              "short_name": "Greenwich Village",
+              "types": ["neighborhood", "political"]
+            },
+            {
+              "long_name": "Manhattan",
+              "short_name": "Manhattan",
+              "types": ["sublocality_level_1", "sublocality", "political"]
+            },
+            {
+              "long_name": "New York",
+              "short_name": "New York",
+              "types": ["locality", "political"]
+            },
+            {
+              "long_name": "New York County",
+              "short_name": "New York County",
+              "types": ["administrative_area_level_2", "political"]
+            },
+            {
+              "long_name": "New York",
+              "short_name": "NY",
+              "types": ["administrative_area_level_1", "political"]
+            },
+            {
+              "long_name": "United States",
+              "short_name": "US",
+              "types": ["country", "political"]
+            },
+            {
+              "long_name": "10011",
+              "short_name": "10011",
+              "types": ["postal_code"]
+            }
+          ],
+          "geometry": {
+            "location": {
+              "lat": 40.7337807,
+              "lng": -73.9974401
+            }
+          }
+        }
+      ]
+    },
+    "0,0": {
+      "status": "ZERO_RESULTS",
+      "results": []
+    },
+    "error_request": {
+      "status": "REQUEST_DENIED",
+      "error_message": "The provided API key is invalid."
+    },
+    "over_query_limit": {
+      "status": "OVER_QUERY_LIMIT",
+      "error_message": "You have exceeded your daily request quota for this API."
+    }
+  },
+  "nominatim": {
+    "40.7337807,-73.9974401": [
+      {
+        "place_id": 12345678,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 87654321,
+        "lat": "40.7337807",
+        "lon": "-73.9974401",
+        "display_name": "35 West 9th Street, NYC, New York, US",
+        "address": {
+          "house_number": "35",
+          "road": "West 9th Street",
+          "city": "NYC",
+          "state": "New York",
+          "country": "US",
+          "country_code": "us"
+        },
+        "boundingbox": ["40.7336807", "40.7338807", "-73.9975401", "-73.9973401"]
+      }
+    ],
+    "48.8530000,2.3400000": [
+      {
+        "place_id": 87654321,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 12345678,
+        "lat": "48.8530000",
+        "lon": "2.3400000",
+        "display_name": "Rue du Jardinet, Paris, Île-de-France, FR",
+        "address": {
+          "road": "Rue du Jardinet",
+          "city": "Paris",
+          "state": "Île-de-France",
+          "country": "France",
+          "country_code": "fr"
+        },
+        "boundingbox": ["48.8529000", "48.8531000", "2.3399000", "2.3401000"]
+      }
+    ],
+    "0,0": [],
+    "error_request": {
+      "error": "Unable to geocode"
+    }
+  },
+  "gisgraphy": {
+    "48.8530000,2.3400000": {
+      "result": {
+        "numFound": 1,
+        "QTime": 8,
+        "info": "Reverse geocoding",
+        "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright"
+      },
+      "address": {
+        "streetName": "Rue du Jardinet",
+        "city": "Paris",
+        "state": "Île-de-France",
+        "country": "France",
+        "countryCode": "FR",
+        "formatedFull": "Rue du Jardinet, Paris, Île-de-France, FR"
+      }
+    },
+    "0,0": {
+      "result": {
+        "numFound": 0,
+        "QTime": 5,
+        "info": "Reverse geocoding",
+        "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright"
+      }
+    },
+    "error_request": {
+      "error": "Service unavailable",
+      "status": 503
+    }
+  },
+  "opencage": {
+    "34.116302,-118.051519": {
+      "status": {
+        "code": 200,
+        "message": "OK"
+      },
+      "results": [
+        {
+          "formatted": "Charleston Road, California, US",
+          "components": {
+            "road": "Charleston Road",
+            "state": "California",
+            "country": "United States of America",
+            "country_code": "us"
+          },
+          "geometry": {
+            "lat": 34.116302,
+            "lng": -118.051519
+          }
+        }
+      ]
+    },
+    "0,0": {
+      "status": {
+        "code": 200,
+        "message": "OK"
+      },
+      "results": []
+    },
+    "error_request": {
+      "status": {
+        "code": 401,
+        "message": "invalid API key"
+      },
+      "results": []
+    },
+    "over_query_limit": {
+      "status": {
+        "code": 402,
+        "message": "quota exceeded"
+      },
+      "results": []
+    }
+  },
+  "geocodefarm": {
+    "34.116302,-118.051519": {
+      "geocoding_results": {
+        "STATUS": {
+          "access": "FREE",
+          "status": "SUCCESS",
+          "address_provided": "REVERSE COORDINATES",
+          "result_count": 1
+        },
+        "RESULTS": [
+          {
+            "formatted_address": "604 Estrella Ave, Arcadia, CA, United States",
+            "ADDRESS": {
+              "street_number": "604",
+              "street_name": "Estrella Ave",
+              "locality": "Arcadia",
+              "admin_1": "CA",
+              "country": "United States"
+            },
+            "COORDINATES": {
+              "latitude": "34.116302",
+              "longitude": "-118.051519"
+            }
+          }
+        ]
+      }
+    },
+    "0,0": {
+      "geocoding_results": {
+        "STATUS": {
+          "access": "FREE",
+          "status": "SUCCESS",
+          "address_provided": "REVERSE COORDINATES",
+          "result_count": 0
+        },
+        "RESULTS": []
+      }
+    },
+    "error_request": {
+      "geocoding_results": {
+        "STATUS": {
+          "access": "FREE",
+          "status": "FAILED, ACCESS_DENIED",
+          "address_provided": "REVERSE COORDINATES"
+        }
+      }
+    }
+  },
+  "geocodexyz": {
+    "34.116302,-118.051519": {
+      "standard": {
+        "addresst": "605 ESTRELLA AVE",
+        "city": "ARCADIA",
+        "prov": "California",
+        "countryname": "United States of America",
+        "postal": "",
+        "confidence": "0.9"
+      },
+      "longt": "-118.051519",
+      "latt": "34.116302",
+      "geonumber": "605",
+      "street": "ESTRELLA AVE",
+      "region": "California",
+      "country": "US",
+      "staddress": "605 ESTRELLA AVE",
+      "stnumber": "605",
+      "alt": {
+        "loc": [
+          {
+            "staddress": "605 ESTRELLA AVE",
+            "stnumber": "605",
+            "street": "ESTRELLA AVE",
+            "postal": ""
+          }
+        ]
+      }
+    },
+    "0,0": {
+      "error": {
+        "code": "008",
+        "description": "No results found"
+      }
+    },
+    "error_request": {
+      "error": {
+        "code": "002",
+        "description": "Invalid request"
+      }
+    }
+  },
+  "ban": {
+    "48.8575,2.2944": {
+      "type": "FeatureCollection",
+      "version": "draft",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [2.2944, 48.8575]
+          },
+          "properties": {
+            "label": "8 Avenue Gustave Eiffel 75007 Paris",
+            "score": 0.9876543210987654,
+            "housenumber": "8",
+            "street": "Avenue Gustave Eiffel",
+            "postcode": "75007",
+            "city": "Paris",
+            "country": "France",
+            "id": "ADRNIVX_0000000000000000000000000",
+            "type": "housenumber",
+            "name": "8 Avenue Gustave Eiffel"
+          }
+        }
+      ],
+      "attribution": "BAN",
+      "licence": "ODbL 1.0",
+      "query": "48.8575,2.2944"
+    },
+    "0,0": {
+      "type": "FeatureCollection",
+      "version": "draft",
+      "features": [],
+      "attribution": "BAN",
+      "licence": "ODbL 1.0",
+      "query": "0,0"
+    },
+    "error_request": {
+      "error": "Bad Request",
+      "message": "Invalid coordinates format"
+    }
+  },
+  "here": {
+    "48.8575,2.2944": {
+      "items": [
+        {
+          "title": "1 Tour Eiffel, Paris, Île-de-France, FRA",
+          "id": "here:af:streetsection:FRA:streetsection:123456789",
+          "resultType": "houseNumber",
+          "houseNumberType": "PA",
+          "address": {
+            "label": "1 Tour Eiffel, Paris, Île-de-France, FRA",
+            "countryCode": "FRA",
+            "countryName": "France",
+            "stateCode": "IDF",
+            "state": "Île-de-France",
+            "county": "Paris",
+            "city": "Paris",
+            "district": "7e Arrondissement",
+            "street": "Tour Eiffel",
+            "postalCode": "75007",
+            "houseNumber": "1"
+          },
+          "position": {
+            "lat": 48.8575,
+            "lng": 2.2944
+          },
+          "access": [
+            {
+              "lat": 48.8575,
+              "lng": 2.2944
+            }
+          ],
+          "distance": 0
+        }
+      ]
+    },
+    "0,0": {
+      "items": []
+    },
+    "error_request": {
+      "error": "Unauthorized",
+      "error_description": "Invalid API key"
+    }
+  },
+  "mapmyindia": {
+    "28.6129602407977,77.2294557094574": {
+      "responseCode": 200,
+      "version": "270.19",
+      "results": [
+        {
+          "houseNumber": "",
+          "houseName": "India Gate",
+          "poi": "India Gate",
+          "poi_dist": "1",
+          "street": "",
+          "streetDistanced": "",
+          "subSubLocality": "",
+          "subLocality": "",
+          "locality": "New Delhi",
+          "village": "",
+          "district": "New Delhi",
+          "subDistrict": "",
+          "city": "",
+          "state": "Delhi",
+          "pincode": "110001",
+          "formattedAddress": "New Delhi, Delhi. 1 m from India Gate pin-110001 (India)",
+          "lat": "28.6129602407977",
+          "lng": "77.2294557094574"
+        }
+      ]
+    },
+    "0,0": {
+      "responseCode": 200,
+      "version": "270.19",
+      "results": []
+    },
+    "error_request": {
+      "responseCode": 401,
+      "message": "Unauthorized. API key is invalid or expired."
+    }
+  },
+  "positionstack": {
+    "28.6129602407977,77.2294557094574": {
+      "data": [
+        {
+          "latitude": 28.6129602407977,
+          "longitude": 77.2294557094574,
+          "type": "venue",
+          "name": "India Gate",
+          "number": null,
+          "street": null,
+          "postal_code": null,
+          "confidence": 0.8,
+          "region": "Delhi",
+          "region_code": "DL",
+          "county": "New Delhi",
+          "locality": "New Delhi",
+          "administrative_area": null,
+          "neighbourhood": null,
+          "country": "India",
+          "country_code": "IND",
+          "continent": "Asia",
+          "label": "India Gate, New Delhi, India"
+        }
+      ]
+    },
+    "0,0": {
+      "data": []
+    },
+    "error_request": {
+      "error": {
+        "code": "invalid_access_key",
+        "message": "You have not supplied a valid API Access Key."
+      }
+    }
+  },
+  "mapbox": {
+    "40.733,-73.989": {
+      "type": "FeatureCollection",
+      "query": [40.733, -73.989],
+      "features": [
+        {
+          "id": "address.123456789",
+          "type": "Feature",
+          "place_type": ["address"],
+          "relevance": 1,
+          "properties": {
+            "accuracy": "point"
+          },
+          "text": "East 13th Street",
+          "place_name": "120 East 13th Street, New York, New York 10003, United States",
+          "center": [-73.989, 40.733],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.989, 40.733]
+          },
+          "address": "120",
+          "context": [
+            {
+              "id": "neighborhood.123456",
+              "text": "Greenwich Village"
+            },
+            {
+              "id": "postcode.123456",
+              "text": "10003"
+            },
+            {
+              "id": "place.123456",
+              "wikidata": "Q60",
+              "text": "New York"
+            },
+            {
+              "id": "region.123456",
+              "wikidata": "Q1384",
+              "short_code": "US-NY",
+              "text": "New York"
+            },
+            {
+              "id": "country.123456",
+              "wikidata": "Q30",
+              "short_code": "us",
+              "text": "United States"
+            }
+          ]
+        }
+      ],
+      "attribution": "NOTICE: © 2023 Mapbox and its suppliers. All rights reserved."
+    },
+    "0,0": {
+      "type": "FeatureCollection",
+      "query": [0, 0],
+      "features": [],
+      "attribution": "NOTICE: © 2023 Mapbox and its suppliers. All rights reserved."
+    },
+    "error_request": {
+      "message": "Not Authorized - Invalid Token"
+    }
+  },
+  "maptiler": {
+    "40.733,-73.989": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "East 13th Street",
+            "label": "East 13th Street, New York City, New York, United States",
+            "score": 0.9876543210987654,
+            "place_type": "street",
+            "city": "New York City",
+            "state": "New York",
+            "country": "United States"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.989, 40.733]
+          }
+        }
+      ]
+    },
+    "0,0": {
+      "type": "FeatureCollection",
+      "features": []
+    },
+    "error_request": {
+      "message": "Unauthorized",
+      "statusCode": 401
+    }
+  },
+  "geoapify": {
+    "40.733,-73.989": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "114 East 13th Street",
+            "street": "East 13th Street",
+            "housenumber": "114",
+            "city": "New York",
+            "state": "New York",
+            "country": "United States",
+            "country_code": "us",
+            "formatted": "114 East 13th Street, New York, New York, US",
+            "address_line1": "114 East 13th Street",
+            "address_line2": "New York, New York, US"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.989, 40.733]
+          }
+        }
+      ]
+    },
+    "0,0": {
+      "type": "FeatureCollection",
+      "features": []
+    },
+    "error_request": {
+      "statusCode": 401,
+      "message": "Invalid API key",
+      "error": "Unauthorized"
+    }
+  },
+  "geocodejson": {
+    "40.7337807,-73.9974401": {
+      "type": "FeatureCollection",
+      "geocoding": {
+        "version": "0.1.0",
+        "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "licence": "ODbL",
+        "query": "40.7337807,-73.9974401"
+      },
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "geocoding": {
+              "label": "35 West 9th Street, New York, New York, US",
+              "housenumber": "35",
+              "street": "West 9th Street",
+              "city": "New York",
+              "state": "New York",
+              "country": "United States",
+              "admin": {
+                "level2": "United States",
+                "level4": "New York",
+                "level6": "New York"
+              }
+            }
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.9974401, 40.7337807]
+          }
+        }
+      ]
+    },
+    "0,0": {
+      "type": "FeatureCollection",
+      "geocoding": {
+        "version": "0.1.0",
+        "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "licence": "ODbL",
+        "query": "0,0"
+      },
+      "features": []
+    },
+    "error_request": {
+      "error": "Invalid request",
+      "status": 400
+    }
+  },
+  "protocol_specific": {
+    "tk103": {
+      "37.7749,-122.4194": {
+        "formatted_address": "San Francisco, CA, USA",
+        "provider": "nominatim"
+      },
+      "51.5074,-0.1278": {
+        "formatted_address": "London, UK",
+        "provider": "nominatim"
+      }
+    },
+    "teltonika": {
+      "48.8566,2.3522": {
+        "formatted_address": "Paris, France",
+        "provider": "google"
+      },
+      "55.7558,37.6173": {
+        "formatted_address": "Moscow, Russia",
+        "provider": "google"
+      }
+    },
+    "meitrack": {
+      "35.6762,139.6503": {
+        "formatted_address": "Tokyo, Japan",
+        "provider": "opencage"
+      },
+      "22.3193,114.1694": {
+        "formatted_address": "Hong Kong",
+        "provider": "opencage"
+      }
+    },
+    "atrack": {
+      "1.3521,103.8198": {
+        "formatted_address": "Singapore",
+        "provider": "mapbox"
+      },
+      "25.2048,55.2708": {
+        "formatted_address": "Dubai, UAE",
+        "provider": "mapbox"
+      }
+    },
+    "totem": {
+      "19.4326,-99.1332": {
+        "formatted_address": "Mexico City, Mexico",
+        "provider": "here"
+      },
+      "41.9028,12.4964": {
+        "formatted_address": "Rome, Italy",
+        "provider": "here"
+      }
+    },
+    "meiligao": {
+      "52.5200,13.4050": {
+        "formatted_address": "Berlin, Germany",
+        "provider": "geoapify"
+      },
+      "59.3293,18.0686": {
+        "formatted_address": "Stockholm, Sweden",
+        "provider": "geoapify"
+      }
+    }
+  },
+  "error_cases": {
+    "timeout": {
+      "error": "Request timed out",
+      "status": 408
+    },
+    "service_unavailable": {
+      "error": "Service temporarily unavailable",
+      "status": 503
+    },
+    "rate_limited": {
+      "error": "Rate limit exceeded",
+      "status": 429,
+      "retry_after": 60
+    },
+    "invalid_coordinates": {
+      "error": "Invalid coordinates format",
+      "status": 400
+    },
+    "internal_server_error": {
+      "error": "Internal server error",
+      "status": 500
+    }
+  },
+  "edge_cases": {
+    "north_pole": {
+      "90.0,0.0": {
+        "formatted_address": "North Pole, Arctic Ocean",
+        "provider": "mock"
+      }
+    },
+    "south_pole": {
+      "-90.0,0.0": {
+        "formatted_address": "South Pole, Antarctica",
+        "provider": "mock"
+      }
+    },
+    "mid_atlantic": {
+      "0.0,-30.0": {
+        "formatted_address": "Atlantic Ocean",
+        "provider": "mock"
+      }
+    },
+    "mid_pacific": {
+      "0.0,180.0": {
+        "formatted_address": "Pacific Ocean",
+        "provider": "mock"
+      }
+    },
+    "international_date_line": {
+      "0.0,-180.0": {
+        "formatted_address": "International Date Line, Pacific Ocean",
+        "provider": "mock"
+      }
+    },
+    "mount_everest": {
+      "27.9881,86.9250": {
+        "formatted_address": "Mount Everest, Nepal/Tibet",
+        "provider": "mock"
+      }
+    },
+    "mariana_trench": {
+      "11.3733,142.5917": {
+        "formatted_address": "Mariana Trench, Pacific Ocean",
+        "provider": "mock"
+      }
+    },
+    "null_island": {
+      "0.0,0.0": {
+        "formatted_address": "Null Island (fictional place at 0,0)",
+        "provider": "mock"
+      }
+    }
+  }
+}
