@@ -1,0 +1,73 @@
+{
+  "status": "OK",
+  "results": [
+    {
+      "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+      "formatted_address": "123 Main Street, Springfield, IL 62701, USA",
+      "geometry": {
+        "location": {
+          "lat": 39.801056,
+          "lng": -89.643592
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 39.802404,
+            "lng": -89.642243
+          },
+          "southwest": {
+            "lat": 39.799708,
+            "lng": -89.644941
+          }
+        }
+      },
+      "address_components": [
+        {
+          "long_name": "123",
+          "short_name": "123",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "Main Street",
+          "short_name": "Main St",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Springfield",
+          "short_name": "Springfield",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Sangamon County",
+          "short_name": "Sangamon County",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Illinois",
+          "short_name": "IL",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "62701",
+          "short_name": "62701",
+          "types": ["postal_code"]
+        }
+      ],
+      "types": ["street_address"],
+      "confidence": 0.9
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-05-23T10:15:30.123Z",
+    "provider": "MockGeocoder",
+    "request_id": "mock-req-12345",
+    "query_time_ms": 42,
+    "attribution": "This is a mock response for testing purposes",
+    "license": "For testing use only"
+  }
+}
