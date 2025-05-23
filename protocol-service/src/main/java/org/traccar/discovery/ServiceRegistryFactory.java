@@ -15,8 +15,9 @@
  */
 package org.traccar.discovery;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Factory class for creating ServiceRegistry instances based on configuration.
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ServiceRegistryFactory {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRegistryFactory.class);
+    private static final Logger LOGGER = Logger.getLogger(ServiceRegistryFactory.class.getName());
     
     // Registry type constants
     public static final String REGISTRY_TYPE_CONSUL = "consul";
@@ -51,11 +52,11 @@ public class ServiceRegistryFactory {
         String registryType = config.getRegistryType();
         
         if (registryType == null || registryType.isEmpty()) {
-            LOGGER.info("Registry type not specified, using default: {}", DEFAULT_REGISTRY_TYPE);
+            LOGGER.info("Registry type not specified, using default: " + DEFAULT_REGISTRY_TYPE);
             registryType = DEFAULT_REGISTRY_TYPE;
         }
         
-        LOGGER.debug("Creating service registry of type: {}", registryType);
+        LOGGER.fine("Creating service registry of type: " + registryType);
         
         switch (registryType.toLowerCase()) {
             case REGISTRY_TYPE_CONSUL:
@@ -63,8 +64,8 @@ public class ServiceRegistryFactory {
             case REGISTRY_TYPE_KUBERNETES:
                 return getKubernetesRegistry(config);
             default:
-                LOGGER.warn("Unknown registry type: {}, falling back to default: {}", 
-                        registryType, DEFAULT_REGISTRY_TYPE);
+                LOGGER.warning("Unknown registry type: " + registryType + ", falling back to default: " + 
+                        DEFAULT_REGISTRY_TYPE);
                 return getConsulRegistry(config);
         }
     }
@@ -92,7 +93,12 @@ public class ServiceRegistryFactory {
     private static synchronized ServiceRegistry getKubernetesRegistry(ServiceRegistryConfig config) {
         if (kubernetesRegistry == null) {
             LOGGER.info("Initializing Kubernetes service registry");
-            kubernetesRegistry = new KubernetesServiceRegistry(config);
+            try {
+                kubernetesRegistry = new KubernetesServiceRegistry(config);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Failed to initialize Kubernetes service registry", e);
+                throw new RuntimeException("Failed to initialize Kubernetes service registry", e);
+            }
         }
         return kubernetesRegistry;
     }
@@ -103,6 +109,6 @@ public class ServiceRegistryFactory {
     public static synchronized void reset() {
         consulRegistry = null;
         kubernetesRegistry = null;
-        LOGGER.debug("Service registry instances have been reset");
+        LOGGER.fine("Service registry instances have been reset");
     }
 }
