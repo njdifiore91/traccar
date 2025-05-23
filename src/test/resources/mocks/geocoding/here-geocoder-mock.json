@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/v1/revgeocode\\?types=address&limit=1&at=35\\.6762,139\\.6503&apiKey=.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": [
+        {
+          "title": "2-chōme-11 Meguro, Meguro City, Tokyo, Japan",
+          "id": "here:cm:namedplace:jpn:35c2c9fb-c79d-4060-8cbe-33f3b8c61a28",
+          "resultType": "houseNumber",
+          "address": {
+            "label": "2-chōme-11 Meguro, Meguro City, Tokyo, Japan",
+            "countryCode": "JPN",
+            "countryName": "Japan",
+            "state": "Tokyo",
+            "county": "Tokyo",
+            "city": "Meguro City",
+            "district": "Meguro",
+            "street": "Meguro",
+            "postalCode": "153-0063",
+            "houseNumber": "2-11"
+          },
+          "position": {
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "access": [
+            {
+              "lat": 35.6762,
+              "lng": 139.6503
+            }
+          ],
+          "distance": 0
+        }
+      ]
+    }
+  }
+}
