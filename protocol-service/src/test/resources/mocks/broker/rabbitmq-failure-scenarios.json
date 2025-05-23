@@ -1,0 +1,391 @@
+{
+  "version": "1.0",
+  "description": "RabbitMQ failure scenarios for Protocol Service resilience testing",
+  "documentation": {
+    "purpose": "This configuration file defines various failure scenarios for testing Protocol Service resilience against RabbitMQ broker failures.",
+    "usage": "These scenarios are loaded by the mock RabbitMQ broker during integration testing to simulate different failure conditions.",
+    "failureTypes": {
+      "CONNECTION_REFUSED": "Simulates broker being completely unavailable, connection attempts are refused",
+      "CONNECTION_CLOSED": "Simulates an established connection being abruptly terminated",
+      "CONNECTION_TIMEOUT": "Simulates slow response from broker causing connection timeout",
+      "CHANNEL_CLOSED": "Simulates broker closing channels with an error code",
+      "PUBLISH_CONFIRM_DELAY": "Simulates delayed publish confirms from broker",
+      "PUBLISH_CONFIRM_TIMEOUT": "Simulates missing publish confirms (never acknowledged)",
+      "MESSAGE_RETURNED": "Simulates messages being returned as unroutable",
+      "CHANNEL_FLOW_CONTROL": "Simulates broker applying flow control to limit publishing rate",
+      "NETWORK_PARTITION": "Simulates network partition between client and broker",
+      "MEMORY_ALARM": "Simulates broker memory alarm that blocks publishers",
+      "DISK_ALARM": "Simulates broker disk alarm that blocks publishers",
+      "AUTHENTICATION_FAILURE": "Simulates authentication failures on connection attempts",
+      "COMBINED": "Combines multiple failure scenarios in sequence"
+    },
+    "frequencyTypes": {
+      "ONCE": "Failure occurs exactly once after the specified trigger time",
+      "REPEATING": "Failure occurs repeatedly at the specified interval",
+      "PERCENTAGE": "Failure occurs randomly for the specified percentage of operations"
+    },
+    "recoveryBehaviors": {
+      "AUTOMATIC": "System automatically recovers after the specified duration",
+      "MANUAL": "System requires manual intervention to recover"
+    }
+  },
+  
+  "scenarios": [
+    {
+      "id": "broker-unavailable",
+      "name": "Broker Temporarily Unavailable",
+      "description": "Simulates a complete broker outage where all connection attempts fail",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CONNECTION_REFUSED",
+        "duration": 30000,
+        "triggerAfter": 60000,
+        "frequency": "ONCE",
+        "affectedPorts": [5672, 5671],
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "connection-drop",
+      "name": "Connection Dropped",
+      "description": "Simulates an established connection being abruptly terminated",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CONNECTION_CLOSED",
+        "duration": 15000,
+        "triggerAfter": 120000,
+        "frequency": "REPEATING",
+        "repeatInterval": 300000,
+        "maxOccurrences": 3,
+        "affectedConnections": "ALL",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "connection-timeout",
+      "name": "Connection Timeout",
+      "description": "Simulates slow response from broker causing connection timeout",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CONNECTION_TIMEOUT",
+        "duration": 45000,
+        "triggerAfter": 180000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "channel-closure",
+      "name": "Channel Closure",
+      "description": "Simulates broker closing channels with an error",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CHANNEL_CLOSED",
+        "duration": 10000,
+        "triggerAfter": 240000,
+        "frequency": "REPEATING",
+        "repeatInterval": 180000,
+        "maxOccurrences": 5,
+        "affectedChannels": "RANDOM",
+        "channelCloseCode": 406,
+        "channelCloseReason": "PRECONDITION_FAILED",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "publish-confirm-delay",
+      "name": "Publish Confirm Delay",
+      "description": "Simulates delayed publish confirms from broker",
+      "enabled": true,
+      "configuration": {
+        "failureType": "PUBLISH_CONFIRM_DELAY",
+        "delayMin": 5000,
+        "delayMax": 15000,
+        "triggerAfter": 300000,
+        "frequency": "PERCENTAGE",
+        "percentage": 25,
+        "duration": 60000,
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "publish-confirm-timeout",
+      "name": "Publish Confirm Timeout",
+      "description": "Simulates missing publish confirms (never acknowledged)",
+      "enabled": true,
+      "configuration": {
+        "failureType": "PUBLISH_CONFIRM_TIMEOUT",
+        "triggerAfter": 360000,
+        "frequency": "PERCENTAGE",
+        "percentage": 10,
+        "duration": 30000,
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "publish-returns",
+      "name": "Message Returns",
+      "description": "Simulates messages being returned as unroutable",
+      "enabled": true,
+      "configuration": {
+        "failureType": "MESSAGE_RETURNED",
+        "triggerAfter": 420000,
+        "frequency": "PERCENTAGE",
+        "percentage": 15,
+        "duration": 45000,
+        "returnCode": 312,
+        "returnReason": "NO_ROUTE",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "channel-flow-control",
+      "name": "Channel Flow Control",
+      "description": "Simulates broker applying flow control to limit publishing rate",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CHANNEL_FLOW_CONTROL",
+        "triggerAfter": 480000,
+        "duration": 60000,
+        "frequency": "ONCE",
+        "active": false,
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "network-partition",
+      "name": "Network Partition",
+      "description": "Simulates network partition between client and broker",
+      "enabled": true,
+      "configuration": {
+        "failureType": "NETWORK_PARTITION",
+        "triggerAfter": 540000,
+        "duration": 30000,
+        "frequency": "ONCE",
+        "packetLossPercentage": 80,
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "broker-memory-alarm",
+      "name": "Broker Memory Alarm",
+      "description": "Simulates broker memory alarm that blocks publishers",
+      "enabled": true,
+      "configuration": {
+        "failureType": "MEMORY_ALARM",
+        "triggerAfter": 600000,
+        "duration": 45000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "broker-disk-alarm",
+      "name": "Broker Disk Alarm",
+      "description": "Simulates broker disk alarm that blocks publishers",
+      "enabled": true,
+      "configuration": {
+        "failureType": "DISK_ALARM",
+        "triggerAfter": 660000,
+        "duration": 45000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "authentication-failure",
+      "name": "Authentication Failure",
+      "description": "Simulates authentication failures on connection attempts",
+      "enabled": true,
+      "configuration": {
+        "failureType": "AUTHENTICATION_FAILURE",
+        "triggerAfter": 720000,
+        "duration": 30000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "combined-scenario-1",
+      "name": "Connection Drop with Delayed Recovery",
+      "description": "Simulates connection drop followed by slow reconnection",
+      "enabled": true,
+      "configuration": {
+        "failureType": "COMBINED",
+        "subScenarios": ["connection-drop", "connection-timeout"],
+        "triggerAfter": 780000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "MANUAL"
+      }
+    },
+    {
+      "id": "combined-scenario-2",
+      "name": "Broker Restart with Authentication Issues",
+      "description": "Simulates broker restart followed by authentication problems",
+      "enabled": true,
+      "configuration": {
+        "failureType": "COMBINED",
+        "subScenarios": ["broker-unavailable", "authentication-failure"],
+        "triggerAfter": 840000,
+        "frequency": "ONCE",
+        "recoveryBehavior": "MANUAL"
+      }
+    },
+    {
+      "id": "intermittent-connection-failures",
+      "name": "Intermittent Connection Failures",
+      "description": "Simulates intermittent connection failures with varying durations",
+      "enabled": true,
+      "configuration": {
+        "failureType": "CONNECTION_CLOSED",
+        "triggerAfter": 900000,
+        "frequency": "REPEATING",
+        "repeatInterval": 60000,
+        "maxOccurrences": 10,
+        "durationMin": 5000,
+        "durationMax": 30000,
+        "randomizeDuration": true,
+        "affectedConnections": "RANDOM_PERCENTAGE",
+        "connectionPercentage": 30,
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "progressive-degradation",
+      "name": "Progressive Service Degradation",
+      "description": "Simulates progressively worsening broker performance",
+      "enabled": true,
+      "configuration": {
+        "failureType": "PROGRESSIVE",
+        "triggerAfter": 1200000,
+        "duration": 300000,
+        "stages": [
+          {
+            "stageDuration": 60000,
+            "publishLatencyMs": 100,
+            "consumeLatencyMs": 50,
+            "packetLossPercentage": 0
+          },
+          {
+            "stageDuration": 60000,
+            "publishLatencyMs": 500,
+            "consumeLatencyMs": 250,
+            "packetLossPercentage": 5
+          },
+          {
+            "stageDuration": 60000,
+            "publishLatencyMs": 2000,
+            "consumeLatencyMs": 1000,
+            "packetLossPercentage": 15
+          },
+          {
+            "stageDuration": 60000,
+            "publishLatencyMs": 5000,
+            "consumeLatencyMs": 2500,
+            "packetLossPercentage": 30
+          },
+          {
+            "stageDuration": 60000,
+            "failureType": "CONNECTION_CLOSED",
+            "affectedConnections": "ALL"
+          }
+        ],
+        "recoveryBehavior": "AUTOMATIC"
+      }
+    },
+    {
+      "id": "queue-deletion",
+      "name": "Queue Deletion",
+      "description": "Simulates queues being deleted unexpectedly",
+      "enabled": true,
+      "configuration": {
+        "failureType": "QUEUE_DELETED",
+        "triggerAfter": 1500000,
+        "frequency": "ONCE",
+        "queuePattern": "protocol.*",
+        "recoveryBehavior": "MANUAL"
+      }
+    },
+    {
+      "id": "exchange-deletion",
+      "name": "Exchange Deletion",
+      "description": "Simulates exchanges being deleted unexpectedly",
+      "enabled": true,
+      "configuration": {
+        "failureType": "EXCHANGE_DELETED",
+        "triggerAfter": 1800000,
+        "frequency": "ONCE",
+        "exchangePattern": "protocol.*",
+        "recoveryBehavior": "MANUAL"
+      }
+    }
+  ],
+  "testProfiles": [
+    {
+      "id": "basic",
+      "name": "Basic Resilience Test",
+      "description": "Basic set of failure scenarios for quick testing",
+      "enabledScenarios": ["broker-unavailable", "connection-drop", "channel-closure", "publish-confirm-delay"]
+    },
+    {
+      "id": "comprehensive",
+      "name": "Comprehensive Resilience Test",
+      "description": "Complete set of failure scenarios for thorough testing",
+      "enabledScenarios": "ALL"
+    },
+    {
+      "id": "connection-focused",
+      "name": "Connection Resilience Test",
+      "description": "Focus on connection-related failures",
+      "enabledScenarios": ["broker-unavailable", "connection-drop", "connection-timeout", "network-partition", "authentication-failure", "intermittent-connection-failures"]
+    },
+    {
+      "id": "channel-focused",
+      "name": "Channel Resilience Test",
+      "description": "Focus on channel-related failures",
+      "enabledScenarios": ["channel-closure", "channel-flow-control", "publish-confirm-delay", "publish-confirm-timeout", "publish-returns"]
+    },
+    {
+      "id": "broker-resource-focused",
+      "name": "Broker Resource Test",
+      "description": "Focus on broker resource-related failures",
+      "enabledScenarios": ["broker-memory-alarm", "broker-disk-alarm", "queue-deletion", "exchange-deletion"]
+    },
+    {
+      "id": "chaos",
+      "name": "Chaos Test",
+      "description": "Random combination of failures with high frequency",
+      "enabledScenarios": "ALL",
+      "overrideSettings": {
+        "randomizeTiming": true,
+        "timingVariance": 50,
+        "maxConcurrentFailures": 3
+      }
+    }
+  ],
+  
+  "globalSettings": {
+    "enabled": true,
+    "logFailures": true,
+    "logLevel": "INFO",
+    "randomizeTiming": true,
+    "timingVariance": 10,
+    "defaultRecoveryBehavior": "AUTOMATIC",
+    "maxConcurrentFailures": 2,
+    "testDuration": 3600000,
+    "gracefulShutdown": true,
+    "shutdownTimeout": 30000,
+    "metricCollection": {
+      "enabled": true,
+      "samplingInterval": 5000,
+      "exportPath": "./logs/rabbitmq-failure-metrics.json"
+    },
+    "notificationEndpoints": [
+      {
+        "type": "HTTP",
+        "url": "http://localhost:8080/api/test/notifications",
+        "events": ["FAILURE_START", "FAILURE_END", "RECOVERY_COMPLETE"]
+      }
+    ]
+  }
+}
