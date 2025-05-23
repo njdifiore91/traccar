@@ -1,0 +1,83 @@
+# Traccar Position Processing Service
+
+Thank you for installing the Traccar Position Processing Service Helm chart!
+
+## About the Position Service
+
+The Position Processing Service is responsible for processing and enriching raw GPS position data. It consumes raw position messages from the message broker, applies a series of handlers for data enrichment (geocoding, distance calculation, geofence detection, etc.), and publishes enriched positions for downstream services.
+
+## Verifying Your Installation
+
+1. Check that the Position Service pods are running:
+
+   ```bash
+   kubectl get pods -l app.kubernetes.io/name=position-service -n {{ .Release.Namespace }}
+   ```
+
+2. Verify the health of the Position Service:
+
+   ```bash
+   kubectl exec -it $(kubectl get pods -l app.kubernetes.io/name=position-service -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}') -n {{ .Release.Namespace }} -- curl http://localhost:8081/actuator/health
+   ```
+
+   You should see a response with `{"status":"UP"}` indicating the service is healthy.
+
+3. Check that the service is properly connected to the message broker:
+
+   ```bash
+   kubectl logs -l app.kubernetes.io/name=position-service -n {{ .Release.Namespace }} | grep "Connected to message broker"
+   ```
+
+## Monitoring the Position Service
+
+1. View the logs of the Position Service:
+
+   ```bash
+   kubectl logs -f -l app.kubernetes.io/name=position-service -n {{ .Release.Namespace }}
+   ```
+
+2. Monitor position processing metrics:
+
+   ```bash
+   kubectl port-forward svc/{{ .Release.Name }}-position-service 8081:8081 -n {{ .Release.Namespace }}
+   ```
+
+   Then access metrics at: http://localhost:8081/actuator/prometheus
+
+3. Check the current scaling status:
+
+   ```bash
+   kubectl get hpa {{ .Release.Name }}-position-service -n {{ .Release.Namespace }}
+   ```
+
+## Common Troubleshooting
+
+1. If positions are not being processed, check:
+   - Message broker connectivity (logs should show successful connection)
+   - Protocol Service is publishing raw positions to the correct topic
+   - Position Service has appropriate permissions to read from and write to topics
+
+2. If geocoding is not working:
+   - Verify geocoding service configuration in the ConfigMap
+   - Check for geocoding service rate limiting or authentication issues
+   - Temporarily disable geocoding in the handler chain for testing
+
+3. If the service is not scaling properly:
+   - Verify the HorizontalPodAutoscaler is correctly configured
+   - Check that metrics are being collected properly
+   - Ensure resource requests and limits are set appropriately
+
+4. For performance issues:
+   - Check CPU and memory usage of the pods
+   - Review handler chain configuration for optimization opportunities
+   - Consider adjusting the consumer concurrency settings
+
+## Documentation References
+
+For more information about the Position Processing Service, refer to:
+
+- Traccar Documentation: https://www.traccar.org/documentation/
+- Position Service API Documentation: http://api.traccar.org/api-docs/position-service
+- Kubernetes Troubleshooting Guide: https://kubernetes.io/docs/tasks/debug-application-cluster/troubleshooting/
+
+For additional help, please visit the Traccar community forums or submit an issue on GitHub.
