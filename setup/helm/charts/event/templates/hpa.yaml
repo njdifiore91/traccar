@@ -1,0 +1,110 @@
+{{- /*
+HorizontalPodAutoscaler for the Event Processing Service
+
+This HPA automatically scales the Event Service based on resource utilization and custom metrics:
+- CPU utilization (default target: 70%)  
+- Memory utilization (default target: 80%)
+- Custom metrics for event processing time (if configured)
+
+The Event Service needs to scale dynamically to handle varying event detection loads,
+particularly during peak hours or when processing large volumes of position data.
+
+Scaling behavior is configured to:  
+- Scale up quickly when load increases (stabilization window of 0 seconds)
+- Scale down conservatively to prevent thrashing (stabilization window of 300 seconds)
+- Limit scale down to 10% of current replicas per minute to ensure smooth transitions
+- Allow rapid scale up during traffic spikes (up to 100% more pods or 4 additional pods every 15 seconds)
+*/ -}}
+
+{{- if .Values.autoscaling.enabled -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "event.fullname" . }}
+  labels:
+    {{- include "event.labels" . | nindent 4 }}
+    app.kubernetes.io/component: event-processing
+  {{- with .Values.autoscaling.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Target the Event Service deployment for scaling
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "event.fullname" . }}
+  # Configure minimum and maximum replica counts
+  minReplicas: {{ .Values.autoscaling.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas | default 10 }}
+  metrics:
+  # CPU-based scaling (target: 70% utilization)
+  {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage | default 70 }}
+  {{- end }}
+  # Memory-based scaling (target: 80% utilization)
+  {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage | default 80 }}
+  {{- end }}
+  # Custom metrics for event processing time and message queue lag
+  {{- if .Values.autoscaling.customMetrics }}
+  {{- toYaml .Values.autoscaling.customMetrics | nindent 2 }}
+  {{- else }}
+  # Default custom metrics if none are specified
+  # These can be overridden in values.yaml
+  - type: Pods
+    pods:
+      metric:
+        name: event_processing_time_seconds
+      target:
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.targetEventProcessingTime | default "0.5" }}
+  - type: Object
+    object:
+      metric:
+        name: kafka_consumer_group_lag
+      describedObject:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: {{ include "event.fullname" . }}
+      target:
+        type: Value
+        value: {{ .Values.autoscaling.targetKafkaLag | default "1000" }}
+  {{- end }}
+  # Configure scaling behavior to prevent thrashing
+  behavior:
+    # Scale down configuration - conservative approach
+    scaleDown:
+      # Wait 5 minutes before scaling down to prevent thrashing
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds | default 300 }}
+      policies:
+      # Limit scale down to 10% of current replicas per minute
+      - type: Percent
+        value: {{ .Values.autoscaling.behavior.scaleDown.percentLimitPercent | default 10 }}
+        periodSeconds: {{ .Values.autoscaling.behavior.scaleDown.periodSeconds | default 60 }}
+    # Scale up configuration - responsive approach
+    scaleUp:
+      # No delay when scaling up to respond quickly to load increases
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds | default 0 }}
+      policies:
+      # Allow scaling up to 100% more pods every 15 seconds
+      - type: Percent
+        value: {{ .Values.autoscaling.behavior.scaleUp.percentLimitPercent | default 100 }}
+        periodSeconds: {{ .Values.autoscaling.behavior.scaleUp.periodSeconds | default 15 }}
+      # Also allow adding up to 4 pods every 15 seconds
+      - type: Pods
+        value: {{ .Values.autoscaling.behavior.scaleUp.podsLimitCount | default 4 }}
+        periodSeconds: {{ .Values.autoscaling.behavior.scaleUp.periodSeconds | default 15 }}
+      # Use the more aggressive policy between percentage and pod count
+      selectPolicy: {{ .Values.autoscaling.behavior.scaleUp.selectPolicy | default "Max" }}
+{{- end }}
