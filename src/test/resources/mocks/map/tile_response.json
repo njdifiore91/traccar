@@ -1,0 +1,48 @@
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": {
+    "Content-Type": "image/png",
+    "Content-Length": "12345",
+    "Access-Control-Allow-Origin": "*",
+    "Cache-Control": "public, max-age=86400",
+    "ETag": "W/\"abc123def456\"",
+    "Last-Modified": "Mon, 01 Jan 2024 00:00:00 GMT",
+    "Server": "MockTileServer/1.0",
+    "Timing-Allow-Origin": "*",
+    "Vary": "Accept-Encoding"
+  },
+  "config": {
+    "statusCodes": {
+      "success": 200,
+      "notFound": 404,
+      "serverError": 500,
+      "unauthorized": 401,
+      "forbidden": 403,
+      "rateLimited": 429
+    },
+    "contentTypes": {
+      "png": "image/png",
+      "jpeg": "image/jpeg",
+      "webp": "image/webp",
+      "pbf": "application/x-protobuf"
+    },
+    "compressionTypes": [
+      "gzip",
+      "deflate",
+      "br"
+    ]
+  },
+  "delay": {
+    "min": 0,
+    "max": 200
+  },
+  "tileInfo": {
+    "format": "png",
+    "size": 12345,
+    "z": "${z}",
+    "x": "${x}",
+    "y": "${y}"
+  },
+  "mockDataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+}
