@@ -1,0 +1,199 @@
+{
+  "responses": {
+    "valid-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "protocol:read protocol:write device:read",
+        "client_id": "protocol-service-client",
+        "username": "test-user",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "user-123",
+        "permissions": ["protocol:read", "protocol:write", "device:read"],
+        "user_id": 123,
+        "device_ids": [1, 2, 3, 4, 5]
+      }
+    },
+    "valid-admin-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "admin protocol:* device:* user:*",
+        "client_id": "admin-client",
+        "username": "admin-user",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "admin-456",
+        "permissions": ["admin", "protocol:*", "device:*", "user:*"],
+        "user_id": 456,
+        "isAdmin": true
+      }
+    },
+    "valid-service-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "service protocol:* device:*",
+        "client_id": "position-service",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "service-789",
+        "permissions": ["service", "protocol:*", "device:*"],
+        "service_id": "position-service",
+        "isService": true
+      }
+    },
+    "expired-token": {
+      "status": "invalid",
+      "statusCode": 401,
+      "error": {
+        "code": "token_expired",
+        "message": "The access token has expired",
+        "details": {
+          "expiredAt": 1715336000
+        }
+      }
+    },
+    "invalid-signature-token": {
+      "status": "invalid",
+      "statusCode": 401,
+      "error": {
+        "code": "invalid_token",
+        "message": "Token signature validation failed",
+        "details": {
+          "reason": "signature_verification_failed"
+        }
+      }
+    },
+    "malformed-token": {
+      "status": "invalid",
+      "statusCode": 400,
+      "error": {
+        "code": "invalid_request",
+        "message": "Malformed token provided",
+        "details": {
+          "reason": "malformed_token"
+        }
+      }
+    },
+    "revoked-token": {
+      "status": "invalid",
+      "statusCode": 401,
+      "error": {
+        "code": "token_revoked",
+        "message": "The token has been revoked",
+        "details": {
+          "revokedAt": 1716350000,
+          "reason": "user_logout"
+        }
+      }
+    },
+    "insufficient-scope-token": {
+      "status": "invalid",
+      "statusCode": 403,
+      "error": {
+        "code": "insufficient_scope",
+        "message": "The token does not have the required scope",
+        "details": {
+          "requiredScope": "protocol:write",
+          "providedScope": "protocol:read device:read"
+        }
+      }
+    },
+    "protocol-specific-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "protocol:read protocol:write device:read",
+        "client_id": "protocol-client",
+        "username": "protocol-user",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "user-789",
+        "permissions": ["protocol:read", "protocol:write", "device:read"],
+        "user_id": 789,
+        "device_ids": [10, 11, 12],
+        "protocol_access": {
+          "allowed_protocols": ["teltonika", "meitrack", "osmand", "tk103"],
+          "denied_protocols": ["atrack", "totem"]
+        }
+      }
+    },
+    "device-limited-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "protocol:read device:read",
+        "client_id": "mobile-app",
+        "username": "device-user",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "user-321",
+        "permissions": ["protocol:read", "device:read"],
+        "user_id": 321,
+        "device_ids": [42],
+        "device_limit": {
+          "max_devices": 1,
+          "current_devices": 1
+        }
+      }
+    },
+    "rate-limited-token": {
+      "status": "valid",
+      "statusCode": 200,
+      "tokenInfo": {
+        "active": true,
+        "scope": "protocol:read protocol:write device:read",
+        "client_id": "rate-limited-client",
+        "username": "limited-user",
+        "token_type": "Bearer",
+        "exp": 1716422400,
+        "iat": 1716336000,
+        "sub": "user-555",
+        "permissions": ["protocol:read", "protocol:write", "device:read"],
+        "user_id": 555,
+        "device_ids": [20, 21, 22],
+        "rate_limits": {
+          "requests_per_minute": 60,
+          "commands_per_minute": 10,
+          "connections_per_minute": 5
+        }
+      }
+    },
+    "server-error": {
+      "status": "error",
+      "statusCode": 500,
+      "error": {
+        "code": "server_error",
+        "message": "Internal server error occurred during token validation",
+        "details": {
+          "errorId": "err-12345",
+          "retryAfter": 5
+        }
+      }
+    },
+    "service-unavailable": {
+      "status": "error",
+      "statusCode": 503,
+      "error": {
+        "code": "service_unavailable",
+        "message": "Authentication service is temporarily unavailable",
+        "details": {
+          "retryAfter": 30,
+          "maintenanceWindow": "2023-05-23T02:00:00Z/2023-05-23T04:00:00Z"
+        }
+      }
+    }
+  }
+}
