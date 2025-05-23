@@ -1,0 +1,105 @@
+{
+  "error": {
+    "status": 429,
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests. Rate limit has been exceeded.",
+    "details": {
+      "retry_after": 60,
+      "limit": "100 requests per minute",
+      "request_id": "req_7a9b8c7d6e5f4a3b2c1d"
+    }
+  },
+  "examples": [
+    {
+      "error": {
+        "status": 400,
+        "code": "INVALID_PHONE_NUMBER",
+        "message": "The phone number provided is invalid or not in the correct format.",
+        "details": {
+          "parameter": "phone",
+          "value": "+123456",
+          "request_id": "req_1a2b3c4d5e6f7g8h9i0j"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 401,
+        "code": "AUTHENTICATION_FAILED",
+        "message": "Invalid API key or authentication credentials.",
+        "details": {
+          "request_id": "req_2b3c4d5e6f7g8h9i0j1k"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 403,
+        "code": "INSUFFICIENT_CREDITS",
+        "message": "Your account does not have sufficient credits to send this message.",
+        "details": {
+          "available_credits": 0,
+          "required_credits": 1,
+          "request_id": "req_3c4d5e6f7g8h9i0j1k2l"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 500,
+        "code": "INTERNAL_ERROR",
+        "message": "An unexpected error occurred while processing your request.",
+        "details": {
+          "request_id": "req_4d5e6f7g8h9i0j1k2l3m"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 503,
+        "code": "SERVICE_UNAVAILABLE",
+        "message": "The SMS service is temporarily unavailable. Please try again later.",
+        "details": {
+          "retry_after": 300,
+          "request_id": "req_5e6f7g8h9i0j1k2l3m4n"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 400,
+        "code": "MESSAGE_TOO_LONG",
+        "message": "The message exceeds the maximum allowed length.",
+        "details": {
+          "max_length": 160,
+          "current_length": 180,
+          "request_id": "req_6f7g8h9i0j1k2l3m4n5o"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 400,
+        "code": "INVALID_SENDER_ID",
+        "message": "The sender ID is invalid or not approved for use.",
+        "details": {
+          "parameter": "sender",
+          "value": "INVALID",
+          "request_id": "req_7g8h9i0j1k2l3m4n5o6p"
+        }
+      }
+    },
+    {
+      "error": {
+        "status": 400,
+        "code": "BLACKLISTED_NUMBER",
+        "message": "The recipient has opted out or is blacklisted from receiving messages.",
+        "details": {
+          "parameter": "phone",
+          "value": "+1234567890",
+          "request_id": "req_8h9i0j1k2l3m4n5o6p7q"
+        }
+      }
+    }
+  ]
+}
