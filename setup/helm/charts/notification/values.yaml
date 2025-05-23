@@ -1,0 +1,339 @@
+# Default values for Notification Service Helm chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## Global settings
+# Number of replicas to deploy for high availability and horizontal scaling
+replicaCount: 2
+
+## Image settings
+# Container image configuration for the Notification Service
+image:
+  # Docker image repository
+  repository: traccar/notification-service
+  # Image tag (using 'latest' is not recommended for production)
+  tag: latest
+  # Image pull policy (IfNotPresent is more efficient for development)
+  pullPolicy: IfNotPresent
+
+## Service account settings
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+## Pod annotations
+# Annotations applied to the pod
+podAnnotations:
+  prometheus.io/scrape: "true"       # Enable Prometheus scraping
+  prometheus.io/path: "/actuator/prometheus"  # Path for metrics
+  prometheus.io/port: "8083"         # Port for metrics
+  fluentbit.io/parser: "json"        # Log parser for Fluent Bit
+
+## Pod security context
+# Security settings for the pod
+podSecurityContext:
+  fsGroup: 1000                     # Set filesystem group
+  supplementalGroups: [1000]        # Additional groups
+  seccompProfile:
+    type: RuntimeDefault             # Use default seccomp profile
+
+## Container security context
+# Security settings for the container
+# Run as non-root user (UID 1000) as required for security
+securityContext:
+  runAsNonRoot: true                # Prevent running as root
+  runAsUser: 1000                   # Run as UID 1000
+  runAsGroup: 1000                  # Run as GID 1000
+  allowPrivilegeEscalation: false   # Prevent privilege escalation
+  readOnlyRootFilesystem: true      # Make root filesystem read-only
+  capabilities:
+    drop:
+      - ALL                         # Drop all capabilities
+
+## Service configuration
+service:
+  type: ClusterIP
+  port: 8083
+
+## Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: notification.traccar.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+## Resource requests and limits
+# Resource allocation as specified in the technical documentation
+# These settings ensure the service has adequate resources while preventing resource hogging
+resources:
+  # Upper bounds of resources the container can use
+  limits:
+    cpu: 500m    # 0.5 CPU cores maximum
+    memory: 512Mi  # 512MB memory maximum
+  # Guaranteed resources allocated to the container
+  requests:
+    cpu: 300m    # 0.3 CPU cores guaranteed
+    memory: 256Mi  # 256MB memory guaranteed
+
+## Autoscaling configuration
+# Horizontal Pod Autoscaler (HPA) settings for dynamic scaling based on load
+autoscaling:
+  # Enable automatic scaling based on resource utilization
+  enabled: true
+  # Minimum number of replicas to maintain even during low load
+  minReplicas: 2
+  # Maximum number of replicas to scale up to during high load
+  maxReplicas: 5
+  # Target CPU utilization percentage that triggers scaling
+  targetCPUUtilizationPercentage: 80
+  # Target memory utilization percentage that triggers scaling
+  targetMemoryUtilizationPercentage: 80
+
+## Node selector
+nodeSelector: {}
+
+## Tolerations
+tolerations: []
+
+## Affinity
+affinity: {}
+
+## Health check probes
+# Kubernetes probes to determine container health and readiness
+
+# Liveness probe - determines if the container is running properly
+# If this fails, the container will be restarted
+livenessProbe:
+  httpGet:
+    path: /health/liveness
+    port: 8083
+  initialDelaySeconds: 30  # Wait time before first probe
+  periodSeconds: 10        # How often to perform the probe
+  timeoutSeconds: 5        # Timeout for each probe
+  failureThreshold: 3      # Number of failures before restarting
+  successThreshold: 1      # Number of successes to be considered successful
+
+# Readiness probe - determines if the container is ready to serve requests
+# If this fails, no traffic will be sent to the pod
+readinessProbe:
+  httpGet:
+    path: /health/readiness
+    port: 8083
+  initialDelaySeconds: 20  # Shorter than liveness as readiness can happen sooner
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+## Environment variables
+# Environment variables passed to the container
+# These configure the Notification Service behavior
+env:
+  # General configuration
+  - name: SERVER_PORT
+    value: "8083"
+  - name: SPRING_PROFILES_ACTIVE
+    value: "prod"
+  - name: LOGGING_LEVEL_ORG_TRACCAR
+    value: "INFO"
+  
+  # Service discovery configuration
+  - name: SPRING_CLOUD_KUBERNETES_ENABLED
+    value: "true"
+  - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_ENABLED
+    value: "true"
+  
+  # Message broker configuration
+  # Default configuration uses RabbitMQ, but can be switched to Kafka
+  - name: MESSAGING_BROKER_TYPE
+    value: "rabbitmq"  # Options: rabbitmq, kafka
+  
+  # RabbitMQ configuration
+  - name: SPRING_RABBITMQ_HOST
+    value: "rabbitmq"
+  - name: SPRING_RABBITMQ_PORT
+    value: "5672"
+  - name: SPRING_RABBITMQ_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: username
+  - name: SPRING_RABBITMQ_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: password
+  
+  # Kafka configuration (used if MESSAGING_BROKER_TYPE is set to "kafka")
+  - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+    value: "kafka:9092"
+  - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+    value: "notification-service"
+  - name: SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET
+    value: "earliest"
+  - name: SPRING_KAFKA_SECURITY_PROTOCOL
+    value: "SASL_SSL"
+  - name: SPRING_KAFKA_SASL_MECHANISM
+    value: "PLAIN"
+  - name: SPRING_KAFKA_SASL_JAAS_CONFIG
+    valueFrom:
+      secretKeyRef:
+        name: kafka-credentials
+        key: jaas-config
+        optional: true
+  
+  # Email notification configuration
+  - name: NOTIFICATION_EMAIL_ENABLED
+    value: "true"
+  - name: NOTIFICATION_EMAIL_FROM
+    value: "notifications@traccar.org"
+  - name: NOTIFICATION_EMAIL_SMTP_HOST
+    value: "smtp.example.com"
+  - name: NOTIFICATION_EMAIL_SMTP_PORT
+    value: "587"
+  - name: NOTIFICATION_EMAIL_SMTP_STARTTLS
+    value: "true"
+  - name: NOTIFICATION_EMAIL_SMTP_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: notification-smtp-credentials
+        key: username
+  - name: NOTIFICATION_EMAIL_SMTP_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: notification-smtp-credentials
+        key: password
+  
+  # SMS notification configuration
+  - name: NOTIFICATION_SMS_ENABLED
+    value: "true"
+  - name: NOTIFICATION_SMS_PROVIDER
+    value: "http"
+  - name: NOTIFICATION_SMS_HTTP_URL
+    value: "https://sms-gateway.example.com/send"
+  - name: NOTIFICATION_SMS_HTTP_AUTHORIZATION
+    valueFrom:
+      secretKeyRef:
+        name: notification-sms-credentials
+        key: authorization
+  
+  # Push notification configuration
+  - name: NOTIFICATION_PUSH_ENABLED
+    value: "true"
+  - name: NOTIFICATION_PUSH_FIREBASE_SERVICE_ACCOUNT
+    valueFrom:
+      secretKeyRef:
+        name: notification-firebase-credentials
+        key: service-account-json
+  
+  # Web notification configuration
+  - name: NOTIFICATION_WEB_ENABLED
+    value: "true"
+  
+  # External notification services configuration
+  - name: NOTIFICATION_TELEGRAM_ENABLED
+    value: "false"
+  - name: NOTIFICATION_TELEGRAM_BOT_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: notification-telegram-credentials
+        key: bot-token
+        optional: true
+  
+  - name: NOTIFICATION_PUSHOVER_ENABLED
+    value: "false"
+  - name: NOTIFICATION_PUSHOVER_USER_KEY
+    valueFrom:
+      secretKeyRef:
+        name: notification-pushover-credentials
+        key: user-key
+        optional: true
+  - name: NOTIFICATION_PUSHOVER_APP_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: notification-pushover-credentials
+        key: app-token
+        optional: true
+
+## Volume mounts
+# Volume mounts for the container
+volumeMounts:
+  - name: templates
+    mountPath: /app/templates
+    readOnly: true
+  - name: certs
+    mountPath: /app/certs
+    readOnly: true
+
+## Volumes
+# Volumes to be attached to the pod
+volumes:
+  # Volume for notification templates
+  - name: templates
+    configMap:
+      name: notification-templates
+  # Volume for certificates and keys
+  - name: certs
+    secret:
+      secretName: notification-service-certs
+
+## Configuration for the application
+# Application-specific configuration parameters
+config:
+  # Template directory configuration for notification templates
+  templateDir: "/app/templates"
+  
+  # Retry configuration for failed notification attempts
+  retryMaxAttempts: 3                # Maximum number of retry attempts
+  retryInitialInterval: 1000         # Initial retry interval in milliseconds
+  retryMultiplier: 2.0               # Multiplier for exponential backoff
+  
+  # Dead letter queue configuration for handling failed messages
+  dlqEnabled: true                   # Enable dead letter queue for undeliverable messages
+  dlqRoutingKey: "notification.dlq"  # Routing key for dead letter queue
+  
+  # Circuit breaker configuration for resilience
+  circuitBreakerEnabled: true        # Enable circuit breaker pattern
+  circuitBreakerTimeout: 5000        # Timeout in milliseconds
+  circuitBreakerResetTimeout: 30000  # Time before attempting to close the circuit
+  
+  # Correlation ID configuration for distributed tracing
+  correlationIdEnabled: true         # Enable correlation ID propagation
+  correlationIdHeaderName: "X-Correlation-ID"  # Header name for correlation ID
+  
+  # Distributed tracing configuration (OpenTelemetry)
+  tracing:
+    enabled: true                    # Enable distributed tracing
+    samplingRate: 1.0                # Sampling rate (1.0 = 100%)
+    exporterType: "jaeger"           # Exporter type (jaeger, zipkin, otlp)
+    endpoint: "http://jaeger:14268/api/traces"  # Tracing collector endpoint
+  
+  # Metrics collection configuration
+  metrics:
+    enabled: true                    # Enable metrics collection
+    endpoint: "/actuator/prometheus"  # Metrics endpoint for scraping
+  
+  # Security configuration
+  security:
+    # mTLS configuration for service-to-service communication
+    mtls:
+      enabled: true                  # Enable mutual TLS
+      keyStore: "/app/certs/keystore.p12"  # Path to keystore
+      trustStore: "/app/certs/truststore.p12"  # Path to truststore
+    
+    # JWT validation for API requests
+    jwt:
+      enabled: true                  # Enable JWT validation
+      issuer: "traccar-api-gateway"  # Expected JWT issuer
+      audience: "notification-service"  # Expected JWT audience
+      publicKeyPath: "/app/certs/public.pem"  # Path to JWT verification key
