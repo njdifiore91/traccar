@@ -1,0 +1,112 @@
+{{- /*
+HorizontalPodAutoscaler for the API Gateway Service.
+
+This template creates a Kubernetes HorizontalPodAutoscaler (HPA) resource that automatically
+scales the API Gateway Service based on resource utilization and custom metrics.
+
+The HPA adjusts the number of API Gateway Service replicas in response to:
+- CPU utilization (default target: 70%)
+- Memory utilization (default target: 80%)
+- Custom metrics for request rate (if configured)
+
+Configuration is done through values.yaml with the following structure:
+
+autoscaling:
+  enabled: true                           # Enable/disable autoscaling
+  minReplicas: 2                          # Minimum number of replicas
+  maxReplicas: 10                         # Maximum number of replicas
+  targetCPUUtilizationPercentage: 70      # CPU utilization target
+  targetMemoryUtilizationPercentage: 80   # Memory utilization target
+  behavior:                               # Optional scaling behavior configuration
+    scaleDown:                            # Scale down behavior
+      stabilizationWindowSeconds: 300     # Time window to restrict scale down
+      policies:                           # Scale down policies
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:                              # Scale up behavior
+      stabilizationWindowSeconds: 0       # No delay for scaling up
+      policies:                           # Scale up policies
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max                   # Use the policy that scales the most
+  customMetrics:                          # Optional custom metrics for scaling
+  - type: Pods                            # Metric type (Pods or Object)
+    name: http_requests_per_second        # Metric name
+    targetType: AverageValue              # Target type (AverageValue or Value)
+    averageValue: 1000                    # Target value for scaling
+*/ -}}
+
+{{- if .Values.autoscaling.enabled -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "api-gateway.fullname" . }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+    app.kubernetes.io/part-of: traccar
+  {{- with .Values.autoscaling.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "api-gateway.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas | default 10 }}
+  {{- with .Values.autoscaling.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  metrics:
+  {{- if not (hasKey .Values.autoscaling "targetCPUUtilizationPercentage") or .Values.autoscaling.targetCPUUtilizationPercentage }}
+  # CPU-based scaling (default target: 70%)
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage | default 70 }}
+  {{- end }}
+  {{- if not (hasKey .Values.autoscaling "targetMemoryUtilizationPercentage") or .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  # Memory-based scaling (default target: 80%)
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage | default 80 }}
+  {{- end }}
+  {{- with .Values.autoscaling.customMetrics }}
+  # Custom metrics-based scaling
+  {{- range . }}
+  - type: {{ .type }}
+    {{- if eq .type "Pods" }}
+    pods:
+      metric:
+        name: {{ .name }}
+      target:
+        type: {{ .targetType | default "AverageValue" }}
+        averageValue: {{ .averageValue }}
+    {{- else if eq .type "Object" }}
+    object:
+      metric:
+        name: {{ .name }}
+      describedObject:
+        apiVersion: {{ .apiVersion }}
+        kind: {{ .kind }}
+        name: {{ .objectName }}
+      target:
+        type: {{ .targetType | default "Value" }}
+        value: {{ .value }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+{{- end }}
