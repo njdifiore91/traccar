@@ -1,0 +1,40 @@
+apiVersion: v2
+name: traccar
+version: 1.0.0
+appVersion: "1.0.0"
+description: Helm chart for Traccar microservices architecture
+type: application
+kubeVersion: ">= 1.25.0-0"
+home: https://www.traccar.org/
+sources:
+  - https://github.com/traccar/traccar
+maintainers:
+  - name: Traccar Team
+    email: support@traccar.org
+    url: https://www.traccar.org/
+icon: https://www.traccar.org/favicon.ico
+dependencies:
+  - name: protocol
+    version: "~1.0.0"
+    repository: "file://./charts/protocol"
+    condition: protocol.enabled
+  - name: position
+    version: "~1.0.0"
+    repository: "file://./charts/position"
+    condition: position.enabled
+  - name: event
+    version: "~1.0.0"
+    repository: "file://./charts/event"
+    condition: event.enabled
+  - name: notification
+    version: "~1.0.0"
+    repository: "file://./charts/notification"
+    condition: notification.enabled
+  - name: api-gateway
+    version: "~1.0.0"
+    repository: "file://./charts/api-gateway"
+    condition: api-gateway.enabled
+  - name: reporting
+    version: "~1.0.0"
+    repository: "file://./charts/reporting"
+    condition: reporting.enabled
