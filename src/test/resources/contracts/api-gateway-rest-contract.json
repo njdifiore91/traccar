@@ -1,0 +1,1806 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Traccar API Gateway REST API",
+    "description": "REST API for the Traccar GPS tracking system API Gateway Service, providing access to all backend microservices while maintaining backward compatibility with the monolithic API. This API Gateway serves as the facade for all backend microservices, handling authentication, request routing, and response aggregation.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traccar Support",
+      "url": "https://www.traccar.org/contact/",
+      "email": "support@traccar.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "x-microservice-architecture": {
+      "gateway": "API Gateway Service",
+      "backend-services": [
+        "Protocol Service",
+        "Position Processing Service",
+        "Event Processing Service",
+        "Notification Service",
+        "Reporting Service"
+      ],
+      "authentication": "Centralized in API Gateway",
+      "communication": "REST/gRPC for synchronous, Message Broker for asynchronous"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "API Gateway base path"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "bearerAuth": []
+    },
+    {
+      "cookieAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "HTTP Basic Authentication"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer Token Authentication"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Session Cookie Authentication"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "string",
+            "description": "Detailed error information"
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "User name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "User phone number"
+          },
+          "readonly": {
+            "type": "boolean",
+            "description": "Whether the user has read-only access"
+          },
+          "administrator": {
+            "type": "boolean",
+            "description": "Whether the user is an administrator"
+          },
+          "map": {
+            "type": "string",
+            "description": "User's preferred map"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "User's default latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "User's default longitude"
+          },
+          "zoom": {
+            "type": "integer",
+            "description": "User's default zoom level"
+          },
+          "twelveHourFormat": {
+            "type": "boolean",
+            "description": "Whether to use 12-hour format"
+          },
+          "coordinateFormat": {
+            "type": "string",
+            "description": "User's preferred coordinate format"
+          },
+          "disabled": {
+            "type": "boolean",
+            "description": "Whether the user is disabled"
+          },
+          "expirationTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User account expiration time"
+          },
+          "deviceLimit": {
+            "type": "integer",
+            "description": "Maximum number of devices allowed"
+          },
+          "userLimit": {
+            "type": "integer",
+            "description": "Maximum number of users allowed"
+          },
+          "deviceReadonly": {
+            "type": "boolean",
+            "description": "Whether devices are read-only"
+          },
+          "limitCommands": {
+            "type": "boolean",
+            "description": "Whether commands are limited"
+          },
+          "poiLayer": {
+            "type": "string",
+            "description": "User's POI layer"
+          },
+          "token": {
+            "type": "string",
+            "description": "User's authentication token"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "User attributes"
+          }
+        },
+        "required": ["id", "name", "email"]
+      },
+      "Device": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Device name"
+          },
+          "uniqueId": {
+            "type": "string",
+            "description": "Device unique identifier"
+          },
+          "status": {
+            "type": "string",
+            "description": "Device status"
+          },
+          "disabled": {
+            "type": "boolean",
+            "description": "Whether the device is disabled"
+          },
+          "lastUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update time"
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Latest position ID"
+          },
+          "groupId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Group ID"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Device phone number"
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model"
+          },
+          "contact": {
+            "type": "string",
+            "description": "Device contact information"
+          },
+          "category": {
+            "type": "string",
+            "description": "Device category"
+          },
+          "geofenceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Associated geofence IDs"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Device attributes"
+          }
+        },
+        "required": ["id", "name", "uniqueId"]
+      },
+      "DeviceAccumulators": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device ID"
+          },
+          "totalDistance": {
+            "type": "number",
+            "format": "double",
+            "description": "Total distance in kilometers"
+          },
+          "hours": {
+            "type": "number",
+            "format": "double",
+            "description": "Engine hours"
+          }
+        },
+        "required": ["deviceId"]
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Position ID"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device ID"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol used"
+          },
+          "deviceTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Device time"
+          },
+          "fixTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fix time"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server time"
+          },
+          "outdated": {
+            "type": "boolean",
+            "description": "Whether the position is outdated"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the position is valid"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Altitude in meters"
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed in knots"
+          },
+          "course": {
+            "type": "number",
+            "format": "double",
+            "description": "Course in degrees"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double",
+            "description": "Accuracy in meters"
+          },
+          "network": {
+            "type": "object",
+            "description": "Network information"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Position attributes"
+          }
+        },
+        "required": ["id", "deviceId", "fixTime", "latitude", "longitude"]
+      }
+    }
+  },
+  "paths": {
+    "/devices": {
+      "get": {
+        "summary": "Get devices",
+        "description": "Retrieves a list of devices based on query parameters",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "all",
+            "in": "query",
+            "description": "Include all devices (admin only)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "Filter by user ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "uniqueId",
+            "in": "query",
+            "description": "Filter by device unique ID",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Filter by device ID",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of devices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Device"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      },
+      "post": {
+        "summary": "Create a device",
+        "description": "Creates a new device",
+        "tags": ["Devices"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Device"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid device data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/devices/{id}": {
+      "get": {
+        "summary": "Get a device",
+        "description": "Retrieves a specific device by ID",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Device"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      },
+      "put": {
+        "summary": "Update a device",
+        "description": "Updates an existing device",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Device"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid device data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a device",
+        "description": "Deletes a specific device by ID",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Device deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/devices/{id}/accumulators": {
+      "put": {
+        "summary": "Update device accumulators",
+        "description": "Updates device accumulators (total distance, hours)",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceAccumulators"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Accumulators updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid accumulator data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/devices/{id}/image": {
+      "post": {
+        "summary": "Upload device image",
+        "description": "Uploads an image for a device",
+        "tags": ["Devices"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/gif": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/svg+xml": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Image filename"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid image data or size limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/devices/share": {
+      "post": {
+        "summary": "Share a device",
+        "description": "Creates a sharing link for a device",
+        "tags": ["Devices"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceId": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Device ID to share"
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Expiration date and time for the share"
+                  }
+                },
+                "required": ["deviceId", "expiration"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device share token",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Share token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid share parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions or sharing disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/positions": {
+      "get": {
+        "summary": "Get positions",
+        "description": "Retrieves positions based on query parameters",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Position IDs",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of positions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Position"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      },
+      "delete": {
+        "summary": "Delete positions",
+        "description": "Deletes positions based on query parameters",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Positions deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/positions/{id}": {
+      "delete": {
+        "summary": "Delete a position",
+        "description": "Deletes a specific position by ID",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Position ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Position deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/positions/kml": {
+      "get": {
+        "summary": "Export positions as KML",
+        "description": "Exports positions in KML format",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KML file",
+            "content": {
+              "application/vnd.google-earth.kml+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=positions.kml"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/positions/csv": {
+      "get": {
+        "summary": "Export positions as CSV",
+        "description": "Exports positions in CSV format",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=positions.csv"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/positions/gpx": {
+      "get": {
+        "summary": "Export positions as GPX",
+        "description": "Exports positions in GPX format",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GPX file",
+            "content": {
+              "application/gpx+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=positions.gpx"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/session": {
+      "get": {
+        "summary": "Get current session",
+        "description": "Retrieves the current user session information based on authentication token or session cookie",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "description": "Authentication token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User session information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {},
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      },
+      "post": {
+        "summary": "Create a new session (login)",
+        "description": "Authenticates a user and creates a new session",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "User email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "description": "User password"
+                  },
+                  "code": {
+                    "type": "integer",
+                    "description": "Two-factor authentication code"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "example": "TOTP"
+                },
+                "description": "Indicates that TOTP (Time-based One-Time Password) is required"
+              }
+            }
+          }
+        },
+        "security": [{}]
+      },
+      "delete": {
+        "summary": "End the current session (logout)",
+        "description": "Terminates the current user session",
+        "tags": ["Authentication"],
+        "responses": {
+          "204": {
+            "description": "Session terminated successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/session/{id}": {
+      "get": {
+        "summary": "Get session by user ID",
+        "description": "Retrieves session information for a specific user ID",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User session information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/session/token": {
+      "post": {
+        "summary": "Request an authentication token",
+        "description": "Generates a new authentication token for the current user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expiration": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Token expiration date and time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication token",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          { "basicAuth": [] },
+          { "bearerAuth": [] },
+          { "cookieAuth": [] }
+        ]
+      }
+    },
+    "/session/openid/auth": {
+      "get": {
+        "summary": "Initiate OpenID authentication",
+        "description": "Redirects to the OpenID provider for authentication",
+        "tags": ["Authentication"],
+        "responses": {
+          "303": {
+            "description": "Redirect to OpenID provider"
+          }
+        },
+        "security": [{}]
+      }
+    },
+    "/session/openid/callback": {
+      "get": {
+        "summary": "OpenID authentication callback",
+        "description": "Callback endpoint for OpenID authentication flow",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "Authorization code from OpenID provider",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "State parameter for CSRF protection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to application after successful authentication"
+          },
+          "400": {
+            "description": "Bad Request - Invalid callback parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    }
+}
