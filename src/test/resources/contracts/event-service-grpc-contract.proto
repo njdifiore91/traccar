@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+package org.traccar.event;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.event.proto";
+option java_outer_classname = "EventServiceProto";
+
+// Import common message definitions
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Event Service definition
+service EventService {
+  // Process position data to detect events
+  rpc ProcessPosition(PositionRequest) returns (EventDetectionResponse);
+  
+  // Evaluate a specific rule against position data
+  rpc EvaluateRule(RuleEvaluationRequest) returns (RuleEvaluationResponse);
+  
+  // Get events for a specific device within a time range
+  rpc GetEvents(EventsRequest) returns (EventsResponse);
+  
+  // Get event by ID
+  rpc GetEvent(EventRequest) returns (Event);
+  
+  // Create a custom event
+  rpc CreateEvent(CreateEventRequest) returns (Event);
+  
+  // Update event rule configuration
+  rpc UpdateEventRule(EventRule) returns (EventRule);
+  
+  // Get all event rules
+  rpc GetEventRules(EventRulesRequest) returns (EventRulesResponse);
+  
+  // Get event rule by ID
+  rpc GetEventRule(EventRuleRequest) returns (EventRule);
+  
+  // Delete event rule
+  rpc DeleteEventRule(EventRuleRequest) returns (google.protobuf.Empty);
+  
+  // Subscribe to event notifications
+  rpc SubscribeToEvents(EventSubscriptionRequest) returns (stream Event);
+}
+
+// Position data for event detection
+message PositionRequest {
+  int64 device_id = 1;
+  double latitude = 2;
+  double longitude = 3;
+  double speed = 4;
+  double course = 5;
+  double altitude = 6;
+  google.protobuf.Timestamp time = 7;
+  map<string, string> attributes = 8;
+  bool motion = 9;
+  double total_distance = 10;
+  bool ignition = 11;
+}
+
+// Response containing detected events
+message EventDetectionResponse {
+  repeated Event events = 1;
+}
+
+// Event data structure
+message Event {
+  int64 id = 1;
+  string type = 2;
+  int64 device_id = 3;
+  int64 position_id = 4;
+  google.protobuf.Timestamp time = 5;
+  int64 geofence_id = 6;
+  int64 maintenance_id = 7;
+  map<string, string> attributes = 8;
+}
+
+// Request to evaluate a specific rule
+message RuleEvaluationRequest {
+  int64 rule_id = 1;
+  int64 device_id = 2;
+  PositionRequest position = 3;
+}
+
+// Response from rule evaluation
+message RuleEvaluationResponse {
+  bool triggered = 1;
+  Event event = 2;
+}
+
+// Request to get events for a device
+message EventsRequest {
+  int64 device_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+  repeated string types = 4;
+  int32 limit = 5;
+}
+
+// Response containing multiple events
+message EventsResponse {
+  repeated Event events = 1;
+}
+
+// Request to get a specific event
+message EventRequest {
+  int64 id = 1;
+}
+
+// Request to create a custom event
+message CreateEventRequest {
+  string type = 1;
+  int64 device_id = 2;
+  int64 position_id = 3;
+  google.protobuf.Timestamp time = 4;
+  int64 geofence_id = 5;
+  int64 maintenance_id = 6;
+  map<string, string> attributes = 7;
+}
+
+// Event rule definition
+message EventRule {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  bool enabled = 4;
+  string type = 5; // MOTION, OVERSPEED, GEOFENCE, etc.
+  repeated int64 device_ids = 6;
+  repeated int64 group_ids = 7;
+  EventRuleCondition condition = 8;
+  map<string, string> parameters = 9;
+  NotificationConfig notification = 10;
+}
+
+// Event rule condition
+message EventRuleCondition {
+  enum ConditionType {
+    ATTRIBUTE = 0;
+    POSITION = 1;
+    DEVICE = 2;
+    TIME = 3;
+    GEOFENCE = 4;
+    MAINTENANCE = 5;
+    CUSTOM = 6;
+  }
+  
+  ConditionType type = 1;
+  string attribute = 2;
+  string operator = 3; // EQUALS, GREATER_THAN, LESS_THAN, etc.
+  string value = 4;
+  repeated EventRuleCondition and_conditions = 5;
+  repeated EventRuleCondition or_conditions = 6;
+}
+
+// Notification configuration for event rules
+message NotificationConfig {
+  bool email = 1;
+  bool sms = 2;
+  bool push = 3;
+  bool web = 4;
+  string template_id = 5;
+  map<string, string> attributes = 6;
+}
+
+// Request to get all event rules
+message EventRulesRequest {
+  int64 device_id = 1;
+  string type = 2;
+  bool enabled_only = 3;
+}
+
+// Response containing multiple event rules
+message EventRulesResponse {
+  repeated EventRule rules = 1;
+}
+
+// Request to get a specific event rule
+message EventRuleRequest {
+  int64 id = 1;
+}
+
+// Request to subscribe to event notifications
+message EventSubscriptionRequest {
+  repeated int64 device_ids = 1;
+  repeated string event_types = 2;
+  int64 user_id = 3;
+}
