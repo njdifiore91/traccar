@@ -1,0 +1,108 @@
+{{- /*
+HorizontalPodAutoscaler for the Notification Service
+
+This manifest defines the HPA configuration for automatically scaling the Notification Service
+based on resource utilization and custom metrics. The Notification Service is responsible for
+delivering alerts via multiple channels (email, SMS, push, etc.) based on detected events.
+
+Key features:
+- CPU-based scaling (target: 70% utilization)
+- Memory-based scaling (target: 80% utilization)
+- Support for custom metrics like message queue lag
+- Configurable min/max replica counts
+- Customizable scaling behavior with sensible defaults
+
+The HPA ensures the Notification Service can handle varying loads efficiently by increasing
+or decreasing the number of replicas based on actual resource utilization and workload metrics.
+*/ -}}
+
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "notification.fullname" . }}
+  labels:
+    {{- include "notification.labels" . | nindent 4 }}
+  {{- with .Values.autoscaling.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Target the Notification Service deployment for scaling
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "notification.fullname" . }}
+  # Configure minimum and maximum number of replicas
+  minReplicas: {{ .Values.autoscaling.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas | default 10 }}
+  metrics:
+    # CPU-based scaling (target: 70% utilization by default)
+    {{- if not (hasKey .Values.autoscaling "targetCPUUtilizationPercentage") }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    {{- else if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    
+    # Memory-based scaling (target: 80% utilization by default)
+    {{- if not (hasKey .Values.autoscaling "targetMemoryUtilizationPercentage") }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    {{- else if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    
+    # Custom metrics for advanced scaling scenarios (e.g., message queue lag)
+    # These can be defined in values.yaml under autoscaling.customMetrics
+    {{- if .Values.autoscaling.customMetrics }}
+    {{- toYaml .Values.autoscaling.customMetrics | nindent 4 }}
+    {{- end }}
+  
+  # Scaling behavior configuration
+  # Controls how aggressively the HPA scales up or down
+  behavior:
+    {{- if .Values.autoscaling.behavior }}
+    {{- toYaml .Values.autoscaling.behavior | nindent 4 }}
+    {{- else }}
+    # Scale down behavior: more conservative to prevent rapid fluctuations
+    scaleDown:
+      # Wait 5 minutes before scaling down to prevent thrashing
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    # Scale up behavior: more aggressive to quickly respond to increased load
+    scaleUp:
+      # No delay when scaling up to respond quickly to load increases
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      # Use the policy that would scale up the most
+      selectPolicy: Max
+    {{- end }}
+{{- end }}
