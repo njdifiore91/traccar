@@ -1,0 +1,124 @@
+[
+  {
+    "scenario": "invalid_token",
+    "response": {
+      "status": 0,
+      "request": "e460545a-9423-4eda-b664-d89f8924e1bb",
+      "errors": [
+        "application token is invalid"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "invalid_user",
+    "response": {
+      "status": 0,
+      "request": "f72a9b36-1c5d-4d5e-8b9c-37a8f3671def",
+      "errors": [
+        "user identifier is invalid"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "rate_limited",
+    "response": {
+      "status": 0,
+      "request": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "errors": [
+        "rate limit exceeded, please wait 60 seconds before trying again"
+      ]
+    },
+    "http_status": 429
+  },
+  {
+    "scenario": "quota_exceeded",
+    "response": {
+      "status": 0,
+      "request": "7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a",
+      "errors": [
+        "application has exceeded its monthly message quota"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "missing_parameter",
+    "response": {
+      "status": 0,
+      "request": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
+      "errors": [
+        "message cannot be blank"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "inactive_user",
+    "response": {
+      "status": 0,
+      "request": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+      "errors": [
+        "user is not active"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "invalid_device",
+    "response": {
+      "status": 0,
+      "request": "2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+      "errors": [
+        "device name is invalid"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "service_unavailable",
+    "response": {
+      "status": 0,
+      "request": "5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c",
+      "errors": [
+        "Pushover service is temporarily unavailable, please try again later"
+      ]
+    },
+    "http_status": 503
+  },
+  {
+    "scenario": "multiple_errors",
+    "response": {
+      "status": 0,
+      "request": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "errors": [
+        "message cannot be blank",
+        "priority must be an integer value between -2 and 2"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "emergency_retry_error",
+    "response": {
+      "status": 0,
+      "request": "8d9e0f1a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+      "errors": [
+        "retry parameter must be supplied with priority=2"
+      ]
+    },
+    "http_status": 400
+  },
+  {
+    "scenario": "emergency_expire_error",
+    "response": {
+      "status": 0,
+      "request": "4b5c6d7e-8f9a-0b1c-2d3e-4f5a6b7c8d9e",
+      "errors": [
+        "expire parameter must be supplied with priority=2"
+      ]
+    },
+    "http_status": 400
+  }
+]
