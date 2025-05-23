@@ -1,0 +1,27 @@
+{
+  "deviceId": 0,
+  "protocol": "test",
+  "serverTime": "2023-01-01T00:00:00.000Z",
+  "deviceTime": "2023-01-01T00:00:00.000Z",
+  "fixTime": "2023-01-01T00:00:00.000Z",
+  "valid": true,
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "altitude": 0.0,
+  "speed": 0.0,
+  "course": 0.0,
+  "accuracy": 0.0,
+  "network": {},
+  "attributes": {
+    "messageId": "test",
+    "raw": "test",
+    "processed": false,
+    "priority": 0,
+    "eventId": null,
+    "correlationId": "00000000-0000-0000-0000-000000000000",
+    "broker": {
+      "topic": "raw.positions",
+      "partition": 0
+    }
+  }
+}
