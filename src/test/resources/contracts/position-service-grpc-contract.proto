@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package org.traccar.position;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.position.grpc";
+option java_outer_classname = "PositionServiceProto";
+
+// Import common message types
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+// Position Service definition
+service PositionService {
+  // Process a raw position from the Protocol Service
+  rpc ProcessPosition(ProcessPositionRequest) returns (ProcessPositionResponse);
+  
+  // Get the latest position for a device
+  rpc GetLatestPosition(GetLatestPositionRequest) returns (Position);
+  
+  // Get positions for a device within a time range
+  rpc GetPositions(GetPositionsRequest) returns (GetPositionsResponse);
+  
+  // Send a command to a device
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+  
+  // Calculate distance between positions
+  rpc CalculateDistance(CalculateDistanceRequest) returns (CalculateDistanceResponse);
+  
+  // Enrich position with additional data (geocoding, motion status, etc.)
+  rpc EnrichPosition(EnrichPositionRequest) returns (Position);
+  
+  // Filter position based on configured rules
+  rpc FilterPosition(FilterPositionRequest) returns (FilterPositionResponse);
+  
+  // Stream positions for a device in real-time
+  rpc StreamPositions(StreamPositionsRequest) returns (stream Position);
+  
+  // Health check endpoint
+  rpc HealthCheck(google.protobuf.Empty) returns (HealthCheckResponse);
+}
+
+// Position message represents a GPS position with all attributes
+message Position {
+  int64 id = 1;
+  int64 device_id = 2;
+  string protocol = 3;
+  google.protobuf.Timestamp device_time = 4;
+  google.protobuf.Timestamp server_time = 5;
+  google.protobuf.Timestamp fix_time = 6;
+  bool valid = 7;
+  double latitude = 8;
+  double longitude = 9;
+  double altitude = 10;
+  double speed = 11;
+  double course = 12;
+  int32 satellites = 13;
+  string address = 14;
+  double accuracy = 15;
+  string network = 16;
+  
+  // Position attributes
+  map<string, AttributeValue> attributes = 17;
+}
+
+// Attribute value can be of different types
+message AttributeValue {
+  oneof value {
+    string string_value = 1;
+    bool bool_value = 2;
+    int64 int_value = 3;
+    double double_value = 4;
+    bytes binary_value = 5;
+  }
+}
+
+// Request to process a raw position
+message ProcessPositionRequest {
+  Position position = 1;
+  bool skip_validation = 2;
+}
+
+// Response from processing a position
+message ProcessPositionResponse {
+  Position position = 1;
+  bool processed = 2;
+  string error_message = 3;
+}
+
+// Request to get the latest position for a device
+message GetLatestPositionRequest {
+  int64 device_id = 1;
+}
+
+// Request to get positions for a device within a time range
+message GetPositionsRequest {
+  int64 device_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+  int32 limit = 4;
+}
+
+// Response containing a list of positions
+message GetPositionsResponse {
+  repeated Position positions = 1;
+}
+
+// Request to send a command to a device
+message SendCommandRequest {
+  int64 device_id = 1;
+  string type = 2;
+  map<string, string> attributes = 3;
+}
+
+// Response from sending a command
+message SendCommandResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to calculate distance between positions
+message CalculateDistanceRequest {
+  oneof distance_type {
+    // Calculate distance between two positions
+    PositionPair position_pair = 1;
+    // Calculate total distance for a list of positions
+    PositionList position_list = 2;
+  }
+}
+
+// Pair of positions for distance calculation
+message PositionPair {
+  Position position1 = 1;
+  Position position2 = 2;
+}
+
+// List of positions for total distance calculation
+message PositionList {
+  repeated Position positions = 1;
+}
+
+// Response with calculated distance
+message CalculateDistanceResponse {
+  double distance = 1; // Distance in meters
+}
+
+// Request to enrich a position with additional data
+message EnrichPositionRequest {
+  Position position = 1;
+  repeated EnrichmentType enrichment_types = 2;
+}
+
+// Types of enrichment that can be applied to a position
+enum EnrichmentType {
+  GEOCODING = 0;
+  MOTION_STATE = 1;
+  DISTANCE = 2;
+  GEOFENCE = 3;
+  SPEED_LIMIT = 4;
+}
+
+// Request to filter a position based on configured rules
+message FilterPositionRequest {
+  Position position = 1;
+  repeated FilterType filter_types = 2;
+}
+
+// Types of filters that can be applied to a position
+enum FilterType {
+  INVALID = 0;
+  ZERO = 1;
+  DUPLICATE = 2;
+  FUTURE = 3;
+  APPROXIMATE = 4;
+  STATIC = 5;
+  DISTANCE = 6;
+  MAX_SPEED = 7;
+  SKIP = 8;
+}
+
+// Response from filtering a position
+message FilterPositionResponse {
+  bool filtered = 1;
+  string filter_reason = 2;
+  Position position = 3;
+}
+
+// Request to stream positions for a device
+message StreamPositionsRequest {
+  int64 device_id = 1;
+  bool include_attributes = 2;
+}
+
+// Health check response
+message HealthCheckResponse {
+  enum Status {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;
+  }
+  Status status = 1;
+}
