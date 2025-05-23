@@ -1,0 +1,2643 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Traccar Reporting Service API",
+    "description": "REST API for the Traccar Reporting Service, providing endpoints for generating and delivering various report types.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traccar Support",
+      "url": "https://www.traccar.org/support/",
+      "email": "support@traccar.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Reporting Service API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "reports",
+      "description": "Report generation and delivery operations"
+    }
+  ],
+  "paths": {
+    "/reports/combined": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get combined report data",
+        "description": "Retrieves combined report data for specified devices or groups within a time range",
+        "operationId": "getCombinedReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CombinedReportItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/route": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get route report data",
+        "description": "Retrieves route report data for specified devices or groups within a time range",
+        "operationId": "getRouteReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "mail",
+            "in": "query",
+            "description": "Email the report instead of returning it directly",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Position"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/route/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get route report in Excel format",
+        "description": "Retrieves route report in Excel format for specified devices or groups within a time range",
+        "operationId": "getRouteReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/route/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email route report in Excel format",
+        "description": "Emails route report in Excel format for specified devices or groups within a time range",
+        "operationId": "emailRouteReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/events": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get events report data",
+        "description": "Retrieves events report data for specified devices or groups within a time range",
+        "operationId": "getEventsReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Event types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "alarm",
+            "in": "query",
+            "description": "Alarm types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "mail",
+            "in": "query",
+            "description": "Email the report instead of returning it directly",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/events/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get events report in Excel format",
+        "description": "Retrieves events report in Excel format for specified devices or groups within a time range",
+        "operationId": "getEventsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Event types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "alarm",
+            "in": "query",
+            "description": "Alarm types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/events/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email events report in Excel format",
+        "description": "Emails events report in Excel format for specified devices or groups within a time range",
+        "operationId": "emailEventsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Event types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "alarm",
+            "in": "query",
+            "description": "Alarm types to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/summary": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get summary report data",
+        "description": "Retrieves summary report data for specified devices or groups within a time range",
+        "operationId": "getSummaryReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "daily",
+            "in": "query",
+            "description": "Include daily breakdown in the report",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "mail",
+            "in": "query",
+            "description": "Email the report instead of returning it directly",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SummaryReportItem"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/summary/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get summary report in Excel format",
+        "description": "Retrieves summary report in Excel format for specified devices or groups within a time range",
+        "operationId": "getSummaryReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "daily",
+            "in": "query",
+            "description": "Include daily breakdown in the report",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/summary/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email summary report in Excel format",
+        "description": "Emails summary report in Excel format for specified devices or groups within a time range",
+        "operationId": "emailSummaryReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "daily",
+            "in": "query",
+            "description": "Include daily breakdown in the report",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/trips": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get trips report data",
+        "description": "Retrieves trips report data for specified devices or groups within a time range",
+        "operationId": "getTripsReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "mail",
+            "in": "query",
+            "description": "Email the report instead of returning it directly",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TripReportItem"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/trips/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get trips report in Excel format",
+        "description": "Retrieves trips report in Excel format for specified devices or groups within a time range",
+        "operationId": "getTripsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/trips/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email trips report in Excel format",
+        "description": "Emails trips report in Excel format for specified devices or groups within a time range",
+        "operationId": "emailTripsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/stops": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get stops report data",
+        "description": "Retrieves stops report data for specified devices or groups within a time range",
+        "operationId": "getStopsReport",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "mail",
+            "in": "query",
+            "description": "Email the report instead of returning it directly",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StopReportItem"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/stops/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get stops report in Excel format",
+        "description": "Retrieves stops report in Excel format for specified devices or groups within a time range",
+        "operationId": "getStopsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/stops/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email stops report in Excel format",
+        "description": "Emails stops report in Excel format for specified devices or groups within a time range",
+        "operationId": "emailStopsReportExcel",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Device IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Group IDs to include in the report",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date and time for the report period (ISO-8601 format)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/devices/xlsx": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Get devices report in Excel format",
+        "description": "Retrieves devices report in Excel format for all devices accessible to the user",
+        "operationId": "getDevicesReportExcel",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/devices/mail": {
+      "get": {
+        "tags": ["reports"],
+        "summary": "Email devices report in Excel format",
+        "description": "Emails devices report in Excel format for all devices accessible to the user",
+        "operationId": "emailDevicesReportExcel",
+        "responses": {
+          "204": {
+            "description": "Report sent by email successfully"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Reports feature disabled for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Position": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the position"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier this position belongs to"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol used to receive the position"
+          },
+          "deviceTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the position as reported by the device"
+          },
+          "fixTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position was determined"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the position was received by the server"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude in decimal degrees"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude in decimal degrees"
+          },
+          "altitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Altitude in meters above sea level"
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speed in knots"
+          },
+          "course": {
+            "type": "number",
+            "format": "double",
+            "description": "Course in degrees"
+          },
+          "address": {
+            "type": "string",
+            "description": "Geocoded address of the position"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double",
+            "description": "Position accuracy in meters"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Indicates if the position is valid"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes associated with the position"
+          }
+        },
+        "required": [
+          "id",
+          "deviceId",
+          "latitude",
+          "longitude",
+          "serverTime"
+        ]
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the event"
+          },
+          "type": {
+            "type": "string",
+            "description": "Event type (e.g., deviceOnline, deviceOffline, geofenceEnter, geofenceExit, alarm)"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the event was generated on the server"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier this event is associated with"
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Position identifier this event is associated with"
+          },
+          "geofenceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Geofence identifier this event is associated with (for geofence events)"
+          },
+          "maintenanceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maintenance identifier this event is associated with (for maintenance events)"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes associated with the event"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "serverTime",
+          "deviceId"
+        ]
+      },
+      "CombinedReportItem": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Device name"
+          },
+          "distance": {
+            "type": "number",
+            "format": "double",
+            "description": "Total distance traveled in kilometers"
+          },
+          "averageSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Average speed in knots"
+          },
+          "maxSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Maximum speed in knots"
+          },
+          "engineHours": {
+            "type": "number",
+            "format": "double",
+            "description": "Total engine hours"
+          },
+          "spentFuel": {
+            "type": "number",
+            "format": "double",
+            "description": "Total fuel spent in liters"
+          },
+          "startOdometer": {
+            "type": "number",
+            "format": "double",
+            "description": "Odometer value at the start of the period"
+          },
+          "endOdometer": {
+            "type": "number",
+            "format": "double",
+            "description": "Odometer value at the end of the period"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the report period"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the report period"
+          }
+        },
+        "required": [
+          "deviceId",
+          "deviceName",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "TripReportItem": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Device name"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Trip start time"
+          },
+          "startAddress": {
+            "type": "string",
+            "description": "Address at trip start"
+          },
+          "startLat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude at trip start"
+          },
+          "startLon": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude at trip start"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Trip end time"
+          },
+          "endAddress": {
+            "type": "string",
+            "description": "Address at trip end"
+          },
+          "endLat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude at trip end"
+          },
+          "endLon": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude at trip end"
+          },
+          "distance": {
+            "type": "number",
+            "format": "double",
+            "description": "Trip distance in kilometers"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trip duration in milliseconds"
+          },
+          "averageSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Average speed during the trip in knots"
+          },
+          "maxSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Maximum speed during the trip in knots"
+          },
+          "spentFuel": {
+            "type": "number",
+            "format": "double",
+            "description": "Fuel spent during the trip in liters"
+          },
+          "driverUniqueId": {
+            "type": "string",
+            "description": "Driver unique identifier"
+          },
+          "driverName": {
+            "type": "string",
+            "description": "Driver name"
+          }
+        },
+        "required": [
+          "deviceId",
+          "deviceName",
+          "startTime",
+          "endTime",
+          "distance",
+          "duration"
+        ]
+      },
+      "StopReportItem": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Device name"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Stop start time"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the stop location"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double",
+            "description": "Latitude of the stop location"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double",
+            "description": "Longitude of the stop location"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Stop end time"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Stop duration in milliseconds"
+          },
+          "engineHours": {
+            "type": "number",
+            "format": "double",
+            "description": "Engine hours during the stop"
+          },
+          "spentFuel": {
+            "type": "number",
+            "format": "double",
+            "description": "Fuel spent during the stop in liters"
+          }
+        },
+        "required": [
+          "deviceId",
+          "deviceName",
+          "startTime",
+          "endTime",
+          "duration"
+        ]
+      },
+      "SummaryReportItem": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Device identifier"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "Device name"
+          },
+          "distance": {
+            "type": "number",
+            "format": "double",
+            "description": "Total distance traveled in kilometers"
+          },
+          "averageSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Average speed in knots"
+          },
+          "maxSpeed": {
+            "type": "number",
+            "format": "double",
+            "description": "Maximum speed in knots"
+          },
+          "engineHours": {
+            "type": "number",
+            "format": "double",
+            "description": "Total engine hours"
+          },
+          "spentFuel": {
+            "type": "number",
+            "format": "double",
+            "description": "Total fuel spent in liters"
+          },
+          "startOdometer": {
+            "type": "number",
+            "format": "double",
+            "description": "Odometer value at the start of the period"
+          },
+          "endOdometer": {
+            "type": "number",
+            "format": "double",
+            "description": "Odometer value at the end of the period"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start time of the report period"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time of the report period"
+          }
+        },
+        "required": [
+          "deviceId",
+          "deviceName",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "string",
+            "description": "Detailed error information"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the error occurred"
+          },
+          "path": {
+            "type": "string",
+            "description": "Request path that caused the error"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Correlation ID for tracking the error across services"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "timestamp"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
+      }
+    }
+  }
+}
