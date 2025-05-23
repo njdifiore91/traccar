@@ -1,0 +1,150 @@
+# Protocol Service Message Broker Configuration
+# This file configures the message broker integration for the Protocol Service
+# It supports both Kafka and RabbitMQ as message brokers
+
+# Common broker settings
+broker:
+  # Type of message broker to use: 'kafka' or 'rabbitmq'
+  # Can be overridden with environment variable BROKER_TYPE
+  type: kafka
+  # Topic for publishing decoded position data
+  topics:
+    positions: raw.positions
+  # Common producer settings
+  producer:
+    client-id: protocol-service
+    # Number of retries if sending fails
+    retries: 3
+    # Retry backoff in milliseconds
+    retry-backoff-ms: 1000
+    # Delivery guarantees: 'at-least-once', 'at-most-once', or 'exactly-once'
+    delivery-guarantee: at-least-once
+    # Batch size for sending messages
+    batch-size: 16384
+    # Linger time in milliseconds
+    linger-ms: 5
+    # Buffer memory in bytes
+    buffer-memory: 33554432
+    # Compression type: 'none', 'gzip', 'snappy', 'lz4', or 'zstd'
+    compression-type: snappy
+
+# Kafka-specific configuration (used when broker.type = kafka)
+kafka:
+  # Connection settings
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  # Security settings
+  security:
+    protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+    # SSL/TLS configuration (when protocol is SSL or SASL_SSL)
+    ssl:
+      enabled: ${KAFKA_SSL_ENABLED:false}
+      truststore-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+      truststore-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      keystore-location: ${KAFKA_SSL_KEYSTORE_LOCATION:}
+      keystore-password: ${KAFKA_SSL_KEYSTORE_PASSWORD:}
+      key-password: ${KAFKA_SSL_KEY_PASSWORD:}
+    # SASL configuration (when protocol is SASL_PLAINTEXT or SASL_SSL)
+    sasl:
+      enabled: ${KAFKA_SASL_ENABLED:false}
+      mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+      jaas-config: ${KAFKA_SASL_JAAS_CONFIG:}
+  # Producer-specific settings
+  producer:
+    # Key serializer
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    # Value serializer
+    value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    # Acknowledgment settings: 0 (no ack), 1 (leader ack), all (all replicas ack)
+    acks: all
+    # Enable idempotent producer for exactly-once semantics
+    enable-idempotence: true
+    # Transaction timeout in milliseconds
+    transaction-timeout-ms: 60000
+  # Admin settings
+  admin:
+    # Auto-create topics if they don't exist
+    auto-create-topics: true
+    # Number of partitions for auto-created topics
+    num-partitions: 3
+    # Replication factor for auto-created topics
+    replication-factor: 3
+
+# RabbitMQ-specific configuration (used when broker.type = rabbitmq)
+rabbitmq:
+  # Connection settings
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USERNAME:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
+  virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+  # Connection timeout in milliseconds
+  connection-timeout: 60000
+  # Requested heartbeat timeout in seconds
+  requested-heartbeat: 60
+  # Security settings
+  ssl:
+    enabled: ${RABBITMQ_SSL_ENABLED:false}
+    # SSL/TLS configuration
+    key-store: ${RABBITMQ_SSL_KEY_STORE:}
+    key-store-password: ${RABBITMQ_SSL_KEY_STORE_PASSWORD:}
+    trust-store: ${RABBITMQ_SSL_TRUST_STORE:}
+    trust-store-password: ${RABBITMQ_SSL_TRUST_STORE_PASSWORD:}
+    algorithm: ${RABBITMQ_SSL_ALGORITHM:TLSv1.2}
+  # Exchange and queue settings
+  exchange:
+    name: protocol.exchange
+    type: topic
+    durable: true
+    auto-delete: false
+  queue:
+    name: raw.positions
+    durable: true
+    exclusive: false
+    auto-delete: false
+  # Producer-specific settings
+  producer:
+    # Enable publisher confirms
+    publisher-confirms: true
+    # Enable publisher returns
+    publisher-returns: true
+    # Mandatory flag for publishing
+    mandatory: true
+    # Delivery mode: 1 (non-persistent) or 2 (persistent)
+    delivery-mode: 2
+    # Channel cache size
+    channel-cache-size: 25
+
+# Error handling and recovery settings
+error-handling:
+  # Dead letter exchange/queue configuration
+  dead-letter:
+    enabled: true
+    exchange: protocol.dlx
+    routing-key: protocol.dlq
+  # Retry settings
+  retry:
+    enabled: true
+    max-attempts: 3
+    initial-interval: 1000
+    multiplier: 2.0
+    max-interval: 10000
+
+# Monitoring and metrics
+monitoring:
+  # Enable JMX metrics
+  jmx-enabled: true
+  # Enable health checks
+  health-check-enabled: true
+  # Metrics reporting interval in seconds
+  metrics-interval: 60
+
+# Service discovery integration
+discovery:
+  # Enable service discovery for broker connections
+  enabled: ${DISCOVERY_ENABLED:false}
+  # Service discovery type: 'consul', 'kubernetes'
+  type: ${DISCOVERY_TYPE:consul}
+  # Service name to look up
+  service-name: ${DISCOVERY_SERVICE_NAME:}
+  # Refresh interval in milliseconds
+  refresh-interval-ms: 60000
