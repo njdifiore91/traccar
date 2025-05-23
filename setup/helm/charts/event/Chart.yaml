@@ -1,0 +1,34 @@
+apiVersion: v2
+name: event
+version: 1.0.0
+type: application
+description: |
+  Event Processing Service for the Traccar GPS tracking platform microservices architecture.
+  
+  This service analyzes position data to detect significant events such as geofence transitions,
+  speed violations, device status changes, and maintenance alerts. It implements complex event
+  processing with stateful operations for time-window events and publishes detected events to
+  the message broker for further processing by the Notification Service.
+
+  Key responsibilities:
+  - Consuming enriched position data from the message broker
+  - Detecting events based on position analysis and rule evaluation
+  - Implementing complex event processing for stateful events
+  - Publishing detected events to the message broker
+  - Storing events in the database using the transactional outbox pattern
+
+kubeVersion: ">= 1.25.0"
+appVersion: "1.0.0"
+maintainers:
+  - name: Traccar Team
+    email: support@traccar.org
+    url: https://www.traccar.org
+keywords:
+  - traccar
+  - gps
+  - tracking
+  - event-processing
+  - microservices
+home: https://www.traccar.org
+sources:
+  - https://github.com/traccar/traccar
