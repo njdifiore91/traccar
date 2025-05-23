@@ -1,0 +1,389 @@
+{
+  "version1": {
+    "standardPosition": {
+      "message": "$$0108AA864244026063999|500440001509071845394212000052093852112903600000.700000000008.4856S07829.5025W048554",
+      "deviceId": "864244026063999",
+      "timestamp": "2015-09-07T18:45:39.000Z",
+      "valid": true,
+      "latitude": -8.48560,
+      "longitude": -78.29503,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 4,
+        "batteryLevel": 52.09,
+        "rssi": 38.52,
+        "sat": 11,
+        "hdop": 2.9,
+        "odometer": 36000
+      }
+    },
+    "alarm": {
+      "message": "$$0108AA864244026063999|500140001509071845394212000052093852112903600000.700000000008.4856S07829.5025W048554",
+      "deviceId": "864244026063999",
+      "timestamp": "2015-09-07T18:45:39.000Z",
+      "valid": true,
+      "latitude": -8.48560,
+      "longitude": -78.29503,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 1,
+        "alarm": true,
+        "batteryLevel": 52.09,
+        "rssi": 38.52,
+        "sat": 11,
+        "hdop": 2.9,
+        "odometer": 36000
+      }
+    },
+    "statusReport": {
+      "message": "$$0108AA864244026063999|500540001509071845394212000052093852112903600000.700000000008.4856S07829.5025W048554",
+      "deviceId": "864244026063999",
+      "timestamp": "2015-09-07T18:45:39.000Z",
+      "valid": true,
+      "latitude": -8.48560,
+      "longitude": -78.29503,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 5,
+        "batteryLevel": 52.09,
+        "rssi": 38.52,
+        "sat": 11,
+        "hdop": 2.9,
+        "odometer": 36000
+      }
+    }
+  },
+  "version2": {
+    "standardPosition": {
+      "message": "$$0128B1867688027024452|AA$GPRMC,171849.00,A,2238.6813,N,11349.3162,E,0.019,,300519,,,A*7B|02.7|01.6|01.9|000000000000|20190530171849|16802155|00000000|00000000|0000|0.0000|0280|0102",
+      "deviceId": "867688027024452",
+      "timestamp": "2019-05-30T17:18:49.000Z",
+      "valid": true,
+      "latitude": 22.64469,
+      "longitude": 113.82194,
+      "speed": 0.019,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 2.7,
+        "externalVoltage": 1.6,
+        "internalVoltage": 1.9,
+        "status": "000000000000",
+        "rssi": 16802155,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 0,
+        "cid": 0,
+        "odometer": 0.0,
+        "temperature": 28.0
+      }
+    },
+    "alarm": {
+      "message": "$$0128B1867688027024452|AA$GPRMC,171849.00,A,2238.6813,N,11349.3162,E,0.019,,300519,,,A*7B|02.7|01.6|01.9|000000010000|20190530171849|16802155|00000000|00000000|0000|0.0000|0280|0102",
+      "deviceId": "867688027024452",
+      "timestamp": "2019-05-30T17:18:49.000Z",
+      "valid": true,
+      "latitude": 22.64469,
+      "longitude": 113.82194,
+      "speed": 0.019,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 2.7,
+        "externalVoltage": 1.6,
+        "internalVoltage": 1.9,
+        "status": "000000010000",
+        "alarm": true,
+        "rssi": 16802155,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 0,
+        "cid": 0,
+        "odometer": 0.0,
+        "temperature": 28.0
+      }
+    },
+    "statusReport": {
+      "message": "$$0128B1867688027024452|AA$GPRMC,171849.00,A,2238.6813,N,11349.3162,E,0.019,,300519,,,A*7B|02.7|01.6|01.9|000000000000|20190530171849|16802155|00000000|00000000|0000|0.0000|0280|0102",
+      "deviceId": "867688027024452",
+      "timestamp": "2019-05-30T17:18:49.000Z",
+      "valid": true,
+      "latitude": 22.64469,
+      "longitude": 113.82194,
+      "speed": 0.019,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 2.7,
+        "externalVoltage": 1.6,
+        "internalVoltage": 1.9,
+        "status": "000000000000",
+        "rssi": 16802155,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 0,
+        "cid": 0,
+        "odometer": 0.0,
+        "temperature": 28.0
+      }
+    }
+  },
+  "version3": {
+    "standardPosition": {
+      "message": "$$0103AA867688027024452|10800000220728090046412047F3B79002222100099.900000002218.8799N11413.0163E054565",
+      "deviceId": "867688027024452",
+      "timestamp": "2022-07-28T09:00:46.000Z",
+      "valid": true,
+      "latitude": 22.31467,
+      "longitude": 114.21694,
+      "speed": 99.9,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 8,
+        "batteryLevel": 41.20,
+        "rssi": 47.0,
+        "sat": 22,
+        "hdop": 2.2
+      }
+    },
+    "alarm": {
+      "message": "$$0103AA867688027024452|10400000220728090046412047F3B79002222100099.900000002218.8799N11413.0163E054565",
+      "deviceId": "867688027024452",
+      "timestamp": "2022-07-28T09:00:46.000Z",
+      "valid": true,
+      "latitude": 22.31467,
+      "longitude": 114.21694,
+      "speed": 99.9,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 4,
+        "alarm": true,
+        "batteryLevel": 41.20,
+        "rssi": 47.0,
+        "sat": 22,
+        "hdop": 2.2
+      }
+    },
+    "statusReport": {
+      "message": "$$0103AA867688027024452|10500000220728090046412047F3B79002222100099.900000002218.8799N11413.0163E054565",
+      "deviceId": "867688027024452",
+      "timestamp": "2022-07-28T09:00:46.000Z",
+      "valid": true,
+      "latitude": 22.31467,
+      "longitude": 114.21694,
+      "speed": 99.9,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 5,
+        "batteryLevel": 41.20,
+        "rssi": 47.0,
+        "sat": 22,
+        "hdop": 2.2
+      }
+    }
+  },
+  "version4": {
+    "standardPosition": {
+      "message": "$$B0000000000000|AA$GPRMC,044639.00,A,1335.89608,N,08948.33395,W,0.000,,010522,,,D*68|1.82|0.94|1.56|0000000000000|20220501044640|14191265|00000000|00291D7F|0000|0.0035|0976|1C6E",
+      "deviceId": "0000000000000",
+      "timestamp": "2022-05-01T04:46:40.000Z",
+      "valid": true,
+      "latitude": 13.59827,
+      "longitude": -89.80557,
+      "speed": 0.0,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 1.82,
+        "externalVoltage": 0.94,
+        "internalVoltage": 1.56,
+        "status": "0000000000000",
+        "rssi": 14191265,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 168223,
+        "cid": 0,
+        "odometer": 0.0035,
+        "temperature": 97.6
+      }
+    },
+    "alarm": {
+      "message": "$$B867162037982501|AA$GPRMC,044622.00,A,1052.72398,N,08535.37752,W,33.233,286.34,010522,,,A*49|1.55|0.71|1.38|1000000000000|20220501044622|14201441|00000000|03E9797F|0000|0.8448|0742|09AC",
+      "deviceId": "867162037982501",
+      "timestamp": "2022-05-01T04:46:22.000Z",
+      "valid": true,
+      "latitude": 10.87873,
+      "longitude": -85.58963,
+      "speed": 33.233,
+      "course": 286.34,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 1.55,
+        "externalVoltage": 0.71,
+        "internalVoltage": 1.38,
+        "status": "1000000000000",
+        "alarm": true,
+        "rssi": 14201441,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 4069753,
+        "cid": 0,
+        "odometer": 0.8448,
+        "temperature": 74.2
+      }
+    },
+    "statusReport": {
+      "message": "$$4867162037886215|AA$GPRMC,044554.00,A,1335.89608,N,08948.33395,W,0.000,,010522,,,D*6E|3.53|1.66|3.12|0000000000000|20220501044554|14191265|00000000|00291D7F|0000|0.0038|0975|E8DA",
+      "deviceId": "867162037886215",
+      "timestamp": "2022-05-01T04:45:54.000Z",
+      "valid": true,
+      "latitude": 13.59827,
+      "longitude": -89.80557,
+      "speed": 0.0,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "batteryLevel": 3.53,
+        "externalVoltage": 1.66,
+        "internalVoltage": 3.12,
+        "status": "0000000000000",
+        "rssi": 14191265,
+        "mcc": 0,
+        "mnc": 0,
+        "lac": 168223,
+        "cid": 0,
+        "odometer": 0.0038,
+        "temperature": 97.5
+      }
+    }
+  },
+  "versionE2": {
+    "standardPosition": {
+      "message": "$$0128E2864606043658458|10811800210415180639391900000000000000000000C5A87D2714060160130.7000012000055.2812S07836.6469W022524",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:39.000Z",
+      "valid": true,
+      "latitude": -55.28120,
+      "longitude": -78.61078,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 8,
+        "batteryLevel": 39.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.6,
+        "odometer": 1601
+      }
+    },
+    "alarm": {
+      "message": "$$0128E2864606043658458|10411800210415180639391900000000000000000000C5A87D2714060160130.7000012000055.2812S07836.6469W022524",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:39.000Z",
+      "valid": true,
+      "latitude": -55.28120,
+      "longitude": -78.61078,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 4,
+        "alarm": true,
+        "batteryLevel": 39.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.6,
+        "odometer": 1601
+      }
+    },
+    "statusReport": {
+      "message": "$$0128E2864606043658458|10511800210415180639391900000000000000000000C5A87D2714060160130.7000012000055.2812S07836.6469W022524",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:39.000Z",
+      "valid": true,
+      "latitude": -55.28120,
+      "longitude": -78.61078,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 5,
+        "batteryLevel": 39.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.6,
+        "odometer": 1601
+      }
+    }
+  },
+  "versionE5": {
+    "standardPosition": {
+      "message": "$$0128E5864606043658458|10811800210415180641381900000000000000000000C5A87D2714070520320.7000004000055.2901S07836.6423W022621",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:41.000Z",
+      "valid": true,
+      "latitude": -55.29010,
+      "longitude": -78.61071,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 8,
+        "batteryLevel": 38.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.7,
+        "odometer": 5203
+      }
+    },
+    "alarm": {
+      "message": "$$0128E5864606043658458|10411800210415180641381900000000000000000000C5A87D2714070520320.7000004000055.2901S07836.6423W022621",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:41.000Z",
+      "valid": true,
+      "latitude": -55.29010,
+      "longitude": -78.61071,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 4,
+        "alarm": true,
+        "batteryLevel": 38.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.7,
+        "odometer": 5203
+      }
+    },
+    "statusReport": {
+      "message": "$$0128E5864606043658458|10511800210415180641381900000000000000000000C5A87D2714070520320.7000004000055.2901S07836.6423W022621",
+      "deviceId": "864606043658458",
+      "timestamp": "2021-04-15T18:06:41.000Z",
+      "valid": true,
+      "latitude": -55.29010,
+      "longitude": -78.61071,
+      "speed": 0.7,
+      "course": 0.0,
+      "altitude": 0.0,
+      "attributes": {
+        "status": 5,
+        "batteryLevel": 38.19,
+        "rssi": 0.0,
+        "sat": 14,
+        "hdop": 0.7,
+        "odometer": 5203
+      }
+    }
+  }
+}
