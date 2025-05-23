@@ -1,0 +1,265 @@
+---
+# ConfigMap for Event Processing Service configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-service-config
+  labels:
+    app: event-service
+    component: event-processing
+data:
+  application.yml: |
+    server:
+      port: 8082
+    
+    spring:
+      application:
+        name: event-service
+      
+      # Message broker configuration
+      kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+        consumer:
+          group-id: event-service
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          properties:
+            spring.json.trusted.packages: org.traccar.model
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      
+    # Service discovery configuration
+    eureka:
+      client:
+        serviceUrl:
+          defaultZone: ${EUREKA_URI:http://discovery-service:8761/eureka}
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        preferIpAddress: true
+    
+    # Monitoring and health check configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,prometheus
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+    
+    # Event processing configuration
+    event:
+      processing:
+        # Maximum number of events to process in a single batch
+        batch-size: 100
+        # Maximum time to wait for a batch to fill up (in milliseconds)
+        batch-timeout: 500
+        # Enable/disable specific event types
+        types:
+          geofence: true
+          overspeed: true
+          motion: true
+          ignition: true
+          maintenance: true
+          driver: true
+          device-status: true
+        # Thresholds for event detection
+        thresholds:
+          overspeed-margin-percent: 5
+          harsh-acceleration: 0.3
+          harsh-braking: 0.4
+          idle-duration-seconds: 180
+    
+    # Resilience configuration
+    resilience4j:
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+
+---
+# Deployment for Event Processing Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-service
+  labels:
+    app: event-service
+    component: event-processing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: event-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: event-service
+        image: ${DOCKER_REGISTRY:-traccar}/event-service:${IMAGE_TAG:-latest}
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8082
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-headless:9092"
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8082
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: event-service-config
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - event-service
+              topologyKey: "kubernetes.io/hostname"
+
+---
+# Service for Event Processing Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-service
+  labels:
+    app: event-service
+    component: event-processing
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8082"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  selector:
+    app: event-service
+  ports:
+  - name: http
+    port: 8082
+    targetPort: 8082
+  type: ClusterIP
+
+---
+# HorizontalPodAutoscaler for Event Processing Service
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: event-service-hpa
+  labels:
+    app: event-service
+    component: event-processing
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: event-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # Custom metrics for event processing rate (requires Prometheus Adapter)
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: event_processing_rate
+  #     target:
+  #       type: AverageValue
+  #       averageValue: 500
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 120
