@@ -1,0 +1,418 @@
+{
+  "schemaVersion": "1.0",
+  "description": "JSON template for position messages published to Kafka by the Protocol Service",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Position",
+    "type": "object",
+    "required": [
+      "id",
+      "deviceId",
+      "protocol",
+      "serverTime",
+      "fixTime",
+      "latitude",
+      "longitude",
+      "valid"
+    ],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "description": "Unique position identifier"
+      },
+      "deviceId": {
+        "type": "integer",
+        "description": "Device identifier that generated this position"
+      },
+      "protocol": {
+        "type": "string",
+        "description": "Protocol used to receive the position data"
+      },
+      "serverTime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Time when the server received the position"
+      },
+      "deviceTime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Time reported by the device"
+      },
+      "fixTime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "GPS fix time"
+      },
+      "valid": {
+        "type": "boolean",
+        "description": "Indicates if the position is valid"
+      },
+      "latitude": {
+        "type": "number",
+        "description": "Latitude in degrees"
+      },
+      "longitude": {
+        "type": "number",
+        "description": "Longitude in degrees"
+      },
+      "altitude": {
+        "type": "number",
+        "description": "Altitude in meters",
+        "default": 0
+      },
+      "speed": {
+        "type": "number",
+        "description": "Speed in knots",
+        "default": 0
+      },
+      "course": {
+        "type": "number",
+        "description": "Direction in degrees",
+        "default": 0
+      },
+      "accuracy": {
+        "type": "number",
+        "description": "Position accuracy in meters",
+        "default": 0
+      },
+      "network": {
+        "type": "object",
+        "description": "Network information",
+        "properties": {
+          "radioType": {
+            "type": "string",
+            "description": "Radio type (GSM, CDMA, etc.)"
+          },
+          "cellTowers": {
+            "type": "array",
+            "description": "Cell tower information",
+            "items": {
+              "type": "object"
+            }
+          },
+          "wifiAccessPoints": {
+            "type": "array",
+            "description": "WiFi access point information",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "attributes": {
+        "type": "object",
+        "description": "Additional attributes specific to the protocol or device",
+        "additionalProperties": true
+      }
+    }
+  },
+  "examples": [
+    {
+      "description": "Basic position example with minimal fields",
+      "payload": {
+        "id": 1,
+        "deviceId": 123,
+        "protocol": "tcp",
+        "serverTime": "2023-05-15T10:30:00.000Z",
+        "fixTime": "2023-05-15T10:29:55.000Z",
+        "deviceTime": "2023-05-15T10:29:55.000Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.5,
+        "speed": 0,
+        "course": 0,
+        "accuracy": 5.0,
+        "attributes": {
+          "sat": 8,
+          "hdop": 1.2,
+          "battery": 95.5,
+          "ignition": false
+        }
+      }
+    },
+    {
+      "description": "Teltonika protocol position example",
+      "payload": {
+        "id": 2,
+        "deviceId": 456,
+        "protocol": "teltonika",
+        "serverTime": "2023-05-15T11:45:00.000Z",
+        "fixTime": "2023-05-15T11:44:30.000Z",
+        "deviceTime": "2023-05-15T11:44:30.000Z",
+        "valid": true,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 15.2,
+        "speed": 35.5,
+        "course": 180.3,
+        "accuracy": 3.0,
+        "attributes": {
+          "sat": 12,
+          "hdop": 0.8,
+          "battery": 85.0,
+          "ignition": true,
+          "motion": true,
+          "odometer": 12543.5,
+          "hours": 358.6,
+          "io1": true,
+          "io2": false,
+          "temperature": 24.5,
+          "fuel": 78.3,
+          "adc1": 3.45,
+          "gsm": 5
+        }
+      }
+    },
+    {
+      "description": "Meitrack protocol position example",
+      "payload": {
+        "id": 3,
+        "deviceId": 789,
+        "protocol": "meitrack",
+        "serverTime": "2023-05-15T14:20:00.000Z",
+        "fixTime": "2023-05-15T14:19:45.000Z",
+        "deviceTime": "2023-05-15T14:19:45.000Z",
+        "valid": true,
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "altitude": 25.0,
+        "speed": 12.3,
+        "course": 90.5,
+        "accuracy": 4.2,
+        "attributes": {
+          "sat": 9,
+          "hdop": 1.0,
+          "battery": 75.2,
+          "ignition": true,
+          "event": 1,
+          "alarm": "sos",
+          "status": 1,
+          "input": 3,
+          "output": 1,
+          "temperature": 22.8,
+          "fuel": 65.7
+        }
+      }
+    },
+    {
+      "description": "TK103 protocol position example",
+      "payload": {
+        "id": 4,
+        "deviceId": 101,
+        "protocol": "tk103",
+        "serverTime": "2023-05-15T16:05:00.000Z",
+        "fixTime": "2023-05-15T16:04:30.000Z",
+        "deviceTime": "2023-05-15T16:04:30.000Z",
+        "valid": true,
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "altitude": 30.5,
+        "speed": 45.2,
+        "course": 270.8,
+        "accuracy": 6.0,
+        "attributes": {
+          "sat": 7,
+          "battery": 65.0,
+          "ignition": true,
+          "alarm": "powerCut",
+          "status": 2,
+          "rssi": 67,
+          "gps": "A",
+          "door": true,
+          "fuel": 55.3
+        }
+      }
+    },
+    {
+      "description": "ATrack protocol position example",
+      "payload": {
+        "id": 5,
+        "deviceId": 202,
+        "protocol": "atrack",
+        "serverTime": "2023-05-15T18:30:00.000Z",
+        "fixTime": "2023-05-15T18:29:45.000Z",
+        "deviceTime": "2023-05-15T18:29:45.000Z",
+        "valid": true,
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "altitude": 40.2,
+        "speed": 0.0,
+        "course": 0.0,
+        "accuracy": 2.5,
+        "attributes": {
+          "sat": 11,
+          "hdop": 0.9,
+          "battery": 90.5,
+          "ignition": false,
+          "motion": false,
+          "odometer": 28456.7,
+          "hours": 1245.8,
+          "status": 0,
+          "input": 0,
+          "output": 0,
+          "temperature": 21.3,
+          "driver": "ID12345"
+        }
+      }
+    },
+    {
+      "description": "Invalid position example",
+      "payload": {
+        "id": 6,
+        "deviceId": 303,
+        "protocol": "teltonika",
+        "serverTime": "2023-05-15T20:15:00.000Z",
+        "fixTime": "2023-05-15T20:14:30.000Z",
+        "deviceTime": "2023-05-15T20:14:30.000Z",
+        "valid": false,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "accuracy": 0.0,
+        "attributes": {
+          "sat": 0,
+          "hdop": 99.9,
+          "battery": 45.0,
+          "ignition": false,
+          "reason": "noGpsFix"
+        }
+      }
+    }
+  ],
+  "validationRules": [
+    "All required fields must be present in the message",
+    "Latitude must be between -90 and 90 degrees",
+    "Longitude must be between -180 and 180 degrees",
+    "Speed must be non-negative",
+    "Course must be between 0 and 360 degrees",
+    "Protocol field must match one of the supported protocols",
+    "Timestamps must be in ISO 8601 format"
+  ],
+  "supportedProtocols": [
+    "teltonika",
+    "meitrack",
+    "tk103",
+    "atrack",
+    "totem",
+    "meiligao",
+    "gt06",
+    "h02",
+    "eelink",
+    "suntech",
+    "coban",
+    "tramigo",
+    "xexun",
+    "concox",
+    "watch",
+    "navtelecom",
+    "galileo",
+    "intellitrac",
+    "ruptela",
+    "aplicom",
+    "gotop",
+    "t55",
+    "avl301",
+    "castel",
+    "mta6",
+    "tzone",
+    "tlt2h",
+    "taip",
+    "wondex",
+    "cellocator",
+    "aquila",
+    "flextrack",
+    "easytrack",
+    "gpsgate",
+    "gt30",
+    "genx",
+    "v680",
+    "pt502",
+    "tr20",
+    "navis",
+    "meiligao",
+    "skypatrol",
+    "gt02",
+    "cartrack",
+    "minifinder",
+    "haicom",
+    "ardi01",
+    "xt013",
+    "autofon",
+    "gosafe",
+    "tt8850",
+    "bce",
+    "xirgo",
+    "calamp",
+    "mtx",
+    "tytan",
+    "avl09",
+    "wirelink",
+    "laipac",
+    "huabao",
+    "v680",
+    "hunterpro",
+    "raveon",
+    "cradlepoint",
+    "arknavx8",
+    "arnavi",
+    "gator",
+    "noran",
+    "m2m",
+    "osmand",
+    "riti",
+    "ulbotech",
+    "tramigo",
+    "tr900",
+    "eelink",
+    "alten",
+    "wialon",
+    "carscop",
+    "manpower",
+    "globalsat",
+    "pt3000",
+    "ruptela",
+    "topflytech",
+    "laipac",
+    "aplicom",
+    "gotop",
+    "sanavigator",
+    "queclink",
+    "alcolock",
+    "idpl",
+    "fifotrack",
+    "smokey",
+    "extremetrack",
+    "trakmate",
+    "at2000",
+    "maestro",
+    "ais",
+    "gt30",
+    "tmg",
+    "pretrace",
+    "visiontek",
+    "orion",
+    "esky",
+    "genx",
+    "stl060",
+    "cartrack",
+    "minifinder",
+    "enfora",
+    "meiligao",
+    "megastek",
+    "navigil",
+    "smartsole",
+    "gpsgate",
+    "meitrack",
+    "atrack",
+    "pt502",
+    "tr20",
+    "navis",
+    "meiligao",
+    "skypatrol",
+    "gt02",
+    "cartrack"
+  ]
+}
