@@ -1,0 +1,334 @@
+{
+  "responses": {
+    "success": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "8d5c2f1d7a0b4a7e9b1c3d5e7f9a1b3c",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                47.6371,
+                -122.1374,
+                47.6473,
+                -122.1254
+              ],
+              "name": "1 Microsoft Way, Redmond, WA 98052",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  47.6422,
+                  -122.1314
+                ]
+              },
+              "address": {
+                "addressLine": "1 Microsoft Way",
+                "adminDistrict": "WA",
+                "adminDistrict2": "King County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "1 Microsoft Way, Redmond, WA 98052",
+                "locality": "Redmond",
+                "postalCode": "98052"
+              },
+              "confidence": "High",
+              "entityType": "Address"
+            }
+          ]
+        }
+      ]
+    },
+    "multiple_results": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b",
+      "resourceSets": [
+        {
+          "estimatedTotal": 2,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                40.7480,
+                -73.9857,
+                40.7580,
+                -73.9757
+              ],
+              "name": "350 5th Ave, New York, NY 10118",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  40.7484,
+                  -73.9857
+                ]
+              },
+              "address": {
+                "addressLine": "350 5th Ave",
+                "adminDistrict": "NY",
+                "adminDistrict2": "New York County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "350 5th Ave, New York, NY 10118",
+                "locality": "New York",
+                "postalCode": "10118"
+              },
+              "confidence": "High",
+              "entityType": "Address"
+            },
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                40.7480,
+                -73.9857,
+                40.7580,
+                -73.9757
+              ],
+              "name": "Empire State Building, New York, NY 10118",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  40.7484,
+                  -73.9857
+                ]
+              },
+              "address": {
+                "addressLine": "Empire State Building",
+                "adminDistrict": "NY",
+                "adminDistrict2": "New York County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "Empire State Building, New York, NY 10118",
+                "locality": "New York",
+                "postalCode": "10118"
+              },
+              "confidence": "High",
+              "entityType": "Landmark"
+            }
+          ]
+        }
+      ]
+    },
+    "international": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                48.8557,
+                2.2936,
+                48.8657,
+                2.3036
+              ],
+              "name": "Eiffel Tower, Paris, France",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  48.8584,
+                  2.2945
+                ]
+              },
+              "address": {
+                "addressLine": "5 Avenue Anatole France",
+                "adminDistrict": "Île-de-France",
+                "adminDistrict2": "Paris",
+                "countryRegion": "France",
+                "countryRegionIso2": "FR",
+                "formattedAddress": "5 Avenue Anatole France, 75007 Paris, France",
+                "locality": "Paris",
+                "postalCode": "75007"
+              },
+              "confidence": "High",
+              "entityType": "Landmark"
+            }
+          ]
+        }
+      ]
+    },
+    "medium_confidence": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                37.7648,
+                -122.4248,
+                37.7748,
+                -122.4148
+              ],
+              "name": "San Francisco, CA",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  37.7749,
+                  -122.4194
+                ]
+              },
+              "address": {
+                "adminDistrict": "CA",
+                "adminDistrict2": "San Francisco County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "San Francisco, CA",
+                "locality": "San Francisco"
+              },
+              "confidence": "Medium",
+              "entityType": "PopulatedPlace"
+            }
+          ]
+        }
+      ]
+    },
+    "low_confidence": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "0a9b8c7d6e5f4g3h2i1j0k9l8m7n6o5p",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                51.4800,
+                -0.1200,
+                51.5200,
+                -0.0800
+              ],
+              "name": "London, United Kingdom",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  51.5074,
+                  -0.1278
+                ]
+              },
+              "address": {
+                "countryRegion": "United Kingdom",
+                "countryRegionIso2": "GB",
+                "formattedAddress": "London, United Kingdom",
+                "locality": "London"
+              },
+              "confidence": "Low",
+              "entityType": "PopulatedPlace"
+            }
+          ]
+        }
+      ]
+    },
+    "empty_results": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h",
+      "resourceSets": [
+        {
+          "estimatedTotal": 0,
+          "resources": []
+        }
+      ]
+    },
+    "error": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "errorDetails": [
+        "Invalid coordinates provided."
+      ],
+      "statusCode": 400,
+      "statusDescription": "Bad Request",
+      "traceId": "7z6x5c4v3b2n1m0l9k8j7h6g5f4d3s2a"
+    },
+    "unauthorized": {
+      "authenticationResultCode": "InvalidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "errorDetails": [
+        "The credentials provided are invalid."
+      ],
+      "statusCode": 401,
+      "statusDescription": "Unauthorized",
+      "traceId": "9q8w7e6r5t4y3u2i1o0p9a8s7d6f5g4h"
+    },
+    "protocol_specific": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                34.0500,
+                -118.2600,
+                34.0600,
+                -118.2500
+              ],
+              "name": "Los Angeles, CA 90012",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  34.0522,
+                  -118.2437
+                ]
+              },
+              "address": {
+                "addressLine": "City Hall",
+                "adminDistrict": "CA",
+                "adminDistrict2": "Los Angeles County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "City Hall, Los Angeles, CA 90012",
+                "locality": "Los Angeles",
+                "postalCode": "90012"
+              },
+              "confidence": "High",
+              "entityType": "Address",
+              "protocolData": {
+                "deviceId": "123456789",
+                "protocolType": "tk103",
+                "locationSource": "gps",
+                "accuracy": 10,
+                "timestamp": "2023-05-15T14:30:00Z"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
