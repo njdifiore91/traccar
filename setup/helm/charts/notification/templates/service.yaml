@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "notification.fullname" . }}
+  labels:
+    {{- include "notification.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notification-service
+    service: notification
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8083"
+    prometheus.io/path: "/actuator/prometheus"
+    service.kubernetes.io/description: "Notification Service for event alerts delivery"
+    service.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.service.port | default 8083 }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "notification.selectorLabels" . | nindent 4 }}
