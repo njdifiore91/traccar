@@ -1,0 +1,540 @@
+{
+  "scenarios": {
+    "protocol_service": {
+      "healthy": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()"
+            }
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "degraded": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()"
+            }
+          },
+          "messageBroker": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection refused: connect",
+              "type": "RabbitMQ"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "unhealthy": {
+        "status": "DOWN",
+        "components": {
+          "livenessState": {
+            "status": "DOWN",
+            "details": {
+              "error": "Service is not responding"
+            }
+          },
+          "readinessState": {
+            "status": "DOWN"
+          },
+          "db": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection refused: connect",
+              "database": "PostgreSQL"
+            }
+          },
+          "messageBroker": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection refused: connect",
+              "type": "RabbitMQ"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 1073741824,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "startup": {
+        "status": "UP",
+        "components": {
+          "startupState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()"
+            }
+          },
+          "messageBroker": {
+            "status": "UNKNOWN",
+            "details": {
+              "message": "Still initializing connection",
+              "type": "RabbitMQ"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "high_load": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()",
+              "responseTime": 250
+            }
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2",
+              "queueDepth": 5000,
+              "consumerLag": 2500
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 3221225472,
+              "threshold": 1073741824
+            }
+          },
+          "memory": {
+            "status": "UP",
+            "details": {
+              "total": 2147483648,
+              "free": 536870912,
+              "processors": 4,
+              "heapUsage": 75
+            }
+          }
+        }
+      },
+      "detailed_metrics": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()",
+              "activeConnections": 5,
+              "maxConnections": 10,
+              "idleConnections": 5,
+              "minConnections": 2,
+              "responseTime": 15
+            }
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2",
+              "queueDepth": 120,
+              "consumerLag": 5,
+              "exchanges": 4,
+              "queues": 8,
+              "channels": 12,
+              "connections": 3
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 7516192768,
+              "threshold": 1073741824,
+              "usedPercent": 30
+            }
+          },
+          "memory": {
+            "status": "UP",
+            "details": {
+              "total": 2147483648,
+              "free": 1288490188,
+              "processors": 4,
+              "heapUsage": 40,
+              "nonHeapUsage": 120,
+              "gcPauseLastMinute": 50,
+              "threadCount": 25
+            }
+          },
+          "protocolStats": {
+            "status": "UP",
+            "details": {
+              "activeProtocols": 15,
+              "activeConnections": 120,
+              "messagesPerSecond": 45.5,
+              "bytesPerSecond": 12500,
+              "errorRate": 0.001
+            }
+          }
+        }
+      }
+    },
+    "position_service": {
+      "healthy": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "db": {
+            "status": "UP",
+            "details": {
+              "database": "PostgreSQL",
+              "validationQuery": "isValid()"
+            }
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "unhealthy": {
+        "status": "DOWN",
+        "components": {
+          "livenessState": {
+            "status": "DOWN",
+            "details": {
+              "error": "Service is not responding"
+            }
+          },
+          "readinessState": {
+            "status": "DOWN"
+          },
+          "db": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection refused: connect",
+              "database": "PostgreSQL"
+            }
+          },
+          "messageBroker": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection refused: connect",
+              "type": "RabbitMQ"
+            }
+          }
+        }
+      }
+    },
+    "event_service": {
+      "healthy": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "degraded": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2",
+              "queueDepth": 15000,
+              "consumerLag": 10000
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      }
+    },
+    "notification_service": {
+      "healthy": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2"
+            }
+          },
+          "mail": {
+            "status": "UP",
+            "details": {
+              "location": "smtp.example.com:25"
+            }
+          },
+          "sms": {
+            "status": "UP",
+            "details": {
+              "provider": "Twilio"
+            }
+          },
+          "push": {
+            "status": "UP",
+            "details": {
+              "provider": "Firebase"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      },
+      "degraded": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "messageBroker": {
+            "status": "UP",
+            "details": {
+              "type": "RabbitMQ",
+              "version": "3.11.2"
+            }
+          },
+          "mail": {
+            "status": "DOWN",
+            "details": {
+              "error": "Connection timeout",
+              "location": "smtp.example.com:25"
+            }
+          },
+          "sms": {
+            "status": "UP",
+            "details": {
+              "provider": "Twilio"
+            }
+          },
+          "push": {
+            "status": "UP",
+            "details": {
+              "provider": "Firebase"
+            }
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          }
+        }
+      }
+    },
+    "api_gateway": {
+      "healthy": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          },
+          "webServer": {
+            "status": "UP",
+            "details": {
+              "activeConnections": 25,
+              "maxConnections": 200
+            }
+          },
+          "serviceDiscovery": {
+            "status": "UP",
+            "details": {
+              "registeredServices": 5,
+              "healthyServices": 5
+            }
+          }
+        }
+      },
+      "degraded": {
+        "status": "UP",
+        "components": {
+          "livenessState": {
+            "status": "UP"
+          },
+          "readinessState": {
+            "status": "UP"
+          },
+          "diskSpace": {
+            "status": "UP",
+            "details": {
+              "total": 10737418240,
+              "free": 8589934592,
+              "threshold": 1073741824
+            }
+          },
+          "webServer": {
+            "status": "UP",
+            "details": {
+              "activeConnections": 25,
+              "maxConnections": 200
+            }
+          },
+          "serviceDiscovery": {
+            "status": "UP",
+            "details": {
+              "registeredServices": 5,
+              "healthyServices": 3,
+              "degradedServices": ["notification_service", "event_service"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "liveness": "/actuator/health/live",
+    "readiness": "/actuator/health/ready",
+    "startup": "/actuator/health/startup",
+    "health": "/actuator/health"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Mock health check responses for Protocol Service and its dependencies",
+    "generated": "2023-05-15T10:30:00Z"
+  }
+}
