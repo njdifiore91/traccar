@@ -1,0 +1,63 @@
+{
+  "responses": [
+    {
+      "messageId": null,
+      "exception": {
+        "messagingErrorCode": "INVALID_ARGUMENT",
+        "message": "The registration token is not a valid FCM registration token",
+        "cause": {
+          "message": "The registration token is not a valid FCM registration token",
+          "domain": "global",
+          "reason": "badRequest"
+        }
+      },
+      "successful": false
+    },
+    {
+      "messageId": null,
+      "exception": {
+        "messagingErrorCode": "UNREGISTERED",
+        "message": "The provided registration token is not registered. A previously valid registration token can be unregistered for a variety of reasons.",
+        "cause": {
+          "message": "The provided registration token is not registered",
+          "domain": "global",
+          "reason": "deviceUnregistered"
+        }
+      },
+      "successful": false
+    },
+    {
+      "messageId": "projects/traccar-notification/messages/1234567890123456",
+      "exception": null,
+      "successful": true
+    },
+    {
+      "messageId": null,
+      "exception": {
+        "messagingErrorCode": "INVALID_ARGUMENT",
+        "message": "Invalid registration token format",
+        "cause": {
+          "message": "Invalid registration token format",
+          "domain": "global",
+          "reason": "badRequest"
+        }
+      },
+      "successful": false
+    },
+    {
+      "messageId": null,
+      "exception": {
+        "messagingErrorCode": "UNREGISTERED",
+        "message": "The registration token is no longer valid. The client app unregistered from FCM, possibly by uninstalling the app",
+        "cause": {
+          "message": "The registration token is no longer valid",
+          "domain": "global",
+          "reason": "deviceUnregistered"
+        }
+      },
+      "successful": false
+    }
+  ],
+  "successCount": 1,
+  "failureCount": 4
+}
