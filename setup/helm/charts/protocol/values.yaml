@@ -1,0 +1,209 @@
+# Default values for Protocol Service Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Replica count for initial deployment
+# Will be adjusted by HPA if enabled
+replicaCount: 2
+
+# Container image configuration
+image:
+  repository: traccar/protocol-service
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: "latest"
+
+# Image pull secrets for private registries
+imagePullSecrets: []
+
+# Name override and fullname override
+nameOverride: ""
+fullnameOverride: ""
+
+# Service account configuration
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: 
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Service configuration
+service:
+  # Service type - ClusterIP for internal access, LoadBalancer for external access
+  type: LoadBalancer
+  # Management API port
+  managementPort: 8090
+  # Protocol ports for device connections
+  protocolPorts:
+    # Common protocols
+    - name: osmand
+      port: 5055
+      protocol: TCP
+    - name: teltonika
+      port: 5027
+      protocol: TCP
+    - name: meitrack
+      port: 5020
+      protocol: TCP
+    - name: tk103
+      port: 5006
+      protocol: TCP
+    - name: gt06
+      port: 5023
+      protocol: TCP
+    # Add more protocol ports as needed
+
+# Ingress configuration for management API
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: protocol.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Resource requests and limits as specified in technical documentation
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  # Target CPU utilization percentage
+  targetCPUUtilizationPercentage: 70
+  # Target memory utilization percentage
+  targetMemoryUtilizationPercentage: 80
+  # Custom metrics for connection-based scaling
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: active_connections
+        target:
+          type: AverageValue
+          averageValue: 800
+
+# Node selector for pod scheduling
+nodeSelector: {}
+
+# Tolerations for pod scheduling
+tolerations: []
+
+# Affinity for pod scheduling
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - protocol-service
+        topologyKey: "kubernetes.io/hostname"
+
+# Health check configuration
+health:
+  # Liveness probe - TCP socket check on protocol ports
+  livenessProbe:
+    tcpSocket:
+      port: 5055  # Default to osmand port
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # Readiness probe - HTTP GET on management API
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8090
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Message broker configuration
+messageBroker:
+  # Type of message broker (kafka or rabbitmq)
+  type: kafka
+  # Kafka configuration
+  kafka:
+    bootstrapServers: "kafka:9092"
+    positionTopic: "raw.positions"
+    connectionTopic: "device.connections"
+  # RabbitMQ configuration
+  rabbitmq:
+    host: "rabbitmq"
+    port: 5672
+    username: "guest"
+    password: "guest"
+    positionExchange: "positions"
+    connectionExchange: "connections"
+
+# Protocol configuration
+protocol:
+  # Default timeout for idle connections in seconds
+  timeout: 600
+  # Number of boss threads for accepting connections
+  bossThreads: 1
+  # Number of worker threads for handling I/O (0 = auto-configured based on CPU)
+  workerThreads: 0
+  # Enable/disable specific protocols
+  enabledProtocols:
+    osmand: true
+    teltonika: true
+    meitrack: true
+    tk103: true
+    gt06: true
+    # Add more protocols as needed
+
+# Logging configuration
+logging:
+  level: INFO
+  # Enable JSON formatted logs for production
+  jsonFormat: true
+  # Include additional fields in logs
+  additionalFields:
+    service: "protocol-service"
+    environment: "production"
+
+# Service discovery configuration
+discovery:
+  # Enable service discovery registration
+  enabled: true
+  # Type of service discovery (kubernetes or consul)
+  type: kubernetes
+  # Consul configuration if type is consul
+  consul:
+    host: "consul"
+    port: 8500
