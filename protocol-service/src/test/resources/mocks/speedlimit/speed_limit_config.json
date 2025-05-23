@@ -1,0 +1,44 @@
+{
+  "provider": {
+    "type": "overpass",
+    "apiUrl": "http://mock-overpass-api:8080/api/interpreter",
+    "enabled": true,
+    "accuracy": 100,
+    "timeout": 5000,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "cache": {
+    "enabled": true,
+    "maxSize": 1000,
+    "expireAfterWrite": 3600,
+    "expireAfterAccess": 1800
+  },
+  "mock": {
+    "enabled": true,
+    "defaultResponse": true,
+    "defaultSpeedLimit": 50,
+    "simulateErrors": false,
+    "errorRate": 0.1,
+    "responseDelay": 200,
+    "randomizeResponse": false
+  },
+  "speedLimits": {
+    "default": 50,
+    "residential": 30,
+    "primary": 80,
+    "secondary": 60,
+    "motorway": 120,
+    "trunk": 100
+  },
+  "conversion": {
+    "outputUnit": "knots",
+    "speedMultiplier": 1.0
+  },
+  "logging": {
+    "enabled": true,
+    "logRequests": true,
+    "logResponses": true,
+    "logErrors": true
+  }
+}
