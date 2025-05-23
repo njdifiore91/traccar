@@ -1,0 +1,1238 @@
+{
+  "endpoints": {
+    "/v1/agent/service/register": {
+      "success": {
+        "status": 200
+      },
+      "failure": {
+        "status": 400,
+        "body": {
+          "error": "Service name cannot be empty"
+        }
+      }
+    },
+    "/v1/agent/service/deregister": {
+      "success": {
+        "status": 200
+      },
+      "not_found": {
+        "status": 404,
+        "body": {
+          "error": "Service not found"
+        }
+      }
+    },
+    "/v1/catalog/services": {
+      "default": {
+        "status": 200,
+        "body": {
+          "api-gateway": ["api", "gateway", "http"],
+          "protocol-service": ["protocol", "device", "http"],
+          "position-service": ["position", "gps", "http"],
+          "event-service": ["event", "notification", "http"],
+          "notification-service": ["notification", "email", "sms", "http"],
+          "reporting-service": ["reporting", "analytics", "http"]
+        }
+      },
+      "empty": {
+        "status": 200,
+        "body": {}
+      }
+    },
+    "/v1/catalog/service/api-gateway": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "api-gateway-1",
+            "Node": "node1",
+            "Address": "192.168.1.10",
+            "ServiceID": "api-gateway-1",
+            "ServiceName": "api-gateway",
+            "ServiceTags": ["api", "gateway", "http"],
+            "ServiceAddress": "192.168.1.10",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 100,
+            "ModifyIndex": 100
+          },
+          {
+            "ID": "api-gateway-2",
+            "Node": "node2",
+            "Address": "192.168.1.11",
+            "ServiceID": "api-gateway-2",
+            "ServiceName": "api-gateway",
+            "ServiceTags": ["api", "gateway", "http"],
+            "ServiceAddress": "192.168.1.11",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 101,
+            "ModifyIndex": 101
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/service/protocol-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "protocol-service-1",
+            "Node": "node1",
+            "Address": "192.168.1.20",
+            "ServiceID": "protocol-service-1",
+            "ServiceName": "protocol-service",
+            "ServiceTags": ["protocol", "device", "http"],
+            "ServiceAddress": "192.168.1.20",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 102,
+            "ModifyIndex": 102
+          },
+          {
+            "ID": "protocol-service-2",
+            "Node": "node2",
+            "Address": "192.168.1.21",
+            "ServiceID": "protocol-service-2",
+            "ServiceName": "protocol-service",
+            "ServiceTags": ["protocol", "device", "http"],
+            "ServiceAddress": "192.168.1.21",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 103,
+            "ModifyIndex": 103
+          },
+          {
+            "ID": "protocol-service-3",
+            "Node": "node3",
+            "Address": "192.168.1.22",
+            "ServiceID": "protocol-service-3",
+            "ServiceName": "protocol-service",
+            "ServiceTags": ["protocol", "device", "http"],
+            "ServiceAddress": "192.168.1.22",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 104,
+            "ModifyIndex": 104
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/service/position-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "position-service-1",
+            "Node": "node1",
+            "Address": "192.168.1.30",
+            "ServiceID": "position-service-1",
+            "ServiceName": "position-service",
+            "ServiceTags": ["position", "gps", "http"],
+            "ServiceAddress": "192.168.1.30",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 105,
+            "ModifyIndex": 105
+          },
+          {
+            "ID": "position-service-2",
+            "Node": "node2",
+            "Address": "192.168.1.31",
+            "ServiceID": "position-service-2",
+            "ServiceName": "position-service",
+            "ServiceTags": ["position", "gps", "http"],
+            "ServiceAddress": "192.168.1.31",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 106,
+            "ModifyIndex": 106
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/service/event-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "event-service-1",
+            "Node": "node1",
+            "Address": "192.168.1.40",
+            "ServiceID": "event-service-1",
+            "ServiceName": "event-service",
+            "ServiceTags": ["event", "notification", "http"],
+            "ServiceAddress": "192.168.1.40",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 107,
+            "ModifyIndex": 107
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/service/notification-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "notification-service-1",
+            "Node": "node1",
+            "Address": "192.168.1.50",
+            "ServiceID": "notification-service-1",
+            "ServiceName": "notification-service",
+            "ServiceTags": ["notification", "email", "sms", "http"],
+            "ServiceAddress": "192.168.1.50",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 108,
+            "ModifyIndex": 108
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/service/reporting-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "reporting-service-1",
+            "Node": "node1",
+            "Address": "192.168.1.60",
+            "ServiceID": "reporting-service-1",
+            "ServiceName": "reporting-service",
+            "ServiceTags": ["reporting", "analytics", "http"],
+            "ServiceAddress": "192.168.1.60",
+            "ServicePort": 8080,
+            "ServiceMeta": {
+              "version": "1.0.0"
+            },
+            "ServiceEnableTagOverride": false,
+            "CreateIndex": 109,
+            "ModifyIndex": 109
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/health/service/api-gateway": {
+      "all_healthy": {
+        "status": 200,
+        "body": [
+          {
+            "Node": {
+              "ID": "node1-id",
+              "Node": "node1",
+              "Address": "192.168.1.10",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.10",
+                "wan": "192.168.1.10"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 10,
+              "ModifyIndex": 10
+            },
+            "Service": {
+              "ID": "api-gateway-1",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.10",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 100,
+              "ModifyIndex": 100
+            },
+            "Checks": [
+              {
+                "Node": "node1",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 10,
+                "ModifyIndex": 10
+              },
+              {
+                "Node": "node1",
+                "CheckID": "service:api-gateway-1",
+                "Name": "Service 'api-gateway' check",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "HTTP GET /health: 200 OK",
+                "ServiceID": "api-gateway-1",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 100,
+                "ModifyIndex": 100
+              }
+            ]
+          },
+          {
+            "Node": {
+              "ID": "node2-id",
+              "Node": "node2",
+              "Address": "192.168.1.11",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.11",
+                "wan": "192.168.1.11"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 11,
+              "ModifyIndex": 11
+            },
+            "Service": {
+              "ID": "api-gateway-2",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.11",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 101,
+              "ModifyIndex": 101
+            },
+            "Checks": [
+              {
+                "Node": "node2",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 11,
+                "ModifyIndex": 11
+              },
+              {
+                "Node": "node2",
+                "CheckID": "service:api-gateway-2",
+                "Name": "Service 'api-gateway' check",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "HTTP GET /health: 200 OK",
+                "ServiceID": "api-gateway-2",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 101,
+                "ModifyIndex": 101
+              }
+            ]
+          }
+        ]
+      },
+      "partial_healthy": {
+        "status": 200,
+        "body": [
+          {
+            "Node": {
+              "ID": "node1-id",
+              "Node": "node1",
+              "Address": "192.168.1.10",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.10",
+                "wan": "192.168.1.10"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 10,
+              "ModifyIndex": 10
+            },
+            "Service": {
+              "ID": "api-gateway-1",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.10",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 100,
+              "ModifyIndex": 100
+            },
+            "Checks": [
+              {
+                "Node": "node1",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 10,
+                "ModifyIndex": 10
+              },
+              {
+                "Node": "node1",
+                "CheckID": "service:api-gateway-1",
+                "Name": "Service 'api-gateway' check",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "HTTP GET /health: 200 OK",
+                "ServiceID": "api-gateway-1",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 100,
+                "ModifyIndex": 100
+              }
+            ]
+          },
+          {
+            "Node": {
+              "ID": "node2-id",
+              "Node": "node2",
+              "Address": "192.168.1.11",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.11",
+                "wan": "192.168.1.11"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 11,
+              "ModifyIndex": 11
+            },
+            "Service": {
+              "ID": "api-gateway-2",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.11",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 101,
+              "ModifyIndex": 101
+            },
+            "Checks": [
+              {
+                "Node": "node2",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 11,
+                "ModifyIndex": 11
+              },
+              {
+                "Node": "node2",
+                "CheckID": "service:api-gateway-2",
+                "Name": "Service 'api-gateway' check",
+                "Status": "critical",
+                "Notes": "",
+                "Output": "HTTP GET /health: 503 Service Unavailable",
+                "ServiceID": "api-gateway-2",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 101,
+                "ModifyIndex": 101
+              }
+            ]
+          }
+        ]
+      },
+      "all_unhealthy": {
+        "status": 200,
+        "body": [
+          {
+            "Node": {
+              "ID": "node1-id",
+              "Node": "node1",
+              "Address": "192.168.1.10",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.10",
+                "wan": "192.168.1.10"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 10,
+              "ModifyIndex": 10
+            },
+            "Service": {
+              "ID": "api-gateway-1",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.10",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 100,
+              "ModifyIndex": 100
+            },
+            "Checks": [
+              {
+                "Node": "node1",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 10,
+                "ModifyIndex": 10
+              },
+              {
+                "Node": "node1",
+                "CheckID": "service:api-gateway-1",
+                "Name": "Service 'api-gateway' check",
+                "Status": "critical",
+                "Notes": "",
+                "Output": "HTTP GET /health: 500 Internal Server Error",
+                "ServiceID": "api-gateway-1",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 100,
+                "ModifyIndex": 100
+              }
+            ]
+          },
+          {
+            "Node": {
+              "ID": "node2-id",
+              "Node": "node2",
+              "Address": "192.168.1.11",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.11",
+                "wan": "192.168.1.11"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 11,
+              "ModifyIndex": 11
+            },
+            "Service": {
+              "ID": "api-gateway-2",
+              "Service": "api-gateway",
+              "Tags": ["api", "gateway", "http"],
+              "Address": "192.168.1.11",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 101,
+              "ModifyIndex": 101
+            },
+            "Checks": [
+              {
+                "Node": "node2",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 11,
+                "ModifyIndex": 11
+              },
+              {
+                "Node": "node2",
+                "CheckID": "service:api-gateway-2",
+                "Name": "Service 'api-gateway' check",
+                "Status": "critical",
+                "Notes": "",
+                "Output": "HTTP GET /health: Connection refused",
+                "ServiceID": "api-gateway-2",
+                "ServiceName": "api-gateway",
+                "ServiceTags": ["api", "gateway", "http"],
+                "CreateIndex": 101,
+                "ModifyIndex": 101
+              }
+            ]
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/health/service/protocol-service": {
+      "all_healthy": {
+        "status": 200,
+        "body": [
+          {
+            "Node": {
+              "ID": "node1-id",
+              "Node": "node1",
+              "Address": "192.168.1.20",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.20",
+                "wan": "192.168.1.20"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 10,
+              "ModifyIndex": 10
+            },
+            "Service": {
+              "ID": "protocol-service-1",
+              "Service": "protocol-service",
+              "Tags": ["protocol", "device", "http"],
+              "Address": "192.168.1.20",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 102,
+              "ModifyIndex": 102
+            },
+            "Checks": [
+              {
+                "Node": "node1",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 10,
+                "ModifyIndex": 10
+              },
+              {
+                "Node": "node1",
+                "CheckID": "service:protocol-service-1",
+                "Name": "Service 'protocol-service' check",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "HTTP GET /health: 200 OK",
+                "ServiceID": "protocol-service-1",
+                "ServiceName": "protocol-service",
+                "ServiceTags": ["protocol", "device", "http"],
+                "CreateIndex": 102,
+                "ModifyIndex": 102
+              }
+            ]
+          },
+          {
+            "Node": {
+              "ID": "node2-id",
+              "Node": "node2",
+              "Address": "192.168.1.21",
+              "Datacenter": "dc1",
+              "TaggedAddresses": {
+                "lan": "192.168.1.21",
+                "wan": "192.168.1.21"
+              },
+              "Meta": {
+                "env": "test"
+              },
+              "CreateIndex": 11,
+              "ModifyIndex": 11
+            },
+            "Service": {
+              "ID": "protocol-service-2",
+              "Service": "protocol-service",
+              "Tags": ["protocol", "device", "http"],
+              "Address": "192.168.1.21",
+              "Meta": {
+                "version": "1.0.0"
+              },
+              "Port": 8080,
+              "Weights": {
+                "Passing": 1,
+                "Warning": 1
+              },
+              "EnableTagOverride": false,
+              "CreateIndex": 103,
+              "ModifyIndex": 103
+            },
+            "Checks": [
+              {
+                "Node": "node2",
+                "CheckID": "serfHealth",
+                "Name": "Serf Health Status",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "Agent alive and reachable",
+                "ServiceID": "",
+                "ServiceName": "",
+                "ServiceTags": [],
+                "CreateIndex": 11,
+                "ModifyIndex": 11
+              },
+              {
+                "Node": "node2",
+                "CheckID": "service:protocol-service-2",
+                "Name": "Service 'protocol-service' check",
+                "Status": "passing",
+                "Notes": "",
+                "Output": "HTTP GET /health: 200 OK",
+                "ServiceID": "protocol-service-2",
+                "ServiceName": "protocol-service",
+                "ServiceTags": ["protocol", "device", "http"],
+                "CreateIndex": 103,
+                "ModifyIndex": 103
+              }
+            ]
+          }
+        ]
+      },
+      "not_found": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/catalog/nodes": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "ID": "node1-id",
+            "Node": "node1",
+            "Address": "192.168.1.10",
+            "Datacenter": "dc1",
+            "TaggedAddresses": {
+              "lan": "192.168.1.10",
+              "wan": "192.168.1.10"
+            },
+            "Meta": {
+              "env": "test"
+            },
+            "CreateIndex": 10,
+            "ModifyIndex": 10
+          },
+          {
+            "ID": "node2-id",
+            "Node": "node2",
+            "Address": "192.168.1.11",
+            "Datacenter": "dc1",
+            "TaggedAddresses": {
+              "lan": "192.168.1.11",
+              "wan": "192.168.1.11"
+            },
+            "Meta": {
+              "env": "test"
+            },
+            "CreateIndex": 11,
+            "ModifyIndex": 11
+          },
+          {
+            "ID": "node3-id",
+            "Node": "node3",
+            "Address": "192.168.1.12",
+            "Datacenter": "dc1",
+            "TaggedAddresses": {
+              "lan": "192.168.1.12",
+              "wan": "192.168.1.12"
+            },
+            "Meta": {
+              "env": "test"
+            },
+            "CreateIndex": 12,
+            "ModifyIndex": 12
+          }
+        ]
+      },
+      "empty": {
+        "status": 200,
+        "body": []
+      }
+    },
+    "/v1/kv/config/api-gateway": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 100,
+            "ModifyIndex": 200,
+            "LockIndex": 0,
+            "Key": "config/api-gateway/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 101,
+            "ModifyIndex": 201,
+            "LockIndex": 0,
+            "Key": "config/api-gateway/auth",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogdHJ1ZSwgInR5cGUiOiAiYmFzaWMifQ==",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 102,
+            "ModifyIndex": 202,
+            "LockIndex": 0,
+            "Key": "config/api-gateway/cors",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogdHJ1ZSwgImFsbG93ZWRPcmlnaW5zIjogWyIqIl19",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/kv/config/protocol-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 103,
+            "ModifyIndex": 203,
+            "LockIndex": 0,
+            "Key": "config/protocol-service/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 104,
+            "ModifyIndex": 204,
+            "LockIndex": 0,
+            "Key": "config/protocol-service/protocols",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogWyJ0azEwMyIsICJtZWl0cmFjayIsICJ0b3RlbSIsICJhdHJhY2siLCAidGVsdG9uaWthIiwgIm1laWxpZ2FvIl19",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/kv/config/position-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 105,
+            "ModifyIndex": 205,
+            "LockIndex": 0,
+            "Key": "config/position-service/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 106,
+            "ModifyIndex": 206,
+            "LockIndex": 0,
+            "Key": "config/position-service/processing",
+            "Flags": 0,
+            "Value": "eyJiYXRjaFNpemUiOiAxMDAsICJwcm9jZXNzaW5nSW50ZXJ2YWwiOiAxMDAwfQ==",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/kv/config/event-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 107,
+            "ModifyIndex": 207,
+            "LockIndex": 0,
+            "Key": "config/event-service/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 108,
+            "ModifyIndex": 208,
+            "LockIndex": 0,
+            "Key": "config/event-service/events",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogWyJnZW9mZW5jZSIsICJvdmVyc3BlZWQiLCAibW90aW9uIl19",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/kv/config/notification-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 109,
+            "ModifyIndex": 209,
+            "LockIndex": 0,
+            "Key": "config/notification-service/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 110,
+            "ModifyIndex": 210,
+            "LockIndex": 0,
+            "Key": "config/notification-service/channels",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogWyJlbWFpbCIsICJzbXMiLCAicHVzaCJdfQ==",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 111,
+            "ModifyIndex": 211,
+            "LockIndex": 0,
+            "Key": "config/notification-service/email",
+            "Flags": 0,
+            "Value": "eyJzbXRwSG9zdCI6ICJzbXRwLmV4YW1wbGUuY29tIiwgInNtdHBQb3J0IjogNTg3LCAic210cFVzZXIiOiAidGVzdCIsICJzbXRwUGFzc3dvcmQiOiAidGVzdCIsICJmcm9tIjogInRlc3RAZXhhbXBsZS5jb20ifQ==",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/kv/config/reporting-service": {
+      "default": {
+        "status": 200,
+        "body": [
+          {
+            "CreateIndex": 112,
+            "ModifyIndex": 212,
+            "LockIndex": 0,
+            "Key": "config/reporting-service/server",
+            "Flags": 0,
+            "Value": "eyJwb3J0IjogODA4MCwgImhvc3QiOiAiMC4wLjAuMCIsICJ0aW1lb3V0IjogMzB9",
+            "Session": ""
+          },
+          {
+            "CreateIndex": 113,
+            "ModifyIndex": 213,
+            "LockIndex": 0,
+            "Key": "config/reporting-service/reports",
+            "Flags": 0,
+            "Value": "eyJlbmFibGVkIjogWyJyb3V0ZSIsICJldmVudCIsICJzdW1tYXJ5IiwgInRyaXAiXX0=",
+            "Session": ""
+          }
+        ]
+      },
+      "not_found": {
+        "status": 404,
+        "body": []
+      }
+    },
+    "/v1/agent/self": {
+      "default": {
+        "status": 200,
+        "body": {
+          "Config": {
+            "Datacenter": "dc1",
+            "NodeName": "consul-server",
+            "NodeID": "consul-server-id",
+            "Server": true,
+            "Version": "1.15.0",
+            "Bootstrap": true,
+            "RejoinAfterLeave": false
+          },
+          "Member": {
+            "Name": "consul-server",
+            "Addr": "127.0.0.1",
+            "Port": 8301,
+            "Tags": {
+              "dc": "dc1",
+              "role": "consul",
+              "vsn": "2",
+              "vsn_max": "3",
+              "vsn_min": "2"
+            },
+            "Status": 1,
+            "ProtocolMin": 1,
+            "ProtocolMax": 5,
+            "ProtocolCur": 2,
+            "DelegateMin": 2,
+            "DelegateMax": 5,
+            "DelegateCur": 4
+          },
+          "Stats": {
+            "agent": {
+              "check_monitors": "0",
+              "check_ttls": "0",
+              "checks": "0",
+              "services": "0"
+            },
+            "consul": {
+              "leader": "true",
+              "server": "true"
+            },
+            "runtime": {
+              "arch": "amd64",
+              "cpu_count": "4",
+              "goroutines": "96",
+              "max_procs": "4",
+              "os": "linux",
+              "version": "go1.20.5"
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent/services": {
+      "default": {
+        "status": 200,
+        "body": {
+          "api-gateway-1": {
+            "ID": "api-gateway-1",
+            "Service": "api-gateway",
+            "Tags": ["api", "gateway", "http"],
+            "Meta": {
+              "version": "1.0.0"
+            },
+            "Port": 8080,
+            "Address": "192.168.1.10",
+            "EnableTagOverride": false,
+            "Weights": {
+              "Passing": 1,
+              "Warning": 1
+            }
+          },
+          "protocol-service-1": {
+            "ID": "protocol-service-1",
+            "Service": "protocol-service",
+            "Tags": ["protocol", "device", "http"],
+            "Meta": {
+              "version": "1.0.0"
+            },
+            "Port": 8080,
+            "Address": "192.168.1.20",
+            "EnableTagOverride": false,
+            "Weights": {
+              "Passing": 1,
+              "Warning": 1
+            }
+          },
+          "position-service-1": {
+            "ID": "position-service-1",
+            "Service": "position-service",
+            "Tags": ["position", "gps", "http"],
+            "Meta": {
+              "version": "1.0.0"
+            },
+            "Port": 8080,
+            "Address": "192.168.1.30",
+            "EnableTagOverride": false,
+            "Weights": {
+              "Passing": 1,
+              "Warning": 1
+            }
+          }
+        }
+      },
+      "empty": {
+        "status": 200,
+        "body": {}
+      }
+    },
+    "/v1/agent/checks": {
+      "default": {
+        "status": 200,
+        "body": {
+          "service:api-gateway-1": {
+            "Node": "node1",
+            "CheckID": "service:api-gateway-1",
+            "Name": "Service 'api-gateway' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "HTTP GET /health: 200 OK",
+            "ServiceID": "api-gateway-1",
+            "ServiceName": "api-gateway",
+            "ServiceTags": ["api", "gateway", "http"]
+          },
+          "service:protocol-service-1": {
+            "Node": "node1",
+            "CheckID": "service:protocol-service-1",
+            "Name": "Service 'protocol-service' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "HTTP GET /health: 200 OK",
+            "ServiceID": "protocol-service-1",
+            "ServiceName": "protocol-service",
+            "ServiceTags": ["protocol", "device", "http"]
+          },
+          "service:position-service-1": {
+            "Node": "node1",
+            "CheckID": "service:position-service-1",
+            "Name": "Service 'position-service' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "HTTP GET /health: 200 OK",
+            "ServiceID": "position-service-1",
+            "ServiceName": "position-service",
+            "ServiceTags": ["position", "gps", "http"]
+          }
+        }
+      },
+      "with_failures": {
+        "status": 200,
+        "body": {
+          "service:api-gateway-1": {
+            "Node": "node1",
+            "CheckID": "service:api-gateway-1",
+            "Name": "Service 'api-gateway' check",
+            "Status": "critical",
+            "Notes": "",
+            "Output": "HTTP GET /health: Connection refused",
+            "ServiceID": "api-gateway-1",
+            "ServiceName": "api-gateway",
+            "ServiceTags": ["api", "gateway", "http"]
+          },
+          "service:protocol-service-1": {
+            "Node": "node1",
+            "CheckID": "service:protocol-service-1",
+            "Name": "Service 'protocol-service' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "HTTP GET /health: 200 OK",
+            "ServiceID": "protocol-service-1",
+            "ServiceName": "protocol-service",
+            "ServiceTags": ["protocol", "device", "http"]
+          },
+          "service:position-service-1": {
+            "Node": "node1",
+            "CheckID": "service:position-service-1",
+            "Name": "Service 'position-service' check",
+            "Status": "warning",
+            "Notes": "",
+            "Output": "HTTP GET /health: 429 Too Many Requests",
+            "ServiceID": "position-service-1",
+            "ServiceName": "position-service",
+            "ServiceTags": ["position", "gps", "http"]
+          }
+        }
+      },
+      "empty": {
+        "status": 200,
+        "body": {}
+      }
+    }
+  }
+}
