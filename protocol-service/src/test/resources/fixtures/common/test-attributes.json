@@ -1,0 +1,598 @@
+{
+  "version": "1.0",
+  "description": "Standard attribute definitions for protocol testing",
+  "attributes": {
+    "raw": {
+      "description": "Original raw message from the device",
+      "type": "String",
+      "example": "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A",
+      "notes": "Used for debugging and protocol verification"
+    },
+    "index": {
+      "description": "Message index or sequence number",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 42,
+      "notes": "Used to track message order and detect missing messages"
+    },
+    "hdop": {
+      "description": "Horizontal Dilution of Precision",
+      "type": "Number",
+      "range": "0.5 to 99.9",
+      "example": 1.3,
+      "notes": "Lower values indicate better GPS precision"
+    },
+    "vdop": {
+      "description": "Vertical Dilution of Precision",
+      "type": "Number",
+      "range": "0.5 to 99.9",
+      "example": 2.1,
+      "notes": "Lower values indicate better GPS precision"
+    },
+    "pdop": {
+      "description": "Position Dilution of Precision",
+      "type": "Number",
+      "range": "0.5 to 99.9",
+      "example": 2.5,
+      "notes": "Combined position precision (3D)"
+    },
+    "sat": {
+      "description": "Number of satellites in use",
+      "type": "Number",
+      "range": "0 to 50",
+      "example": 8,
+      "notes": "Higher values generally indicate better position accuracy"
+    },
+    "satVisible": {
+      "description": "Number of satellites visible",
+      "type": "Number",
+      "range": "0 to 50",
+      "example": 12,
+      "notes": "Total satellites visible, including those not used for positioning"
+    },
+    "rssi": {
+      "description": "Received Signal Strength Indicator",
+      "type": "Number",
+      "range": "-120 to 0",
+      "example": -67,
+      "notes": "Cellular signal strength in dBm, higher (closer to 0) is better"
+    },
+    "gps": {
+      "description": "GPS status indicator",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Indicates if GPS is active and functioning"
+    },
+    "roaming": {
+      "description": "Cellular roaming status",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Indicates if device is using roaming cellular network"
+    },
+    "event": {
+      "description": "Event identifier",
+      "type": "String",
+      "example": "deviceOnline",
+      "notes": "Custom event identifier specific to protocol or device"
+    },
+    "alarm": {
+      "description": "Alarm type",
+      "type": "String",
+      "validValues": ["general", "sos", "vibration", "movement", "lowspeed", "overspeed", "fallDown", "lowPower", "lowBattery", "fault", "powerOff", "powerOn", "door", "lock", "unlock", "geofence", "geofenceEnter", "geofenceExit", "gpsAntennaCut", "accident", "tow", "idle", "highRpm", "hardAcceleration", "hardBraking", "hardCornering", "laneChange", "fatigueDriving", "powerCut", "powerRestored", "jamming", "temperature", "parking", "bonnet", "footBrake", "fuelLeak", "tampering", "removing"],
+      "example": "sos",
+      "notes": "Standard alarm types for consistent event handling"
+    },
+    "status": {
+      "description": "Device status information",
+      "type": "Number",
+      "example": 0,
+      "notes": "Device-specific status code"
+    },
+    "odometer": {
+      "description": "Total distance traveled in meters",
+      "type": "Number",
+      "range": "0 to 9999999",
+      "example": 43712000,
+      "notes": "Vehicle's total distance traveled in meters"
+    },
+    "serviceOdometer": {
+      "description": "Service odometer in meters",
+      "type": "Number",
+      "range": "0 to 9999999",
+      "example": 1234000,
+      "notes": "Distance since last service in meters"
+    },
+    "tripOdometer": {
+      "description": "Trip odometer in meters",
+      "type": "Number",
+      "range": "0 to 9999999",
+      "example": 42000,
+      "notes": "Current trip distance in meters"
+    },
+    "hours": {
+      "description": "Engine hours in milliseconds",
+      "type": "Number",
+      "range": "0 to 2^63-1",
+      "example": 1234567890,
+      "notes": "Total engine running time in milliseconds"
+    },
+    "steps": {
+      "description": "Step counter for personal trackers",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 8000,
+      "notes": "Number of steps for personal tracking devices"
+    },
+    "heartRate": {
+      "description": "Heart rate for personal trackers",
+      "type": "Number",
+      "range": "0 to 300",
+      "example": 72,
+      "notes": "Heart rate in beats per minute for personal tracking devices"
+    },
+    "input": {
+      "description": "Input state bitfield",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 3,
+      "notes": "Bitfield representing digital input states"
+    },
+    "output": {
+      "description": "Output state bitfield",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 1,
+      "notes": "Bitfield representing digital output states"
+    },
+    "image": {
+      "description": "Image data or URL",
+      "type": "String",
+      "example": "http://example.com/image.jpg",
+      "notes": "Reference to image captured by device"
+    },
+    "video": {
+      "description": "Video data or URL",
+      "type": "String",
+      "example": "http://example.com/video.mp4",
+      "notes": "Reference to video captured by device"
+    },
+    "audio": {
+      "description": "Audio data or URL",
+      "type": "String",
+      "example": "http://example.com/audio.mp3",
+      "notes": "Reference to audio captured by device"
+    },
+    "power": {
+      "description": "External power supply voltage in volts",
+      "type": "Number",
+      "range": "0 to 50",
+      "example": 12.6,
+      "notes": "External power supply voltage in volts"
+    },
+    "battery": {
+      "description": "Internal battery voltage in volts",
+      "type": "Number",
+      "range": "0 to 50",
+      "example": 3.8,
+      "notes": "Internal battery voltage in volts"
+    },
+    "batteryLevel": {
+      "description": "Internal battery level as percentage",
+      "type": "Number",
+      "range": "0 to 100",
+      "example": 85,
+      "notes": "Internal battery level as percentage"
+    },
+    "fuel": {
+      "description": "Fuel level in liters",
+      "type": "Number",
+      "range": "0 to 1000",
+      "example": 45.3,
+      "notes": "Fuel level in liters"
+    },
+    "fuelUsed": {
+      "description": "Fuel used in liters",
+      "type": "Number",
+      "range": "0 to 10000",
+      "example": 125.7,
+      "notes": "Total fuel used in liters"
+    },
+    "fuelConsumption": {
+      "description": "Fuel consumption in liters/hour",
+      "type": "Number",
+      "range": "0 to 100",
+      "example": 8.4,
+      "notes": "Current fuel consumption in liters/hour"
+    },
+    "versionFw": {
+      "description": "Firmware version",
+      "type": "String",
+      "example": "1.2.5",
+      "notes": "Device firmware version"
+    },
+    "versionHw": {
+      "description": "Hardware version",
+      "type": "String",
+      "example": "3.0",
+      "notes": "Device hardware version"
+    },
+    "type": {
+      "description": "Device type identifier",
+      "type": "String",
+      "example": "TK103",
+      "notes": "Model or type of the device"
+    },
+    "ignition": {
+      "description": "Ignition status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Vehicle ignition state (on/off)"
+    },
+    "flags": {
+      "description": "Device-specific flags",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 15,
+      "notes": "Bitfield for device-specific flags"
+    },
+    "antenna": {
+      "description": "GPS antenna status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "GPS antenna connection status"
+    },
+    "charge": {
+      "description": "Battery charging status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Indicates if battery is currently charging"
+    },
+    "ip": {
+      "description": "Device IP address",
+      "type": "String",
+      "example": "10.0.0.1",
+      "notes": "IP address of the device"
+    },
+    "archive": {
+      "description": "Indicates archived (historical) data",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Flag for historical/archived position data"
+    },
+    "distance": {
+      "description": "Distance from previous point in meters",
+      "type": "Number",
+      "range": "0 to 1000000",
+      "example": 42.5,
+      "notes": "Distance from previous position in meters"
+    },
+    "totalDistance": {
+      "description": "Total distance in meters",
+      "type": "Number",
+      "range": "0 to 9999999",
+      "example": 43712000,
+      "notes": "Alternative to odometer, total distance in meters"
+    },
+    "rpm": {
+      "description": "Engine RPM",
+      "type": "Number",
+      "range": "0 to 20000",
+      "example": 3500,
+      "notes": "Engine revolutions per minute"
+    },
+    "vin": {
+      "description": "Vehicle Identification Number",
+      "type": "String",
+      "example": "1HGCM82633A004352",
+      "notes": "Standard vehicle identification number"
+    },
+    "approximate": {
+      "description": "Indicates position is approximate",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Flag for approximate/calculated positions"
+    },
+    "throttle": {
+      "description": "Throttle position as percentage",
+      "type": "Number",
+      "range": "0 to 100",
+      "example": 45,
+      "notes": "Throttle position as percentage"
+    },
+    "motion": {
+      "description": "Motion detection status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Indicates if motion is detected"
+    },
+    "armed": {
+      "description": "Alarm armed status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Indicates if alarm system is armed"
+    },
+    "geofence": {
+      "description": "Geofence identifier",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 1,
+      "notes": "Identifier of triggered geofence"
+    },
+    "acceleration": {
+      "description": "Acceleration in m/s²",
+      "type": "Number",
+      "range": "-50 to 50",
+      "example": 3.1,
+      "notes": "Acceleration in meters per second squared"
+    },
+    "humidity": {
+      "description": "Humidity percentage",
+      "type": "Number",
+      "range": "0 to 100",
+      "example": 68,
+      "notes": "Relative humidity percentage"
+    },
+    "deviceTemp": {
+      "description": "Device temperature in celsius",
+      "type": "Number",
+      "range": "-50 to 100",
+      "example": 35.5,
+      "notes": "Internal device temperature in celsius"
+    },
+    "coolantTemp": {
+      "description": "Engine coolant temperature in celsius",
+      "type": "Number",
+      "range": "-50 to 200",
+      "example": 90,
+      "notes": "Engine coolant temperature in celsius"
+    },
+    "engineLoad": {
+      "description": "Engine load as percentage",
+      "type": "Number",
+      "range": "0 to 100",
+      "example": 75,
+      "notes": "Engine load as percentage"
+    },
+    "engineTemp": {
+      "description": "Engine temperature in celsius",
+      "type": "Number",
+      "range": "-50 to 200",
+      "example": 95,
+      "notes": "Engine temperature in celsius"
+    },
+    "operator": {
+      "description": "Mobile operator name",
+      "type": "String",
+      "example": "Verizon",
+      "notes": "Cellular network operator name"
+    },
+    "command": {
+      "description": "Command information",
+      "type": "String",
+      "example": "reboot",
+      "notes": "Command sent to or from device"
+    },
+    "blocked": {
+      "description": "Device blocked status",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Indicates if device is blocked/disabled"
+    },
+    "lock": {
+      "description": "Lock status",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Indicates if device/vehicle is locked"
+    },
+    "door": {
+      "description": "Door status",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Indicates if door is open (true) or closed (false)"
+    },
+    "axleWeight": {
+      "description": "Axle weight in kg",
+      "type": "Number",
+      "range": "0 to 100000",
+      "example": 5400,
+      "notes": "Vehicle axle weight in kilograms"
+    },
+    "gSensor": {
+      "description": "G-sensor data",
+      "type": "String",
+      "example": "x:0.1,y:-0.5,z:9.8",
+      "notes": "G-sensor/accelerometer data in multiple axes"
+    },
+    "iccid": {
+      "description": "SIM card ICCID",
+      "type": "String",
+      "example": "89014103211118510720",
+      "notes": "Integrated Circuit Card Identifier for SIM"
+    },
+    "phone": {
+      "description": "Phone number",
+      "type": "String",
+      "example": "+15551234567",
+      "notes": "Device phone number"
+    },
+    "speedLimit": {
+      "description": "Speed limit in knots",
+      "type": "Number",
+      "range": "0 to 500",
+      "example": 60,
+      "notes": "Speed limit in knots"
+    },
+    "drivingTime": {
+      "description": "Continuous driving time in seconds",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 3600,
+      "notes": "Continuous driving time in seconds"
+    },
+    "dtcs": {
+      "description": "Diagnostic Trouble Codes",
+      "type": "String",
+      "example": "P0171,P0172",
+      "notes": "OBD-II diagnostic trouble codes"
+    },
+    "obdSpeed": {
+      "description": "OBD speed in km/h",
+      "type": "Number",
+      "range": "0 to 500",
+      "example": 65,
+      "notes": "Vehicle speed from OBD in km/h"
+    },
+    "obdOdometer": {
+      "description": "OBD odometer in meters",
+      "type": "Number",
+      "range": "0 to 9999999",
+      "example": 43712000,
+      "notes": "Vehicle odometer from OBD in meters"
+    },
+    "result": {
+      "description": "Command result",
+      "type": "String",
+      "example": "success",
+      "notes": "Result of command execution"
+    },
+    "driverUniqueId": {
+      "description": "Driver unique identifier",
+      "type": "String",
+      "example": "DRIVER001",
+      "notes": "Unique identifier for the driver"
+    },
+    "card": {
+      "description": "Card identifier",
+      "type": "String",
+      "example": "1234567890ABCDEF",
+      "notes": "RFID card or driver card identifier"
+    },
+    "temp1": {
+      "description": "Temperature sensor 1 in celsius",
+      "type": "Number",
+      "range": "-50 to 200",
+      "example": 24.5,
+      "notes": "Temperature from sensor 1 in celsius"
+    },
+    "temp2": {
+      "description": "Temperature sensor 2 in celsius",
+      "type": "Number",
+      "range": "-50 to 200",
+      "example": 18.2,
+      "notes": "Temperature from sensor 2 in celsius"
+    },
+    "adc1": {
+      "description": "ADC input 1 value",
+      "type": "Number",
+      "range": "0 to 4095",
+      "example": 2048,
+      "notes": "Analog-to-Digital Converter input 1 value"
+    },
+    "adc2": {
+      "description": "ADC input 2 value",
+      "type": "Number",
+      "range": "0 to 4095",
+      "example": 1024,
+      "notes": "Analog-to-Digital Converter input 2 value"
+    },
+    "io1": {
+      "description": "I/O port 1 state",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Input/Output port 1 state"
+    },
+    "io2": {
+      "description": "I/O port 2 state",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Input/Output port 2 state"
+    },
+    "count1": {
+      "description": "Generic counter 1",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 42,
+      "notes": "Generic counter 1 value"
+    },
+    "count2": {
+      "description": "Generic counter 2",
+      "type": "Number",
+      "range": "0 to 2^31-1",
+      "example": 123,
+      "notes": "Generic counter 2 value"
+    },
+    "in1": {
+      "description": "Input 1 state",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Digital input 1 state"
+    },
+    "in2": {
+      "description": "Input 2 state",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Digital input 2 state"
+    },
+    "out1": {
+      "description": "Output 1 state",
+      "type": "Boolean",
+      "example": true,
+      "notes": "Digital output 1 state"
+    },
+    "out2": {
+      "description": "Output 2 state",
+      "type": "Boolean",
+      "example": false,
+      "notes": "Digital output 2 state"
+    }
+  },
+  "validationRules": {
+    "requiredForValidPosition": [
+      "latitude",
+      "longitude",
+      "deviceTime"
+    ],
+    "numericRanges": {
+      "latitude": [-90, 90],
+      "longitude": [-180, 180],
+      "speed": [0, 500],
+      "course": [0, 360],
+      "batteryLevel": [0, 100],
+      "rssi": [-120, 0]
+    },
+    "typeValidation": true,
+    "allowUnknownAttributes": true
+  },
+  "testCases": {
+    "basic": {
+      "latitude": 37.4219999,
+      "longitude": -122.0840575,
+      "speed": 0,
+      "course": 0,
+      "deviceTime": "2023-01-01T12:00:00.000Z"
+    },
+    "complete": {
+      "latitude": 37.4219999,
+      "longitude": -122.0840575,
+      "speed": 65.5,
+      "course": 45.3,
+      "altitude": 100.0,
+      "deviceTime": "2023-01-01T12:00:00.000Z",
+      "batteryLevel": 85,
+      "rssi": -67,
+      "sat": 8,
+      "hdop": 1.2,
+      "ignition": true,
+      "motion": true,
+      "odometer": 12345000
+    },
+    "alarm": {
+      "latitude": 37.4219999,
+      "longitude": -122.0840575,
+      "speed": 0,
+      "course": 0,
+      "deviceTime": "2023-01-01T12:00:00.000Z",
+      "alarm": "sos"
+    }
+  }
+}
