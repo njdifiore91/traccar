@@ -1,0 +1,186 @@
+# Service Discovery Configuration for Protocol Service Testing
+
+# Common service discovery settings
+service-discovery:
+  # Enable service discovery for testing
+  enabled: true
+  # Service information
+  service:
+    name: protocol-service
+    # Test instance ID with random suffix to avoid conflicts
+    instance-id: protocol-service-test-${random.uuid}
+    # Test-specific tags
+    tags:
+      - test
+      - protocol
+    # Service metadata for discovery
+    metadata:
+      environment: test
+      version: 1.0.0-TEST
+  # Health check configuration for service discovery
+  health-check:
+    # Path for health check endpoint
+    path: /actuator/health/liveness
+    # Port for health check endpoint
+    port: 8081
+    # Health check interval in seconds
+    interval: 10
+    # Health check timeout in seconds
+    timeout: 5
+    # Number of consecutive failures before marking service unhealthy
+    failure-threshold: 3
+    # Initial delay before starting health checks (seconds)
+    initial-delay: 30
+
+# Consul service discovery configuration for testing
+consul:
+  # Enable Consul service discovery for testing
+  enabled: true
+  # Test Consul server address (local or mock)
+  host: localhost
+  port: 8500
+  # Disable TLS for test environment
+  tls:
+    enabled: false
+  # Service registration configuration
+  registration:
+    # Enable automatic service registration
+    enabled: true
+    # Service check configuration
+    check:
+      # HTTP health check for Consul
+      http: http://localhost:8081/actuator/health/liveness
+      # Check interval in Consul format
+      interval: 10s
+      # Check timeout in Consul format
+      timeout: 5s
+      # Deregister service after this time if node fails
+      deregister-critical-service-after: 1m
+  # Service discovery configuration
+  discovery:
+    # Enable service discovery via Consul
+    enabled: true
+    # Query tags for filtering services
+    query-tags:
+      position-service: test
+      event-service: test
+      notification-service: test
+    # Cache refresh interval in milliseconds
+    cache-refresh-ms: 5000
+    # Whether to register with local agent
+    register-with-local-agent: true
+    # Whether to deregister on shutdown
+    deregister-on-shutdown: true
+    # Prefer IP address instead of hostname
+    prefer-ip-address: true
+    # Health check path
+    health-check-path: /actuator/health/liveness
+    # Health check interval
+    health-check-interval: 10s
+    # Health check timeout
+    health-check-timeout: 5s
+    # Health check critical timeout
+    health-check-critical-timeout: 30s
+
+# Kubernetes service discovery configuration for testing
+kubernetes:
+  # Enable Kubernetes service discovery for testing
+  # Note: This would typically be true in a Kubernetes environment
+  # and false in a local development environment
+  enabled: false
+  # Namespace for service discovery
+  namespace: traccar-test
+  # Service account for accessing Kubernetes API
+  service-account: protocol-service
+  # Trust certificates for API server
+  trust-certs: true
+  # Master URL for Kubernetes API (use service account in real K8s)
+  master-url: https://kubernetes.default.svc
+  # Service discovery configuration
+  discovery:
+    # Enable service discovery via Kubernetes API
+    enabled: true
+    # Whether to register with Kubernetes
+    register: true
+    # Service name pattern for discovery
+    service-name-pattern: ${spring.application.name}
+    # Port name or number for service communication
+    port-name: http
+    # Primary port name or number
+    primary-port-name: http
+    # Whether to include all namespaces in discovery
+    all-namespaces: false
+    # Specific namespaces to include in discovery
+    namespaces:
+      - traccar-test
+    # Service labels for filtering discovered services
+    service-labels:
+      app: traccar
+      environment: test
+    # Cache refresh interval in milliseconds
+    cache-refresh-ms: 5000
+
+# Mock service registry for testing without actual Consul or Kubernetes
+mock-registry:
+  # Enable mock registry for testing
+  enabled: true
+  # Mock service instances for testing service discovery
+  services:
+    # Mock position service instances
+    position-service:
+      - id: position-service-test-1
+        host: localhost
+        port: 8082
+        healthy: true
+        metadata:
+          version: 1.0.0-TEST
+      - id: position-service-test-2
+        host: localhost
+        port: 8083
+        healthy: false
+        metadata:
+          version: 1.0.0-TEST
+    # Mock event service instances
+    event-service:
+      - id: event-service-test-1
+        host: localhost
+        port: 8084
+        healthy: true
+        metadata:
+          version: 1.0.0-TEST
+    # Mock notification service instances
+    notification-service:
+      - id: notification-service-test-1
+        host: localhost
+        port: 8085
+        healthy: true
+        metadata:
+          version: 1.0.0-TEST
+
+# Circuit breaker configuration for service discovery
+resilience4j:
+  # Circuit breaker specific to service discovery operations
+  circuitbreaker:
+    instances:
+      serviceDiscovery:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  # Retry configuration for service discovery operations
+  retry:
+    instances:
+      serviceDiscovery:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+# Test-specific logging for service discovery
+logging:
+  level:
+    org.traccar.discovery: DEBUG
+    com.ecwid.consul: DEBUG
+    io.fabric8.kubernetes: DEBUG
