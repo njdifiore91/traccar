@@ -1,0 +1,167 @@
+{
+  "version": "1.0.0",
+  "description": "Shared configuration for protocol tests",
+  "general": {
+    "timeouts": {
+      "connectionTimeout": 5000,
+      "socketTimeout": 5000,
+      "testTimeout": 10000
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "initialBackoff": 1000,
+      "backoffMultiplier": 2.0
+    },
+    "bufferSizes": {
+      "defaultBufferSize": 4096,
+      "maxBufferSize": 65536
+    }
+  },
+  "environments": {
+    "local": {
+      "mockServices": true,
+      "testContainers": true,
+      "logLevel": "DEBUG"
+    },
+    "ci": {
+      "mockServices": true,
+      "testContainers": true,
+      "logLevel": "INFO"
+    }
+  },
+  "mocks": {
+    "geocoder": {
+      "enabled": true,
+      "responseFile": "mocks/geocoding/default_response.json"
+    },
+    "speedLimit": {
+      "enabled": true,
+      "responseFile": "mocks/speedlimit/default_response.json"
+    },
+    "notification": {
+      "enabled": true,
+      "responseFile": "mocks/notification/default_response.json"
+    },
+    "authentication": {
+      "enabled": true,
+      "responseFile": "mocks/authentication/default_response.json"
+    },
+    "map": {
+      "enabled": true,
+      "responseFile": "mocks/map/default_response.json"
+    },
+    "broker": {
+      "enabled": true,
+      "type": "embedded",
+      "topics": ["positions", "events", "commands", "notifications"]
+    },
+    "discovery": {
+      "enabled": true,
+      "responseFile": "mocks/discovery/default_response.json"
+    }
+  },
+  "protocols": {
+    "common": {
+      "testMessages": {
+        "location": "protocols/common/messages.json",
+        "binary": "protocols/common/binary_messages.bin"
+      },
+      "testDevices": {
+        "defaultDeviceId": 1,
+        "defaultUniqueId": "123456789012345"
+      },
+      "testPositions": {
+        "defaultLatitude": 40.7128,
+        "defaultLongitude": -74.0060,
+        "defaultAltitude": 0.0,
+        "defaultSpeed": 0.0,
+        "defaultCourse": 0.0
+      }
+    },
+    "tk103": {
+      "testMessages": {
+        "location": "protocols/tk103/messages.json",
+        "binary": "protocols/tk103/binary_messages.bin"
+      }
+    },
+    "teltonika": {
+      "testMessages": {
+        "location": "protocols/teltonika/messages.json",
+        "binary": "protocols/teltonika/binary_messages.bin"
+      }
+    },
+    "meitrack": {
+      "testMessages": {
+        "location": "protocols/meitrack/messages.json",
+        "binary": "protocols/meitrack/binary_messages.bin"
+      }
+    },
+    "totem": {
+      "testMessages": {
+        "location": "protocols/totem/messages.json",
+        "binary": "protocols/totem/binary_messages.bin"
+      }
+    },
+    "atrack": {
+      "testMessages": {
+        "location": "protocols/atrack/messages.json",
+        "binary": "protocols/atrack/binary_messages.bin"
+      }
+    },
+    "meiligao": {
+      "testMessages": {
+        "location": "protocols/meiligao/messages.json",
+        "binary": "protocols/meiligao/binary_messages.bin"
+      }
+    }
+  },
+  "testData": {
+    "devices": [
+      {
+        "id": 1,
+        "uniqueId": "123456789012345",
+        "protocol": "tk103"
+      },
+      {
+        "id": 2,
+        "uniqueId": "123456789012346",
+        "protocol": "teltonika"
+      },
+      {
+        "id": 3,
+        "uniqueId": "123456789012347",
+        "protocol": "meitrack"
+      }
+    ],
+    "positions": [
+      {
+        "deviceId": 1,
+        "time": "2023-01-01T12:00:00.000Z",
+        "valid": true,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0
+      }
+    ]
+  },
+  "testContainers": {
+    "postgres": {
+      "enabled": true,
+      "image": "postgres:14-alpine",
+      "databaseName": "traccar",
+      "username": "test",
+      "password": "test"
+    },
+    "kafka": {
+      "enabled": true,
+      "image": "confluentinc/cp-kafka:7.3.0"
+    },
+    "consul": {
+      "enabled": true,
+      "image": "consul:1.15",
+      "port": 8500
+    }
+  }
+}
