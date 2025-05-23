@@ -1,0 +1,96 @@
+{{- /*
+Traccar Service Template
+
+This template creates a Kubernetes Service resource for Traccar microservices.
+It provides a standardized way to expose services internally and externally.
+
+Parameters (via .Values.service):
+- type: Service type (ClusterIP, NodePort, LoadBalancer, ExternalName)
+- ports: List of port configurations
+  - name: Port name
+  - port: Service port
+  - targetPort: Container port (defaults to service port if not specified)
+  - nodePort: Node port (only for NodePort and LoadBalancer types)
+  - protocol: Protocol (TCP, UDP, SCTP, defaults to TCP)
+- annotations: Service annotations for cloud provider integration
+- externalTrafficPolicy: External traffic policy (Local, Cluster)
+- sessionAffinity: Session affinity (None, ClientIP)
+- sessionAffinityConfig: Session affinity configuration
+- loadBalancerIP: Static IP for LoadBalancer type
+- loadBalancerSourceRanges: Source IP ranges allowed to access LoadBalancer
+- publishNotReadyAddresses: Whether to publish not ready addresses
+- ipFamilyPolicy: IP family policy (SingleStack, PreferDualStack, RequireDualStack)
+- ipFamilies: IP families (IPv4, IPv6)
+- clusterIP: Specific cluster IP or "None" for headless service
+
+Example usage in values.yaml:
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+*/ -}}
+{{- define "traccar.service" -}}
+{{- $fullName := include "traccar.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "traccar.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  {{- with .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.service.sessionAffinity }}
+  sessionAffinity: {{ . }}
+  {{- end }}
+  {{- with .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.publishNotReadyAddresses }}
+  publishNotReadyAddresses: {{ .Values.service.publishNotReadyAddresses }}
+  {{- end }}
+  {{- with .Values.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.service.ipFamilies }}
+  ipFamilies:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  ports:
+    {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+      protocol: {{ .protocol | default "TCP" }}
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    {{- include "traccar.selectorLabels" . | nindent 4 }}
+{{- end }}
