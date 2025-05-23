@@ -1,0 +1,363 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-config
+  labels:
+    app: notification-service
+    component: notification
+data:
+  application.yaml: |
+    server:
+      port: 8083
+    
+    spring:
+      application:
+        name: notification-service
+      
+      # Message broker configuration
+      rabbitmq:
+        host: ${RABBITMQ_HOST:rabbitmq}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
+        listener:
+          simple:
+            retry:
+              enabled: true
+              initial-interval: 1000
+              max-attempts: 3
+              multiplier: 2.0
+    
+    # Notification channel configuration
+    notification:
+      channels:
+        email:
+          enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+          smtp:
+            host: ${SMTP_HOST:smtp.example.com}
+            port: ${SMTP_PORT:587}
+            username: ${SMTP_USERNAME:}
+            password: ${SMTP_PASSWORD:}
+            from: ${SMTP_FROM:no-reply@example.com}
+            starttls: ${SMTP_STARTTLS:true}
+        sms:
+          enabled: ${NOTIFICATION_SMS_ENABLED:false}
+          provider: ${SMS_PROVIDER:http}
+          http:
+            url: ${SMS_HTTP_URL:}
+            authorization: ${SMS_HTTP_AUTH:}
+          aws:
+            region: ${AWS_REGION:us-east-1}
+            accessKey: ${AWS_ACCESS_KEY:}
+            secretKey: ${AWS_SECRET_KEY:}
+        push:
+          enabled: ${NOTIFICATION_PUSH_ENABLED:false}
+          firebase:
+            credentials: ${FIREBASE_CREDENTIALS:}
+        web:
+          enabled: ${NOTIFICATION_WEB_ENABLED:true}
+      
+      # Dead letter queue configuration
+      dlq:
+        enabled: true
+        retry-interval: 60000
+        max-retries: 5
+      
+      # Circuit breaker configuration
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 5
+        reset-timeout: 30000
+    
+    # Template configuration
+    templates:
+      path: /app/templates
+    
+    # Management endpoints
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+
+  # Email notification templates
+  email-templates.yaml: |
+    templates:
+      - name: device-offline
+        subject: Device Offline Alert
+        body: |
+          <html>
+          <body>
+          <h1>Device Offline Alert</h1>
+          <p>Your device {device.name} has been offline since {event.serverTime}.</p>
+          <p>Last known position: {position.latitude}, {position.longitude}</p>
+          <p>Address: {position.address}</p>
+          </body>
+          </html>
+      - name: geofence-enter
+        subject: Geofence Entry Alert
+        body: |
+          <html>
+          <body>
+          <h1>Geofence Entry Alert</h1>
+          <p>Your device {device.name} has entered geofence {geofence.name} at {event.serverTime}.</p>
+          <p>Position: {position.latitude}, {position.longitude}</p>
+          <p>Address: {position.address}</p>
+          </body>
+          </html>
+      - name: geofence-exit
+        subject: Geofence Exit Alert
+        body: |
+          <html>
+          <body>
+          <h1>Geofence Exit Alert</h1>
+          <p>Your device {device.name} has exited geofence {geofence.name} at {event.serverTime}.</p>
+          <p>Position: {position.latitude}, {position.longitude}</p>
+          <p>Address: {position.address}</p>
+          </body>
+          </html>
+      - name: overspeed
+        subject: Overspeed Alert
+        body: |
+          <html>
+          <body>
+          <h1>Overspeed Alert</h1>
+          <p>Your device {device.name} has exceeded the speed limit at {event.serverTime}.</p>
+          <p>Speed: {position.speed} km/h</p>
+          <p>Position: {position.latitude}, {position.longitude}</p>
+          <p>Address: {position.address}</p>
+          </body>
+          </html>
+
+  # SMS notification templates
+  sms-templates.yaml: |
+    templates:
+      - name: device-offline
+        body: "Device {device.name} offline since {event.serverTime}. Last position: {position.address}"
+      - name: geofence-enter
+        body: "Device {device.name} entered {geofence.name} at {event.serverTime}. Location: {position.address}"
+      - name: geofence-exit
+        body: "Device {device.name} exited {geofence.name} at {event.serverTime}. Location: {position.address}"
+      - name: overspeed
+        body: "Device {device.name} exceeded speed limit: {position.speed} km/h at {position.address}"
+
+  # Push notification templates
+  push-templates.yaml: |
+    templates:
+      - name: device-offline
+        title: "Device Offline"
+        body: "Device {device.name} has been offline since {event.serverTime}"
+        data:
+          type: "device-offline"
+          deviceId: "{device.id}"
+      - name: geofence-enter
+        title: "Geofence Entry"
+        body: "Device {device.name} entered {geofence.name}"
+        data:
+          type: "geofence-enter"
+          deviceId: "{device.id}"
+          geofenceId: "{geofence.id}"
+      - name: geofence-exit
+        title: "Geofence Exit"
+        body: "Device {device.name} exited {geofence.name}"
+        data:
+          type: "geofence-exit"
+          deviceId: "{device.id}"
+          geofenceId: "{geofence.id}"
+      - name: overspeed
+        title: "Overspeed Alert"
+        body: "Device {device.name} exceeded speed limit: {position.speed} km/h"
+        data:
+          type: "overspeed"
+          deviceId: "{device.id}"
+          speed: "{position.speed}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  labels:
+    app: notification-service
+    component: notification
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: ${DOCKER_REGISTRY}/traccar/notification-service:${VERSION}
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8083
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        - name: RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-credentials
+              key: username
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-credentials
+              key: password
+        - name: SMTP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: smtp-credentials
+              key: host
+              optional: true
+        - name: SMTP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: smtp-credentials
+              key: port
+              optional: true
+        - name: SMTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: smtp-credentials
+              key: username
+              optional: true
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: smtp-credentials
+              key: password
+              optional: true
+        - name: SMTP_FROM
+          valueFrom:
+            secretKeyRef:
+              name: smtp-credentials
+              key: from
+              optional: true
+        resources:
+          requests:
+            cpu: 300m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8083
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: templates-volume
+          mountPath: /app/templates
+      volumes:
+      - name: config-volume
+        configMap:
+          name: notification-config
+          items:
+          - key: application.yaml
+            path: application.yaml
+      - name: templates-volume
+        configMap:
+          name: notification-config
+          items:
+          - key: email-templates.yaml
+            path: email-templates.yaml
+          - key: sms-templates.yaml
+            path: sms-templates.yaml
+          - key: push-templates.yaml
+            path: push-templates.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    app: notification-service
+    component: notification
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - name: http
+    port: 8083
+    targetPort: 8083
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: notification-service
+  labels:
+    app: notification-service
+    component: notification
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: notification-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60
