@@ -15,143 +15,273 @@
  */
 package org.traccar.messaging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Tag;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.propagation.TextMapSetter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.instrumentation.kafka.v2_6.KafkaTelemetry;
-import io.opentelemetry.api.OpenTelemetry;
-
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Properties;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Kafka implementation of the MessageProducer interface.
- * Publishes positions and device status updates to Kafka topics.
+ * Implementation of the MessageProducer interface for Apache Kafka.
+ * Handles the details of Kafka producer configuration, topic partitioning,
+ * and message delivery guarantees. Integrates with OpenTelemetry for distributed
+ * tracing and Micrometer for metrics collection.
  */
+@Singleton
 public class KafkaMessageProducer implements MessageProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMessageProducer.class);
 
-    private final Producer<Long, String> producer;
+    private final Producer<String, String> producer;
     private final ObjectMapper objectMapper;
-    private final String positionsTopic;
-    private final String deviceStatusTopic;
-    private final KafkaTelemetry kafkaTelemetry;
+    private final Tracer tracer;
+    private final MeterRegistry meterRegistry;
+    private final MessagingConfig config;
+
+    private final Timer positionSendTimer;
+    private final Timer deviceStatusSendTimer;
+    private final Counter positionSendErrorCounter;
+    private final Counter deviceStatusSendErrorCounter;
+    private final Counter totalMessagesSentCounter;
+
+    private static final TextMapSetter<ProducerRecord<String, String>> KAFKA_HEADER_SETTER =
+            (record, key, value) -> record.headers().add(key, value.getBytes());
 
     /**
-     * Construct Kafka message producer with provided configuration.
+     * Creates a new KafkaMessageProducer with the specified dependencies.
      *
-     * @param config Configuration parameters
-     * @param openTelemetry OpenTelemetry instance for tracing
+     * @param objectMapper JSON serializer
+     * @param tracer OpenTelemetry tracer for distributed tracing
+     * @param meterRegistry Micrometer registry for metrics collection
+     * @param config Messaging configuration
      */
-    public KafkaMessageProducer(Config config, OpenTelemetry openTelemetry) {
-        this.objectMapper = new ObjectMapper();
-        this.positionsTopic = config.getString(Keys.KAFKA_POSITIONS_TOPIC.getKey(), "raw.positions");
-        this.deviceStatusTopic = config.getString(Keys.KAFKA_DEVICE_STATUS_TOPIC.getKey(), "device.connections");
-        
-        // Configure Kafka producer
+    @Inject
+    public KafkaMessageProducer(
+            ObjectMapper objectMapper,
+            Tracer tracer,
+            MeterRegistry meterRegistry,
+            MessagingConfig config) {
+        this.objectMapper = objectMapper;
+        this.tracer = tracer;
+        this.meterRegistry = meterRegistry;
+        this.config = config;
+
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, 
-                config.getString(Keys.KAFKA_BOOTSTRAP_SERVERS.getKey(), "localhost:9092"));
-        properties.put(ProducerConfig.CLIENT_ID_CONFIG, 
-                config.getString(Keys.KAFKA_CLIENT_ID.getKey(), "traccar-protocol-service"));
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getKafkaBootstrapServers());
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.ACKS_CONFIG, "all");
-        properties.put(ProducerConfig.RETRIES_CONFIG, 3);
-        properties.put(ProducerConfig.LINGER_MS_CONFIG, 5);
-        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
         
-        // Create Kafka producer with OpenTelemetry instrumentation
-        this.kafkaTelemetry = KafkaTelemetry.create(openTelemetry);
-        this.producer = new KafkaProducer<>(properties);
+        // Configure acknowledgment level
+        properties.put(ProducerConfig.ACKS_CONFIG, config.getKafkaAcksConfig());
         
-        LOGGER.info("Kafka message producer initialized with topics: positions={}, deviceStatus={}", 
-                positionsTopic, deviceStatusTopic);
+        // Configure retries
+        properties.put(ProducerConfig.RETRIES_CONFIG, config.getKafkaRetries());
+        properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, config.getKafkaRetryBackoffMs());
+        
+        // Configure batching
+        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, config.getKafkaBatchSize());
+        properties.put(ProducerConfig.LINGER_MS_CONFIG, config.getKafkaLingerMs());
+        
+        // Configure buffer memory
+        properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, config.getKafkaBufferMemory());
+        
+        // Configure compression
+        properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, config.getKafkaCompressionType());
+        
+        // Enable idempotence for exactly-once semantics if configured
+        if (config.isKafkaEnableIdempotence()) {
+            properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+            // When idempotence is enabled, max.in.flight.requests.per.connection must be <= 5
+            properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
+        }
+        
+        // Configure client ID for metrics and logging
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, config.getKafkaClientId());
+
+        producer = new KafkaProducer<>(properties);
+
+        // Initialize metrics
+        positionSendTimer = meterRegistry.timer("kafka.producer.position.send");
+        deviceStatusSendTimer = meterRegistry.timer("kafka.producer.device.status.send");
+        positionSendErrorCounter = meterRegistry.counter("kafka.producer.position.errors");
+        deviceStatusSendErrorCounter = meterRegistry.counter("kafka.producer.device.status.errors");
+        totalMessagesSentCounter = meterRegistry.counter("kafka.producer.messages.sent");
+
+        LOGGER.info("Initialized Kafka producer with bootstrap servers: {}", config.getKafkaBootstrapServers());
     }
 
     @Override
     public void sendPosition(Position position) throws Exception {
-        String json = objectMapper.writeValueAsString(position);
+        String key = Long.toString(position.getDeviceId());
+        String topic = config.getPositionsTopic();
         
-        // Create producer record with device ID as key for partitioning
-        ProducerRecord<Long, String> record = new ProducerRecord<>(
-                positionsTopic, position.getDeviceId(), json);
+        Span span = tracer.spanBuilder("kafka.send.position")
+                .setSpanKind(SpanKind.PRODUCER)
+                .setAttribute("messaging.system", "kafka")
+                .setAttribute("messaging.destination", topic)
+                .setAttribute("messaging.destination_kind", "topic")
+                .setAttribute("messaging.kafka.client_id", config.getKafkaClientId())
+                .setAttribute("messaging.kafka.partition", position.getDeviceId() % config.getKafkaPartitionCount())
+                .setAttribute("device.id", position.getDeviceId())
+                .startSpan();
         
-        // Inject OpenTelemetry context for distributed tracing
-        record = kafkaTelemetry.wrap(record, Context.current());
-        
-        // Add span attributes for better tracing
-        Span span = Span.current();
-        span.setAttribute("messaging.system", "kafka");
-        span.setAttribute("messaging.destination", positionsTopic);
-        span.setAttribute("messaging.destination_kind", "topic");
-        
-        // Send record asynchronously with callback
-        producer.send(record, (metadata, exception) -> {
-            if (exception != null) {
-                LOGGER.warn("Failed to send position to Kafka", exception);
-                span.recordException(exception);
-            } else {
-                LOGGER.debug("Position sent to Kafka: topic={}, partition={}, offset={}", 
-                        metadata.topic(), metadata.partition(), metadata.offset());
-            }
-        });
+        try {
+            String value = objectMapper.writeValueAsString(position);
+            ProducerRecord<String, String> record = new ProducerRecord<>(
+                    topic, 
+                    (int) (position.getDeviceId() % config.getKafkaPartitionCount()), 
+                    key, 
+                    value);
+            
+            // Inject tracing context into Kafka headers
+            tracer.getOpenTelemetry().getPropagators().getTextMapPropagator()
+                    .inject(Context.current().with(span), record, KAFKA_HEADER_SETTER);
+            
+            // Send the message and measure the time it takes
+            positionSendTimer.record(() -> {
+                try {
+                    Future<RecordMetadata> future = producer.send(record);
+                    if (config.isKafkaSyncSend()) {
+                        // Wait for the send to complete if synchronous sending is enabled
+                        future.get(config.getKafkaSendTimeoutMs(), TimeUnit.MILLISECONDS);
+                    }
+                    totalMessagesSentCounter.increment();
+                } catch (Exception e) {
+                    positionSendErrorCounter.increment();
+                    span.recordException(e);
+                    throw new RuntimeException("Failed to send position to Kafka", e);
+                }
+            });
+        } catch (JsonProcessingException e) {
+            positionSendErrorCounter.increment();
+            span.recordException(e);
+            throw e;
+        } finally {
+            span.end();
+        }
     }
 
     @Override
     public void sendDeviceConnectionStatus(long deviceId, boolean connected) throws Exception {
-        Map<String, Object> status = new HashMap<>();
-        status.put("deviceId", deviceId);
-        status.put("connected", connected);
-        status.put("timestamp", System.currentTimeMillis());
+        String key = Long.toString(deviceId);
+        String topic = config.getDeviceStatusTopic();
         
-        String json = objectMapper.writeValueAsString(status);
+        Span span = tracer.spanBuilder("kafka.send.device.status")
+                .setSpanKind(SpanKind.PRODUCER)
+                .setAttribute("messaging.system", "kafka")
+                .setAttribute("messaging.destination", topic)
+                .setAttribute("messaging.destination_kind", "topic")
+                .setAttribute("messaging.kafka.client_id", config.getKafkaClientId())
+                .setAttribute("messaging.kafka.partition", deviceId % config.getKafkaPartitionCount())
+                .setAttribute("device.id", deviceId)
+                .setAttribute("device.connected", connected)
+                .startSpan();
         
-        // Create producer record with device ID as key for partitioning
-        ProducerRecord<Long, String> record = new ProducerRecord<>(
-                deviceStatusTopic, deviceId, json);
-        
-        // Inject OpenTelemetry context for distributed tracing
-        record = kafkaTelemetry.wrap(record, Context.current());
-        
-        // Add span attributes for better tracing
-        Span span = Span.current();
-        span.setAttribute("messaging.system", "kafka");
-        span.setAttribute("messaging.destination", deviceStatusTopic);
-        span.setAttribute("messaging.destination_kind", "topic");
-        
-        // Send record asynchronously with callback
-        producer.send(record, (metadata, exception) -> {
-            if (exception != null) {
-                LOGGER.warn("Failed to send device status to Kafka", exception);
-                span.recordException(exception);
-            } else {
-                LOGGER.debug("Device status sent to Kafka: topic={}, partition={}, offset={}", 
-                        metadata.topic(), metadata.partition(), metadata.offset());
-            }
-        });
+        try {
+            // Create a simple status object to serialize
+            DeviceStatus status = new DeviceStatus(deviceId, connected);
+            String value = objectMapper.writeValueAsString(status);
+            
+            ProducerRecord<String, String> record = new ProducerRecord<>(
+                    topic, 
+                    (int) (deviceId % config.getKafkaPartitionCount()), 
+                    key, 
+                    value);
+            
+            // Inject tracing context into Kafka headers
+            tracer.getOpenTelemetry().getPropagators().getTextMapPropagator()
+                    .inject(Context.current().with(span), record, KAFKA_HEADER_SETTER);
+            
+            // Send the message and measure the time it takes
+            deviceStatusSendTimer.record(() -> {
+                try {
+                    Future<RecordMetadata> future = producer.send(record);
+                    if (config.isKafkaSyncSend()) {
+                        // Wait for the send to complete if synchronous sending is enabled
+                        future.get(config.getKafkaSendTimeoutMs(), TimeUnit.MILLISECONDS);
+                    }
+                    totalMessagesSentCounter.increment();
+                } catch (Exception e) {
+                    deviceStatusSendErrorCounter.increment();
+                    span.recordException(e);
+                    throw new RuntimeException("Failed to send device status to Kafka", e);
+                }
+            });
+        } catch (JsonProcessingException e) {
+            deviceStatusSendErrorCounter.increment();
+            span.recordException(e);
+            throw e;
+        } finally {
+            span.end();
+        }
+    }
+
+    @Override
+    public boolean isConnected() {
+        try {
+            // Check if the producer is connected by sending a metadata request
+            producer.partitionsFor(config.getPositionsTopic());
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check Kafka connection", e);
+            return false;
+        }
     }
 
     @Override
     public void close() {
         if (producer != null) {
-            producer.flush();
-            producer.close();
-            LOGGER.info("Kafka message producer closed");
+            try {
+                // Flush any pending messages before closing
+                producer.flush();
+                producer.close(config.getKafkaCloseTimeoutMs(), TimeUnit.MILLISECONDS);
+                LOGGER.info("Kafka producer closed successfully");
+            } catch (Exception e) {
+                LOGGER.error("Error closing Kafka producer", e);
+            }
+        }
+    }
+
+    /**
+     * Simple class to represent device connection status for serialization.
+     */
+    private static class DeviceStatus {
+        private final long deviceId;
+        private final boolean connected;
+
+        public DeviceStatus(long deviceId, boolean connected) {
+            this.deviceId = deviceId;
+            this.connected = connected;
+        }
+
+        public long getDeviceId() {
+            return deviceId;
+        }
+
+        public boolean isConnected() {
+            return connected;
         }
     }
 }
