@@ -1,0 +1,437 @@
+{
+  "version": "1.0",
+  "description": "Sample message templates for testing asynchronous communication between microservices",
+  "messages": {
+    "position": {
+      "standard": {
+        "deviceId": 123,
+        "protocol": "tk103",
+        "serverTime": "2023-05-23T10:15:30.000Z",
+        "deviceTime": "2023-05-23T10:15:20.000Z",
+        "fixTime": "2023-05-23T10:15:20.000Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.0,
+        "speed": 45.5,
+        "course": 180.0,
+        "address": "123 Main St, San Francisco, CA",
+        "accuracy": 5.0,
+        "network": {
+          "radioType": "gsm",
+          "cellTowers": [
+            {
+              "cellId": 12345,
+              "locationAreaCode": 1000,
+              "mobileCountryCode": 310,
+              "mobileNetworkCode": 410,
+              "signalStrength": -70
+            }
+          ]
+        },
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true,
+          "motion": true,
+          "odometer": 12345.6,
+          "fuelLevel": 75.5,
+          "temperature": 28.5
+        }
+      },
+      "minimal": {
+        "deviceId": 456,
+        "protocol": "meitrack",
+        "serverTime": "2023-05-23T10:15:30.000Z",
+        "deviceTime": "2023-05-23T10:15:20.000Z",
+        "fixTime": "2023-05-23T10:15:20.000Z",
+        "valid": true,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 10.0,
+        "speed": 0.0,
+        "course": 0.0
+      },
+      "invalid": {
+        "deviceId": 789,
+        "protocol": "teltonika",
+        "serverTime": "2023-05-23T10:15:30.000Z",
+        "deviceTime": "2023-05-23T10:15:20.000Z",
+        "fixTime": "2023-05-23T10:15:20.000Z",
+        "valid": false,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "attributes": {
+          "batteryLevel": 15,
+          "reason": "no_fix"
+        }
+      },
+      "withAlarm": {
+        "deviceId": 101,
+        "protocol": "atrack",
+        "serverTime": "2023-05-23T10:15:30.000Z",
+        "deviceTime": "2023-05-23T10:15:20.000Z",
+        "fixTime": "2023-05-23T10:15:20.000Z",
+        "valid": true,
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "altitude": 25.0,
+        "speed": 0.0,
+        "course": 90.0,
+        "attributes": {
+          "alarm": "sos",
+          "batteryLevel": 30
+        }
+      }
+    },
+    "event": {
+      "geofenceEntry": {
+        "id": 1001,
+        "deviceId": 123,
+        "type": "geofenceEnter",
+        "eventTime": "2023-05-23T10:20:30.000Z",
+        "positionId": 10001,
+        "geofenceId": 501,
+        "maintenanceId": 0,
+        "attributes": {
+          "geofenceName": "Home Zone"
+        }
+      },
+      "geofenceExit": {
+        "id": 1002,
+        "deviceId": 123,
+        "type": "geofenceExit",
+        "eventTime": "2023-05-23T11:45:30.000Z",
+        "positionId": 10025,
+        "geofenceId": 501,
+        "maintenanceId": 0,
+        "attributes": {
+          "geofenceName": "Home Zone",
+          "dwellTime": 5100
+        }
+      },
+      "deviceOverspeed": {
+        "id": 1003,
+        "deviceId": 456,
+        "type": "deviceOverspeed",
+        "eventTime": "2023-05-23T12:10:45.000Z",
+        "positionId": 10050,
+        "geofenceId": 0,
+        "maintenanceId": 0,
+        "attributes": {
+          "speed": 75.5,
+          "speedLimit": 60.0
+        }
+      },
+      "deviceFuelDrop": {
+        "id": 1004,
+        "deviceId": 789,
+        "type": "deviceFuelDrop",
+        "eventTime": "2023-05-23T13:25:10.000Z",
+        "positionId": 10075,
+        "geofenceId": 0,
+        "maintenanceId": 0,
+        "attributes": {
+          "fuelDrop": 15.5,
+          "fuelLevel": 60.0
+        }
+      },
+      "alarmEvent": {
+        "id": 1005,
+        "deviceId": 101,
+        "type": "alarm",
+        "eventTime": "2023-05-23T14:05:22.000Z",
+        "positionId": 10100,
+        "geofenceId": 0,
+        "maintenanceId": 0,
+        "attributes": {
+          "alarmType": "sos"
+        }
+      },
+      "maintenanceDue": {
+        "id": 1006,
+        "deviceId": 123,
+        "type": "maintenance",
+        "eventTime": "2023-05-23T15:30:00.000Z",
+        "positionId": 10125,
+        "geofenceId": 0,
+        "maintenanceId": 201,
+        "attributes": {
+          "maintenanceName": "Oil Change",
+          "serviceOdometer": 5000.0,
+          "currentOdometer": 4950.0
+        }
+      }
+    },
+    "notification": {
+      "email": {
+        "id": 2001,
+        "userId": 1,
+        "deviceId": 123,
+        "type": "email",
+        "notificatorId": "mail",
+        "eventId": 1001,
+        "messageId": "msg-2001-email",
+        "sent": false,
+        "sentTime": null,
+        "recipients": ["user@example.com"],
+        "content": {
+          "subject": "Geofence Entry Alert",
+          "body": "Device 'Truck 123' has entered geofence 'Home Zone' at 2023-05-23 10:20:30.",
+          "attachments": [],
+          "templateId": "geofence-entry"
+        },
+        "attributes": {
+          "priority": "normal"
+        }
+      },
+      "sms": {
+        "id": 2002,
+        "userId": 1,
+        "deviceId": 456,
+        "type": "sms",
+        "notificatorId": "sms",
+        "eventId": 1003,
+        "messageId": "msg-2002-sms",
+        "sent": false,
+        "sentTime": null,
+        "recipients": ["+15551234567"],
+        "content": {
+          "body": "ALERT: Vehicle 'Car 456' exceeded speed limit (75.5 in 60.0 zone) at 2023-05-23 12:10:45.",
+          "templateId": "overspeed"
+        },
+        "attributes": {
+          "priority": "high"
+        }
+      },
+      "push": {
+        "id": 2003,
+        "userId": 1,
+        "deviceId": 101,
+        "type": "push",
+        "notificatorId": "firebase",
+        "eventId": 1005,
+        "messageId": "msg-2003-push",
+        "sent": false,
+        "sentTime": null,
+        "recipients": ["device-token-abc123"],
+        "content": {
+          "title": "SOS Alert",
+          "body": "Emergency alert from device 'Wearable 101' at 2023-05-23 14:05:22.",
+          "sound": "emergency.mp3",
+          "icon": "sos_icon",
+          "templateId": "sos-alert"
+        },
+        "attributes": {
+          "priority": "critical",
+          "ttl": 3600
+        }
+      },
+      "web": {
+        "id": 2004,
+        "userId": 1,
+        "deviceId": 789,
+        "type": "web",
+        "notificatorId": "web",
+        "eventId": 1004,
+        "messageId": "msg-2004-web",
+        "sent": false,
+        "sentTime": null,
+        "recipients": ["session-xyz789"],
+        "content": {
+          "title": "Fuel Drop Alert",
+          "body": "Possible fuel theft detected on 'Truck 789'. Fuel level dropped by 15.5 units at 2023-05-23 13:25:10.",
+          "icon": "fuel_alert",
+          "templateId": "fuel-drop"
+        },
+        "attributes": {
+          "priority": "high",
+          "autoClose": false
+        }
+      },
+      "telegram": {
+        "id": 2005,
+        "userId": 1,
+        "deviceId": 123,
+        "type": "telegram",
+        "notificatorId": "telegram",
+        "eventId": 1006,
+        "messageId": "msg-2005-telegram",
+        "sent": false,
+        "sentTime": null,
+        "recipients": ["12345678"],
+        "content": {
+          "body": "Maintenance reminder: 'Oil Change' is due soon for 'Truck 123'. Current odometer: 4950.0, Service due at: 5000.0.",
+          "templateId": "maintenance-reminder"
+        },
+        "attributes": {
+          "priority": "normal"
+        }
+      }
+    },
+    "command": {
+      "positionSingle": {
+        "id": 3001,
+        "deviceId": 123,
+        "type": "positionSingle",
+        "description": "Request single position update",
+        "attributes": {}
+      },
+      "engineStop": {
+        "id": 3002,
+        "deviceId": 456,
+        "type": "engineStop",
+        "description": "Stop vehicle engine",
+        "attributes": {
+          "reason": "theft_recovery"
+        }
+      },
+      "engineResume": {
+        "id": 3003,
+        "deviceId": 456,
+        "type": "engineResume",
+        "description": "Resume vehicle engine",
+        "attributes": {
+          "reason": "owner_verified"
+        }
+      },
+      "alarmArm": {
+        "id": 3004,
+        "deviceId": 789,
+        "type": "alarmArm",
+        "description": "Arm vehicle alarm system",
+        "attributes": {}
+      },
+      "alarmDisarm": {
+        "id": 3005,
+        "deviceId": 789,
+        "type": "alarmDisarm",
+        "description": "Disarm vehicle alarm system",
+        "attributes": {}
+      },
+      "setSpeedLimit": {
+        "id": 3006,
+        "deviceId": 101,
+        "type": "setSpeedLimit",
+        "description": "Set vehicle speed limit",
+        "attributes": {
+          "speedLimit": 80.0
+        }
+      },
+      "custom": {
+        "id": 3007,
+        "deviceId": 123,
+        "type": "custom",
+        "description": "Custom command with protocol-specific data",
+        "attributes": {
+          "data": "AABBCCDDEEFF",
+          "protocol": "tk103"
+        }
+      }
+    },
+    "error": {
+      "positionProcessingError": {
+        "id": 4001,
+        "source": "position-service",
+        "errorCode": "POSITION_PROCESSING_ERROR",
+        "errorTime": "2023-05-23T16:45:30.000Z",
+        "deviceId": 123,
+        "correlationId": "corr-id-abc123",
+        "message": "Failed to process position update",
+        "details": "Invalid position data format",
+        "originalMessage": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "invalid_field": "invalid_value"
+        },
+        "retryable": true,
+        "severity": "ERROR"
+      },
+      "eventProcessingError": {
+        "id": 4002,
+        "source": "event-service",
+        "errorCode": "EVENT_PROCESSING_ERROR",
+        "errorTime": "2023-05-23T17:15:45.000Z",
+        "deviceId": 456,
+        "correlationId": "corr-id-def456",
+        "message": "Failed to process event",
+        "details": "Referenced geofence not found",
+        "originalMessage": {
+          "id": 1001,
+          "deviceId": 456,
+          "type": "geofenceEnter",
+          "geofenceId": 999
+        },
+        "retryable": false,
+        "severity": "WARNING"
+      },
+      "notificationDeliveryError": {
+        "id": 4003,
+        "source": "notification-service",
+        "errorCode": "NOTIFICATION_DELIVERY_ERROR",
+        "errorTime": "2023-05-23T18:30:15.000Z",
+        "deviceId": 789,
+        "correlationId": "corr-id-ghi789",
+        "message": "Failed to deliver SMS notification",
+        "details": "SMS gateway returned error: rate limit exceeded",
+        "originalMessage": {
+          "id": 2002,
+          "type": "sms",
+          "recipients": ["+15551234567"]
+        },
+        "retryable": true,
+        "severity": "ERROR",
+        "retryCount": 2,
+        "nextRetryTime": "2023-05-23T19:00:15.000Z"
+      },
+      "commandExecutionError": {
+        "id": 4004,
+        "source": "protocol-service",
+        "errorCode": "COMMAND_EXECUTION_ERROR",
+        "errorTime": "2023-05-23T19:45:30.000Z",
+        "deviceId": 101,
+        "correlationId": "corr-id-jkl101",
+        "message": "Failed to execute command",
+        "details": "Device not connected",
+        "originalMessage": {
+          "id": 3001,
+          "deviceId": 101,
+          "type": "positionSingle"
+        },
+        "retryable": true,
+        "severity": "WARNING",
+        "retryCount": 3,
+        "nextRetryTime": "2023-05-23T20:15:30.000Z"
+      },
+      "serviceDiscoveryError": {
+        "id": 4005,
+        "source": "api-gateway",
+        "errorCode": "SERVICE_DISCOVERY_ERROR",
+        "errorTime": "2023-05-23T20:30:00.000Z",
+        "correlationId": "corr-id-mno202",
+        "message": "Failed to discover service",
+        "details": "Service 'position-service' not found in registry",
+        "retryable": true,
+        "severity": "CRITICAL",
+        "affectedServices": ["position-service"],
+        "retryCount": 5,
+        "nextRetryTime": "2023-05-23T20:31:00.000Z"
+      },
+      "messageBrokerError": {
+        "id": 4006,
+        "source": "event-service",
+        "errorCode": "MESSAGE_BROKER_ERROR",
+        "errorTime": "2023-05-23T21:15:45.000Z",
+        "correlationId": "corr-id-pqr303",
+        "message": "Failed to publish message to broker",
+        "details": "Connection to message broker lost",
+        "retryable": true,
+        "severity": "CRITICAL",
+        "retryCount": 0,
+        "nextRetryTime": "2023-05-23T21:16:45.000Z"
+      }
+    }
+  }
+}
