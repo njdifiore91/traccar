@@ -1,0 +1,25 @@
+apiVersion: v2
+kind: Chart
+name: protocol
+version: 1.0.0
+appVersion: "1.0.0"
+description: |
+  Protocol Service for Traccar GPS tracking platform. This service is responsible for
+  device communication and protocol handling for 200+ supported GPS protocols. It acts
+  as the entry point for all device data, with horizontal scalability for supporting
+  thousands of concurrent connections.
+type: application
+kubeVersion: ">= 1.25.0-0"
+maintainers:
+  - name: Traccar Team
+    email: support@traccar.org
+    url: https://www.traccar.org
+keywords:
+  - traccar
+  - gps
+  - tracking
+  - protocol
+  - iot
+home: https://www.traccar.org
+sources:
+  - https://github.com/traccar/traccar
