@@ -1,0 +1,68 @@
+{
+  "protocol": "atrack",
+  "decoderOptions": {
+    "longDate": {
+      "enabled": false,
+      "testCases": [
+        {
+          "name": "standardDateFormat",
+          "enabled": false,
+          "description": "Tests using standard date format"
+        },
+        {
+          "name": "longDateFormat",
+          "enabled": true,
+          "description": "Tests using long date format"
+        }
+      ]
+    },
+    "decimalFuel": {
+      "enabled": false,
+      "description": "Parse fuel values as decimal instead of hexadecimal"
+    },
+    "custom": {
+      "enabled": false,
+      "testCases": [
+        {
+          "name": "standardFormat",
+          "enabled": false,
+          "description": "Tests using standard format"
+        },
+        {
+          "name": "customFormat",
+          "enabled": true,
+          "form": "%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT",
+          "description": "Tests using custom format string"
+        },
+        {
+          "name": "extendedCustomFormat",
+          "enabled": true,
+          "form": "%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF",
+          "description": "Tests using extended custom format string"
+        }
+      ]
+    },
+    "frameMask": {
+      "enabled": false,
+      "testCases": [
+        {
+          "name": "defaultFrameMask",
+          "enabled": false,
+          "value": 0,
+          "description": "Tests using default frame mask"
+        },
+        {
+          "name": "beaconFrameMask",
+          "enabled": true,
+          "value": 1,
+          "description": "Tests using beacon frame mask for tag data"
+        }
+      ]
+    }
+  },
+  "testParameters": {
+    "connectionTimeout": 5000,
+    "responseTimeout": 2000,
+    "maxRetries": 3
+  }
+}
