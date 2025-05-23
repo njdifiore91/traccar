@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "description": "Mock responses for OAuth/OIDC authentication flows",
+    "version": "1.0.0",
+    "updated": "2023-11-15"
+  },
+  "discovery": {
+    "issuer": "https://mock-oauth.traccar.org",
+    "authorization_endpoint": "https://mock-oauth.traccar.org/oauth2/authorize",
+    "token_endpoint": "https://mock-oauth.traccar.org/oauth2/token",
+    "userinfo_endpoint": "https://mock-oauth.traccar.org/oauth2/userinfo",
+    "jwks_uri": "https://mock-oauth.traccar.org/oauth2/jwks",
+    "response_types_supported": ["code", "token", "id_token", "code token", "code id_token", "token id_token", "code token id_token"],
+    "subject_types_supported": ["public", "pairwise"],
+    "id_token_signing_alg_values_supported": ["RS256"],
+    "scopes_supported": ["openid", "profile", "email", "address", "phone", "offline_access"],
+    "token_endpoint_auth_methods_supported": ["client_secret_basic", "client_secret_post"],
+    "claims_supported": ["sub", "iss", "name", "email", "picture", "given_name", "family_name", "locale", "updated_at"],
+    "grant_types_supported": ["authorization_code", "refresh_token", "client_credentials", "password"]
+  },
+  "jwks": {
+    "keys": [
+      {
+        "kty": "RSA",
+        "kid": "mock-key-id-1",
+        "use": "sig",
+        "alg": "RS256",
+        "n": "xwQ72P9z9OYshiQ-ntDYaPnnfwG6u9JAdLMZ5o0dmjlcyrvwQRdoFIKPnO65Q8mh6F_LDSxjxa2Yzo_wdjhbPZLjfUJXgCzm54cClXzT5twzo7lzoAfaJlkTsoZc2HFWqmcri0BuzmTFLZx2Q7wYBm0pXHmQKF0V-C1O6NWfd4mfBhbM-I1tHYSpAMgarSm22WDMDx-WWI7TEzy2QhaBVaENW9BKaKkJklocAZCxk18WhR0fckIGiWiSM5FcU1PY2jfGsTmX505Ub7P5Dz75Ygqrutd5tFrcqyPAtPTFDk8X1InxkkUwpP3nFU5o50DGhwQolGYKPGtQ-ZtmbOfcWQ",
+        "e": "AQAB"
+      }
+    ]
+  },
+  "token_responses": {
+    "authorization_code": {
+      "success": {
+        "access_token": "mock-access-token-auth-code",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "refresh_token": "mock-refresh-token-auth-code",
+        "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Im1vY2sta2V5LWlkLTEifQ.eyJpc3MiOiJodHRwczovL21vY2stb2F1dGgudHJhY2Nhci5vcmciLCJzdWIiOiIxMjM0NTY3ODkwIiwiYXVkIjoibW9jay1jbGllbnQtaWQiLCJleHAiOjE3MzY4OTg0NTYsImlhdCI6MTczNjg5NDg1NiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSJ9.mock-signature"
+      },
+      "invalid_grant": {
+        "error": "invalid_grant",
+        "error_description": "The authorization code is invalid or has expired"
+      },
+      "invalid_client": {
+        "error": "invalid_client",
+        "error_description": "Client authentication failed"
+      }
+    },
+    "refresh_token": {
+      "success": {
+        "access_token": "mock-access-token-refresh",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "refresh_token": "mock-refresh-token-new"
+      },
+      "invalid_grant": {
+        "error": "invalid_grant",
+        "error_description": "The refresh token is invalid or has expired"
+      }
+    },
+    "client_credentials": {
+      "success": {
+        "access_token": "mock-access-token-client-credentials",
+        "token_type": "Bearer",
+        "expires_in": 3600
+      },
+      "invalid_client": {
+        "error": "invalid_client",
+        "error_description": "Client authentication failed"
+      }
+    },
+    "password": {
+      "success": {
+        "access_token": "mock-access-token-password",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "refresh_token": "mock-refresh-token-password",
+        "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Im1vY2sta2V5LWlkLTEifQ.eyJpc3MiOiJodHRwczovL21vY2stb2F1dGgudHJhY2Nhci5vcmciLCJzdWIiOiIxMjM0NTY3ODkwIiwiYXVkIjoibW9jay1jbGllbnQtaWQiLCJleHAiOjE3MzY4OTg0NTYsImlhdCI6MTczNjg5NDg1NiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSJ9.mock-signature"
+      },
+      "invalid_grant": {
+        "error": "invalid_grant",
+        "error_description": "The username or password is incorrect"
+      }
+    }
+  },
+  "token_validation": {
+    "valid": {
+      "active": true,
+      "scope": "openid profile email",
+      "client_id": "mock-client-id",
+      "username": "john.doe@example.com",
+      "token_type": "Bearer",
+      "exp": 1736898456,
+      "iat": 1736894856,
+      "sub": "1234567890",
+      "aud": "mock-client-id",
+      "iss": "https://mock-oauth.traccar.org"
+    },
+    "expired": {
+      "active": false,
+      "error": "invalid_token",
+      "error_description": "The token has expired"
+    },
+    "invalid": {
+      "active": false,
+      "error": "invalid_token",
+      "error_description": "The token is malformed or invalid"
+    },
+    "revoked": {
+      "active": false,
+      "error": "invalid_token",
+      "error_description": "The token has been revoked"
+    }
+  },
+  "userinfo": {
+    "admin": {
+      "sub": "1234567890",
+      "name": "John Doe",
+      "given_name": "John",
+      "family_name": "Doe",
+      "email": "john.doe@example.com",
+      "email_verified": true,
+      "picture": "https://mock-oauth.traccar.org/profile/john.jpg",
+      "roles": ["admin", "user"],
+      "permissions": ["read:devices", "write:devices", "read:users", "write:users", "read:reports", "write:reports", "read:geofences", "write:geofences", "read:notifications", "write:notifications", "read:calendar", "write:calendar", "read:attributes", "write:attributes", "read:drivers", "write:drivers", "read:groups", "write:groups", "read:commands", "write:commands"]
+    },
+    "manager": {
+      "sub": "0987654321",
+      "name": "Jane Smith",
+      "given_name": "Jane",
+      "family_name": "Smith",
+      "email": "jane.smith@example.com",
+      "email_verified": true,
+      "picture": "https://mock-oauth.traccar.org/profile/jane.jpg",
+      "roles": ["manager", "user"],
+      "permissions": ["read:devices", "write:devices", "read:users", "read:reports", "write:reports", "read:geofences", "write:geofences", "read:notifications", "write:notifications", "read:calendar", "write:calendar", "read:attributes", "write:attributes", "read:drivers", "write:drivers", "read:groups", "write:groups", "read:commands"]
+    },
+    "user": {
+      "sub": "5678901234",
+      "name": "Bob Johnson",
+      "given_name": "Bob",
+      "family_name": "Johnson",
+      "email": "bob.johnson@example.com",
+      "email_verified": true,
+      "picture": "https://mock-oauth.traccar.org/profile/bob.jpg",
+      "roles": ["user"],
+      "permissions": ["read:devices", "read:reports", "read:geofences", "read:notifications", "read:calendar", "read:attributes", "read:drivers", "read:groups"]
+    },
+    "readonly": {
+      "sub": "1357924680",
+      "name": "Alice Brown",
+      "given_name": "Alice",
+      "family_name": "Brown",
+      "email": "alice.brown@example.com",
+      "email_verified": true,
+      "picture": "https://mock-oauth.traccar.org/profile/alice.jpg",
+      "roles": ["readonly"],
+      "permissions": ["read:devices", "read:reports", "read:geofences"]
+    },
+    "error": {
+      "error": "invalid_token",
+      "error_description": "The access token is invalid or has expired"
+    }
+  },
+  "authorization_responses": {
+    "code": {
+      "success": {
+        "code": "mock-authorization-code",
+        "state": "${state}"
+      },
+      "access_denied": {
+        "error": "access_denied",
+        "error_description": "The resource owner denied the request",
+        "state": "${state}"
+      },
+      "invalid_request": {
+        "error": "invalid_request",
+        "error_description": "The request is missing a required parameter",
+        "state": "${state}"
+      }
+    },
+    "token": {
+      "success": {
+        "access_token": "mock-access-token-implicit",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "state": "${state}"
+      },
+      "access_denied": {
+        "error": "access_denied",
+        "error_description": "The resource owner denied the request",
+        "state": "${state}"
+      }
+    },
+    "id_token": {
+      "success": {
+        "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Im1vY2sta2V5LWlkLTEifQ.eyJpc3MiOiJodHRwczovL21vY2stb2F1dGgudHJhY2Nhci5vcmciLCJzdWIiOiIxMjM0NTY3ODkwIiwiYXVkIjoibW9jay1jbGllbnQtaWQiLCJleHAiOjE3MzY4OTg0NTYsImlhdCI6MTczNjg5NDg1NiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSJ9.mock-signature",
+        "state": "${state}"
+      },
+      "access_denied": {
+        "error": "access_denied",
+        "error_description": "The resource owner denied the request",
+        "state": "${state}"
+      }
+    },
+    "hybrid": {
+      "success": {
+        "code": "mock-authorization-code",
+        "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Im1vY2sta2V5LWlkLTEifQ.eyJpc3MiOiJodHRwczovL21vY2stb2F1dGgudHJhY2Nhci5vcmciLCJzdWIiOiIxMjM0NTY3ODkwIiwiYXVkIjoibW9jay1jbGllbnQtaWQiLCJleHAiOjE3MzY4OTg0NTYsImlhdCI6MTczNjg5NDg1NiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSJ9.mock-signature",
+        "state": "${state}"
+      },
+      "access_denied": {
+        "error": "access_denied",
+        "error_description": "The resource owner denied the request",
+        "state": "${state}"
+      }
+    }
+  },
+  "logout": {
+    "success": {
+      "status": "success",
+      "message": "Successfully logged out"
+    },
+    "error": {
+      "error": "invalid_request",
+      "error_description": "No valid session found to log out"
+    }
+  }
+}
