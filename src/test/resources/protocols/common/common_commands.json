@@ -1,0 +1,376 @@
+{
+  "description": "Standard command templates for protocol encoder tests",
+  "version": "1.0",
+  "lastUpdated": "2023-05-23",
+  "commands": {
+    "positionSingle": {
+      "type": "positionSingle",
+      "description": "Request a single position update from the device",
+      "attributes": {},
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"]
+    },
+    "positionPeriodic": {
+      "type": "positionPeriodic",
+      "description": "Configure periodic position reporting",
+      "attributes": {
+        "frequency": 60
+      },
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "data": "Protocol-specific format for frequency value"
+      },
+      "notes": "Frequency is specified in seconds. Some protocols may require specific frequency values or formats."
+    },
+    "positionStop": {
+      "type": "positionStop",
+      "description": "Stop periodic position reporting",
+      "attributes": {},
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols"
+      }
+    },
+    "engineStop": {
+      "type": "engineStop",
+      "description": "Stop the vehicle engine",
+      "attributes": {},
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "relay": "Relay number for protocols supporting multiple relays",
+        "data": "Protocol-specific command data format"
+      }
+    },
+    "engineResume": {
+      "type": "engineResume",
+      "description": "Resume the vehicle engine",
+      "attributes": {},
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "relay": "Relay number for protocols supporting multiple relays",
+        "data": "Protocol-specific command data format"
+      }
+    },
+    "alarmArm": {
+      "type": "alarmArm",
+      "description": "Arm the alarm system",
+      "attributes": {}
+    },
+    "alarmDisarm": {
+      "type": "alarmDisarm",
+      "description": "Disarm the alarm system",
+      "attributes": {}
+    },
+    "setTimezone": {
+      "type": "setTimezone",
+      "description": "Set the device timezone",
+      "attributes": {
+        "timezone": "UTC"
+      }
+    },
+    "requestPhoto": {
+      "type": "requestPhoto",
+      "description": "Request a photo from the device camera",
+      "attributes": {}
+    },
+    "powerOff": {
+      "type": "powerOff",
+      "description": "Power off the device",
+      "attributes": {}
+    },
+    "rebootDevice": {
+      "type": "rebootDevice",
+      "description": "Reboot the device",
+      "attributes": {}
+    },
+    "factoryReset": {
+      "type": "factoryReset",
+      "description": "Reset the device to factory settings",
+      "attributes": {}
+    },
+    "sendSms": {
+      "type": "sendSms",
+      "description": "Send an SMS message from the device",
+      "attributes": {
+        "phone": "+1234567890",
+        "message": "Test message"
+      }
+    },
+    "sendUssd": {
+      "type": "sendUssd",
+      "description": "Send a USSD code from the device",
+      "attributes": {
+        "message": "*100#"
+      }
+    },
+    "sosNumber": {
+      "type": "sosNumber",
+      "description": "Set SOS phone number",
+      "attributes": {
+        "index": 1,
+        "phone": "+1234567890"
+      }
+    },
+    "silenceTime": {
+      "type": "silenceTime",
+      "description": "Set silence time period",
+      "attributes": {
+        "data": "22:00-06:00"
+      }
+    },
+    "setPhonebook": {
+      "type": "setPhonebook",
+      "description": "Set device phonebook entries",
+      "attributes": {
+        "data": "+1234567890,+0987654321"
+      }
+    },
+    "message": {
+      "type": "message",
+      "description": "Send a text message to the device",
+      "attributes": {
+        "message": "Test message"
+      }
+    },
+    "voiceMessage": {
+      "type": "voiceMessage",
+      "description": "Send a voice message to the device",
+      "attributes": {
+        "data": "voice_message_data"
+      }
+    },
+    "outputControl": {
+      "type": "outputControl",
+      "description": "Control digital outputs on the device",
+      "attributes": {
+        "index": 1,
+        "enable": true
+      },
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "data": "Protocol-specific format for output control",
+        "duration": "Duration in seconds for temporary output activation"
+      },
+      "notes": "The 'index' attribute specifies which output to control (1-based). The 'enable' attribute determines whether to activate (true) or deactivate (false) the output."
+    },
+    "voiceMonitoring": {
+      "type": "voiceMonitoring",
+      "description": "Enable voice monitoring",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "setAgps": {
+      "type": "setAgps",
+      "description": "Configure assisted GPS",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "setIndicator": {
+      "type": "setIndicator",
+      "description": "Control device indicators",
+      "attributes": {
+        "data": "indicator_settings"
+      }
+    },
+    "configuration": {
+      "type": "configuration",
+      "description": "Set device configuration parameters",
+      "attributes": {
+        "data": "config_parameters"
+      },
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "language": "Language setting for the device",
+        "uniqueId": "Device unique identifier"
+      },
+      "notes": "The 'data' attribute format is highly protocol-specific. Refer to individual protocol documentation for the correct format."
+    },
+    "getVersion": {
+      "type": "getVersion",
+      "description": "Request device firmware version",
+      "attributes": {}
+    },
+    "firmwareUpdate": {
+      "type": "firmwareUpdate",
+      "description": "Update device firmware",
+      "attributes": {
+        "server": "firmware.example.com",
+        "port": 80
+      }
+    },
+    "setConnection": {
+      "type": "setConnection",
+      "description": "Configure device connection parameters",
+      "attributes": {
+        "server": "tracking.example.com",
+        "port": 5055
+      }
+    },
+    "setOdometer": {
+      "type": "setOdometer",
+      "description": "Set device odometer value",
+      "attributes": {
+        "data": "12345.6"
+      }
+    },
+    "getModemStatus": {
+      "type": "getModemStatus",
+      "description": "Request modem status information",
+      "attributes": {}
+    },
+    "getDeviceStatus": {
+      "type": "getDeviceStatus",
+      "description": "Request device status information",
+      "attributes": {}
+    },
+    "setSpeedLimit": {
+      "type": "setSpeedLimit",
+      "description": "Set device speed limit",
+      "attributes": {
+        "data": "80"
+      }
+    },
+    "modePowerSaving": {
+      "type": "modePowerSaving",
+      "description": "Enable power saving mode",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "modeDeepSleep": {
+      "type": "modeDeepSleep",
+      "description": "Enable deep sleep mode",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "alarmGeofence": {
+      "type": "alarmGeofence",
+      "description": "Configure geofence alarm",
+      "attributes": {
+        "radius": 100,
+        "enable": true
+      }
+    },
+    "alarmBattery": {
+      "type": "alarmBattery",
+      "description": "Configure battery alarm",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "alarmSos": {
+      "type": "alarmSos",
+      "description": "Configure SOS alarm",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "alarmRemove": {
+      "type": "alarmRemove",
+      "description": "Configure device removal alarm",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "alarmClock": {
+      "type": "alarmClock",
+      "description": "Configure time-based alarm",
+      "attributes": {
+        "data": "08:00,17:00"
+      }
+    },
+    "alarmSpeed": {
+      "type": "alarmSpeed",
+      "description": "Configure speed alarm",
+      "attributes": {
+        "data": "90"
+      }
+    },
+    "alarmFall": {
+      "type": "alarmFall",
+      "description": "Configure fall detection alarm",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "alarmVibration": {
+      "type": "alarmVibration",
+      "description": "Configure vibration alarm",
+      "attributes": {
+        "enable": true
+      }
+    },
+    "custom": {
+      "type": "custom",
+      "description": "Custom command template for protocol-specific commands",
+      "attributes": {
+        "data": "custom_command_data"
+      },
+      "supportedProtocols": ["teltonika", "meitrack", "atrack", "totem", "meiligao", "tk103"],
+      "commonExtensions": {
+        "devicePassword": "Device security password, required by some protocols",
+        "uniqueId": "Device unique identifier",
+        "protocol": "Specific protocol identifier for multi-protocol devices"
+      },
+      "notes": "The 'custom' command type is used for protocol-specific commands that don't fit any of the standard command types. The 'data' attribute contains the raw command data in the format expected by the device."
+    },
+    "deviceIdentification": {
+      "type": "deviceIdentification",
+      "description": "Request device identification information",
+      "attributes": {}
+    }
+  },
+  "usage": {
+    "description": "These command templates can be used in protocol encoder tests to verify command encoding functionality. Each protocol implementation can extend these templates with protocol-specific parameters.",
+    "example": "To use in a test, create a Command object with the appropriate type and attributes, then pass it to the protocol encoder for encoding."
+  },
+  "extensibility": {
+    "description": "Protocol-specific command parameters can be added to these base templates as needed. The 'custom' command type can be used for commands that don't fit any of the standard types.",
+    "example": "For a protocol that requires additional parameters for the 'engineStop' command, extend the base template with those parameters before passing it to the encoder."
+  },
+  "testUsage": {
+    "description": "Example of how to use these command templates in protocol encoder tests",
+    "code": [
+      "Command command = new Command();",
+      "command.setType(Command.TYPE_ENGINE_STOP);",
+      "command.set(Command.KEY_DEVICE_PASSWORD, '123456');",
+      "verifyCommand(encoder, command, binary('01020304050607'));"
+    ],
+    "examples": {
+      "positionSingle": {
+        "description": "Request a single position update",
+        "code": [
+          "Command command = new Command();",
+          "command.setType(Command.TYPE_POSITION_SINGLE);",
+          "verifyCommand(encoder, command, binary('010203'));"
+        ]
+      },
+      "engineStop": {
+        "description": "Stop the vehicle engine",
+        "code": [
+          "Command command = new Command();",
+          "command.setType(Command.TYPE_ENGINE_STOP);",
+          "command.set(Command.KEY_DEVICE_PASSWORD, '123456');",
+          "verifyCommand(encoder, command, binary('0102030405'));"
+        ]
+      },
+      "outputControl": {
+        "description": "Control digital output",
+        "code": [
+          "Command command = new Command();",
+          "command.setType(Command.TYPE_OUTPUT_CONTROL);",
+          "command.set(Command.KEY_INDEX, 1);",
+          "command.set(Command.KEY_ENABLE, true);",
+          "verifyCommand(encoder, command, binary('0102'));"
+        ]
+      }
+    }
+  }
+}
