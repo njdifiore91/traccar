@@ -1,0 +1,200 @@
+{{- /*
+Template for creating a Horizontal Pod Autoscaler (HPA) resource.
+
+This template creates a Kubernetes HorizontalPodAutoscaler that enables dynamic scaling
+of Traccar microservices based on resource utilization and custom metrics.
+
+Parameters:
+  - .Values.hpa.enabled: Whether to enable HPA (default: true)
+  - .Values.hpa.minReplicas: Minimum number of replicas (default: 1)
+  - .Values.hpa.maxReplicas: Maximum number of replicas (default: 10)
+  - .Values.hpa.metrics: List of metrics to use for scaling
+  - .Values.hpa.cpu.enabled: Whether to enable CPU-based scaling (default: true)
+  - .Values.hpa.cpu.targetUtilization: Target CPU utilization percentage (default: 70)
+  - .Values.hpa.memory.enabled: Whether to enable memory-based scaling (default: true)
+  - .Values.hpa.memory.targetUtilization: Target memory utilization percentage (default: 80)
+  - .Values.hpa.custom: Custom metrics configuration
+    - .Values.hpa.custom.kafkaLag: Kafka queue lag metric configuration
+    - .Values.hpa.custom.grpcRequests: gRPC requests per second metric configuration
+    - .Values.hpa.custom.connections: Active connections metric configuration
+    - .Values.hpa.custom.messageRate: Message processing rate metric configuration
+    - .Values.hpa.custom.metrics: Additional custom metrics configuration
+  - .Values.hpa.behavior: HPA behavior configuration for scaling policies
+
+Dependencies:
+  - Requires "traccar.labels" template to be defined elsewhere in the chart
+
+Usage:
+  {{- include "traccar.hpa" (dict "root" . "name" "my-service" "target" "Deployment/my-service") -}}
+
+Example values.yaml configuration:
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpu:
+      enabled: true
+      targetUtilization: 70
+    memory:
+      enabled: true
+      targetUtilization: 80
+    custom:
+      kafkaLag:
+        targetValue: 1000
+      grpcRequests:
+        targetValue: 500
+      connections:
+        targetValue: 1000
+      messageRate:
+        targetValue: 5000
+      metrics:
+        - type: "Pods"
+          name: "custom_metric_name"
+          targetType: "AverageValue"
+          targetValue: 100
+*/}}
+
+{{- define "traccar.hpa" -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- $target := .target -}}
+{{- $targetKind := (split "/" $target)._0 -}}
+{{- $targetName := (split "/" $target)._1 -}}
+
+{{- if $root.Values.hpa.enabled -}}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "traccar.labels" $root | nindent 4 }}
+  {{- with $root.Values.hpa.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ $targetKind }}
+    name: {{ $targetName }}
+  minReplicas: {{ $root.Values.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ $root.Values.hpa.maxReplicas | default 10 }}
+  metrics:
+    {{- if and $root.Values.hpa.cpu.enabled (not (kindIs "invalid" $root.Values.hpa.cpu.enabled)) }}
+    # CPU utilization metric
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $root.Values.hpa.cpu.targetUtilization | default 70 }}
+    {{- end }}
+    
+    {{- if and $root.Values.hpa.memory.enabled (not (kindIs "invalid" $root.Values.hpa.memory.enabled)) }}
+    # Memory utilization metric
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $root.Values.hpa.memory.targetUtilization | default 80 }}
+    {{- end }}
+    
+    {{- if $root.Values.hpa.custom }}
+    {{- if $root.Values.hpa.custom.kafkaLag }}
+    # Kafka queue lag metric
+    - type: Pods
+      pods:
+        metric:
+          name: kafka_queue_lag
+        target:
+          type: AverageValue
+          averageValue: {{ $root.Values.hpa.custom.kafkaLag.targetValue | default 1000 }}
+    {{- end }}
+    
+    {{- if $root.Values.hpa.custom.grpcRequests }}
+    # gRPC calls per second metric
+    - type: Pods
+      pods:
+        metric:
+          name: grpc_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: {{ $root.Values.hpa.custom.grpcRequests.targetValue | default 500 }}
+    {{- end }}
+    
+    {{- if $root.Values.hpa.custom.connections }}
+    # Active connections metric
+    - type: Pods
+      pods:
+        metric:
+          name: active_connections
+        target:
+          type: AverageValue
+          averageValue: {{ $root.Values.hpa.custom.connections.targetValue | default 1000 }}
+    {{- end }}
+    
+    {{- if $root.Values.hpa.custom.messageRate }}
+    # Message processing rate metric
+    - type: Pods
+      pods:
+        metric:
+          name: messages_processed_per_second
+        target:
+          type: AverageValue
+          averageValue: {{ $root.Values.hpa.custom.messageRate.targetValue | default 5000 }}
+    {{- end }}
+    
+    {{- if $root.Values.hpa.custom.metrics }}
+    # Additional custom metrics
+    {{- range $root.Values.hpa.custom.metrics }}
+    - type: {{ .type }}
+      {{- if eq .type "Pods" }}
+      pods:
+        metric:
+          name: {{ .name }}
+        target:
+          type: {{ .targetType | default "AverageValue" }}
+          {{- if eq .targetType "Value" }}
+          value: {{ .targetValue }}
+          {{- else }}
+          averageValue: {{ .targetValue }}
+          {{- end }}
+      {{- else if eq .type "Object" }}
+      object:
+        metric:
+          name: {{ .name }}
+        describedObject:
+          apiVersion: {{ .apiVersion }}
+          kind: {{ .kind }}
+          name: {{ .objectName }}
+        target:
+          type: {{ .targetType | default "Value" }}
+          value: {{ .targetValue }}
+      {{- else if eq .type "External" }}
+      external:
+        metric:
+          name: {{ .name }}
+          {{- if .selector }}
+          selector:
+            matchLabels:
+              {{- toYaml .selector | nindent 14 }}
+          {{- end }}
+        target:
+          type: {{ .targetType | default "Value" }}
+          {{- if eq .targetType "AverageValue" }}
+          averageValue: {{ .targetValue }}
+          {{- else }}
+          value: {{ .targetValue }}
+          {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- with $root.Values.hpa.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
