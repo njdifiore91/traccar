@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+package org.traccar.notification;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.notification.proto";
+option java_outer_classname = "NotificationServiceProto";
+
+// Notification message structure
+message NotificationMessage {
+  string subject = 1;
+  string body = 2;
+}
+
+// Notification request with recipient and message details
+message NotificationRequest {
+  int64 user_id = 1;
+  string notification_type = 2;
+  NotificationMessage message = 3;
+  map<string, string> attributes = 4;
+}
+
+// Response for notification delivery
+message NotificationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Event data for notification context
+message EventData {
+  int64 id = 1;
+  string type = 2;
+  int64 device_id = 3;
+  int64 position_id = 4;
+  map<string, string> attributes = 5;
+}
+
+// Position data for notification context
+message PositionData {
+  int64 id = 1;
+  int64 device_id = 2;
+  double latitude = 3;
+  double longitude = 4;
+  double speed = 5;
+  double course = 6;
+  string address = 7;
+  int64 timestamp = 8;
+  map<string, string> attributes = 9;
+}
+
+// User data for notification recipient
+message UserData {
+  int64 id = 1;
+  string email = 2;
+  string phone = 3;
+  string language = 4;
+  map<string, string> attributes = 5;
+}
+
+// Template processing request
+message TemplateRequest {
+  string template_name = 1;
+  string template_path = 2;
+  UserData user = 3;
+  EventData event = 4;
+  PositionData position = 5;
+  map<string, string> placeholders = 6;
+}
+
+// Template processing response
+message TemplateResponse {
+  NotificationMessage message = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+// Email notification request
+message EmailNotificationRequest {
+  string to = 1;
+  string from = 2;
+  NotificationMessage message = 3;
+  repeated string attachments = 4;
+}
+
+// SMS notification request
+message SmsNotificationRequest {
+  string to = 1;
+  string message = 2;
+}
+
+// Push notification request
+message PushNotificationRequest {
+  int64 user_id = 1;
+  string title = 2;
+  string body = 3;
+  map<string, string> data = 4;
+}
+
+// Webhook notification request
+message WebhookNotificationRequest {
+  string url = 1;
+  map<string, string> headers = 2;
+  string payload = 3;
+  string method = 4; // GET, POST, PUT, etc.
+}
+
+// Notification Service definition
+service NotificationService {
+  // Send notification through appropriate channels based on user preferences
+  rpc SendNotification(NotificationRequest) returns (NotificationResponse);
+  
+  // Process notification template with provided context
+  rpc ProcessTemplate(TemplateRequest) returns (TemplateResponse);
+  
+  // Channel-specific notification methods
+  rpc SendEmailNotification(EmailNotificationRequest) returns (NotificationResponse);
+  rpc SendSmsNotification(SmsNotificationRequest) returns (NotificationResponse);
+  rpc SendPushNotification(PushNotificationRequest) returns (NotificationResponse);
+  rpc SendWebhookNotification(WebhookNotificationRequest) returns (NotificationResponse);
+  
+  // Batch notification delivery
+  rpc SendBatchNotifications(stream NotificationRequest) returns (stream NotificationResponse);
+  
+  // Check notification delivery status
+  rpc GetNotificationStatus(NotificationStatusRequest) returns (NotificationStatusResponse);
+}
+
+// Notification status request
+message NotificationStatusRequest {
+  string notification_id = 1;
+}
+
+// Notification status response
+message NotificationStatusResponse {
+  enum Status {
+    UNKNOWN = 0;
+    PENDING = 1;
+    DELIVERED = 2;
+    FAILED = 3;
+  }
+  
+  string notification_id = 1;
+  Status status = 2;
+  string error_message = 3;
+  int64 timestamp = 4;
+}
