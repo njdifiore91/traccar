@@ -1,0 +1,94 @@
+{
+  "deviceId": 123456,
+  "protocol": "test-protocol",
+  "serverTime": "2023-06-15T10:30:00.000Z",
+  "deviceTime": "2023-06-15T10:29:55.000Z",
+  "fixTime": "2023-06-15T10:29:50.000Z",
+  "outdated": false,
+  "valid": true,
+  "latitude": 37.7749,
+  "longitude": -122.4194,
+  "altitude": 15.5,
+  "speed": 42.5,
+  "course": 180.0,
+  "accuracy": 5.0,
+  "network": {
+    "radioType": "gsm",
+    "cellTowers": [
+      {
+        "cellId": 12345,
+        "locationAreaCode": 1000,
+        "mobileCountryCode": 310,
+        "mobileNetworkCode": 410,
+        "signalStrength": -70
+      }
+    ],
+    "wifiAccessPoints": [
+      {
+        "macAddress": "01:23:45:67:89:ab",
+        "signalStrength": -80
+      }
+    ]
+  },
+  "attributes": {
+    "batteryLevel": 85,
+    "externalPower": 12.5,
+    "ignition": true,
+    "motion": true,
+    "status": 1,
+    "io": {
+      "digitalInput1": true,
+      "digitalInput2": false,
+      "digitalOutput1": true,
+      "analogInput1": 5.2,
+      "analogInput2": 3.8
+    },
+    "temperature": 25.5,
+    "humidity": 60,
+    "accelerometer": {
+      "x": 0.01,
+      "y": 0.02,
+      "z": 0.97
+    },
+    "gyroscope": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.1
+    },
+    "fuel": {
+      "level": 75.5,
+      "consumption": 8.7,
+      "temperature": 65.0
+    },
+    "odometer": 12345.6,
+    "hours": 1234.5,
+    "rssi": -67,
+    "gsmSignal": 80,
+    "satellites": 9,
+    "hdop": 1.1,
+    "pdop": 2.3,
+    "vdop": 1.8,
+    "alarm": "sos",
+    "driver": {
+      "id": "driver123",
+      "name": "John Doe",
+      "rfid": "AB123456",
+      "phone": "+1234567890"
+    },
+    "raw": "AABBCCDDEEFF",
+    "distance": 1500.5,
+    "totalDistance": 45678.9,
+    "rpm": 1800,
+    "vin": "1HGCM82633A123456",
+    "address": "123 Main St, San Francisco, CA 94105",
+    "geofenceIds": [1, 2, 3],
+    "protocol-specific": {
+      "command": 8,
+      "messageType": "location",
+      "sequenceNumber": 1234,
+      "index": 1,
+      "customField1": "custom value",
+      "customField2": 42
+    }
+  }
+}
