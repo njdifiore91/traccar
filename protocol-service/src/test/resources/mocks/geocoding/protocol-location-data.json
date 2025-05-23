@@ -1,0 +1,393 @@
+{
+  "version": "1.0",
+  "description": "Sample location data formatted according to different device protocols for testing protocol-specific geocoding scenarios",
+  "protocols": [
+    {
+      "name": "h02",
+      "port": 5013,
+      "description": "H02 protocol used by various GPS trackers",
+      "samples": [
+        {
+          "raw_data": "*HQ,4210209006,V1,200101141503,A,2608.9437,N,08016.2521,W,000.80,000,FFFFF9FF,310,260,0,0,6#",
+          "parsed_data": {
+            "device_id": "4210209006",
+            "latitude": 26.149062,
+            "longitude": -80.270868,
+            "speed": 0.8,
+            "course": 0.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:15:03.000Z",
+            "attributes": {
+              "status": "FFFFF9FF",
+              "battery": 6
+            }
+          },
+          "expected_geocoding": {
+            "address": "NW 136th Avenue, Sunrise, Florida, United States",
+            "country": "United States",
+            "state": "Florida",
+            "city": "Sunrise",
+            "street": "NW 136th Avenue"
+          },
+          "test_scenario": "stationary_vehicle_text_protocol"
+        },
+        {
+          "raw_data": "*HQ,4210209006,V1,200101141523,A,2608.9598,N,08016.2359,W,025.50,178,FFFFF9FF,310,260,0,0,6#",
+          "parsed_data": {
+            "device_id": "4210209006",
+            "latitude": 26.149330,
+            "longitude": -80.270598,
+            "speed": 25.5,
+            "course": 178.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:15:23.000Z",
+            "attributes": {
+              "status": "FFFFF9FF",
+              "battery": 6
+            }
+          },
+          "expected_geocoding": {
+            "address": "NW 136th Avenue, Sunrise, Florida, United States",
+            "country": "United States",
+            "state": "Florida",
+            "city": "Sunrise",
+            "street": "NW 136th Avenue"
+          },
+          "test_scenario": "moving_vehicle_text_protocol"
+        }
+      ]
+    },
+    {
+      "name": "tk103",
+      "port": 5002,
+      "description": "TK103 protocol used by various Chinese GPS trackers",
+      "samples": [
+        {
+          "raw_data": "(056789012345BP05123456789012345120101A3804.2418N01258.4386E000.0141136.3700000000L00000000)",
+          "parsed_data": {
+            "device_id": "056789012345",
+            "latitude": 38.070697,
+            "longitude": 12.973977,
+            "speed": 0.0,
+            "course": 136.37,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:11:36.000Z"
+          },
+          "expected_geocoding": {
+            "address": "Via Cristoforo Colombo, Trapani, Sicily, Italy",
+            "country": "Italy",
+            "state": "Sicily",
+            "city": "Trapani",
+            "street": "Via Cristoforo Colombo"
+          },
+          "test_scenario": "stationary_vehicle"
+        },
+        {
+          "raw_data": "(056789012345BP05123456789012345120101A3804.2511N01258.4549E035.7141147.7500000000L00000000)",
+          "parsed_data": {
+            "device_id": "056789012345",
+            "latitude": 38.070852,
+            "longitude": 12.974248,
+            "speed": 35.7,
+            "course": 147.75,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:11:47.000Z"
+          },
+          "expected_geocoding": {
+            "address": "Via Cristoforo Colombo, Trapani, Sicily, Italy",
+            "country": "Italy",
+            "state": "Sicily",
+            "city": "Trapani",
+            "street": "Via Cristoforo Colombo"
+          },
+          "test_scenario": "moving_vehicle"
+        }
+      ]
+    },
+    {
+      "name": "gps103",
+      "port": 5001,
+      "description": "GPS103 protocol used by various GPS trackers",
+      "samples": [
+        {
+          "raw_data": "imei:123456789012345,tracker,200101141203,,F,141203.000,A,4024.5213,N,07359.4442,W,0.00,348.5,,,0.9,,,,,0.0,,1,,,,,,,",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 40.408688,
+            "longitude": -73.990737,
+            "speed": 0.0,
+            "course": 348.5,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:12:03.000Z"
+          },
+          "expected_geocoding": {
+            "address": "West 9th Street, New York City, New York, United States",
+            "country": "United States",
+            "state": "New York",
+            "city": "New York City",
+            "street": "West 9th Street"
+          },
+          "test_scenario": "stationary_vehicle"
+        },
+        {
+          "raw_data": "imei:123456789012345,tracker,200101141223,,F,141223.000,A,4024.5315,N,07359.4201,W,25.43,168.9,,,0.9,,,,,0.0,,1,,,,,,,",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 40.408858,
+            "longitude": -73.990335,
+            "speed": 25.43,
+            "course": 168.9,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:12:23.000Z"
+          },
+          "expected_geocoding": {
+            "address": "West 9th Street, New York City, New York, United States",
+            "country": "United States",
+            "state": "New York",
+            "city": "New York City",
+            "street": "West 9th Street"
+          },
+          "test_scenario": "moving_vehicle"
+        }
+      ]
+    },
+    {
+      "name": "meitrack",
+      "port": 5020,
+      "description": "Meitrack protocol used by Meitrack devices (TC68, MVT380, etc.)",
+      "samples": [
+        {
+          "raw_data": "$$J163,123456789012345,AFF,0004,35,48.858823,2.294497,200101141323,A,10,27,0,161,1.2,19,1648894,435695,240|24|88B9|E435,0000,|||0A22|0000,00000001,,50,,,,,,,,,,,,,*70",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 48.858823,
+            "longitude": 2.294497,
+            "speed": 10.0,
+            "course": 161.0,
+            "altitude": 27.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:13:23.000Z",
+            "attributes": {
+              "battery": 1.2,
+              "rssi": 19,
+              "satellites": 10
+            }
+          },
+          "expected_geocoding": {
+            "address": "Avenue Gustave Eiffel, Paris, Île-de-France, France",
+            "country": "France",
+            "state": "Île-de-France",
+            "city": "Paris",
+            "street": "Avenue Gustave Eiffel"
+          },
+          "test_scenario": "moving_vehicle_with_obd"
+        },
+        {
+          "raw_data": "$$J163,123456789012345,AFF,0004,35,48.858532,2.294267,200101141353,A,0,25,0,161,1.2,19,1648894,435695,240|24|88B9|E435,0000,|||0A22|0000,00000001,,50,,,,,,,,,,,,,*70",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 48.858532,
+            "longitude": 2.294267,
+            "speed": 0.0,
+            "course": 161.0,
+            "altitude": 25.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:13:53.000Z",
+            "attributes": {
+              "battery": 1.2,
+              "rssi": 19,
+              "satellites": 0
+            }
+          },
+          "expected_geocoding": {
+            "address": "Avenue Gustave Eiffel, Paris, Île-de-France, France",
+            "country": "France",
+            "state": "Île-de-France",
+            "city": "Paris",
+            "street": "Avenue Gustave Eiffel"
+          },
+          "test_scenario": "stationary_vehicle_with_obd"
+        }
+      ]
+    },
+    {
+      "name": "teltonika",
+      "port": 5027,
+      "description": "Teltonika protocol used by Teltonika GPS devices",
+      "samples": [
+        {
+          "raw_data": "000000000000003608010000016B40D8EA30010000000000000000000000000000000105021503010101425E0F01F10000601A014E0000000000000000010000C7CF",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 40.712776,
+            "longitude": -74.005974,
+            "speed": 0.0,
+            "course": 0.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:14:23.000Z",
+            "attributes": {
+              "ignition": false,
+              "movement": false,
+              "satellites": 15
+            }
+          },
+          "expected_geocoding": {
+            "address": "Broadway, New York City, New York, United States",
+            "country": "United States",
+            "state": "New York",
+            "city": "New York City",
+            "street": "Broadway"
+          },
+          "test_scenario": "stationary_vehicle_binary_protocol"
+        },
+        {
+          "raw_data": "000000000000003608010000016B40D9AD30010000000000000000000000000000000105021503010101425E10010A2800601A014E0000000000000000010000C7CF",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 40.713001,
+            "longitude": -74.006231,
+            "speed": 42.0,
+            "course": 280.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:14:53.000Z",
+            "attributes": {
+              "ignition": true,
+              "movement": true,
+              "satellites": 15
+            }
+          },
+          "expected_geocoding": {
+            "address": "Broadway, New York City, New York, United States",
+            "country": "United States",
+            "state": "New York",
+            "city": "New York City",
+            "street": "Broadway"
+          },
+          "test_scenario": "moving_vehicle_binary_protocol"
+        }
+      ]
+    },
+    {
+      "name": "watch",
+      "port": 5093,
+      "description": "Watch protocol used by wearable GPS devices",
+      "samples": [
+        {
+          "raw_data": "[3G*8308373902*0080*UD,200101141603,V,31.22.51.12,N,121.27.37.19,E,0.00,0,0,0,87,1.2,0]\n",
+          "parsed_data": {
+            "device_id": "8308373902",
+            "latitude": 31.380867,
+            "longitude": 121.460331,
+            "speed": 0.0,
+            "course": 0.0,
+            "altitude": 0.0,
+            "valid": false,
+            "timestamp": "2020-01-01T14:16:03.000Z",
+            "attributes": {
+              "battery": 87,
+              "rssi": 1.2
+            }
+          },
+          "expected_geocoding": {
+            "address": "Nanjing Road, Shanghai, China",
+            "country": "China",
+            "state": "Shanghai",
+            "city": "Shanghai",
+            "street": "Nanjing Road"
+          },
+          "test_scenario": "stationary_wearable_device"
+        },
+        {
+          "raw_data": "[3G*8308373902*0080*UD,200101141623,A,31.22.52.35,N,121.27.38.41,E,2.50,90,0,0,85,1.2,0]\n",
+          "parsed_data": {
+            "device_id": "8308373902",
+            "latitude": 31.381208,
+            "longitude": 121.460669,
+            "speed": 2.5,
+            "course": 90.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:16:23.000Z",
+            "attributes": {
+              "battery": 85,
+              "rssi": 1.2
+            }
+          },
+          "expected_geocoding": {
+            "address": "Nanjing Road, Shanghai, China",
+            "country": "China",
+            "state": "Shanghai",
+            "city": "Shanghai",
+            "street": "Nanjing Road"
+          },
+          "test_scenario": "moving_wearable_device"
+        }
+      ]
+    },
+    {
+      "name": "osmand",
+      "port": 5055,
+      "description": "OsmAnd protocol used by Traccar Client mobile apps",
+      "samples": [
+        {
+          "raw_data": "/?id=123456789012345&lat=51.507351&lon=-0.127758&timestamp=1577887003&altitude=0.0&speed=0.0&bearing=0.0&accuracy=10.0&batt=87.0&protocol=osmand",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 51.507351,
+            "longitude": -0.127758,
+            "speed": 0.0,
+            "course": 0.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:16:43.000Z",
+            "attributes": {
+              "battery": 87.0,
+              "accuracy": 10.0
+            }
+          },
+          "expected_geocoding": {
+            "address": "Trafalgar Square, London, United Kingdom",
+            "country": "United Kingdom",
+            "state": "England",
+            "city": "London",
+            "street": "Trafalgar Square"
+          },
+          "test_scenario": "stationary_mobile_app"
+        },
+        {
+          "raw_data": "/?id=123456789012345&lat=51.507912&lon=-0.128452&timestamp=1577887023&altitude=0.0&speed=5.2&bearing=315.0&accuracy=8.0&batt=86.0&protocol=osmand",
+          "parsed_data": {
+            "device_id": "123456789012345",
+            "latitude": 51.507912,
+            "longitude": -0.128452,
+            "speed": 5.2,
+            "course": 315.0,
+            "altitude": 0.0,
+            "valid": true,
+            "timestamp": "2020-01-01T14:17:03.000Z",
+            "attributes": {
+              "battery": 86.0,
+              "accuracy": 8.0
+            }
+          },
+          "expected_geocoding": {
+            "address": "Trafalgar Square, London, United Kingdom",
+            "country": "United Kingdom",
+            "state": "England",
+            "city": "London",
+            "street": "Trafalgar Square"
+          },
+          "test_scenario": "moving_mobile_app"
+        }
+      ]
+    }
+  ]
+}
