@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<devices>
+    <!-- Standard test device with basic attributes -->
+    <device id="1" uniqueId="123456789012345" name="Test Device 1" status="active">
+        <attributes>
+            <attribute name="model">Generic GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+            <attribute name="category">vehicle</attribute>
+            <attribute name="phone">+1234567890</attribute>
+        </attributes>
+    </device>
+    
+    <!-- Device with extended attributes for comprehensive testing -->
+    <device id="2" uniqueId="210000001" name="Test Device 2" status="active">
+        <attributes>
+            <attribute name="model">Advanced GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+            <attribute name="category">vehicle</attribute>
+            <attribute name="phone">+0987654321</attribute>
+            <attribute name="serialNumber">SN-12345-ABC</attribute>
+            <attribute name="firmware">v2.1.5</attribute>
+            <attribute name="hardware">v1.0</attribute>
+        </attributes>
+        <configuration>
+            <param name="interval">60</param>
+            <param name="speedLimit">90</param>
+            <param name="ignitionEnabled">true</param>
+        </configuration>
+    </device>
+    
+    <!-- Device with minimal attributes for basic testing -->
+    <device id="3" uniqueId="1044989601" name="Test Device 3" status="inactive">
+        <attributes>
+            <attribute name="model">Basic GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+        </attributes>
+    </device>
+    
+    <!-- Device with specific protocol attributes for protocol-specific testing -->
+    <device id="4" uniqueId="2000000108" name="Test Device 4" status="active">
+        <attributes>
+            <attribute name="model">Wondex GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+            <attribute name="category">asset</attribute>
+            <attribute name="serialNumber">WDX-2022-108</attribute>
+        </attributes>
+        <configuration>
+            <param name="interval">30</param>
+            <param name="alarmEnabled">true</param>
+            <param name="motionEnabled">true</param>
+        </configuration>
+    </device>
+    
+    <!-- Device with extended protocol-specific attributes -->
+    <device id="5" uniqueId="2000000257" name="Test Device 5" status="active">
+        <attributes>
+            <attribute name="model">Wondex Pro GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+            <attribute name="category">personal</attribute>
+            <attribute name="serialNumber">WDX-2022-257</attribute>
+            <attribute name="firmware">v3.0.1</attribute>
+            <attribute name="hardware">v2.0</attribute>
+        </attributes>
+        <configuration>
+            <param name="interval">15</param>
+            <param name="speedLimit">120</param>
+            <param name="ignitionEnabled">true</param>
+            <param name="alarmEnabled">true</param>
+            <param name="motionEnabled">true</param>
+            <param name="geofenceEnabled">true</param>
+        </configuration>
+    </device>
+    
+    <!-- Device with all attributes for comprehensive testing -->
+    <device id="6" uniqueId="3997324533" name="Test Device 6" status="active">
+        <attributes>
+            <attribute name="model">Enterprise GPS Tracker</attribute>
+            <attribute name="protocol">wondex</attribute>
+            <attribute name="category">vehicle</attribute>
+            <attribute name="phone">+1122334455</attribute>
+            <attribute name="serialNumber">ENT-2022-533</attribute>
+            <attribute name="firmware">v4.2.1</attribute>
+            <attribute name="hardware">v3.5</attribute>
+            <attribute name="manufacturer">Wondex Technologies</attribute>
+            <attribute name="batteryLevel">100</attribute>
+            <attribute name="ipAddress">192.168.1.100</attribute>
+        </attributes>
+        <configuration>
+            <param name="interval">10</param>
+            <param name="speedLimit">130</param>
+            <param name="ignitionEnabled">true</param>
+            <param name="alarmEnabled">true</param>
+            <param name="motionEnabled">true</param>
+            <param name="geofenceEnabled">true</param>
+            <param name="powerSavingMode">false</param>
+            <param name="debugMode">false</param>
+            <param name="timezone">UTC</param>
+            <param name="distanceThreshold">50</param>
+        </configuration>
+    </device>
+</devices>
