@@ -1,0 +1,457 @@
+{
+  "certificates": [
+    {
+      "id": "protocol-service-valid",
+      "type": "service",
+      "role": "client",
+      "status": "valid",
+      "subject": {
+        "commonName": "protocol-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Protocol Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "clientAuth"],
+      "subjectAlternativeNames": [
+        "protocol-service.traccar.svc.cluster.local",
+        "protocol-service.traccar.svc",
+        "protocol-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqP\nXUxmA/y0zAFy4rkYgQgHs1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQm\nZP3Zjm2NlrGS5RwycbKOgvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYc\nZlOgF4y2OOUEEbUHIBVPrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FE\nGQOE5a9JLDaRgGRVT1qQPjQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJ\nRBnL8+WEQVRvDfWwfUnUAQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRkwFwYDVQQLDBBQcm90b2NvbCBTZXJ2aWNlMSkwJwYDVQQDDCBwcm90\nb2NvbC1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqPXUxmA/y0zAFy4rkYgQgHs1Cx\nTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQmZP3Zjm2NlrGS5RwycbKOgvCN\n3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYcZlOgF4y2OOUEEbUHIBVPrTHR\nj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FEGQOEa9JLDaRgGRVT1qQPjQWm\nGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJRBnL8+WEQVRvDfWwfUnUAQGPj\nLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9kQIDAQABo2MwYTAfBgNVHSME\nGDAWgBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8\nGjYBq2c2eygwHwYDVR0RBBgwFoIUcHJvdG9jb2wtc2VydmljZS5sb2NhbDANBgkq\nhkiG9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVj\nwx5qRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPK\nrXYnVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5g\nZu5JkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirow\nEXgVy1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5X\nLW0B7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "position-service-valid",
+      "type": "service",
+      "role": "server",
+      "status": "valid",
+      "subject": {
+        "commonName": "position-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Position Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:01",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "serverAuth"],
+      "subjectAlternativeNames": [
+        "position-service.traccar.svc.cluster.local",
+        "position-service.traccar.svc",
+        "position-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0BUVkLhHvx1VmORl9gZy\nOQEpzciJFWgPUPFsEWS2YcGgMeepRW3pkFEVoLbgI0CAs8LuCBmiiCMqLSHYLs1q\nVgJWCXybkxAgjgQRCw0S0H5/L5wg/DVVgB2FJY5dy6sMZSdvvXxvCK7rBsgYmZ4A\nZHCYGQESZYcZ5M8StpYXcUi3vqRlV9GizuqIj8jR0dMEaEEyxbeyZ0NG7YpzULw/\n8UVuhduxpuNQ9jnCEzUxvGkJPEY5xpUgBH/9evOQlvqDLoY4q+UYMmJBDjO2bhNm\nSn7pHeDKPvKxPzNmTRYD7+u4KveDZ/TP3JXCpzrUKatpQZkCfcucZVmADcMZfwID\nAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRkwFwYDVQQLDBBQb3NpdGlvbiBTZXJ2aWNlMSkwJwYDVQQDDCBwb3Np\ndGlvbi1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEA0BUVkLhHvx1VmORl9gZyOQEpzciJFWgPUPFsEWS2YcGg\nMeepRW3pkFEVoLbgI0CAs8LuCBmiiCMqLSHYLs1qVgJWCXybkxAgjgQRCw0S0H5/\nL5wg/DVVgB2FJY5dy6sMZSdvvXxvCK7rBsgYmZ4AZHCYGQESZYcZ5M8StpYXcUi3\nvqRlV9GizuqIj8jR0dMEaEEyxbeyZ0NG7YpzULw/8UVuhduxpuNQ9jnCEzUxvGkJ\nPEY5xpUgBH/9evOQlvqDLoY4q+UYMmJBDjO2bhNmSn7pHeDKPvKxPzNmTRYD7+u4\nKveDZ/TP3JXCpzrUKatpQZkCfcucZVmADcMZfwIDAQABo2MwYTAfBgNVHSMEGDAW\ngBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8GjYB\nq2c2eygwHwYDVR0RBBgwFoIUcG9zaXRpb24tc2VydmljZS5sb2NhbDANBgkqhkiG\n9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVjwx5q\nRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPKrXYn\nVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5gZu5J\nkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirowEXgV\ny1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5XLW0B\n7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "event-service-valid",
+      "type": "service",
+      "role": "server",
+      "status": "valid",
+      "subject": {
+        "commonName": "event-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Event Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:02",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "serverAuth"],
+      "subjectAlternativeNames": [
+        "event-service.traccar.svc.cluster.local",
+        "event-service.traccar.svc",
+        "event-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzV6Vg9Ub9GXLBcVpKRWk\nXA9fy9tpj1NrLQQOeRkJ7LVRkQuGBzEspRFRXDH0wNbZdLTULZWu7tWyRJAWKbIV\nEJQFXTh8IZFnBVf9KVxDIYRN6UMqMqNNNwZJfbUkOtCXj+Ux3/VuLSs3oGsKKXvV\nXLEUYjJSUEF1jvs+bcXhF4bVS9JxwUZtJAjIhEYz9BcLOcS/NJ1p5uNxLDq+xLQA\nDrjHwDZ8xGKbvLIGkIgABJI+HE5Oiz0TH9jkNFyGTYjSrPH+KLvSFKLl1zF0gr5Z\nZFBJqmCQFn5pQgZYFHI4anXHI5XqkNXRYNzLJRoWnCU4yC8iXJpA/fPyolXRSvnm\nQQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRcwFQYDVQQLDA5FdmVudCBTZXJ2aWNlMScwJQYDVQQDDB5ldmVudC1z\nZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\nMIIBCgKCAQEAzV6Vg9Ub9GXLBcVpKRWkXA9fy9tpj1NrLQQOeRkJ7LVRkQuGBzEs\npRFRXDH0wNbZdLTULZWu7tWyRJAWKbIVEJQFXTh8IZFnBVf9KVxDIYRN6UMqMqNN\nNwZJfbUkOtCXj+Ux3/VuLSs3oGsKKXvVXLEUYjJSUEF1jvs+bcXhF4bVS9JxwUZt\nJAjIhEYz9BcLOcS/NJ1p5uNxLDq+xLQADrjHwDZ8xGKbvLIGkIgABJI+HE5Oiz0T\nH9jkNFyGTYjSrPH+KLvSFKLl1zF0gr5ZZFBJqmCQFn5pQgZYFHI4anXHI5XqkNXR\nYNzLJRoWnCU4yC8iXJpA/fPyolXRSvnmQQIDAQABo2MwYTAfBgNVHSMEGDAWgBQw\nGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8GjYBq2c2\neygwHwYDVR0RBBgwFoISZXZlbnQtc2VydmljZS5sb2NhbDANBgkqhkiG9w0BAQsF\nAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVjwx5qRXKHZZ0x\nySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPKrXYnVCdQQe5q\nBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5gZu5JkHe2HN4C\n5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirowEXgVy1WH0XhX\na+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5XLW0B7mz4+7Qb\nXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "ca-certificate",
+      "type": "ca",
+      "role": "root",
+      "status": "valid",
+      "subject": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2025-01-01T00:00:00Z",
+      "serialNumber": "00:11:22:33:44:55:66:77:88:99",
+      "keyUsage": ["keyCertSign", "cRLSign"],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqceBdaqKe9wWBkVQkT1l\nQOcFHpK1QlnxdNcvuCnBKH3uP+4CE5PTKH4KpFH4v9RJfkLlHyEH9r7Z6PuKqP1l\nDDnxSMKvKwZBJjwdI8NpCBOYWIilBWmMIJUCGZIK3FcYYZJ5+mZfCGRFUXEG8G1v\nZHyRqTjk5vIhsHdnQdM6ZuJm4x4iPFJnLU3AYQCqFQ4sn2nN5PBwALQQVB0YvOZy\n2OVKJIrMTFIRDOvnLDFZ4gOyYQJnuSYJZSzn7XvY1RWg0KNtJWDXEKMybpxVfUmA\nSwhkq/LY4bKLFxNXnV+mc7eH4jgNSQRyC7Fbcsl0w1T3OzZTcHQZUjeKnCXHLTRB\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI1MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMREwDwYDVQQLDAhTZWN1cml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRl\ncm5hbCBDQSBNb2NrMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqceB\ndaqKe9wWBkVQkT1lQOcFHpK1QlnxdNcvuCnBKH3uP+4CE5PTKH4KpFH4v9RJfkLl\nHyEH9r7Z6PuKqP1lDDnxSMKvKwZBJjwdI8NpCBOYWIilBWmMIJUCGZIK3FcYYZJ5\n+mZfCGRFUXEG8G1vZHyRqTjk5vIhsHdnQdM6ZuJm4x4iPFJnLU3AYQCqFQ4sn2nN\n5PBwALQQVB0YvOZy2OVKJIrMTFIRDOvnLDFZ4gOyYQJnuSYJZSzn7XvY1RWg0KNt\nJWDXEKMybpxVfUmASwhkq/LY4bKLFxNXnV+mc7eH4jgNSQRyC7Fbcsl0w1T3OzZT\ncHQZUjeKnCXHLTRBkQIDAQABo2MwYTAfBgNVHSMEGDAWgBQwGqq9GVgCvlCx5XwaN\ngGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8GjYBq2c2eygwHwYDVR0RBBgwF\noIUdHJhY2Nhci1pbnRlcm5hbC1jYS1tb2NrMA0GCSqGSIb3DQEBCwUAA4IBAQBJ\nZbK3RQgV5JQQfDQ5p5lTc7bXxDsE0dKV+8jOZ5zJsW6mNuFjEwI4TmqQS/Gg/Y5G\nEDUDlMBgvCCNmI/R1ej2hKU4jgbhQIzgPQU7RE4osz6RDjT7Kyg7GdGCQey4BA4B\nJEDaxeUKcOFOQADVCCNLg+d+AZHHtLrOQxjsAb/K9N9s/QJsESt5YQMqm9KsqNKQ\nZpEbCDvYFU9cldKHPi7xVW9K+/YTzgYjEfzFlf3q5J5AsVRB3XuYKRX/pT5DFybi\nZA1wNxrKvxj4zyeHtQgXqrI42KWYXQMlEyLJUTv0XMQMCnBr2WWdqjUyU1a/Z9zO\nQkUMBIRZRMpOTUUgbC5L\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "protocol-service-expired",
+      "type": "service",
+      "role": "client",
+      "status": "expired",
+      "subject": {
+        "commonName": "protocol-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Protocol Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2022-01-01T00:00:00Z",
+      "validTo": "2022-12-31T23:59:59Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:10",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "clientAuth"],
+      "subjectAlternativeNames": [
+        "protocol-service.traccar.svc.cluster.local",
+        "protocol-service.traccar.svc",
+        "protocol-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqP\nXUxmA/y0zAFy4rkYgQgHs1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQm\nZP3Zjm2NlrGS5RwycbKOgvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYc\nZlOgF4y2OOUEEbUHIBVPrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FE\nGQOE5a9JLDaRgGRVT1qQPjQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJ\nRBnL8+WEQVRvDfWwfUnUAQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIyMDEw\nMTAwMDAwMFoXDTIyMTIzMTIzNTk1OVowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRkwFwYDVQQLDBBQcm90b2NvbCBTZXJ2aWNlMSkwJwYDVQQDDCBwcm90\nb2NvbC1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqPXUxmA/y0zAFy4rkYgQgHs1Cx\nTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQmZP3Zjm2NlrGS5RwycbKOgvCN\n3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYcZlOgF4y2OOUEEbUHIBVPrTHR\nj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FEGQOEa9JLDaRgGRVT1qQPjQWm\nGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJRBnL8+WEQVRvDfWwfUnUAQGPj\nLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9kQIDAQABo2MwYTAfBgNVHSME\nGDAWgBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8\nGjYBq2c2eygwHwYDVR0RBBgwFoIUcHJvdG9jb2wtc2VydmljZS5sb2NhbDANBgkq\nhkiG9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVj\nwx5qRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPK\nrXYnVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5g\nZu5JkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirow\nEXgVy1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5X\nLW0B7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "protocol-service-revoked",
+      "type": "service",
+      "role": "client",
+      "status": "revoked",
+      "subject": {
+        "commonName": "protocol-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Protocol Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:11",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "clientAuth"],
+      "subjectAlternativeNames": [
+        "protocol-service.traccar.svc.cluster.local",
+        "protocol-service.traccar.svc",
+        "protocol-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqP\nXUxmA/y0zAFy4rkYgQgHs1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQm\nZP3Zjm2NlrGS5RwycbKOgvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYc\nZlOgF4y2OOUEEbUHIBVPrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FE\nGQOE5a9JLDaRgGRVT1qQPjQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJ\nRBnL8+WEQVRvDfWwfUnUAQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRkwFwYDVQQLDBBQcm90b2NvbCBTZXJ2aWNlMSkwJwYDVQQDDCBwcm90\nb2NvbC1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqPXUxmA/y0zAFy4rkYgQgHs1Cx\nTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQmZP3Zjm2NlrGS5RwycbKOgvCN\n3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYcZlOgF4y2OOUEEbUHIBVPrTHR\nj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FEGQOEa9JLDaRgGRVT1qQPjQWm\nGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJRBnL8+WEQVRvDfWwfUnUAQGPj\nLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9kQIDAQABo2MwYTAfBgNVHSME\nGDAWgBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8\nGjYBq2c2eygwHwYDVR0RBBgwFoIUcHJvdG9jb2wtc2VydmljZS5sb2NhbDANBgkq\nhkiG9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVj\nwx5qRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPK\nrXYnVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5g\nZu5JkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirow\nEXgVy1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5X\nLW0B7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----",
+      "revocationReason": "keyCompromise",
+      "revocationDate": "2023-06-15T12:30:45Z"
+    },
+    {
+      "id": "protocol-service-untrusted",
+      "type": "service",
+      "role": "client",
+      "status": "untrusted",
+      "subject": {
+        "commonName": "protocol-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Protocol Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Untrusted CA",
+        "organization": "Untrusted Organization",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:12",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "clientAuth"],
+      "subjectAlternativeNames": [
+        "protocol-service.traccar.svc.cluster.local",
+        "protocol-service.traccar.svc",
+        "protocol-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqP\nXUxmA/y0zAFy4rkYgQgHs1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQm\nZP3Zjm2NlrGS5RwycbKOgvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYc\nZlOgF4y2OOUEEbUHIBVPrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FE\nGQOE5a9JLDaRgGRVT1qQPjQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJ\nRBnL8+WEQVRvDfWwfUnUAQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZVbnRydXN0ZWQgT3JnYW5pemF0aW9u\nMREwDwYDVQQLDAhTZWN1cml0eTEhMB8GA1UEAwwYVW50cnVzdGVkIENBMB4XDTIz\nMDEwMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYD\nVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQK\nDAZUcmFjY2FyMRkwFwYDVQQLDBBQcm90b2NvbCBTZXJ2aWNlMSkwJwYDVQQDDCBw\ncm90b2NvbC1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqPXUxmA/y0zAFy4rkYgQgH\ns1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQmZP3Zjm2NlrGS5RwycbKO\ngvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYcZlOgF4y2OOUEEbUHIBVP\nrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FEGQOEa9JLDaRgGRVT1qQP\njQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJRBnL8+WEQVRvDfWwfUnUA\nQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9kQIDAQABo2MwYTAfBgNV\nHSMEGDAWgBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5Q\nseV8GjYBq2c2eygwHwYDVR0RBBgwFoIUcHJvdG9jb2wtc2VydmljZS5sb2NhbDAN\nBgkqhkiG9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGM\nhVVjwx5qRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmY\nNUPKrXYnVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jC\nnY5gZu5JkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHz\nirowEXgVy1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyy\nDW5XLW0B7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    },
+    {
+      "id": "protocol-service-invalid-san",
+      "type": "service",
+      "role": "client",
+      "status": "invalid",
+      "subject": {
+        "commonName": "protocol-service.traccar.svc.cluster.local",
+        "organization": "Traccar",
+        "organizationalUnit": "Protocol Service",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "issuer": {
+        "commonName": "Traccar Internal CA",
+        "organization": "Traccar",
+        "organizationalUnit": "Security",
+        "locality": "San Francisco",
+        "state": "California",
+        "country": "US"
+      },
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2024-01-01T00:00:00Z",
+      "serialNumber": "01:23:45:67:89:ab:cd:ef:13",
+      "keyUsage": ["digitalSignature", "keyEncipherment", "clientAuth"],
+      "subjectAlternativeNames": [
+        "wrong-service.traccar.svc.cluster.local",
+        "wrong-service.traccar.svc",
+        "wrong-service"
+      ],
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqP\nXUxmA/y0zAFy4rkYgQgHs1CxTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQm\nZP3Zjm2NlrGS5RwycbKOgvCN3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYc\nZlOgF4y2OOUEEbUHIBVPrTHRj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FE\nGQOE5a9JLDaRgGRVT1qQPjQWmGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJ\nRBnL8+WEQVRvDfWwfUnUAQGPjLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9\nkQIDAQAB\n-----END PUBLIC KEY-----",
+      "certificate": "-----BEGIN CERTIFICATE-----\nMIIEBTCCAu2gAwIBAgIUARI0VmeJrXcdfRYMbkVJXmSuUEIwDQYJKoZIhvcNAQEL\nBQAwgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH\nDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZUcmFjY2FyMREwDwYDVQQLDAhTZWN1\ncml0eTEhMB8GA1UEAwwYVHJhY2NhciBJbnRlcm5hbCBDQSBNb2NrMB4XDTIzMDEw\nMTAwMDAwMFoXDTI0MDEwMTAwMDAwMFowgZExCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMQ8wDQYDVQQKDAZU\ncmFjY2FyMRkwFwYDVQQLDBBQcm90b2NvbCBTZXJ2aWNlMSkwJwYDVQQDDCBwcm90\nb2NvbC1zZXJ2aWNlLnRyYWNjYXIuc3ZjLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEAvFdDGPtQUgMKJEcUbQqPXUxmA/y0zAFy4rkYgQgHs1Cx\nTCMz1cmm+oT6xmZk7vGRlw9Y4w9GWcL0xBcpHhQmZP3Zjm2NlrGS5RwycbKOgvCN\n3FQ4NjQBQ7UPtBBFpX8R1NUrTDRejkG61fYadYYcZlOgF4y2OOUEEbUHIBVPrTHR\nj2+8AQAQxUZZLYOHyGrMUKWmYYQ6CFHFgRf0H3FEGQOEa9JLDaRgGRVT1qQPjQWm\nGj3h2XtmJxjQHIuA0qa9EeUvUYJZ5Vl6ISixCVJRBnL8+WEQVRvDfWwfUnUAQGPj\nLdkhY8hxbNTvUPrCVYs5zJnbTOIpPMlGKXwJDH9kQIDAQABo2MwYTAfBgNVHSME\nGDAWgBQwGqq9GVgCvlCx5XwaNgGrZzZ7KDAdBgNVHQ4EFgQUMBqqvRlYAr5QseV8\nGjYBq2c2eygwHwYDVR0RBBgwFoIUd3Jvbmctc2VydmljZS5sb2NhbDANBgkqhkiG\n9w0BAQsFAAOCAQEAcGZCiUKTQH0gYMkHMnrGFKrMXHOdTIVLPQyNJPGMhVVjwx5q\nRXKHZZ0xySce8KJ5YdLXd1EZTtZqRXKmRqBZT3yBEOplx5ZQnkfRUcmYNUPKrXYn\nVCdQQe5qBk0u+1XpY+QM5G2iXYjKHDXdJLrQWVG0SEVQB8HgOhtd2/jCnY5gZu5J\nkHe2HN4C5+MjnGdYiDNQYbJZVKh5kNrZxuZpGEcnqW5GCpK4cJJgQJHzirowEXgV\ny1WH0XhXa+OSWxEUEUkjdvUUzCiZNgIHcUYAjZ0xXDEzxQ9ZYqvUFAyyDW5XLW0B\n7mz4+7QbXTKvnUxNTKGFGKcXRnzNL4WfuCXOiA==\n-----END CERTIFICATE-----"
+    }
+  ],
+  "certificateChains": [
+    {
+      "id": "protocol-service-chain",
+      "description": "Valid certificate chain for Protocol Service",
+      "certificates": ["protocol-service-valid", "ca-certificate"]
+    },
+    {
+      "id": "position-service-chain",
+      "description": "Valid certificate chain for Position Service",
+      "certificates": ["position-service-valid", "ca-certificate"]
+    },
+    {
+      "id": "event-service-chain",
+      "description": "Valid certificate chain for Event Service",
+      "certificates": ["event-service-valid", "ca-certificate"]
+    },
+    {
+      "id": "protocol-service-expired-chain",
+      "description": "Certificate chain with expired certificate for Protocol Service",
+      "certificates": ["protocol-service-expired", "ca-certificate"]
+    },
+    {
+      "id": "protocol-service-revoked-chain",
+      "description": "Certificate chain with revoked certificate for Protocol Service",
+      "certificates": ["protocol-service-revoked", "ca-certificate"]
+    },
+    {
+      "id": "protocol-service-untrusted-chain",
+      "description": "Certificate chain with untrusted issuer for Protocol Service",
+      "certificates": ["protocol-service-untrusted"]
+    },
+    {
+      "id": "protocol-service-invalid-san-chain",
+      "description": "Certificate chain with invalid Subject Alternative Names for Protocol Service",
+      "certificates": ["protocol-service-invalid-san", "ca-certificate"]
+    }
+  ],
+  "trustStores": [
+    {
+      "id": "default-truststore",
+      "description": "Default trust store for service-to-service communication",
+      "trustedCertificates": ["ca-certificate"],
+      "revocationLists": [
+        {
+          "id": "default-crl",
+          "issuer": "ca-certificate",
+          "lastUpdate": "2023-06-15T12:00:00Z",
+          "nextUpdate": "2023-07-15T12:00:00Z",
+          "revokedCertificates": [
+            {
+              "serialNumber": "01:23:45:67:89:ab:cd:ef:11",
+              "revocationDate": "2023-06-15T12:30:45Z",
+              "reason": "keyCompromise"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "keyStores": [
+    {
+      "id": "protocol-service-keystore",
+      "description": "Key store for Protocol Service",
+      "privateKeys": [
+        {
+          "id": "protocol-service-key",
+          "certificateId": "protocol-service-valid",
+          "keyAlgorithm": "RSA",
+          "keySize": 2048,
+          "keyUsage": ["digitalSignature", "keyEncipherment"],
+          "created": "2023-01-01T00:00:00Z",
+          "rotationDue": "2024-01-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "position-service-keystore",
+      "description": "Key store for Position Service",
+      "privateKeys": [
+        {
+          "id": "position-service-key",
+          "certificateId": "position-service-valid",
+          "keyAlgorithm": "RSA",
+          "keySize": 2048,
+          "keyUsage": ["digitalSignature", "keyEncipherment"],
+          "created": "2023-01-01T00:00:00Z",
+          "rotationDue": "2024-01-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "event-service-keystore",
+      "description": "Key store for Event Service",
+      "privateKeys": [
+        {
+          "id": "event-service-key",
+          "certificateId": "event-service-valid",
+          "keyAlgorithm": "RSA",
+          "keySize": 2048,
+          "keyUsage": ["digitalSignature", "keyEncipherment"],
+          "created": "2023-01-01T00:00:00Z",
+          "rotationDue": "2024-01-01T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": "valid-client-auth",
+      "description": "Valid client authentication from Protocol Service to Position Service",
+      "clientCertificateChain": "protocol-service-chain",
+      "serverCertificateChain": "position-service-chain",
+      "clientTrustStore": "default-truststore",
+      "serverTrustStore": "default-truststore",
+      "expectedResult": "success",
+      "validationChecks": [
+        "certificateValidity",
+        "certificateSignature",
+        "certificateChain",
+        "subjectAlternativeName",
+        "revocationStatus"
+      ]
+    },
+    {
+      "id": "expired-client-cert",
+      "description": "Client authentication with expired certificate",
+      "clientCertificateChain": "protocol-service-expired-chain",
+      "serverCertificateChain": "position-service-chain",
+      "clientTrustStore": "default-truststore",
+      "serverTrustStore": "default-truststore",
+      "expectedResult": "failure",
+      "expectedError": "certificate_expired",
+      "validationChecks": [
+        "certificateValidity",
+        "certificateSignature",
+        "certificateChain",
+        "subjectAlternativeName",
+        "revocationStatus"
+      ]
+    },
+    {
+      "id": "revoked-client-cert",
+      "description": "Client authentication with revoked certificate",
+      "clientCertificateChain": "protocol-service-revoked-chain",
+      "serverCertificateChain": "position-service-chain",
+      "clientTrustStore": "default-truststore",
+      "serverTrustStore": "default-truststore",
+      "expectedResult": "failure",
+      "expectedError": "certificate_revoked",
+      "validationChecks": [
+        "certificateValidity",
+        "certificateSignature",
+        "certificateChain",
+        "subjectAlternativeName",
+        "revocationStatus"
+      ]
+    },
+    {
+      "id": "untrusted-issuer",
+      "description": "Client authentication with certificate from untrusted issuer",
+      "clientCertificateChain": "protocol-service-untrusted-chain",
+      "serverCertificateChain": "position-service-chain",
+      "clientTrustStore": "default-truststore",
+      "serverTrustStore": "default-truststore",
+      "expectedResult": "failure",
+      "expectedError": "unknown_ca",
+      "validationChecks": [
+        "certificateValidity",
+        "certificateSignature",
+        "certificateChain",
+        "subjectAlternativeName",
+        "revocationStatus"
+      ]
+    },
+    {
+      "id": "invalid-san",
+      "description": "Client authentication with invalid Subject Alternative Names",
+      "clientCertificateChain": "protocol-service-invalid-san-chain",
+      "serverCertificateChain": "position-service-chain",
+      "clientTrustStore": "default-truststore",
+      "serverTrustStore": "default-truststore",
+      "expectedResult": "failure",
+      "expectedError": "bad_certificate",
+      "validationChecks": [
+        "certificateValidity",
+        "certificateSignature",
+        "certificateChain",
+        "subjectAlternativeName",
+        "revocationStatus"
+      ]
+    }
+  ]
+}
