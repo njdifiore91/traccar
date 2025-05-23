@@ -1,0 +1,123 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "geofence-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.126986, 47.639754]
+      },
+      "properties": {
+        "name": "Office Perimeter",
+        "description": "Circular geofence around main office",
+        "subType": "Circle",
+        "radius": 500,
+        "color": "#3388ff",
+        "fillColor": "#3388ff",
+        "fillOpacity": 0.2,
+        "weight": 3,
+        "opacity": 0.8
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geofence-2",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-122.135986, 47.635754],
+            [-122.135986, 47.645754],
+            [-122.115986, 47.645754],
+            [-122.115986, 47.635754],
+            [-122.135986, 47.635754]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Warehouse Zone",
+        "description": "Polygon geofence for warehouse area",
+        "color": "#ff7800",
+        "fillColor": "#ff7800",
+        "fillOpacity": 0.2,
+        "weight": 2,
+        "opacity": 0.7,
+        "dashArray": "5, 5"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geofence-3",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-122.128986, 47.642754],
+            [-122.124986, 47.644754],
+            [-122.122986, 47.642754],
+            [-122.124986, 47.640754],
+            [-122.128986, 47.642754]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Parking Area",
+        "description": "Polygon geofence for parking lot",
+        "color": "#33cc33",
+        "fillColor": "#33cc33",
+        "fillOpacity": 0.3,
+        "weight": 2,
+        "opacity": 0.8
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geofence-4",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.130986, 47.635754],
+          [-122.128986, 47.637754],
+          [-122.126986, 47.638754],
+          [-122.124986, 47.637754],
+          [-122.122986, 47.635754]
+        ]
+      },
+      "properties": {
+        "name": "Delivery Route",
+        "description": "Polyline geofence for delivery route",
+        "color": "#9933cc",
+        "weight": 4,
+        "opacity": 0.7,
+        "dashArray": "10, 5"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "geofence-5",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.120986, 47.642754]
+      },
+      "properties": {
+        "name": "Loading Zone",
+        "description": "Circular geofence for loading zone",
+        "subType": "Circle",
+        "radius": 200,
+        "color": "#ff3300",
+        "fillColor": "#ff3300",
+        "fillOpacity": 0.2,
+        "weight": 2,
+        "opacity": 0.8
+      }
+    }
+  ],
+  "metadata": {
+    "generated": "2023-05-15T10:30:00Z",
+    "count": 5,
+    "bbox": [-122.135986, 47.635754, -122.115986, 47.645754],
+    "attribution": "Traccar Geofence Visualization API",
+    "version": "1.0.0"
+  }
+}
