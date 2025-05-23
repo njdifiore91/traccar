@@ -1,0 +1,171 @@
+# Default values for Event Service Helm chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## Image configuration
+image:
+  repository: traccar/event-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+## Service configuration
+service:
+  type: ClusterIP
+  port: 8082
+  annotations: {}
+
+## Resource allocation as per technical specifications
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+## Health check configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+  path: /actuator/health/liveness
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+  path: /actuator/health/readiness
+
+## Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+## Message broker configuration
+messageBroker:
+  type: kafka # Options: kafka, rabbitmq
+  kafka:
+    bootstrapServers: "kafka:9092"
+    consumerGroupId: "event-service"
+    topics:
+      enrichedPositions: "enriched-positions"
+      events: "events"
+    security:
+      enabled: false
+      # username: ""
+      # password: ""
+      # mechanism: "PLAIN"
+      # protocol: "SASL_SSL"
+  rabbitmq:
+    host: "rabbitmq"
+    port: 5672
+    username: "guest"
+    password: "guest"
+    virtualHost: "/"
+    queues:
+      enrichedPositions: "enriched-positions"
+      events: "events"
+
+## Environment variables
+env:
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOGGING_LEVEL_ORG_TRACCAR: "INFO"
+  SERVER_PORT: "8082"
+
+## Additional environment variables
+extraEnv: []
+  # - name: EXTRA_VAR_NAME
+  #   value: "extra-var-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: username
+
+## Pod annotations
+podAnnotations: {}
+
+## Pod security context
+securityContext: {}
+
+## Node selector
+nodeSelector: {}
+
+## Tolerations
+tolerations: []
+
+## Affinity
+affinity: {}
+
+## Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+## Persistence configuration
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+## Ingress configuration
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: event.traccar.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+## Configuration for service discovery
+serviceDiscovery:
+  enabled: true
+  type: kubernetes # Options: kubernetes, consul
+  consul:
+    host: "consul"
+    port: 8500
+    serviceName: "event-service"
+    healthCheckPath: "/actuator/health"
+
+## Circuit breaker configuration
+resilience:
+  circuitBreaker:
+    enabled: true
+    slidingWindowSize: 100
+    failureRateThreshold: 50
+    waitDurationInOpenState: 10000
+    permittedNumberOfCallsInHalfOpenState: 10
+
+## Distributed tracing configuration
+tracing:
+  enabled: false
+  type: jaeger # Options: jaeger, zipkin
+  jaeger:
+    serviceName: "event-service"
+    udpSender:
+      host: jaeger-agent
+      port: 6831
+  zipkin:
+    baseUrl: "http://zipkin:9411"
+
+## Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+    additionalLabels: {}
+    scrapeInterval: 15s
+    path: /actuator/prometheus
