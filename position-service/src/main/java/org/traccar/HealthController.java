@@ -1,199 +1,128 @@
-/*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.traccar;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.storage.Storage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthComponent;
+import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.actuate.health.Status;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.traccar.metrics.HealthMetrics;
 
 /**
- * Health check controller for the Position Service.
- * 
- * This controller exposes health check endpoints for Kubernetes liveness and readiness probes.
- * The liveness probe checks if the service is running, and the readiness probe checks if the
- * service is ready to handle requests, including checking the health of dependencies like
- * the database and message broker.
+ * Controller for exposing health check endpoints for the Position Processing Service.
+ * Provides liveness and readiness probes for Kubernetes integration and dependency health monitoring.
  */
-@Path("/health")
+@RestController
+@RequestMapping("/actuator/health")
 public class HealthController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HealthController.class);
-
-    private final Storage storage;
-    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final HealthEndpoint healthEndpoint;
+    private final HealthMetrics healthMetrics;
 
     /**
-     * Constructs a new HealthController with the necessary dependencies.
+     * Constructs a new HealthController with the specified dependencies.
      *
-     * @param storage Storage for checking database connectivity
-     * @param circuitBreakerRegistry Registry for checking circuit breaker status
+     * @param healthEndpoint Spring Boot's health endpoint for accessing health indicators
+     * @param healthMetrics Metrics collector for recording health status
      */
-    @Inject
-    public HealthController(Storage storage, CircuitBreakerRegistry circuitBreakerRegistry) {
-        this.storage = storage;
-        this.circuitBreakerRegistry = circuitBreakerRegistry;
+    @Autowired
+    public HealthController(HealthEndpoint healthEndpoint, HealthMetrics healthMetrics) {
+        this.healthEndpoint = healthEndpoint;
+        this.healthMetrics = healthMetrics;
     }
 
     /**
      * Liveness probe endpoint for Kubernetes.
-     * 
-     * This endpoint checks if the service is running. It always returns 200 OK
-     * if the service is able to handle the request.
+     * Checks if the service is running and not deadlocked.
      *
-     * @return 200 OK if the service is running
+     * @return 200 OK if the service is alive, 503 Service Unavailable otherwise
      */
-    @GET
-    @Path("/liveness")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response liveness() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("timestamp", System.currentTimeMillis());
+    @GetMapping("/live")
+    public ResponseEntity<HealthComponent> liveness() {
+        HealthComponent health = healthEndpoint.healthForPath("liveness");
+        boolean isHealthy = health.getStatus() == Status.UP;
         
-        return Response.ok(response).build();
+        // Record the liveness check in metrics
+        healthMetrics.recordHealthCheck("liveness", isHealthy);
+        
+        return createHealthResponse(health);
     }
 
     /**
      * Readiness probe endpoint for Kubernetes.
-     * 
-     * This endpoint checks if the service is ready to handle requests, including
-     * checking the health of dependencies like the database and message broker.
+     * Checks if the service is ready to handle traffic, including dependency checks.
      *
      * @return 200 OK if the service is ready, 503 Service Unavailable otherwise
      */
-    @GET
-    @Path("/readiness")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response readiness() {
-        Map<String, Object> response = new HashMap<>();
-        Map<String, Object> components = new HashMap<>();
-        boolean isReady = true;
+    @GetMapping("/ready")
+    public ResponseEntity<HealthComponent> readiness() {
+        HealthComponent health = healthEndpoint.healthForPath("readiness");
+        boolean isHealthy = health.getStatus() == Status.UP;
         
-        // Check database connectivity
-        try {
-            storage.getObjects(OutboxMessage.class, null);
-            components.put("database", Map.of("status", "UP"));
-        } catch (Exception e) {
-            LOGGER.error("Database health check failed: {}", e.getMessage());
-            components.put("database", Map.of(
-                    "status", "DOWN",
-                    "error", e.getMessage()));
-            isReady = false;
-        }
+        // Record the readiness check in metrics
+        healthMetrics.recordHealthCheck("readiness", isHealthy);
         
-        // Check circuit breaker status
-        Map<String, Object> circuitBreakers = new HashMap<>();
-        for (CircuitBreaker circuitBreaker : circuitBreakerRegistry.getAllCircuitBreakers()) {
-            String name = circuitBreaker.getName();
-            CircuitBreaker.State state = circuitBreaker.getState();
-            
-            circuitBreakers.put(name, Map.of("state", state.name()));
-            
-            // If any circuit breaker is OPEN, the service is not ready
-            if (state == CircuitBreaker.State.OPEN) {
-                LOGGER.warn("Circuit breaker {} is OPEN", name);
-                isReady = false;
-            }
-        }
-        components.put("circuitBreakers", circuitBreakers);
-        
-        // Build the response
-        response.put("status", isReady ? "UP" : "DOWN");
-        response.put("components", components);
-        response.put("timestamp", System.currentTimeMillis());
-        
-        return isReady
-                ? Response.ok(response).build()
-                : Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(response).build();
+        return createHealthResponse(health);
     }
 
     /**
-     * Detailed health check endpoint.
-     * 
-     * This endpoint provides detailed health information about the service and its dependencies.
+     * Startup probe endpoint for Kubernetes.
+     * Checks if the service has completed its startup process.
      *
-     * @return 200 OK with detailed health information
+     * @return 200 OK if the service has started up, 503 Service Unavailable otherwise
      */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response health() {
-        Map<String, Object> response = new HashMap<>();
-        Map<String, Object> components = new HashMap<>();
-        boolean isHealthy = true;
+    @GetMapping("/startup")
+    public ResponseEntity<HealthComponent> startup() {
+        HealthComponent health = healthEndpoint.healthForPath("startup");
+        boolean isHealthy = health.getStatus() == Status.UP;
         
-        // Check database connectivity
-        try {
-            storage.getObjects(OutboxMessage.class, null);
-            components.put("database", Map.of("status", "UP"));
-        } catch (Exception e) {
-            LOGGER.error("Database health check failed: {}", e.getMessage());
-            components.put("database", Map.of(
-                    "status", "DOWN",
-                    "error", e.getMessage()));
-            isHealthy = false;
+        // Record the startup check in metrics
+        healthMetrics.recordHealthCheck("startup", isHealthy);
+        
+        return createHealthResponse(health);
+    }
+
+    /**
+     * Overall health endpoint that aggregates all health indicators.
+     * Provides detailed health information for all components.
+     *
+     * @return 200 OK if all components are healthy, 503 Service Unavailable otherwise
+     */
+    @GetMapping
+    public ResponseEntity<HealthComponent> health() {
+        HealthComponent health = healthEndpoint.health();
+        boolean isHealthy = health.getStatus() == Status.UP;
+        
+        // Record the overall health check in metrics
+        healthMetrics.recordHealthCheck("overall", isHealthy);
+        
+        // Update the service health status gauge
+        healthMetrics.setServiceHealthStatus(isHealthy ? 1.0 : 0.0);
+        
+        return createHealthResponse(health);
+    }
+
+    /**
+     * Creates a ResponseEntity with the appropriate HTTP status based on the health status.
+     *
+     * @param health The health component to create a response for
+     * @return ResponseEntity with the health component and appropriate HTTP status
+     */
+    private ResponseEntity<HealthComponent> createHealthResponse(HealthComponent health) {
+        if (health.getStatus() == Status.UP) {
+            return ResponseEntity.ok(health);
+        } else if (health.getStatus() == Status.OUT_OF_SERVICE) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(health);
+        } else if (health.getStatus() == Status.DOWN) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(health);
+        } else {
+            // For any unknown status, return 503 Service Unavailable
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(health);
         }
-        
-        // Check circuit breaker status
-        Map<String, Object> circuitBreakers = new HashMap<>();
-        for (CircuitBreaker circuitBreaker : circuitBreakerRegistry.getAllCircuitBreakers()) {
-            String name = circuitBreaker.getName();
-            CircuitBreaker.State state = circuitBreaker.getState();
-            CircuitBreaker.Metrics metrics = circuitBreaker.getMetrics();
-            
-            circuitBreakers.put(name, Map.of(
-                    "state", state.name(),
-                    "failureRate", metrics.getFailureRate(),
-                    "slowCallRate", metrics.getSlowCallRate(),
-                    "numberOfBufferedCalls", metrics.getNumberOfBufferedCalls(),
-                    "numberOfFailedCalls", metrics.getNumberOfFailedCalls(),
-                    "numberOfSlowCalls", metrics.getNumberOfSlowCalls(),
-                    "numberOfSuccessfulCalls", metrics.getNumberOfSuccessfulCalls()));
-            
-            // If any circuit breaker is OPEN, the service is not healthy
-            if (state == CircuitBreaker.State.OPEN) {
-                isHealthy = false;
-            }
-        }
-        components.put("circuitBreakers", circuitBreakers);
-        
-        // Add JVM metrics
-        Runtime runtime = Runtime.getRuntime();
-        Map<String, Object> jvm = new HashMap<>();
-        jvm.put("totalMemory", runtime.totalMemory());
-        jvm.put("freeMemory", runtime.freeMemory());
-        jvm.put("maxMemory", runtime.maxMemory());
-        jvm.put("availableProcessors", runtime.availableProcessors());
-        components.put("jvm", jvm);
-        
-        // Build the response
-        response.put("status", isHealthy ? "UP" : "DOWN");
-        response.put("components", components);
-        response.put("timestamp", System.currentTimeMillis());
-        
-        return Response.ok(response).build();
     }
 }
