@@ -1,0 +1,62 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "api-gateway.fullname" . }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.ingress.annotations }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    {{- else }}
+    kubernetes.io/ingress.class: "{{ .Values.ingress.className }}"
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{ .Values.ingress.sslRedirect }}"
+    # Enable WebSocket support
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_http_version 1.1;
+      proxy_set_header Authorization $http_authorization;
+      proxy_pass_header Authorization;
+    {{- end }}
+    {{- if .Values.ingress.certManager.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certManager.issuer }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    {{- range .Values.ingress.hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+    secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ .host | quote }}
+    http:
+      paths:
+      - path: {{ .path | default "/" }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "api-gateway.fullname" $ }}
+            port:
+              number: {{ $.Values.service.port }}
+      # Explicitly define WebSocket endpoint
+      - path: "/api/socket"
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "api-gateway.fullname" $ }}
+            port:
+              number: {{ $.Values.service.port }}
+  {{- end }}
+  {{- if .Values.ingress.defaultBackend.enabled }}
+  defaultBackend:
+    service:
+      name: {{ include "api-gateway.fullname" . }}
+      port:
+        number: {{ .Values.service.port }}
+  {{- end }}
