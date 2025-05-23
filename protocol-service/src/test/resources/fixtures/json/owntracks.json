@@ -1,0 +1,110 @@
+[
+  {
+    "_type": "location",
+    "acc": 15,
+    "alt": 440,
+    "batt": 46,
+    "conn": "w",
+    "lat": 46.0681247,
+    "lon": 11.1512805,
+    "t": "u",
+    "tid": "5t",
+    "tst": 1551874878,
+    "vac": 2,
+    "vel": 0
+  },
+  {
+    "lon": 2.29513,
+    "lat": 48.85833,
+    "tst": 1497349316,
+    "_type": "location",
+    "tid": "JJ"
+  },
+  {
+    "cog": 271,
+    "lon": 2.29513,
+    "acc": 5,
+    "vel": 61,
+    "vac": 21,
+    "lat": 48.85833,
+    "tst": 1497349316,
+    "alt": 167,
+    "_type": "location",
+    "tid": "JJ",
+    "t": "u",
+    "batt": 67
+  },
+  {
+    "lat": 48.85,
+    "lon": 2.295,
+    "_type": "location",
+    "tid": "JJ",
+    "tst": 1497476456
+  },
+  {
+    "_type": "location",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "tst": 1609459200
+  },
+  {
+    "_type": "location",
+    "lat": 51.5074456789,
+    "lon": -0.1278123456,
+    "tst": 1609459200,
+    "tid": "HIGHPRECISION"
+  },
+  {
+    "_type": "location",
+    "acc": 3,
+    "alt": 1250,
+    "batt": 100,
+    "conn": "m",
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "t": "p",
+    "tid": "ALLFIELDS",
+    "tst": 1609459200,
+    "vac": 4,
+    "vel": 25,
+    "cog": 90
+  },
+  {
+    "_type": "location",
+    "acc": 10,
+    "alt": 350,
+    "batt": 35,
+    "conn": "o",
+    "lat": 52.5200,
+    "lon": 13.4050,
+    "t": "c",
+    "tid": "DIFFCONN",
+    "tst": 1609459200,
+    "vac": 8,
+    "vel": 12
+  },
+  {
+    "_type": "location",
+    "acc": 1,
+    "alt": 8848,
+    "batt": 5,
+    "conn": "w",
+    "lat": 27.9881,
+    "lon": 86.9250,
+    "t": "u",
+    "tid": "EXTREME",
+    "tst": 1609459200,
+    "vac": 1,
+    "vel": 120,
+    "cog": 180
+  },
+  {
+    "_type": "location",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "tst": 1609459200,
+    "tid": "MINIMAL",
+    "p": "iOS",
+    "desc": "Test device"
+  }
+]
