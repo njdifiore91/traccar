@@ -1,0 +1,468 @@
+{
+  "responses": {
+    "40.733,-73.989": {
+      "type": "FeatureCollection",
+      "query": ["40.733", "-73.989"],
+      "features": [
+    {
+      "id": "address.123456789",
+      "type": "Feature",
+      "place_type": ["address"],
+      "relevance": 1,
+      "properties": {
+        "accuracy": "rooftop"
+      },
+      "text": "East 13th Street",
+      "place_name": "120 East 13th Street, New York, New York 10003, United States",
+      "center": [-73.989, 40.733],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.989, 40.733]
+      },
+      "address": "120",
+      "context": [
+        {
+          "id": "neighborhood.123456",
+          "text": "Greenwich Village"
+        },
+        {
+          "id": "locality.123456",
+          "text": "Manhattan"
+        },
+        {
+          "id": "postcode.123456",
+          "text": "10003"
+        },
+        {
+          "id": "place.123456",
+          "text": "New York"
+        },
+        {
+          "id": "region.123456",
+          "text": "New York"
+        },
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "neighborhood.123456",
+      "type": "Feature",
+      "place_type": ["neighborhood"],
+      "relevance": 1,
+      "properties": {},
+      "text": "Greenwich Village",
+      "place_name": "Greenwich Village, New York, New York, United States",
+      "center": [-73.999, 40.735],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.999, 40.735]
+      },
+      "context": [
+        {
+          "id": "locality.123456",
+          "text": "Manhattan"
+        },
+        {
+          "id": "postcode.123456",
+          "text": "10003"
+        },
+        {
+          "id": "place.123456",
+          "text": "New York"
+        },
+        {
+          "id": "region.123456",
+          "text": "New York"
+        },
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "locality.123456",
+      "type": "Feature",
+      "place_type": ["locality"],
+      "relevance": 1,
+      "properties": {},
+      "text": "Manhattan",
+      "place_name": "Manhattan, New York, New York, United States",
+      "center": [-73.9597, 40.7903],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9597, 40.7903]
+      },
+      "context": [
+        {
+          "id": "place.123456",
+          "text": "New York"
+        },
+        {
+          "id": "region.123456",
+          "text": "New York"
+        },
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "postcode.123456",
+      "type": "Feature",
+      "place_type": ["postcode"],
+      "relevance": 1,
+      "properties": {},
+      "text": "10003",
+      "place_name": "New York, New York 10003, United States",
+      "center": [-73.9903, 40.7348],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9903, 40.7348]
+      },
+      "context": [
+        {
+          "id": "place.123456",
+          "text": "New York"
+        },
+        {
+          "id": "region.123456",
+          "text": "New York"
+        },
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "place.123456",
+      "type": "Feature",
+      "place_type": ["place"],
+      "relevance": 1,
+      "properties": {},
+      "text": "New York",
+      "place_name": "New York, New York, United States",
+      "center": [-74.0060, 40.7128],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.0060, 40.7128]
+      },
+      "context": [
+        {
+          "id": "region.123456",
+          "text": "New York"
+        },
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "region.123456",
+      "type": "Feature",
+      "place_type": ["region"],
+      "relevance": 1,
+      "properties": {},
+      "text": "New York",
+      "place_name": "New York, United States",
+      "center": [-75.4999, 43.0000],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.4999, 43.0000]
+      },
+      "context": [
+        {
+          "id": "country.123456",
+          "text": "United States"
+        }
+      ]
+    },
+    {
+      "id": "country.123456",
+      "type": "Feature",
+      "place_type": ["country"],
+      "relevance": 1,
+      "properties": {},
+      "text": "United States",
+      "place_name": "United States",
+      "center": [-98.5795, 39.8283],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-98.5795, 39.8283]
+      }
+    }
+  ],
+      "attribution": "NOTICE: © 2023 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+    },
+    "31.776797,35.211489": {
+      "type": "FeatureCollection",
+      "query": ["31.776797", "35.211489"],
+      "features": [
+        {
+          "id": "address.987654321",
+          "type": "Feature",
+          "place_type": ["address"],
+          "relevance": 1,
+          "properties": {
+            "accuracy": "rooftop"
+          },
+          "text": "Ibn Shaprut St",
+          "place_name": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL",
+          "center": [35.211489, 31.776797],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [35.211489, 31.776797]
+          },
+          "address": "1",
+          "context": [
+            {
+              "id": "neighborhood.654321",
+              "text": "Rehavia"
+            },
+            {
+              "id": "place.654321",
+              "text": "Jerusalem"
+            },
+            {
+              "id": "region.654321",
+              "text": "Jerusalem District"
+            },
+            {
+              "id": "country.654321",
+              "text": "IL"
+            }
+          ]
+        },
+        {
+          "id": "neighborhood.654321",
+          "type": "Feature",
+          "place_type": ["neighborhood"],
+          "relevance": 1,
+          "properties": {},
+          "text": "Rehavia",
+          "place_name": "Rehavia, Jerusalem, Jerusalem District, IL",
+          "center": [35.2106, 31.7756],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [35.2106, 31.7756]
+          },
+          "context": [
+            {
+              "id": "place.654321",
+              "text": "Jerusalem"
+            },
+            {
+              "id": "region.654321",
+              "text": "Jerusalem District"
+            },
+            {
+              "id": "country.654321",
+              "text": "IL"
+            }
+          ]
+        },
+        {
+          "id": "place.654321",
+          "type": "Feature",
+          "place_type": ["place"],
+          "relevance": 1,
+          "properties": {},
+          "text": "Jerusalem",
+          "place_name": "Jerusalem, Jerusalem District, IL",
+          "center": [35.2137, 31.7683],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [35.2137, 31.7683]
+          },
+          "context": [
+            {
+              "id": "region.654321",
+              "text": "Jerusalem District"
+            },
+            {
+              "id": "country.654321",
+              "text": "IL"
+            }
+          ]
+        },
+        {
+          "id": "region.654321",
+          "type": "Feature",
+          "place_type": ["region"],
+          "relevance": 1,
+          "properties": {},
+          "text": "Jerusalem District",
+          "place_name": "Jerusalem District, IL",
+          "center": [35.2137, 31.7683],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [35.2137, 31.7683]
+          },
+          "context": [
+            {
+              "id": "country.654321",
+              "text": "IL"
+            }
+          ]
+        },
+        {
+          "id": "country.654321",
+          "type": "Feature",
+          "place_type": ["country"],
+          "relevance": 1,
+          "properties": {},
+          "text": "IL",
+          "place_name": "IL",
+          "center": [34.8516, 31.0461],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [34.8516, 31.0461]
+          }
+        }
+      ],
+      "attribution": "NOTICE: © 2023 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+    },
+    "40.7337807,-73.9974401": {
+      "type": "FeatureCollection",
+      "query": ["40.7337807", "-73.9974401"],
+      "features": [
+        {
+          "id": "address.456789123",
+          "type": "Feature",
+          "place_type": ["address"],
+          "relevance": 1,
+          "properties": {
+            "accuracy": "rooftop"
+          },
+          "text": "West 9th Street",
+          "place_name": "35 West 9th Street, NYC, New York, US",
+          "center": [-73.9974401, 40.7337807],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.9974401, 40.7337807]
+          },
+          "address": "35",
+          "context": [
+            {
+              "id": "neighborhood.789123",
+              "text": "Greenwich Village"
+            },
+            {
+              "id": "place.789123",
+              "text": "NYC"
+            },
+            {
+              "id": "region.789123",
+              "text": "New York"
+            },
+            {
+              "id": "country.789123",
+              "text": "US"
+            }
+          ]
+        },
+        {
+          "id": "neighborhood.789123",
+          "type": "Feature",
+          "place_type": ["neighborhood"],
+          "relevance": 1,
+          "properties": {},
+          "text": "Greenwich Village",
+          "place_name": "Greenwich Village, NYC, New York, US",
+          "center": [-73.9998, 40.7347],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-73.9998, 40.7347]
+          },
+          "context": [
+            {
+              "id": "place.789123",
+              "text": "NYC"
+            },
+            {
+              "id": "region.789123",
+              "text": "New York"
+            },
+            {
+              "id": "country.789123",
+              "text": "US"
+            }
+          ]
+        },
+        {
+          "id": "place.789123",
+          "type": "Feature",
+          "place_type": ["place"],
+          "relevance": 1,
+          "properties": {},
+          "text": "NYC",
+          "place_name": "NYC, New York, US",
+          "center": [-74.0060, 40.7128],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-74.0060, 40.7128]
+          },
+          "context": [
+            {
+              "id": "region.789123",
+              "text": "New York"
+            },
+            {
+              "id": "country.789123",
+              "text": "US"
+            }
+          ]
+        },
+        {
+          "id": "region.789123",
+          "type": "Feature",
+          "place_type": ["region"],
+          "relevance": 1,
+          "properties": {},
+          "text": "New York",
+          "place_name": "New York, US",
+          "center": [-75.4999, 43.0000],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-75.4999, 43.0000]
+          },
+          "context": [
+            {
+              "id": "country.789123",
+              "text": "US"
+            }
+          ]
+        },
+        {
+          "id": "country.789123",
+          "type": "Feature",
+          "place_type": ["country"],
+          "relevance": 1,
+          "properties": {},
+          "text": "US",
+          "place_name": "US",
+          "center": [-98.5795, 39.8283],
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-98.5795, 39.8283]
+          }
+        }
+      ],
+      "attribution": "NOTICE: © 2023 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+    },
+    "error": {
+      "code": "NotFound",
+      "message": "Not Found"
+    },
+    "rate_limit_exceeded": {
+      "code": "RateLimitExceeded",
+      "message": "Rate limit exceeded"
+    }
+  }
+}
