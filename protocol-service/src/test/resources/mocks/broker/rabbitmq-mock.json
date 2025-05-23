@@ -1,0 +1,157 @@
+{
+  "connection": {
+    "host": "localhost",
+    "port": 5672,
+    "virtualHost": "test",
+    "username": "guest",
+    "password": "guest",
+    "connectionTimeout": 5000,
+    "handshakeTimeout": 5000,
+    "requestedHeartbeat": 60
+  },
+  "ssl": {
+    "enabled": false,
+    "keyStore": "",
+    "keyStorePassword": "",
+    "trustStore": "",
+    "trustStorePassword": ""
+  },
+  "publisherConfirms": {
+    "enabled": true,
+    "timeout": 5000
+  },
+  "consumerAck": {
+    "autoAck": false,
+    "multipleAck": false
+  },
+  "exchanges": [
+    {
+      "name": "position.exchange",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "device.exchange",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "event.exchange",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "command.exchange",
+      "type": "direct",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "position.queue",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {}
+    },
+    {
+      "name": "device.queue",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {}
+    },
+    {
+      "name": "event.queue",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {}
+    },
+    {
+      "name": "command.queue",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {}
+    },
+    {
+      "name": "protocol.command.queue",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "position.exchange",
+      "destination": "position.queue",
+      "destinationType": "queue",
+      "routingKey": "position.#",
+      "arguments": {}
+    },
+    {
+      "source": "device.exchange",
+      "destination": "device.queue",
+      "destinationType": "queue",
+      "routingKey": "device.#",
+      "arguments": {}
+    },
+    {
+      "source": "event.exchange",
+      "destination": "event.queue",
+      "destinationType": "queue",
+      "routingKey": "event.#",
+      "arguments": {}
+    },
+    {
+      "source": "command.exchange",
+      "destination": "command.queue",
+      "destinationType": "queue",
+      "routingKey": "command",
+      "arguments": {}
+    },
+    {
+      "source": "command.exchange",
+      "destination": "protocol.command.queue",
+      "destinationType": "queue",
+      "routingKey": "protocol.command",
+      "arguments": {}
+    }
+  ],
+  "settings": {
+    "automaticRecoveryEnabled": true,
+    "topologyRecoveryEnabled": true,
+    "networkRecoveryInterval": 5000,
+    "channelRpcTimeout": 600000,
+    "channelShouldCheckRpcResponseType": true,
+    "useNio": true,
+    "nioThreads": 2,
+    "prefetchCount": 10,
+    "defaultExchangeType": "topic",
+    "mockDelayMs": 0,
+    "simulateLatency": false,
+    "simulateDisconnects": false,
+    "disconnectProbability": 0.0
+  },
+  "testBehavior": {
+    "simulateServerErrors": false,
+    "errorProbability": 0.0,
+    "simulateSlowResponses": false,
+    "slowResponseProbability": 0.0,
+    "slowResponseMaxDelayMs": 2000
+  }
+}
