@@ -1,0 +1,632 @@
+{
+  "version": "1.0.0",
+  "description": "Common test utilities for protocol testing in the Protocol Service microservice",
+  "utilities": {
+    "hexConversion": {
+      "description": "Utilities for converting between hex strings and binary data",
+      "functions": {
+        "hexToBytes": {
+          "description": "Convert hex string to byte array",
+          "examples": [
+            {
+              "input": "48656C6C6F",
+              "output": "Hello"
+            }
+          ]
+        },
+        "bytesToHex": {
+          "description": "Convert byte array to hex string",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "48656C6C6F"
+            }
+          ]
+        },
+        "hexToAscii": {
+          "description": "Convert hex string to ASCII string",
+          "examples": [
+            {
+              "input": "48656C6C6F",
+              "output": "Hello"
+            }
+          ]
+        },
+        "asciiToHex": {
+          "description": "Convert ASCII string to hex string",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "48656C6C6F"
+            }
+          ]
+        }
+      }
+    },
+    "checksumValidation": {
+      "description": "Utilities for calculating and validating checksums",
+      "functions": {
+        "calculateCrc16": {
+          "description": "Calculate CRC-16 checksum",
+          "polynomials": {
+            "CCITT": "0x1021",
+            "XMODEM": "0x1021",
+            "MODBUS": "0x8005"
+          },
+          "examples": [
+            {
+              "input": "Hello",
+              "polynomial": "CCITT",
+              "output": "9B06"
+            }
+          ]
+        },
+        "calculateCrc32": {
+          "description": "Calculate CRC-32 checksum",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "F7D18982"
+            }
+          ]
+        },
+        "calculateXor": {
+          "description": "Calculate XOR checksum",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "00"
+            }
+          ]
+        },
+        "calculateLrc": {
+          "description": "Calculate Longitudinal Redundancy Check (LRC)",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "2D"
+            }
+          ]
+        },
+        "calculateSum": {
+          "description": "Calculate simple sum checksum",
+          "examples": [
+            {
+              "input": "Hello",
+              "output": "232"
+            }
+          ]
+        }
+      }
+    },
+    "dataFormatting": {
+      "description": "Utilities for formatting test data",
+      "functions": {
+        "formatCoordinate": {
+          "description": "Format coordinate in various formats",
+          "formats": [
+            "decimal",
+            "degreesMinutes",
+            "degreesMinutesSeconds",
+            "hex"
+          ],
+          "examples": [
+            {
+              "input": 37.7749,
+              "format": "decimal",
+              "output": "37.7749"
+            },
+            {
+              "input": 37.7749,
+              "format": "degreesMinutes",
+              "output": "3746.494"
+            }
+          ]
+        },
+        "formatDate": {
+          "description": "Format date in various formats",
+          "formats": [
+            "yyyyMMdd",
+            "ddMMyyyy",
+            "MMddyyyy",
+            "yyMMdd",
+            "unix",
+            "iso8601"
+          ],
+          "examples": [
+            {
+              "input": "2023-01-15T12:30:45Z",
+              "format": "yyyyMMdd",
+              "output": "20230115"
+            },
+            {
+              "input": "2023-01-15T12:30:45Z",
+              "format": "unix",
+              "output": "1673786445"
+            }
+          ]
+        },
+        "formatSpeed": {
+          "description": "Format speed in various units",
+          "units": [
+            "kph",
+            "mph",
+            "knots",
+            "mps"
+          ],
+          "examples": [
+            {
+              "input": 100,
+              "fromUnit": "kph",
+              "toUnit": "mph",
+              "output": 62.14
+            }
+          ]
+        }
+      }
+    },
+    "messageBrokerTesting": {
+      "description": "Utilities for testing message broker integration",
+      "functions": {
+        "createPositionMessage": {
+          "description": "Create a position message for broker testing",
+          "examples": [
+            {
+              "deviceId": 123,
+              "protocol": "tk103",
+              "latitude": 37.7749,
+              "longitude": -122.4194,
+              "time": "2023-01-15T12:30:45Z",
+              "attributes": {
+                "speed": 60,
+                "course": 180,
+                "battery": 95
+              }
+            }
+          ]
+        },
+        "createEventMessage": {
+          "description": "Create an event message for broker testing",
+          "examples": [
+            {
+              "deviceId": 123,
+              "type": "deviceOnline",
+              "time": "2023-01-15T12:30:45Z",
+              "attributes": {}
+            },
+            {
+              "deviceId": 123,
+              "type": "geofenceEnter",
+              "geofenceId": 456,
+              "time": "2023-01-15T12:30:45Z",
+              "attributes": {
+                "positionId": 789
+              }
+            }
+          ]
+        },
+        "validateMessageSchema": {
+          "description": "Validate message against schema",
+          "schemas": [
+            "position.proto",
+            "event.proto",
+            "command.proto",
+            "device.proto"
+          ]
+        },
+        "mockBrokerResponse": {
+          "description": "Mock responses from message broker",
+          "examples": [
+            {
+              "topic": "device-status",
+              "message": {
+                "deviceId": 123,
+                "status": "online",
+                "lastUpdate": "2023-01-15T12:30:45Z"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "distributedTesting": {
+      "description": "Utilities for distributed testing in microservice architecture",
+      "functions": {
+        "generateDeviceId": {
+          "description": "Generate unique device ID for testing",
+          "examples": [
+            {
+              "prefix": "test",
+              "output": "test-12345678"
+            }
+          ]
+        },
+        "generateImei": {
+          "description": "Generate valid IMEI number for testing",
+          "examples": [
+            {
+              "output": "356938035643809"
+            }
+          ]
+        },
+        "generateProtocolMessage": {
+          "description": "Generate protocol-specific test messages",
+          "supportedProtocols": [
+            "tk103",
+            "h02",
+            "meitrack",
+            "teltonika",
+            "gt06",
+            "osmand",
+            "atrack",
+            "totem",
+            "meiligao"
+          ],
+          "messageTypes": [
+            "login",
+            "position",
+            "alarm",
+            "status",
+            "heartbeat"
+          ],
+          "examples": [
+            {
+              "protocol": "tk103",
+              "type": "login",
+              "deviceId": "123456789012345",
+              "output": "(013612345678BP05123456789012345)"
+            },
+            {
+              "protocol": "teltonika",
+              "type": "position",
+              "deviceId": "123456789012345",
+              "latitude": 37.7749,
+              "longitude": -122.4194,
+              "output": "hexString"
+            }
+          ]
+        },
+        "mockServiceDiscovery": {
+          "description": "Mock service discovery for testing",
+          "services": [
+            {
+              "name": "position-service",
+              "host": "localhost",
+              "port": 8080,
+              "endpoints": [
+                "/api/positions",
+                "/api/devices/{id}/positions"
+              ]
+            },
+            {
+              "name": "event-service",
+              "host": "localhost",
+              "port": 8081,
+              "endpoints": [
+                "/api/events",
+                "/api/devices/{id}/events"
+              ]
+            }
+          ]
+        },
+        "mockGrpcService": {
+          "description": "Mock gRPC service for testing",
+          "services": [
+            {
+              "name": "DeviceService",
+              "methods": [
+                "getDevice",
+                "updateDevice",
+                "deleteDevice"
+              ]
+            },
+            {
+              "name": "PositionService",
+              "methods": [
+                "getLatestPosition",
+                "getPositions",
+                "sendCommand"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "networkTesting": {
+      "description": "Utilities for testing network protocols",
+      "functions": {
+        "createTcpClient": {
+          "description": "Create TCP client for testing",
+          "examples": [
+            {
+              "host": "localhost",
+              "port": 5001,
+              "timeout": 5000
+            }
+          ]
+        },
+        "createUdpClient": {
+          "description": "Create UDP client for testing",
+          "examples": [
+            {
+              "host": "localhost",
+              "port": 5002,
+              "timeout": 5000
+            }
+          ]
+        },
+        "createHttpClient": {
+          "description": "Create HTTP client for testing",
+          "examples": [
+            {
+              "baseUrl": "http://localhost:8080",
+              "timeout": 5000,
+              "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer test-token"
+              }
+            }
+          ]
+        },
+        "simulateNetworkConditions": {
+          "description": "Simulate various network conditions",
+          "conditions": [
+            "latency",
+            "packetLoss",
+            "bandwidth",
+            "disconnection"
+          ],
+          "examples": [
+            {
+              "condition": "latency",
+              "value": 200,
+              "unit": "ms"
+            },
+            {
+              "condition": "packetLoss",
+              "value": 5,
+              "unit": "percent"
+            }
+          ]
+        }
+      }
+    },
+    "testDataGeneration": {
+      "description": "Utilities for generating test data",
+      "functions": {
+        "generateRandomPosition": {
+          "description": "Generate random position data",
+          "examples": [
+            {
+              "deviceId": 123,
+              "bounds": {
+                "minLat": 37.7,
+                "maxLat": 37.8,
+                "minLon": -122.5,
+                "maxLon": -122.4
+              },
+              "attributes": ["speed", "course", "altitude", "battery"]
+            }
+          ]
+        },
+        "generatePositionSequence": {
+          "description": "Generate sequence of positions along a route",
+          "examples": [
+            {
+              "deviceId": 123,
+              "startPoint": [37.7749, -122.4194],
+              "endPoint": [37.3382, -121.8863],
+              "pointCount": 10,
+              "timeInterval": 60,
+              "speed": 60
+            }
+          ]
+        },
+        "generateDeviceData": {
+          "description": "Generate device test data",
+          "examples": [
+            {
+              "count": 5,
+              "protocolFilter": ["tk103", "teltonika"],
+              "attributes": {
+                "includePhone": true,
+                "includeCategory": true,
+                "includeGroupId": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "testConfigurations": {
+    "defaultTimeouts": {
+      "connectionTimeout": 5000,
+      "readTimeout": 10000,
+      "writeTimeout": 5000,
+      "idleTimeout": 60000
+    },
+    "defaultPorts": {
+      "tk103": 5001,
+      "h02": 5002,
+      "meitrack": 5003,
+      "teltonika": 5004,
+      "gt06": 5005,
+      "osmand": 5055,
+      "atrack": 5006,
+      "totem": 5007,
+      "meiligao": 5008
+    },
+    "messageBroker": {
+      "kafka": {
+        "bootstrapServers": "localhost:9092",
+        "topics": {
+          "positions": "raw-positions",
+          "events": "events",
+          "commands": "commands",
+          "status": "device-status"
+        },
+        "consumerGroup": "protocol-service-test"
+      },
+      "rabbitmq": {
+        "host": "localhost",
+        "port": 5672,
+        "username": "guest",
+        "password": "guest",
+        "queues": {
+          "positions": "raw-positions",
+          "events": "events",
+          "commands": "commands",
+          "status": "device-status"
+        },
+        "exchange": "traccar"
+      }
+    },
+    "serviceDiscovery": {
+      "consul": {
+        "host": "localhost",
+        "port": 8500,
+        "serviceName": "protocol-service",
+        "serviceId": "protocol-service-test",
+        "healthCheckPath": "/actuator/health",
+        "healthCheckInterval": "10s"
+      },
+      "kubernetes": {
+        "namespace": "traccar-test",
+        "serviceName": "protocol-service",
+        "port": 8080,
+        "healthCheckPath": "/actuator/health",
+        "readinessPath": "/actuator/health/readiness",
+        "livenessPath": "/actuator/health/liveness"
+      }
+    },
+    "testDatabase": {
+      "url": "jdbc:postgresql://localhost:5432/traccar_test",
+      "username": "test",
+      "password": "test",
+      "driverClassName": "org.postgresql.Driver"
+    },
+    "mockServices": {
+      "positionService": {
+        "host": "localhost",
+        "port": 8081,
+        "endpoints": {
+          "positions": "/api/positions",
+          "latestPosition": "/api/devices/{id}/positions/latest"
+        }
+      },
+      "deviceService": {
+        "host": "localhost",
+        "port": 8082,
+        "endpoints": {
+          "devices": "/api/devices",
+          "device": "/api/devices/{id}"
+        }
+      }
+    }
+  },
+  "testScenarios": {
+    "basicProtocolTests": {
+      "description": "Basic protocol parsing tests",
+      "scenarios": [
+        {
+          "name": "loginMessage",
+          "description": "Test device login message parsing",
+          "protocols": ["tk103", "h02", "meitrack", "teltonika", "gt06"]
+        },
+        {
+          "name": "positionMessage",
+          "description": "Test position message parsing",
+          "protocols": ["tk103", "h02", "meitrack", "teltonika", "gt06", "osmand"]
+        },
+        {
+          "name": "alarmMessage",
+          "description": "Test alarm message parsing",
+          "protocols": ["tk103", "meitrack", "teltonika", "gt06"]
+        },
+        {
+          "name": "statusMessage",
+          "description": "Test status message parsing",
+          "protocols": ["teltonika", "meitrack"]
+        }
+      ]
+    },
+    "integrationTests": {
+      "description": "Integration tests with other services",
+      "scenarios": [
+        {
+          "name": "positionPipeline",
+          "description": "Test position processing pipeline",
+          "steps": [
+            "Send position message to protocol service",
+            "Verify message published to broker",
+            "Verify position service consumes message",
+            "Verify position stored in database"
+          ]
+        },
+        {
+          "name": "commandExecution",
+          "description": "Test command execution flow",
+          "steps": [
+            "Send command request to API",
+            "Verify command published to broker",
+            "Verify protocol service consumes command",
+            "Verify command sent to device",
+            "Verify response published to broker"
+          ]
+        }
+      ]
+    },
+    "performanceTests": {
+      "description": "Performance tests for protocol service",
+      "scenarios": [
+        {
+          "name": "highVolumePositions",
+          "description": "Test high volume position message processing",
+          "parameters": {
+            "deviceCount": 1000,
+            "messagesPerDevice": 10,
+            "messageInterval": 100,
+            "protocol": "osmand"
+          }
+        },
+        {
+          "name": "concurrentConnections",
+          "description": "Test concurrent device connections",
+          "parameters": {
+            "connectionCount": 500,
+            "rampUpPeriod": 60,
+            "testDuration": 300,
+            "protocol": "tk103"
+          }
+        }
+      ]
+    },
+    "reliabilityTests": {
+      "description": "Reliability tests for protocol service",
+      "scenarios": [
+        {
+          "name": "brokerFailure",
+          "description": "Test behavior when message broker is unavailable",
+          "steps": [
+            "Start sending position messages",
+            "Simulate broker failure",
+            "Verify messages buffered",
+            "Restore broker",
+            "Verify buffered messages sent"
+          ]
+        },
+        {
+          "name": "networkDisruption",
+          "description": "Test behavior during network disruption",
+          "steps": [
+            "Establish device connections",
+            "Simulate network disruption",
+            "Verify reconnection behavior",
+            "Verify session state maintained"
+          ]
+        }
+      ]
+    }
+  }
+}
