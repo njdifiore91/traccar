@@ -1,0 +1,248 @@
+{
+  "37.7749,-122.4194": {
+    "status": "success",
+    "speedLimit": 25,
+    "unit": "mph",
+    "description": "San Francisco downtown area"
+  },
+  "34.0522,-118.2437": {
+    "status": "success",
+    "speedLimit": 35,
+    "unit": "mph",
+    "description": "Los Angeles downtown area"
+  },
+  "40.7128,-74.0060": {
+    "status": "success",
+    "speedLimit": 25,
+    "unit": "mph",
+    "description": "New York City area"
+  },
+  "51.5074,-0.1278": {
+    "status": "success",
+    "speedLimit": 30,
+    "unit": "kph",
+    "description": "London city center"
+  },
+  "48.8566,2.3522": {
+    "status": "success",
+    "speedLimit": 50,
+    "unit": "kph",
+    "description": "Paris city center"
+  },
+  "52.5200,13.4050": {
+    "status": "success",
+    "speedLimit": 30,
+    "unit": "kph",
+    "description": "Berlin city center"
+  },
+  "35.6762,139.6503": {
+    "status": "success",
+    "speedLimit": 40,
+    "unit": "kph",
+    "description": "Tokyo city area"
+  },
+  "22.3193,114.1694": {
+    "status": "success",
+    "speedLimit": 50,
+    "unit": "kph",
+    "description": "Hong Kong city area"
+  },
+  "1.3521,103.8198": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Singapore expressway"
+  },
+  "55.7558,37.6173": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Moscow city center"
+  },
+  "19.4326,-99.1332": {
+    "status": "success",
+    "speedLimit": 80,
+    "unit": "kph",
+    "description": "Mexico City highway"
+  },
+  "-33.8688,151.2093": {
+    "status": "success",
+    "speedLimit": 40,
+    "unit": "kph",
+    "description": "Sydney city area"
+  },
+  "25.2048,55.2708": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Dubai city center"
+  },
+  "41.9028,12.4964": {
+    "status": "success",
+    "speedLimit": 50,
+    "unit": "kph",
+    "description": "Rome city center"
+  },
+  "28.6139,77.2090": {
+    "status": "success",
+    "speedLimit": 40,
+    "unit": "kph",
+    "description": "New Delhi city area"
+  },
+  "39.9042,116.4074": {
+    "status": "success",
+    "speedLimit": 70,
+    "unit": "kph",
+    "description": "Beijing city area"
+  },
+  "37.5665,126.9780": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Seoul city area"
+  },
+  "45.4215,-75.6972": {
+    "status": "success",
+    "speedLimit": 50,
+    "unit": "kph",
+    "description": "Ottawa city area"
+  },
+  "38.8951,-77.0364": {
+    "status": "success",
+    "speedLimit": 25,
+    "unit": "mph",
+    "description": "Washington DC area"
+  },
+  "59.3293,18.0686": {
+    "status": "success",
+    "speedLimit": 30,
+    "unit": "kph",
+    "description": "Stockholm city center"
+  },
+  "33.5731,-7.5898": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Casablanca city area"
+  },
+  "30.0444,31.2357": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Cairo city area"
+  },
+  "6.5244,3.3792": {
+    "status": "success",
+    "speedLimit": 50,
+    "unit": "kph",
+    "description": "Lagos city area"
+  },
+  "4.7110,-74.0721": {
+    "status": "success",
+    "speedLimit": 80,
+    "unit": "kph",
+    "description": "Bogota highway"
+  },
+  "-34.6037,-58.3816": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Buenos Aires city area"
+  },
+  "0.0000,0.0000": {
+    "status": "error",
+    "message": "No speed limit data available for this location",
+    "errorType": "NOT_FOUND",
+    "description": "Null Island - invalid coordinates for testing"
+  },
+  "90.0000,0.0000": {
+    "status": "error",
+    "message": "No road data available at the North Pole",
+    "errorType": "NO_ROAD_DATA",
+    "description": "North Pole - extreme coordinates for testing"
+  },
+  "-90.0000,0.0000": {
+    "status": "error",
+    "message": "No road data available at the South Pole",
+    "errorType": "NO_ROAD_DATA",
+    "description": "South Pole - extreme coordinates for testing"
+  },
+  "999.9999,999.9999": {
+    "status": "error",
+    "message": "Invalid coordinates",
+    "errorType": "INVALID_COORDINATES",
+    "description": "Invalid coordinates outside possible range"
+  },
+  "41.0000,-112.0000": {
+    "status": "error",
+    "message": "Server error while retrieving speed limit data",
+    "errorType": "SERVER_ERROR",
+    "description": "Great Salt Lake - for testing server errors"
+  },
+  "27.9881,86.9250": {
+    "status": "error",
+    "message": "No road data available at this location",
+    "errorType": "NO_ROAD_DATA",
+    "description": "Mount Everest - for testing no road data"
+  },
+  "36.1699,-115.1398": {
+    "status": "success",
+    "speedLimit": 65,
+    "unit": "mph",
+    "description": "Las Vegas Strip"
+  },
+  "48.8584,2.2945": {
+    "status": "success",
+    "speedLimit": 30,
+    "unit": "kph",
+    "description": "Eiffel Tower area"
+  },
+  "40.6892,-74.0445": {
+    "status": "success",
+    "speedLimit": 35,
+    "unit": "mph",
+    "description": "Statue of Liberty area"
+  },
+  "29.9792,31.1342": {
+    "status": "success",
+    "speedLimit": 60,
+    "unit": "kph",
+    "description": "Great Pyramids area"
+  },
+  "27.1751,78.0421": {
+    "status": "success",
+    "speedLimit": 40,
+    "unit": "kph",
+    "description": "Taj Mahal area"
+  },
+  "43.7229,-79.3872": {
+    "status": "success",
+    "speedLimit": 25,
+    "unit": "knots",
+    "description": "Toronto area - using knots for unit testing"
+  },
+  "64.1466,-21.9426": {
+    "status": "success",
+    "speedLimit": 30,
+    "unit": "knots",
+    "description": "Reykjavik area - using knots for unit testing"
+  },
+  "35.6586,139.7454": {
+    "status": "success",
+    "speedLimit": 20,
+    "unit": "knots",
+    "description": "Tokyo Tower area - using knots for unit testing"
+  },
+  "25.1972,55.2744": {
+    "status": "error",
+    "message": "Unable to parse speed limit data",
+    "errorType": "PARSING_ERROR",
+    "description": "Burj Khalifa area - for testing parsing errors"
+  },
+  "37.8199,-122.4783": {
+    "status": "error",
+    "message": "Connection timeout while retrieving speed limit data",
+    "errorType": "TIMEOUT_ERROR",
+    "description": "Golden Gate Bridge - for testing timeout errors"
+  }
+}
