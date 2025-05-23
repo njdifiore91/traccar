@@ -1,0 +1,91 @@
+{
+  "standard": {
+    "sat": 12,
+    "hdop": 0.8,
+    "pdop": 1.5,
+    "distance": 125.7,
+    "totalDistance": 15784.3,
+    "motion": true,
+    "ignition": true,
+    "rssi": -67,
+    "battery": 4.2,
+    "power": 12.5,
+    "batteryLevel": 87,
+    "odometer": 12543.8,
+    "tripOdometer": 354.2
+  },
+  "io": {
+    "io1": 1,
+    "io2": 0,
+    "io3": 1,
+    "io4": 0,
+    "io5": 1,
+    "io6": 0,
+    "io7": 1,
+    "io8": 0,
+    "io9": 1,
+    "io10": 0,
+    "io11": 1,
+    "io12": 0,
+    "io13": 1,
+    "io14": 0,
+    "io15": 1,
+    "io16": 0
+  },
+  "adc": {
+    "adc1": 0.87,
+    "adc2": 2.45,
+    "adc3": 3.12,
+    "adc4": 0.56
+  },
+  "temperature": {
+    "temp1": 24.5,
+    "temp2": 18.3,
+    "temp3": -5.2,
+    "temp4": 32.1,
+    "deviceTemp": 36.7
+  },
+  "sensors": {
+    "tag1Voltage": 3090,
+    "tag1Battery": 3030,
+    "eyeTemp1": -11.87,
+    "fuelLevel": 78.5,
+    "fuelConsumption": 8.7,
+    "rpm": 1850,
+    "engineLoad": 43,
+    "coolantTemp": 87.5,
+    "axleWeight": 5430
+  },
+  "status": {
+    "driverUniqueId": "12749884",
+    "vin": "WDD2040701A123456",
+    "input": 5,
+    "output": 3,
+    "event": 42,
+    "alarm": "hardAcceleration",
+    "blocked": false,
+    "door": true,
+    "lock": false,
+    "geofence": 2,
+    "jamming": false,
+    "roaming": true
+  },
+  "extended": {
+    "in1": 1,
+    "in2": 0,
+    "in3": 1,
+    "in4": 0,
+    "out1": 1,
+    "out2": 0,
+    "out3": 1,
+    "out4": 0,
+    "count1": 42,
+    "count2": 187,
+    "count3": 3549,
+    "count4": 12,
+    "gsensor": "0.1,0.05,0.98",
+    "iccid": "89701234567890123456",
+    "operator": "25001",
+    "speedLimit": 90
+  }
+}
