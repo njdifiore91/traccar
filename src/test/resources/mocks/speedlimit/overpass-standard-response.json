@@ -1,0 +1,38 @@
+{
+  "request": {
+    "urlPathPattern": "/api/interpreter",
+    "queryParameters": {
+      "data": {
+        "matches": ".*way\\[maxspeed\\]\\(around:[0-9]+,[0-9.-]+,[0-9.-]+\\);out%20tags.*"
+      }
+    },
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    },
+    "jsonBody": {
+      "version": 0.6,
+      "generator": "Overpass API",
+      "osm3s": {
+        "timestamp_osm_base": "2023-05-15T12:34:56Z",
+        "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+      },
+      "elements": [
+        {
+          "type": "way",
+          "id": 123456789,
+          "tags": {
+            "highway": "residential",
+            "maxspeed": "50",
+            "name": "Main Street"
+          }
+        }
+      ]
+    },
+    "fixedDelayMilliseconds": 100
+  }
+}
