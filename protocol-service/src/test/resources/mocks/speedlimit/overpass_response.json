@@ -1,0 +1,170 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.61.5 4133829e",
+  "osm3s": {
+    "timestamp_osm_base": "2023-10-17T15:22:15Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "way",
+      "id": 123456789,
+      "bounds": {
+        "minlat": 37.7749,
+        "minlon": -122.4194,
+        "maxlat": 37.7750,
+        "maxlon": -122.4193
+      },
+      "nodes": [111111, 222222, 333333],
+      "tags": {
+        "highway": "primary",
+        "maxspeed": "50",
+        "name": "Main Street"
+      }
+    },
+    {
+      "type": "way",
+      "id": 234567890,
+      "bounds": {
+        "minlat": 37.7751,
+        "minlon": -122.4196,
+        "maxlat": 37.7752,
+        "maxlon": -122.4195
+      },
+      "nodes": [444444, 555555, 666666],
+      "tags": {
+        "highway": "secondary",
+        "maxspeed": "30 mph",
+        "name": "Oak Avenue"
+      }
+    },
+    {
+      "type": "way",
+      "id": 345678901,
+      "bounds": {
+        "minlat": 37.7753,
+        "minlon": -122.4198,
+        "maxlat": 37.7754,
+        "maxlon": -122.4197
+      },
+      "nodes": [777777, 888888, 999999],
+      "tags": {
+        "highway": "tertiary",
+        "maxspeed": "25 knots",
+        "name": "Harbor Road"
+      }
+    },
+    {
+      "type": "way",
+      "id": 456789012,
+      "bounds": {
+        "minlat": 37.7755,
+        "minlon": -122.4200,
+        "maxlat": 37.7756,
+        "maxlon": -122.4199
+      },
+      "nodes": [101010, 202020, 303030],
+      "tags": {
+        "highway": "residential",
+        "maxspeed": "20 mph",
+        "name": "Elm Street"
+      }
+    },
+    {
+      "type": "way",
+      "id": 567890123,
+      "bounds": {
+        "minlat": 37.7757,
+        "minlon": -122.4202,
+        "maxlat": 37.7758,
+        "maxlon": -122.4201
+      },
+      "nodes": [404040, 505050, 606060],
+      "tags": {
+        "highway": "motorway",
+        "maxspeed": "120",
+        "name": "Highway 101"
+      }
+    },
+    {
+      "type": "way",
+      "id": 678901234,
+      "bounds": {
+        "minlat": 37.7759,
+        "minlon": -122.4204,
+        "maxlat": 37.7760,
+        "maxlon": -122.4203
+      },
+      "nodes": [707070, 808080, 909090],
+      "tags": {
+        "highway": "trunk",
+        "maxspeed": "55 mph",
+        "name": "Coastal Highway"
+      }
+    },
+    {
+      "type": "way",
+      "id": 789012345,
+      "bounds": {
+        "minlat": 37.7761,
+        "minlon": -122.4206,
+        "maxlat": 37.7762,
+        "maxlon": -122.4205
+      },
+      "nodes": [111222, 333444, 555666],
+      "tags": {
+        "highway": "service",
+        "maxspeed": "15 knots",
+        "name": "Marina Access"
+      }
+    },
+    {
+      "type": "way",
+      "id": 890123456,
+      "bounds": {
+        "minlat": 37.7763,
+        "minlon": -122.4208,
+        "maxlat": 37.7764,
+        "maxlon": -122.4207
+      },
+      "nodes": [777888, 999000, 111222],
+      "tags": {
+        "highway": "unclassified",
+        "maxspeed": "35",
+        "name": "Rural Road"
+      }
+    },
+    {
+      "type": "way",
+      "id": 901234567,
+      "bounds": {
+        "minlat": 37.7765,
+        "minlon": -122.4210,
+        "maxlat": 37.7766,
+        "maxlon": -122.4209
+      },
+      "nodes": [333444, 555666, 777888],
+      "tags": {
+        "highway": "living_street",
+        "maxspeed": "10 mph",
+        "name": "Neighborhood Lane"
+      }
+    },
+    {
+      "type": "way",
+      "id": 123123123,
+      "bounds": {
+        "minlat": 37.7767,
+        "minlon": -122.4212,
+        "maxlat": 37.7768,
+        "maxlon": -122.4211
+      },
+      "nodes": [999000, 111222, 333444],
+      "tags": {
+        "highway": "track",
+        "maxspeed": "5 knots",
+        "name": "Waterfront Path"
+      }
+    }
+  ]
+}
