@@ -1,0 +1,141 @@
+{{/*
+ConfigMap template for Traccar microservices
+
+This template creates a ConfigMap for a Traccar microservice with support for both
+file-based and key-value configurations. It handles environment-specific settings
+and follows consistent naming conventions.
+
+Parameters:
+  - name: The name of the service (e.g., protocol, position, event)
+  - component: The component name (used for labels and selectors)
+  - configMap: The ConfigMap configuration object from values.yaml
+  - labels: Additional labels to apply to the ConfigMap
+  - annotations: Additional annotations to apply to the ConfigMap
+  - context: The Helm template context ($)
+
+Usage:
+  {{- include "traccar.configmap" (dict "name" "protocol" "component" "protocol-service" "configMap" .Values.configMap "labels" .Values.podLabels "annotations" .Values.podAnnotations "context" $) }}
+
+Configuration Options:
+  - enabled: Whether to create the ConfigMap
+  - data: Key-value pairs for direct ConfigMap entries
+  - environmentConfig: Environment-specific configuration (development, staging, production)
+  - includeDatabase: Include database configuration
+  - includeMessageBroker: Include message broker configuration
+  - includeServiceDiscovery: Include service discovery configuration
+  - includeCache: Include cache configuration
+  - serviceConfig: Service-specific configuration template
+  - xmlConfig: XML configuration converted to properties format
+*/}}
+{{- define "traccar.configmap" -}}
+{{- $name := .name -}}
+{{- $component := .component -}}
+{{- $configMap := .configMap -}}
+{{- $labels := .labels -}}
+{{- $annotations := .annotations -}}
+{{- $context := .context -}}
+
+{{- if $configMap.enabled -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "traccar.fullname" $context }}-{{ $name }}-config
+  labels:
+    {{- include "traccar.labels" $context | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+    {{- with $labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  {{/* Include all key-value pairs from data section */}}
+  {{- if $configMap.data }}
+  {{- toYaml $configMap.data | nindent 2 }}
+  {{- end }}
+  
+  {{/* Generate environment-specific configuration */}}
+  {{- if $configMap.environmentConfig }}
+  {{- $environment := $context.Values.global.environment | default "production" }}
+  {{- with (index $configMap.environmentConfig $environment) }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- end }}
+  
+  {{/* Generate database configuration if needed */}}
+  {{- if $configMap.includeDatabase }}
+  database.conf: |
+    {{- $db := $context.Values.global.database }}
+    database.type={{ $db.type }}
+    database.host={{ $db.host }}
+    database.port={{ $db.port }}
+    database.name={{ $db.name }}
+    database.user={{ $db.user }}
+    # Password is provided via secret
+    database.pool.maxSize={{ $db.pool.maxSize }}
+    database.pool.minIdle={{ $db.pool.minIdle }}
+    database.pool.idleTimeout={{ $db.pool.idleTimeout }}
+    database.pool.maxLifetime={{ $db.pool.maxLifetime }}
+  {{- end }}
+  
+  {{/* Generate message broker configuration if needed */}}
+  {{- if $configMap.includeMessageBroker }}
+  {{- $broker := $context.Values.global.messageBroker }}
+  messageBroker.conf: |
+    messageBroker.type={{ $broker.type }}
+    {{- if eq $broker.type "kafka" }}
+    messageBroker.kafka.bootstrapServers={{ $broker.kafka.bootstrapServers }}
+    messageBroker.kafka.security.enabled={{ $broker.kafka.security.enabled }}
+    {{- if $broker.kafka.security.enabled }}
+    messageBroker.kafka.security.authentication.mechanism={{ $broker.kafka.security.authentication.mechanism }}
+    # Authentication credentials are provided via secret
+    {{- end }}
+    {{- else if eq $broker.type "rabbitmq" }}
+    messageBroker.rabbitmq.host={{ $broker.rabbitmq.host }}
+    messageBroker.rabbitmq.port={{ $broker.rabbitmq.port }}
+    messageBroker.rabbitmq.virtualHost={{ $broker.rabbitmq.virtualHost }}
+    # Authentication credentials are provided via secret
+    {{- end }}
+  {{- end }}
+  
+  {{/* Generate service discovery configuration if needed */}}
+  {{- if $configMap.includeServiceDiscovery }}
+  {{- $discovery := $context.Values.global.serviceDiscovery }}
+  serviceDiscovery.conf: |
+    serviceDiscovery.type={{ $discovery.type }}
+    {{- if eq $discovery.type "consul" }}
+    serviceDiscovery.consul.host={{ $discovery.consul.host }}
+    serviceDiscovery.consul.port={{ $discovery.consul.port }}
+    {{- end }}
+  {{- end }}
+  
+  {{/* Generate cache configuration if needed */}}
+  {{- if $configMap.includeCache }}
+  {{- $cache := $context.Values.global.cache }}
+  cache.conf: |
+    cache.type={{ $cache.type }}
+    {{- if eq $cache.type "redis" }}
+    cache.redis.host={{ $cache.redis.host }}
+    cache.redis.port={{ $cache.redis.port }}
+    # Authentication credentials are provided via secret
+    {{- end }}
+  {{- end }}
+  
+  {{/* Generate service-specific configuration file if provided */}}
+  {{- if $configMap.serviceConfig }}
+  {{ $name }}.conf: |
+    {{- tpl $configMap.serviceConfig $context | nindent 4 }}
+  {{- end }}
+  
+  {{/* Convert XML configuration to properties format if needed */}}
+  {{- if $configMap.xmlConfig }}
+  {{ $name }}.properties: |
+    {{- range $key, $value := $configMap.xmlConfig }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
