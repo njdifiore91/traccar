@@ -1,0 +1,553 @@
+{
+  "version": "1.0",
+  "description": "Service resolution test scenarios for Protocol Service dependency discovery",
+  "scenarios": [
+    {
+      "id": "position-service-normal",
+      "name": "Position Service - Normal Resolution",
+      "description": "Normal successful resolution of Position Service for position data publishing",
+      "service": "position-service",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "position-service-1",
+          "host": "position-service.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to the single available instance",
+      "tags": ["position", "basic", "synchronous"]
+    },
+    {
+      "id": "position-service-multiple",
+      "name": "Position Service - Multiple Instances",
+      "description": "Resolution with multiple Position Service instances available",
+      "service": "position-service",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "position-service-1",
+          "host": "position-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        },
+        {
+          "id": "position-service-2",
+          "host": "position-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "priority": 20
+          }
+        },
+        {
+          "id": "position-service-3",
+          "host": "position-service-3.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c",
+            "priority": 30
+          }
+        }
+      ],
+      "expectedBehavior": "Load balance between healthy instances with round-robin strategy",
+      "tags": ["position", "load-balancing", "synchronous"]
+    },
+    {
+      "id": "position-service-health-aware",
+      "name": "Position Service - Health Aware Selection",
+      "description": "Resolution with a mix of healthy and unhealthy Position Service instances",
+      "service": "position-service",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "position-service-1",
+          "host": "position-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "unhealthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        },
+        {
+          "id": "position-service-2",
+          "host": "position-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "priority": 20
+          }
+        },
+        {
+          "id": "position-service-3",
+          "host": "position-service-3.traccar.svc.cluster.local",
+          "port": 8080,
+          "protocol": "http",
+          "health": "degraded",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c",
+            "priority": 30
+          }
+        }
+      ],
+      "expectedBehavior": "Only route to healthy instances, with degraded instances used as fallback",
+      "tags": ["position", "health-check", "synchronous"]
+    },
+    {
+      "id": "event-service-normal",
+      "name": "Event Service - Normal Resolution",
+      "description": "Normal successful resolution of Event Service for event publishing",
+      "service": "event-service",
+      "pattern": "asynchronous",
+      "instances": [
+        {
+          "id": "event-service-1",
+          "host": "event-service.traccar.svc.cluster.local",
+          "port": 8081,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to the single available instance for event publishing",
+      "tags": ["event", "basic", "asynchronous"]
+    },
+    {
+      "id": "event-service-failover",
+      "name": "Event Service - Failover Scenario",
+      "description": "Failover scenario when primary Event Service instance becomes unhealthy",
+      "service": "event-service",
+      "pattern": "asynchronous",
+      "sequence": [
+        {
+          "step": 1,
+          "instances": [
+            {
+              "id": "event-service-1",
+              "host": "event-service-1.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "healthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1a",
+                "priority": 10
+              }
+            },
+            {
+              "id": "event-service-2",
+              "host": "event-service-2.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "healthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1b",
+                "priority": 20
+              }
+            }
+          ],
+          "expectedBehavior": "Connect to event-service-1 as primary instance"
+        },
+        {
+          "step": 2,
+          "instances": [
+            {
+              "id": "event-service-1",
+              "host": "event-service-1.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "unhealthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1a",
+                "priority": 10
+              }
+            },
+            {
+              "id": "event-service-2",
+              "host": "event-service-2.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "healthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1b",
+                "priority": 20
+              }
+            }
+          ],
+          "expectedBehavior": "Detect unhealthy primary and failover to event-service-2"
+        },
+        {
+          "step": 3,
+          "instances": [
+            {
+              "id": "event-service-1",
+              "host": "event-service-1.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "healthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1a",
+                "priority": 10
+              }
+            },
+            {
+              "id": "event-service-2",
+              "host": "event-service-2.traccar.svc.cluster.local",
+              "port": 8081,
+              "protocol": "http",
+              "health": "healthy",
+              "metadata": {
+                "version": "1.0.0",
+                "zone": "us-east-1b",
+                "priority": 20
+              }
+            }
+          ],
+          "expectedBehavior": "Detect recovered primary and fail back to event-service-1"
+        }
+      ],
+      "tags": ["event", "failover", "asynchronous"]
+    },
+    {
+      "id": "notification-service-normal",
+      "name": "Notification Service - Normal Resolution",
+      "description": "Normal successful resolution of Notification Service for alert delivery",
+      "service": "notification-service",
+      "pattern": "asynchronous",
+      "instances": [
+        {
+          "id": "notification-service-1",
+          "host": "notification-service.traccar.svc.cluster.local",
+          "port": 8082,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to the single available instance for notification delivery",
+      "tags": ["notification", "basic", "asynchronous"]
+    },
+    {
+      "id": "notification-service-multiple-channels",
+      "name": "Notification Service - Multiple Channels",
+      "description": "Resolution of Notification Service instances specialized for different channels",
+      "service": "notification-service",
+      "pattern": "asynchronous",
+      "instances": [
+        {
+          "id": "notification-service-email",
+          "host": "notification-service-email.traccar.svc.cluster.local",
+          "port": 8082,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "channel": "email",
+            "priority": 10
+          }
+        },
+        {
+          "id": "notification-service-sms",
+          "host": "notification-service-sms.traccar.svc.cluster.local",
+          "port": 8082,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "channel": "sms",
+            "priority": 20
+          }
+        },
+        {
+          "id": "notification-service-push",
+          "host": "notification-service-push.traccar.svc.cluster.local",
+          "port": 8082,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c",
+            "channel": "push",
+            "priority": 30
+          }
+        }
+      ],
+      "expectedBehavior": "Route notifications to the appropriate channel-specific service based on notification type",
+      "tags": ["notification", "channels", "asynchronous"]
+    },
+    {
+      "id": "api-gateway-normal",
+      "name": "API Gateway - Normal Resolution",
+      "description": "Normal successful resolution of API Gateway for command routing",
+      "service": "api-gateway",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "api-gateway-1",
+          "host": "api-gateway.traccar.svc.cluster.local",
+          "port": 8083,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to the single available instance for command routing",
+      "tags": ["api", "basic", "synchronous"]
+    },
+    {
+      "id": "api-gateway-zone-aware",
+      "name": "API Gateway - Zone Aware Routing",
+      "description": "Zone-aware routing to API Gateway instances",
+      "service": "api-gateway",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "api-gateway-1",
+          "host": "api-gateway-1.traccar.svc.cluster.local",
+          "port": 8083,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "priority": 10
+          }
+        },
+        {
+          "id": "api-gateway-2",
+          "host": "api-gateway-2.traccar.svc.cluster.local",
+          "port": 8083,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "priority": 20
+          }
+        },
+        {
+          "id": "api-gateway-3",
+          "host": "api-gateway-3.traccar.svc.cluster.local",
+          "port": 8083,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c",
+            "priority": 30
+          }
+        }
+      ],
+      "currentZone": "us-east-1a",
+      "expectedBehavior": "Prefer API Gateway instance in the same zone (api-gateway-1)",
+      "tags": ["api", "zone-aware", "synchronous"]
+    },
+    {
+      "id": "message-broker-kafka",
+      "name": "Message Broker - Kafka",
+      "description": "Resolution of Kafka message broker for asynchronous communication",
+      "service": "kafka",
+      "pattern": "asynchronous",
+      "instances": [
+        {
+          "id": "kafka-1",
+          "host": "kafka-1.traccar.svc.cluster.local",
+          "port": 9092,
+          "protocol": "tcp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.6.1",
+            "zone": "us-east-1a",
+            "priority": 10,
+            "broker.id": "1"
+          }
+        },
+        {
+          "id": "kafka-2",
+          "host": "kafka-2.traccar.svc.cluster.local",
+          "port": 9092,
+          "protocol": "tcp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.6.1",
+            "zone": "us-east-1b",
+            "priority": 20,
+            "broker.id": "2"
+          }
+        },
+        {
+          "id": "kafka-3",
+          "host": "kafka-3.traccar.svc.cluster.local",
+          "port": 9092,
+          "protocol": "tcp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.6.1",
+            "zone": "us-east-1c",
+            "priority": 30,
+            "broker.id": "3"
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to all Kafka brokers in the cluster for topic publishing",
+      "tags": ["messaging", "kafka", "asynchronous"]
+    },
+    {
+      "id": "message-broker-rabbitmq",
+      "name": "Message Broker - RabbitMQ",
+      "description": "Resolution of RabbitMQ message broker for asynchronous communication",
+      "service": "rabbitmq",
+      "pattern": "asynchronous",
+      "instances": [
+        {
+          "id": "rabbitmq-1",
+          "host": "rabbitmq-1.traccar.svc.cluster.local",
+          "port": 5672,
+          "protocol": "amqp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.12.12",
+            "zone": "us-east-1a",
+            "priority": 10,
+            "node.type": "disc"
+          }
+        },
+        {
+          "id": "rabbitmq-2",
+          "host": "rabbitmq-2.traccar.svc.cluster.local",
+          "port": 5672,
+          "protocol": "amqp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.12.12",
+            "zone": "us-east-1b",
+            "priority": 20,
+            "node.type": "disc"
+          }
+        },
+        {
+          "id": "rabbitmq-3",
+          "host": "rabbitmq-3.traccar.svc.cluster.local",
+          "port": 5672,
+          "protocol": "amqp",
+          "health": "healthy",
+          "metadata": {
+            "version": "3.12.12",
+            "zone": "us-east-1c",
+            "priority": 30,
+            "node.type": "ram"
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to RabbitMQ cluster with automatic failover between nodes",
+      "tags": ["messaging", "rabbitmq", "asynchronous"]
+    },
+    {
+      "id": "consul-service-discovery",
+      "name": "Consul Service Discovery",
+      "description": "Resolution of Consul service discovery endpoints",
+      "service": "consul",
+      "pattern": "synchronous",
+      "instances": [
+        {
+          "id": "consul-1",
+          "host": "consul-1.traccar.svc.cluster.local",
+          "port": 8500,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.17.0",
+            "zone": "us-east-1a",
+            "priority": 10,
+            "role": "server",
+            "leader": true
+          }
+        },
+        {
+          "id": "consul-2",
+          "host": "consul-2.traccar.svc.cluster.local",
+          "port": 8500,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.17.0",
+            "zone": "us-east-1b",
+            "priority": 20,
+            "role": "server",
+            "leader": false
+          }
+        },
+        {
+          "id": "consul-3",
+          "host": "consul-3.traccar.svc.cluster.local",
+          "port": 8500,
+          "protocol": "http",
+          "health": "healthy",
+          "metadata": {
+            "version": "1.17.0",
+            "zone": "us-east-1c",
+            "priority": 30,
+            "role": "server",
+            "leader": false
+          }
+        }
+      ],
+      "expectedBehavior": "Connect to Consul leader for service registration and discovery",
+      "tags": ["discovery", "consul", "synchronous"]
+    },
+    {
+      "id": "all-services-unavailable",
+      "name": "All Services Unavailable",
+      "description": "Scenario where all services are unavailable for testing circuit breaker and fallback behavior",
+      "service": "*",
+      "pattern": "both",
+      "instances": [],
+      "expectedBehavior": "Activate circuit breakers and use fallback mechanisms for all services",
+      "tags": ["resilience", "circuit-breaker", "fallback"]
+    }
+  ]
+}
