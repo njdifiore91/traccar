@@ -84,19 +84,32 @@ autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  # Optional scaling behavior configuration
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5-minute stabilization window for scale down
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0    # No delay for scaling up
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max                # Use the policy that scales the most
+  # Optional custom metrics for scaling
+  customMetrics:
+  - type: Pods
+    name: http_requests_per_second
+    targetType: AverageValue
+    averageValue: 1000
 
 # Node selector, tolerations, and affinity
 nodeSelector: {}
