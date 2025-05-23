@@ -1,0 +1,64 @@
+# Database Configuration for Position Processing Service
+
+spring:
+  # Main datasource configuration
+  datasource:
+    # JDBC URL - can be overridden with environment variables
+    url: ${POSITION_DB_URL:jdbc:h2:./data/position-service}
+    # Database username
+    username: ${POSITION_DB_USER:sa}
+    # Database password
+    password: ${POSITION_DB_PASSWORD:}
+    # Driver class name - automatically detected from URL in most cases
+    driver-class-name: ${POSITION_DB_DRIVER:}
+    # Hikari connection pool configuration
+    hikari:
+      # Maximum pool size
+      maximum-pool-size: ${POSITION_DB_POOL_SIZE:10}
+      # Minimum idle connections
+      minimum-idle: ${POSITION_DB_MIN_IDLE:2}
+      # Connection idle timeout
+      idle-timeout: 30000
+      # Maximum lifetime of a connection in the pool
+      max-lifetime: 1800000
+      # Connection timeout
+      connection-timeout: 30000
+      # Pool name for monitoring and JMX
+      pool-name: PositionServiceHikariCP
+      # Test query to validate connections
+      connection-test-query: ${POSITION_DB_TEST_QUERY:SELECT 1}
+
+  # Liquibase configuration for database migrations
+  liquibase:
+    # Enable Liquibase migration
+    enabled: ${POSITION_DB_MIGRATION_ENABLED:true}
+    # Path to the master changelog file
+    change-log: classpath:db/changelog/changelog-master.xml
+    # Database schema to use
+    default-schema: ${POSITION_DB_SCHEMA:}
+    # Liquibase parameters
+    parameters:
+      # Table prefix for all Traccar tables
+      table-prefix: tc_
+    # Contexts to use for migrations
+    contexts: ${POSITION_DB_CONTEXTS:}
+    # Labels to use for migrations
+    labels: ${POSITION_DB_LABELS:}
+
+# Additional database configuration properties
+position:
+  database:
+    # Whether to check database connection on startup
+    check-connection: ${POSITION_DB_CHECK_CONNECTION:true}
+    # Whether to save position data in batches for better performance
+    batch-mode: ${POSITION_DB_BATCH_MODE:true}
+    # Batch size for position inserts when batch-mode is enabled
+    batch-size: ${POSITION_DB_BATCH_SIZE:100}
+    # Maximum batch wait time in milliseconds
+    batch-wait-time: ${POSITION_DB_BATCH_WAIT:1000}
+    # Position data retention period in days (0 = keep indefinitely)
+    retention-days: ${POSITION_DB_RETENTION_DAYS:0}
+    # Whether to perform automatic cleanup of old position data
+    auto-cleanup: ${POSITION_DB_AUTO_CLEANUP:false}
+    # Time of day to run cleanup job (if auto-cleanup is enabled)
+    cleanup-time: ${POSITION_DB_CLEANUP_TIME:03:00}
