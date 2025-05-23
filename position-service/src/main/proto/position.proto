@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package org.traccar.protobuf;
+
+option java_package = "org.traccar.protobuf";
+option java_outer_classname = "PositionProto";
+
+// Position message represents GPS position data exchanged between microservices
+// This schema supports both raw position data from devices and enriched position data after processing
+message Position {
+  // Schema version for backward compatibility
+  uint32 schema_version = 1;
+  
+  // Core position attributes
+  uint64 device_id = 2;       // Unique device identifier
+  uint64 timestamp = 3;       // Position timestamp in milliseconds since epoch
+  double latitude = 4;        // Latitude in degrees
+  double longitude = 5;       // Longitude in degrees
+  double altitude = 6;        // Altitude in meters
+  double speed = 7;           // Speed in knots
+  double course = 8;          // Course in degrees
+  
+  // Position accuracy and quality indicators
+  uint32 satellites = 9;      // Number of satellites used for position fix
+  double hdop = 10;           // Horizontal dilution of precision
+  double pdop = 11;           // Position dilution of precision
+  bool valid = 12;            // Indicates if position is valid
+  
+  // Device status information
+  double power = 13;          // Power/battery level
+  bool ignition = 14;         // Ignition status
+  bool motion = 15;           // Motion status
+  uint32 status = 16;         // Device status flags
+  
+  // Processing status
+  bool processed = 17;        // Indicates if position has been processed
+  
+  // Computed values added during position processing
+  double distance = 18;       // Distance in meters since last position
+  double total_distance = 19; // Total distance in meters
+  string address = 20;        // Reverse geocoded address
+  
+  // Geofencing information
+  repeated uint64 geofence_ids = 21; // IDs of geofences containing this position
+  
+  // Extensible attributes for protocol-specific and computed values
+  map<string, AttributeValue> attributes = 22;
+}
+
+// AttributeValue represents a typed attribute value
+message AttributeValue {
+  oneof value {
+    string string_value = 1;
+    bool bool_value = 2;
+    int32 int_value = 3;
+    double double_value = 4;
+    bytes binary_value = 5;
+  }
+}
+
+// PositionBatch represents a batch of positions for efficient transmission
+message PositionBatch {
+  repeated Position positions = 1;
+}
+
+// PositionUpdate represents a position update event for the message broker
+message PositionUpdate {
+  enum UpdateType {
+    POSITION_INSERTED = 0;    // New position inserted
+    POSITION_UPDATED = 1;     // Existing position updated
+    POSITION_PROCESSED = 2;   // Position processed by handler pipeline
+  }
+  
+  UpdateType update_type = 1;
+  Position position = 2;
+  uint64 timestamp = 3;       // Update timestamp in milliseconds since epoch
+}
