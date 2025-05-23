@@ -1,0 +1,15 @@
+{
+  "MessageId": "2f681a13-5d8f-5bee-9009-91467a1e8f32",
+  "ResponseMetadata": {
+    "RequestId": "d74b8436-ae13-5ab4-a9ff-ce54dfea3fa4",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "x-amzn-RequestId": "d74b8436-ae13-5ab4-a9ff-ce54dfea3fa4",
+      "Content-Type": "text/xml",
+      "Content-Length": "294",
+      "Date": "Wed, 23 May 2025 12:34:56 GMT"
+    },
+    "RetryAttempts": 0
+  },
+  "SequenceNumber": null
+}
