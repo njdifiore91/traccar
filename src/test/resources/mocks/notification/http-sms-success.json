@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "message_id": "SMS-12345-67890",
+  "status": "delivered",
+  "timestamp": "2023-09-15T14:32:21Z",
+  "carrier": {
+    "name": "Test Mobile Carrier",
+    "id": "TMC-001",
+    "country_code": "1"
+  },
+  "details": {
+    "parts": 1,
+    "encoding": "UTF-8",
+    "cost": 0.05,
+    "currency": "USD"
+  },
+  "recipient": {
+    "phone": "+1234567890",
+    "masked_phone": "+12*****7890"
+  },
+  "request_id": "REQ-98765-43210"
+}
