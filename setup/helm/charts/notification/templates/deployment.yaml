@@ -1,0 +1,203 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "notification.fullname" . }}
+  labels:
+    {{- include "notification.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "notification.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "notification.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "notification.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8083
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | default "500m" }}
+              memory: {{ .Values.resources.limits.memory | default "512Mi" }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | default "300m" }}
+              memory: {{ .Values.resources.requests.memory | default "256Mi" }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.env.springProfilesActive | default "prod" }}
+            - name: SERVER_PORT
+              value: "8083"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8083"
+            - name: JAVA_OPTS
+              value: {{ .Values.env.javaOpts | default "-Xmx400m -Xms200m" | quote }}
+            {{- if .Values.env.messageBrokerUrl }}
+            - name: MESSAGE_BROKER_URL
+              value: {{ .Values.env.messageBrokerUrl | quote }}
+            {{- end }}
+            {{- if .Values.env.serviceDiscoveryUrl }}
+            - name: SERVICE_DISCOVERY_URL
+              value: {{ .Values.env.serviceDiscoveryUrl | quote }}
+            {{- end }}
+            {{- if .Values.env.databaseUrl }}
+            - name: DATABASE_URL
+              value: {{ .Values.env.databaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.env.databaseUsername }}
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.databaseSecretName | default (include "notification.fullname" .) }}
+                  key: database-username
+            {{- end }}
+            {{- if .Values.env.databasePassword }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.databaseSecretName | default (include "notification.fullname" .) }}
+                  key: database-password
+            {{- end }}
+            # Notification channel configuration
+            {{- if .Values.env.mailEnabled }}
+            - name: MAIL_ENABLED
+              value: {{ .Values.env.mailEnabled | quote }}
+            {{- end }}
+            {{- if .Values.env.mailHost }}
+            - name: MAIL_HOST
+              value: {{ .Values.env.mailHost | quote }}
+            {{- end }}
+            {{- if .Values.env.mailPort }}
+            - name: MAIL_PORT
+              value: {{ .Values.env.mailPort | quote }}
+            {{- end }}
+            {{- if .Values.env.mailUsername }}
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.mailSecretName | default (include "notification.fullname" .) }}
+                  key: mail-username
+            {{- end }}
+            {{- if .Values.env.mailPassword }}
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.mailSecretName | default (include "notification.fullname" .) }}
+                  key: mail-password
+            {{- end }}
+            {{- if .Values.env.smsEnabled }}
+            - name: SMS_ENABLED
+              value: {{ .Values.env.smsEnabled | quote }}
+            {{- end }}
+            {{- if .Values.env.smsProvider }}
+            - name: SMS_PROVIDER
+              value: {{ .Values.env.smsProvider | quote }}
+            {{- end }}
+            {{- if .Values.env.smsApiKey }}
+            - name: SMS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.smsSecretName | default (include "notification.fullname" .) }}
+                  key: sms-api-key
+            {{- end }}
+            {{- if .Values.env.pushEnabled }}
+            - name: PUSH_ENABLED
+              value: {{ .Values.env.pushEnabled | quote }}
+            {{- end }}
+            {{- if .Values.env.firebaseApiKey }}
+            - name: FIREBASE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.pushSecretName | default (include "notification.fullname" .) }}
+                  key: firebase-api-key
+            {{- end }}
+            {{- if .Values.env.telegramEnabled }}
+            - name: TELEGRAM_ENABLED
+              value: {{ .Values.env.telegramEnabled | quote }}
+            {{- end }}
+            {{- if .Values.env.telegramBotToken }}
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.telegramSecretName | default (include "notification.fullname" .) }}
+                  key: telegram-bot-token
+            {{- end }}
+            {{- with .Values.env.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.envFrom }}
+          envFrom:
+            {{- toYaml .Values.envFrom | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.config.enabled }}
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.config.enabled }}
+        - name: config-volume
+          configMap:
+            name: {{ include "notification.fullname" . }}-config
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
