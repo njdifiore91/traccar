@@ -1,0 +1,79 @@
+{
+  "status": "success",
+  "smtpResponse": {
+    "code": 250,
+    "message": "OK: message accepted for delivery",
+    "timestamp": "2023-09-15T14:30:45.123Z"
+  },
+  "messageDetails": {
+    "messageId": "<20230915143045.123456@traccar.org>",
+    "recipients": ["recipient@example.com"],
+    "sentDate": "2023-09-15T14:30:45.123Z",
+    "subject": "Test Subject"
+  },
+  "serverDetails": {
+    "host": "email-smtp.us-west-2.amazonaws.com",
+    "port": 25,
+    "protocol": "smtps",
+    "authMethod": "LOGIN",
+    "tlsEnabled": true
+  },
+  "headers": {
+    "Return-Path": "<notification@traccar.org>",
+    "Received": "from localhost (localhost [127.0.0.1]) by email-smtp.us-west-2.amazonaws.com with ESMTPS id abcdef123456 for <recipient@example.com>; Fri, 15 Sep 2023 14:30:45 +0000 (UTC)",
+    "DKIM-Signature": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=traccar.org; s=default; t=1631721045; bh=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=; h=From:To:Subject:Date; b=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789==",
+    "Content-Type": "text/plain; charset=UTF-8",
+    "From": "Traccar Notification <notification@traccar.org>",
+    "To": "recipient@example.com",
+    "Subject": "Test Subject",
+    "Message-ID": "<20230915143045.123456@traccar.org>",
+    "Date": "Fri, 15 Sep 2023 14:30:45 +0000 (UTC)"
+  },
+  "deliveryStatus": {
+    "isDelivered": true,
+    "deliveryTime": "2023-09-15T14:30:46.789Z",
+    "attempts": 1,
+    "remoteMta": "email-smtp.us-west-2.amazonaws.com",
+    "smtpConversation": [
+      "220 email-smtp.us-west-2.amazonaws.com ESMTP",
+      "EHLO traccar.org",
+      "250-email-smtp.us-west-2.amazonaws.com",
+      "250-PIPELINING",
+      "250-SIZE 10485760",
+      "250-STARTTLS",
+      "250-AUTH LOGIN PLAIN",
+      "250 Ok",
+      "STARTTLS",
+      "220 Ready to start TLS",
+      "EHLO traccar.org",
+      "250-email-smtp.us-west-2.amazonaws.com",
+      "250-PIPELINING",
+      "250-SIZE 10485760",
+      "250-AUTH LOGIN PLAIN",
+      "250 Ok",
+      "AUTH LOGIN",
+      "334 VXNlcm5hbWU6",
+      "[credentials hidden]",
+      "334 UGFzc3dvcmQ6",
+      "[credentials hidden]",
+      "235 Authentication successful",
+      "MAIL FROM: <notification@traccar.org>",
+      "250 Ok",
+      "RCPT TO: <recipient@example.com>",
+      "250 Ok",
+      "DATA",
+      "354 End data with <CR><LF>.<CR><LF>",
+      "[email content]",
+      ".",
+      "250 Ok: message accepted for delivery",
+      "QUIT",
+      "221 Bye"
+    ]
+  },
+  "metadata": {
+    "correlationId": "smtp-test-123456789",
+    "testMode": true,
+    "mockVersion": "1.0.0",
+    "jakartaMailVersion": "2.1.1"
+  }
+}
