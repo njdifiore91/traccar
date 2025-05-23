@@ -1,0 +1,239 @@
+{
+  "version": "1.0",
+  "description": "Service discovery failure scenarios for Protocol Service resilience testing",
+  "scenarios": [
+    {
+      "id": "service-not-found",
+      "name": "Service Not Found",
+      "description": "Simulates a scenario where a required service cannot be found in service discovery",
+      "failureType": "NOT_FOUND",
+      "affectedServices": ["position-service", "event-service"],
+      "parameters": {
+        "responseCode": 404,
+        "errorMessage": "Service not registered",
+        "duration": 300000
+      }
+    },
+    {
+      "id": "network-partition",
+      "name": "Network Partition",
+      "description": "Simulates a network partition between Protocol Service and other services",
+      "failureType": "NETWORK_PARTITION",
+      "affectedServices": ["all"],
+      "parameters": {
+        "responseCode": 503,
+        "errorMessage": "Service unavailable due to network partition",
+        "duration": 180000,
+        "partitionPercentage": 75
+      }
+    },
+    {
+      "id": "timeout-condition",
+      "name": "Service Timeout",
+      "description": "Simulates slow responses from services that eventually time out",
+      "failureType": "TIMEOUT",
+      "affectedServices": ["position-service"],
+      "parameters": {
+        "responseCode": 504,
+        "errorMessage": "Service response timed out",
+        "delayMs": 10000,
+        "duration": 240000
+      }
+    },
+    {
+      "id": "intermittent-failure",
+      "name": "Intermittent Service Failure",
+      "description": "Simulates services that fail intermittently with a specified failure rate",
+      "failureType": "INTERMITTENT",
+      "affectedServices": ["position-service", "notification-service"],
+      "parameters": {
+        "responseCode": 500,
+        "errorMessage": "Internal server error",
+        "failureRate": 0.5,
+        "duration": 600000,
+        "failurePattern": "random"
+      }
+    },
+    {
+      "id": "degraded-performance",
+      "name": "Degraded Service Performance",
+      "description": "Simulates services that are responding but with degraded performance",
+      "failureType": "DEGRADED",
+      "affectedServices": ["event-service", "notification-service"],
+      "parameters": {
+        "responseCode": 200,
+        "delayMs": 5000,
+        "duration": 300000,
+        "cpuUtilization": 0.9,
+        "memoryUtilization": 0.85
+      }
+    },
+    {
+      "id": "cascading-failure",
+      "name": "Cascading Service Failure",
+      "description": "Simulates a cascading failure scenario where multiple dependent services fail in sequence",
+      "failureType": "CASCADING",
+      "affectedServices": ["position-service", "event-service", "notification-service"],
+      "parameters": {
+        "responseCode": 503,
+        "errorMessage": "Service unavailable due to dependency failure",
+        "duration": 450000,
+        "failureSequence": ["position-service", "event-service", "notification-service"],
+        "delayBetweenFailures": 30000
+      }
+    },
+    {
+      "id": "partial-instance-failure",
+      "name": "Partial Instance Failure",
+      "description": "Simulates a scenario where some instances of a service are failing while others remain operational",
+      "failureType": "PARTIAL",
+      "affectedServices": ["position-service"],
+      "parameters": {
+        "responseCode": 500,
+        "errorMessage": "Internal server error in some instances",
+        "duration": 360000,
+        "failurePercentage": 60,
+        "instanceIds": ["position-service-1", "position-service-3"]
+      }
+    },
+    {
+      "id": "service-registry-failure",
+      "name": "Service Registry Failure",
+      "description": "Simulates a failure of the service registry itself",
+      "failureType": "REGISTRY_FAILURE",
+      "affectedServices": ["service-registry"],
+      "parameters": {
+        "responseCode": 500,
+        "errorMessage": "Service registry unavailable",
+        "duration": 180000,
+        "cacheExpiration": 60000
+      }
+    },
+    {
+      "id": "invalid-service-data",
+      "name": "Invalid Service Data",
+      "description": "Simulates corrupted or invalid service data returned from service discovery",
+      "failureType": "INVALID_DATA",
+      "affectedServices": ["position-service", "event-service"],
+      "parameters": {
+        "responseCode": 200,
+        "duration": 240000,
+        "corruptionType": "missing-endpoint"
+      }
+    },
+    {
+      "id": "service-deregistration",
+      "name": "Service Deregistration",
+      "description": "Simulates services being deregistered from service discovery",
+      "failureType": "DEREGISTRATION",
+      "affectedServices": ["notification-service"],
+      "parameters": {
+        "responseCode": 404,
+        "errorMessage": "Service has been deregistered",
+        "duration": 300000,
+        "deregistrationReason": "health-check-failure"
+      }
+    }
+  ],
+  "circuitBreakerTests": [
+    {
+      "id": "circuit-breaker-trip",
+      "name": "Circuit Breaker Trip Test",
+      "description": "Tests that circuit breakers trip after specified failure thresholds",
+      "baseScenario": "intermittent-failure",
+      "parameters": {
+        "failureRate": 0.8,
+        "failureThreshold": 5,
+        "failureDuration": 60000,
+        "recoveryDuration": 120000
+      }
+    },
+    {
+      "id": "circuit-breaker-recovery",
+      "name": "Circuit Breaker Recovery Test",
+      "description": "Tests that circuit breakers recover after services become healthy again",
+      "baseScenario": "intermittent-failure",
+      "parameters": {
+        "failureRate": 0.9,
+        "failureDuration": 60000,
+        "recoveryDuration": 180000,
+        "halfOpenRequests": 3
+      }
+    }
+  ],
+  "retryPolicyTests": [
+    {
+      "id": "exponential-backoff",
+      "name": "Exponential Backoff Test",
+      "description": "Tests retry policy with exponential backoff for transient failures",
+      "baseScenario": "timeout-condition",
+      "parameters": {
+        "initialDelayMs": 100,
+        "maxDelayMs": 10000,
+        "multiplier": 2.0,
+        "jitterFactor": 0.2,
+        "maxRetries": 5
+      }
+    },
+    {
+      "id": "retry-with-timeout",
+      "name": "Retry with Timeout Test",
+      "description": "Tests retry policy with overall timeout constraint",
+      "baseScenario": "intermittent-failure",
+      "parameters": {
+        "initialDelayMs": 200,
+        "maxDelayMs": 5000,
+        "multiplier": 1.5,
+        "maxRetries": 3,
+        "overallTimeoutMs": 15000
+      }
+    }
+  ],
+  "bulkheadTests": [
+    {
+      "id": "thread-pool-isolation",
+      "name": "Thread Pool Isolation Test",
+      "description": "Tests thread pool isolation for service calls",
+      "baseScenario": "degraded-performance",
+      "parameters": {
+        "maxThreads": 10,
+        "queueSize": 5,
+        "coreThreads": 5,
+        "keepAliveTimeMs": 60000
+      }
+    },
+    {
+      "id": "semaphore-isolation",
+      "name": "Semaphore Isolation Test",
+      "description": "Tests semaphore-based isolation for service calls",
+      "baseScenario": "degraded-performance",
+      "parameters": {
+        "maxConcurrentCalls": 15,
+        "timeoutMs": 5000
+      }
+    }
+  ],
+  "fallbackTests": [
+    {
+      "id": "static-fallback",
+      "name": "Static Fallback Test",
+      "description": "Tests static fallback responses when services are unavailable",
+      "baseScenario": "service-not-found",
+      "parameters": {
+        "fallbackType": "static",
+        "fallbackData": "cached-default-response"
+      }
+    },
+    {
+      "id": "cache-fallback",
+      "name": "Cache Fallback Test",
+      "description": "Tests cached fallback responses when services are unavailable",
+      "baseScenario": "network-partition",
+      "parameters": {
+        "fallbackType": "cache",
+        "cacheTtlMs": 300000,
+        "staleIfErrorTtlMs": 600000
+      }
+    }
+  ]
+}
