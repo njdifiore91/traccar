@@ -1,0 +1,258 @@
+# Position Processing Service Configuration
+# Main configuration file for the Position Processing Service microservice
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8090}
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/position-service}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain
+    min-response-size: 2048
+  tomcat:
+    max-threads: ${SERVER_MAX_THREADS:200}
+    min-spare-threads: ${SERVER_MIN_SPARE_THREADS:20}
+    max-connections: ${SERVER_MAX_CONNECTIONS:10000}
+    connection-timeout: ${SERVER_CONNECTION_TIMEOUT:5000}
+
+# Spring application settings
+spring:
+  application:
+    name: position-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+
+  # Database configuration
+  datasource:
+    url: ${POSITION_DB_URL:jdbc:postgresql://localhost:5432/traccar_position}
+    username: ${POSITION_DB_USERNAME:traccar}
+    password: ${POSITION_DB_PASSWORD:traccar}
+    driver-class-name: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: PositionHikariCP
+      connection-test-query: SELECT 1
+
+  # Liquibase database migration
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    contexts: ${LIQUIBASE_CONTEXTS:default}
+
+  # Kafka configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: position-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.traccar.model,org.traccar.proto
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    listener:
+      concurrency: 3
+      ack-mode: MANUAL_IMMEDIATE
+
+  # Redis cache configuration (optional)
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 2000
+    database: 0
+
+  # Cache configuration
+  cache:
+    type: caffeine
+    cache-names: positions, devices, geofences
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=60s
+
+# Management endpoints for health checks and metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,diskSpace,redis,kafka
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.springframework: INFO
+    org.apache.kafka: WARN
+    com.zaxxer.hikari: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/position-service.log}
+    max-size: 10MB
+    max-history: 10
+
+# Service discovery configuration
+service-discovery:
+  enabled: true
+  type: ${SERVICE_DISCOVERY_TYPE:kubernetes} # kubernetes or consul
+  consul:
+    host: ${CONSUL_HOST:localhost}
+    port: ${CONSUL_PORT:8500}
+    service-name: ${spring.application.name}
+    instance-id: ${spring.application.name}:${random.value}
+    health-check-path: ${server.servlet.context-path}/actuator/health
+    health-check-interval: 15s
+    tags: position-service,traccar
+
+# Position service specific settings
+position:
+  # Processing settings
+  processing:
+    batch-size: ${POSITION_PROCESSING_BATCH_SIZE:100}
+    max-queue-size: ${POSITION_PROCESSING_MAX_QUEUE_SIZE:1000}
+    thread-pool-size: ${POSITION_PROCESSING_THREAD_POOL_SIZE:10}
+  # Geocoding settings
+  geocoder:
+    enabled: ${GEOCODER_ENABLED:true}
+    type: ${GEOCODER_TYPE:google}
+    url: ${GEOCODER_URL:}
+    key: ${GEOCODER_KEY:}
+    language: ${GEOCODER_LANGUAGE:en}
+    format: ${GEOCODER_FORMAT:%h %r, %t, %s, %c}
+    cache-size: ${GEOCODER_CACHE_SIZE:100000}
+    cache-expiry: ${GEOCODER_CACHE_EXPIRY:86400} # 24 hours in seconds
+  # Geolocation settings
+  geolocation:
+    enabled: ${GEOLOCATION_ENABLED:false}
+    type: ${GEOLOCATION_TYPE:mozilla}
+    url: ${GEOLOCATION_URL:}
+    key: ${GEOLOCATION_KEY:}
+  # Speed limit provider settings
+  speed-limit:
+    enabled: ${SPEED_LIMIT_ENABLED:false}
+    type: ${SPEED_LIMIT_TYPE:overpass}
+    url: ${SPEED_LIMIT_URL:}
+    key: ${SPEED_LIMIT_KEY:}
+  # Position forwarding settings
+  forward:
+    enabled: ${POSITION_FORWARD_ENABLED:false}
+    url: ${POSITION_FORWARD_URL:}
+    header: ${POSITION_FORWARD_HEADER:}
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      geocoderService:
+        baseConfig: default
+      geolocationService:
+        baseConfig: default
+      speedLimitService:
+        baseConfig: default
+      forwardingService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      geocoderService:
+        baseConfig: default
+      geolocationService:
+        baseConfig: default
+      speedLimitService:
+        baseConfig: default
+      forwardingService:
+        maxAttempts: 5
+        waitDuration: 2s
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 0
+    instances:
+      geocoderService:
+        baseConfig: default
+      geolocationService:
+        baseConfig: default
+      speedLimitService:
+        baseConfig: default
+      forwardingService:
+        baseConfig: default
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 50
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+    instances:
+      geocoderService:
+        baseConfig: default
+      geolocationService:
+        baseConfig: default
+      speedLimitService:
+        baseConfig: default
+      forwardingService:
+        baseConfig: default
+
+# Kafka topics configuration
+kafka:
+  topics:
+    raw-positions: ${KAFKA_TOPIC_RAW_POSITIONS:raw-positions}
+    enriched-positions: ${KAFKA_TOPIC_ENRICHED_POSITIONS:enriched-positions}
+    device-status: ${KAFKA_TOPIC_DEVICE_STATUS:device-status}
+    commands: ${KAFKA_TOPIC_COMMANDS:device-commands}
+
+# OpenAPI documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  packages-to-scan: org.traccar.position
