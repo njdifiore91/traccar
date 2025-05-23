@@ -1,0 +1,278 @@
+[
+  {
+    "id": 1,
+    "type": "deviceMoving",
+    "deviceId": 1,
+    "positionId": 100,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "speed": 42.5,
+      "motion": true,
+      "totalDistance": 1000.5
+    },
+    "serverTime": "2023-01-15T10:15:30.000Z",
+    "eventTime": "2023-01-15T10:15:20.000Z"
+  },
+  {
+    "id": 2,
+    "type": "deviceStopped",
+    "deviceId": 1,
+    "positionId": 101,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "speed": 0.0,
+      "motion": false,
+      "totalDistance": 1050.5,
+      "ignition": false
+    },
+    "serverTime": "2023-01-15T10:30:30.000Z",
+    "eventTime": "2023-01-15T10:30:20.000Z"
+  },
+  {
+    "id": 3,
+    "type": "geofenceEnter",
+    "deviceId": 2,
+    "positionId": 102,
+    "geofenceId": 1,
+    "maintenanceId": 0,
+    "attributes": {
+      "geofenceName": "Home Zone"
+    },
+    "serverTime": "2023-01-15T11:15:30.000Z",
+    "eventTime": "2023-01-15T11:15:20.000Z"
+  },
+  {
+    "id": 4,
+    "type": "geofenceExit",
+    "deviceId": 2,
+    "positionId": 103,
+    "geofenceId": 1,
+    "maintenanceId": 0,
+    "attributes": {
+      "geofenceName": "Home Zone"
+    },
+    "serverTime": "2023-01-15T12:15:30.000Z",
+    "eventTime": "2023-01-15T12:15:20.000Z"
+  },
+  {
+    "id": 5,
+    "type": "deviceOverspeed",
+    "deviceId": 3,
+    "positionId": 104,
+    "geofenceId": 2,
+    "maintenanceId": 0,
+    "attributes": {
+      "speed": 75.5,
+      "speedLimit": 60.0
+    },
+    "serverTime": "2023-01-15T13:15:30.000Z",
+    "eventTime": "2023-01-15T13:15:20.000Z"
+  },
+  {
+    "id": 6,
+    "type": "deviceFuelDrop",
+    "deviceId": 3,
+    "positionId": 105,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "fuelLevel": 35.5,
+      "previousFuelLevel": 65.5,
+      "fuelDropThreshold": 10.0
+    },
+    "serverTime": "2023-01-15T14:15:30.000Z",
+    "eventTime": "2023-01-15T14:15:20.000Z"
+  },
+  {
+    "id": 7,
+    "type": "deviceFuelIncrease",
+    "deviceId": 3,
+    "positionId": 106,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "fuelLevel": 85.5,
+      "previousFuelLevel": 35.5,
+      "fuelIncreaseThreshold": 10.0
+    },
+    "serverTime": "2023-01-15T15:15:30.000Z",
+    "eventTime": "2023-01-15T15:15:20.000Z"
+  },
+  {
+    "id": 8,
+    "type": "deviceOnline",
+    "deviceId": 4,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {},
+    "serverTime": "2023-01-15T16:15:30.000Z",
+    "eventTime": "2023-01-15T16:15:20.000Z"
+  },
+  {
+    "id": 9,
+    "type": "deviceOffline",
+    "deviceId": 4,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {},
+    "serverTime": "2023-01-15T17:15:30.000Z",
+    "eventTime": "2023-01-15T17:15:20.000Z"
+  },
+  {
+    "id": 10,
+    "type": "deviceUnknown",
+    "deviceId": 5,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {},
+    "serverTime": "2023-01-15T18:15:30.000Z",
+    "eventTime": "2023-01-15T18:15:20.000Z"
+  },
+  {
+    "id": 11,
+    "type": "deviceInactive",
+    "deviceId": 5,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {},
+    "serverTime": "2023-01-15T19:15:30.000Z",
+    "eventTime": "2023-01-15T19:15:20.000Z"
+  },
+  {
+    "id": 12,
+    "type": "alarm",
+    "deviceId": 6,
+    "positionId": 107,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "alarmType": "sos",
+      "alarmPosition": {
+        "latitude": 40.7128,
+        "longitude": -74.0060
+      }
+    },
+    "serverTime": "2023-01-15T20:15:30.000Z",
+    "eventTime": "2023-01-15T20:15:20.000Z"
+  },
+  {
+    "id": 13,
+    "type": "ignitionOn",
+    "deviceId": 7,
+    "positionId": 108,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "ignition": true
+    },
+    "serverTime": "2023-01-15T21:15:30.000Z",
+    "eventTime": "2023-01-15T21:15:20.000Z"
+  },
+  {
+    "id": 14,
+    "type": "ignitionOff",
+    "deviceId": 7,
+    "positionId": 109,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "ignition": false
+    },
+    "serverTime": "2023-01-15T22:15:30.000Z",
+    "eventTime": "2023-01-15T22:15:20.000Z"
+  },
+  {
+    "id": 15,
+    "type": "maintenance",
+    "deviceId": 8,
+    "positionId": 110,
+    "geofenceId": 0,
+    "maintenanceId": 1,
+    "attributes": {
+      "maintenanceName": "Oil Change",
+      "maintenanceStart": 0,
+      "maintenancePeriod": 10000,
+      "maintenanceType": "totalDistance",
+      "maintenanceValue": 10050.5
+    },
+    "serverTime": "2023-01-15T23:15:30.000Z",
+    "eventTime": "2023-01-15T23:15:20.000Z"
+  },
+  {
+    "id": 16,
+    "type": "driverChanged",
+    "deviceId": 9,
+    "positionId": 111,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "driverId": 101,
+      "driverName": "John Doe",
+      "driverUniqueId": "DRV-101"
+    },
+    "serverTime": "2023-01-16T00:15:30.000Z",
+    "eventTime": "2023-01-16T00:15:20.000Z"
+  },
+  {
+    "id": 17,
+    "type": "commandResult",
+    "deviceId": 10,
+    "positionId": 112,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "result": "Success",
+      "command": "engineStop"
+    },
+    "serverTime": "2023-01-16T01:15:30.000Z",
+    "eventTime": "2023-01-16T01:15:20.000Z"
+  },
+  {
+    "id": 18,
+    "type": "textMessage",
+    "deviceId": 10,
+    "positionId": 113,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "message": "Vehicle arrived at destination",
+      "messageType": "info"
+    },
+    "serverTime": "2023-01-16T02:15:30.000Z",
+    "eventTime": "2023-01-16T02:15:20.000Z"
+  },
+  {
+    "id": 19,
+    "type": "deviceOutOfService",
+    "deviceId": 11,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "reason": "Scheduled maintenance"
+    },
+    "serverTime": "2023-01-16T03:15:30.000Z",
+    "eventTime": "2023-01-16T03:15:20.000Z"
+  },
+  {
+    "id": 20,
+    "type": "queuedCommandSent",
+    "deviceId": 12,
+    "positionId": 0,
+    "geofenceId": 0,
+    "maintenanceId": 0,
+    "attributes": {
+      "commandId": 50,
+      "commandType": "engineStop",
+      "commandDescription": "Stop engine remotely"
+    },
+    "serverTime": "2023-01-16T04:15:30.000Z",
+    "eventTime": "2023-01-16T04:15:20.000Z"
+  }
+]
