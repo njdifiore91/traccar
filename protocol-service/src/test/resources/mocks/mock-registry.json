@@ -1,0 +1,553 @@
+{
+  "version": "1.0.0",
+  "description": "Registry of all available mock services for Protocol Service testing",
+  "lastUpdated": "2025-05-23",
+  "mockServices": [
+    {
+      "id": "service-discovery",
+      "name": "Service Discovery Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "service-registration",
+        "service-deregistration",
+        "health-checks",
+        "service-discovery"
+      ],
+      "realServiceMapping": {
+        "name": "consul",
+        "version": "1.15.x"
+      },
+      "endpoints": [
+        {
+          "path": "/v1/agent/service/register",
+          "method": "PUT",
+          "description": "Register a service with the discovery system"
+        },
+        {
+          "path": "/v1/agent/service/deregister/{serviceId}",
+          "method": "PUT",
+          "description": "Deregister a service from the discovery system"
+        },
+        {
+          "path": "/v1/health/service/{serviceName}",
+          "method": "GET",
+          "description": "Get health status of a service"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal service discovery operation"
+        },
+        {
+          "name": "slow-response",
+          "description": "Service discovery with delayed response",
+          "path": "/v1/health/service/slow-service"
+        },
+        {
+          "name": "service-failure",
+          "description": "Service discovery with failing health check",
+          "path": "/v1/health/service/failing-service"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "geocoding-service",
+      "name": "Geocoding Service Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "reverse-geocoding"
+      ],
+      "realServiceMapping": {
+        "name": "position-service-geocoder",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/geocode/reverse",
+          "method": "GET",
+          "description": "Convert coordinates to address",
+          "parameters": ["lat", "lon"]
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal geocoding operation",
+          "path": "/geocode/reverse"
+        },
+        {
+          "name": "slow-response",
+          "description": "Geocoding with delayed response",
+          "path": "/geocode/reverse/slow"
+        },
+        {
+          "name": "service-failure",
+          "description": "Geocoding service failure",
+          "path": "/geocode/reverse/error"
+        }
+      ],
+      "dependencies": ["service-discovery"]
+    },
+    {
+      "id": "map-service",
+      "name": "Map Service Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "tile-serving"
+      ],
+      "realServiceMapping": {
+        "name": "map-tile-service",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/map/tile/{z}/{x}/{y}.png",
+          "method": "GET",
+          "description": "Serve map tiles"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal map tile serving",
+          "path": "/map/tile/{z}/{x}/{y}.png"
+        },
+        {
+          "name": "tile-not-found",
+          "description": "Map tile not found error",
+          "path": "/map/tile/error/{x}/{y}.png"
+        }
+      ],
+      "dependencies": ["service-discovery"]
+    },
+    {
+      "id": "telemetry-collector",
+      "name": "OpenTelemetry Collector Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "trace-collection",
+        "metrics-collection"
+      ],
+      "realServiceMapping": {
+        "name": "opentelemetry-collector",
+        "version": "0.90.x"
+      },
+      "endpoints": [
+        {
+          "path": "/v1/traces",
+          "method": "POST",
+          "description": "Collect trace data"
+        },
+        {
+          "path": "/v1/metrics",
+          "method": "POST",
+          "description": "Collect metrics data"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal telemetry collection"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "health-check",
+      "name": "Health Check Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "liveness-probe",
+        "readiness-probe"
+      ],
+      "realServiceMapping": {
+        "name": "kubernetes-probes",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/health/liveness",
+          "method": "GET",
+          "description": "Liveness health check"
+        },
+        {
+          "path": "/health/readiness",
+          "method": "GET",
+          "description": "Readiness health check with component status"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "all-healthy",
+          "description": "All components healthy"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "speed-limit-service",
+      "name": "Speed Limit Service Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "speed-limit-lookup"
+      ],
+      "realServiceMapping": {
+        "name": "position-service-speedlimit",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/speedlimit",
+          "method": "GET",
+          "description": "Get speed limit for location",
+          "parameters": ["lat", "lon"]
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal speed limit lookup"
+        }
+      ],
+      "dependencies": ["service-discovery"]
+    },
+    {
+      "id": "weather-service",
+      "name": "Weather Service Mock",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "weather-data-lookup"
+      ],
+      "realServiceMapping": {
+        "name": "position-service-weather",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/weather",
+          "method": "GET",
+          "description": "Get weather data for location",
+          "parameters": ["lat", "lon"]
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal weather data lookup"
+        }
+      ],
+      "dependencies": ["service-discovery"]
+    },
+    {
+      "id": "fault-simulation",
+      "name": "Fault Simulation Service",
+      "type": "wiremock",
+      "configPath": "mocks/wiremock-mappings.json",
+      "capabilities": [
+        "connection-failures",
+        "timeout-simulation",
+        "malformed-responses",
+        "latency-simulation"
+      ],
+      "realServiceMapping": {
+        "name": "chaos-testing",
+        "version": "1.x"
+      },
+      "endpoints": [
+        {
+          "path": "/fault/connection-refused/*",
+          "method": "ANY",
+          "description": "Simulate connection refused"
+        },
+        {
+          "path": "/fault/timeout/*",
+          "method": "ANY",
+          "description": "Simulate request timeout"
+        },
+        {
+          "path": "/fault/bad-response/*",
+          "method": "ANY",
+          "description": "Simulate malformed response"
+        },
+        {
+          "path": "/fault/random-latency/*",
+          "method": "ANY",
+          "description": "Simulate random latency"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "connection-refused",
+          "description": "Connection refused simulation"
+        },
+        {
+          "name": "timeout",
+          "description": "Request timeout simulation"
+        },
+        {
+          "name": "bad-response",
+          "description": "Malformed response simulation"
+        },
+        {
+          "name": "random-latency",
+          "description": "Random latency simulation"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "message-broker",
+      "name": "Message Broker Mock",
+      "type": "testcontainers",
+      "configPath": "mocks/testcontainers.properties",
+      "capabilities": [
+        "message-publishing",
+        "message-consumption",
+        "topic-management"
+      ],
+      "realServiceMapping": {
+        "name": "kafka",
+        "version": "7.3.x"
+      },
+      "topics": [
+        {
+          "name": "protocol.positions",
+          "description": "Position data from devices"
+        },
+        {
+          "name": "protocol.events",
+          "description": "Events generated from positions"
+        },
+        {
+          "name": "protocol.commands",
+          "description": "Commands sent to devices"
+        },
+        {
+          "name": "protocol.notifications",
+          "description": "Notifications about device activity"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal message broker operation"
+        },
+        {
+          "name": "broker-down",
+          "description": "Message broker unavailable"
+        },
+        {
+          "name": "slow-broker",
+          "description": "Message broker with high latency"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "database",
+      "name": "Database Mock",
+      "type": "testcontainers",
+      "configPath": "mocks/testcontainers.properties",
+      "capabilities": [
+        "data-storage",
+        "data-retrieval",
+        "transaction-support"
+      ],
+      "realServiceMapping": {
+        "name": "postgresql",
+        "version": "14.x"
+      },
+      "tables": [
+        {
+          "name": "tc_devices",
+          "description": "Device information"
+        },
+        {
+          "name": "tc_positions",
+          "description": "Position data"
+        },
+        {
+          "name": "tc_events",
+          "description": "Event data"
+        },
+        {
+          "name": "tc_users",
+          "description": "User information"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal",
+          "description": "Normal database operation"
+        },
+        {
+          "name": "db-down",
+          "description": "Database unavailable"
+        },
+        {
+          "name": "slow-queries",
+          "description": "Database with high query latency"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "device-simulator",
+      "name": "Device Simulator",
+      "type": "custom",
+      "configPath": "mocks/device-simulator.properties",
+      "capabilities": [
+        "protocol-simulation",
+        "device-behavior-simulation",
+        "connection-management"
+      ],
+      "realServiceMapping": {
+        "name": "physical-devices",
+        "version": "various"
+      },
+      "protocols": [
+        {
+          "name": "tk103",
+          "description": "TK103 GPS tracker protocol"
+        },
+        {
+          "name": "teltonika",
+          "description": "Teltonika GPS tracker protocol"
+        },
+        {
+          "name": "meitrack",
+          "description": "Meitrack GPS tracker protocol"
+        },
+        {
+          "name": "atrack",
+          "description": "ATrack GPS tracker protocol"
+        },
+        {
+          "name": "totem",
+          "description": "Totem GPS tracker protocol"
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "normal-operation",
+          "description": "Normal device operation"
+        },
+        {
+          "name": "connection-loss",
+          "description": "Device connection loss simulation"
+        },
+        {
+          "name": "data-corruption",
+          "description": "Device sending corrupted data"
+        },
+        {
+          "name": "battery-low",
+          "description": "Device with low battery"
+        },
+        {
+          "name": "rapid-movement",
+          "description": "Device moving at high speed"
+        }
+      ],
+      "dependencies": []
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": "basic-protocol-test",
+      "name": "Basic Protocol Parsing Test",
+      "description": "Tests basic protocol parsing functionality",
+      "requiredMocks": [
+        "device-simulator"
+      ]
+    },
+    {
+      "id": "position-processing-test",
+      "name": "Position Processing Test",
+      "description": "Tests position processing with geocoding and speed limits",
+      "requiredMocks": [
+        "device-simulator",
+        "geocoding-service",
+        "speed-limit-service"
+      ]
+    },
+    {
+      "id": "service-discovery-test",
+      "name": "Service Discovery Test",
+      "description": "Tests service registration and discovery",
+      "requiredMocks": [
+        "service-discovery"
+      ]
+    },
+    {
+      "id": "message-broker-test",
+      "name": "Message Broker Test",
+      "description": "Tests message publishing and consumption",
+      "requiredMocks": [
+        "message-broker",
+        "device-simulator"
+      ]
+    },
+    {
+      "id": "fault-tolerance-test",
+      "name": "Fault Tolerance Test",
+      "description": "Tests system behavior under various failure conditions",
+      "requiredMocks": [
+        "device-simulator",
+        "fault-simulation",
+        "service-discovery",
+        "message-broker"
+      ]
+    },
+    {
+      "id": "telemetry-test",
+      "name": "Telemetry Collection Test",
+      "description": "Tests trace and metrics collection",
+      "requiredMocks": [
+        "telemetry-collector",
+        "device-simulator"
+      ]
+    },
+    {
+      "id": "full-integration-test",
+      "name": "Full Integration Test",
+      "description": "Tests the entire protocol service pipeline",
+      "requiredMocks": [
+        "device-simulator",
+        "service-discovery",
+        "geocoding-service",
+        "speed-limit-service",
+        "message-broker",
+        "database",
+        "telemetry-collector"
+      ]
+    }
+  ],
+  "mockInitialization": {
+    "order": [
+      "database",
+      "service-discovery",
+      "message-broker",
+      "telemetry-collector",
+      "geocoding-service",
+      "speed-limit-service",
+      "weather-service",
+      "map-service",
+      "health-check",
+      "fault-simulation",
+      "device-simulator"
+    ],
+    "timeoutSeconds": 30,
+    "retryIntervalSeconds": 5,
+    "maxRetries": 3
+  }
+}
