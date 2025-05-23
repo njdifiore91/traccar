@@ -1,0 +1,81 @@
+{
+  "id": 1,
+  "name": "Test Device",
+  "uniqueId": "123456789012345",
+  "status": "online",
+  "lastUpdate": "2023-06-01T12:00:00.000Z",
+  "positionId": 0,
+  "groupId": 0,
+  "phone": "+1234567890",
+  "model": "Test Model",
+  "contact": "test@example.com",
+  "category": "vehicle",
+  "disabled": false,
+  "protocol": "tk103",
+  "attributes": {
+    "devicePassword": "123456",
+    "supportedCommands": ["engineStop", "engineResume", "positionSingle", "setTimezone"],
+    "commandTimeout": 60,
+    "processingEnabled": true,
+    "decodingEnabled": true,
+    "fixedLatitude": 0.0,
+    "fixedLongitude": 0.0,
+    "reportInterval": 60,
+    "speedLimit": 90,
+    "fuelCapacity": 60.0,
+    "fuelConsumption": 8.5,
+    "timezone": "UTC",
+    "deviceIdentification": {
+      "serialNumber": "SN12345678",
+      "imei": "123456789012345",
+      "iccid": "89012345678901234567",
+      "firmwareVersion": "1.2.3",
+      "hardwareVersion": "A1"
+    },
+    "communication": {
+      "type": "tcp",
+      "port": 5103,
+      "encryptionEnabled": false,
+      "protocolVersion": "1.0",
+      "connectionTimeout": 120,
+      "reconnectInterval": 30,
+      "ackEnabled": true,
+      "ackTimeout": 15
+    },
+    "protocolSpecific": {
+      "tk103": {
+        "alarmMapping": {
+          "acc": "ignition",
+          "door": "doorOpen",
+          "temper": "tampering",
+          "power": "powerCut"
+        },
+        "commandFormat": "standard",
+        "extendedFormat": false,
+        "includeAdc": true,
+        "includeTemp": true
+      },
+      "teltonika": {
+        "codecId": 8,
+        "serverImei": false,
+        "includeIndex": true
+      },
+      "meitrack": {
+        "alarmBitmask": true,
+        "includeAdc": true
+      },
+      "atrack": {
+        "protocolType": "standard",
+        "includeTemp": true
+      },
+      "totem": {
+        "includeAdc": true,
+        "alarmMapping": {
+          "100": "powerCut",
+          "200": "powerRestored",
+          "300": "vibration"
+        }
+      }
+    }
+  }
+}
