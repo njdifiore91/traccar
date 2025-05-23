@@ -1,0 +1,115 @@
+[
+  {
+    "id": 1,
+    "name": "Office Circle",
+    "description": "Office building circular geofence",
+    "area": "CIRCLE (37.7749 -122.4194, 100)",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#FF0000",
+      "speedLimit": 5
+    }
+  },
+  {
+    "id": 2,
+    "name": "Warehouse Polygon",
+    "description": "Warehouse area polygon geofence",
+    "area": "POLYGON ((37.7759 -122.4194, 37.7759 -122.4184, 37.7749 -122.4184, 37.7749 -122.4194, 37.7759 -122.4194))",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#00FF00",
+      "speedLimit": 10
+    }
+  },
+  {
+    "id": 3,
+    "name": "Delivery Route",
+    "description": "Delivery route polyline geofence",
+    "area": "LINESTRING (37.7749 -122.4194, 37.7749 -122.4184, 37.7739 -122.4184, 37.7739 -122.4174)",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#0000FF",
+      "polylineDistance": 50
+    }
+  },
+  {
+    "id": 4,
+    "name": "Complex Polygon",
+    "description": "Complex polygon with multiple points",
+    "area": "POLYGON ((37.7759 -122.4194, 37.7769 -122.4184, 37.7779 -122.4194, 37.7769 -122.4204, 37.7759 -122.4194))",
+    "calendarId": 1,
+    "attributes": {
+      "color": "#FFFF00",
+      "speedLimit": 15
+    }
+  },
+  {
+    "id": 5,
+    "name": "Large Circle",
+    "description": "Large circular geofence for testing",
+    "area": "CIRCLE (37.7749 -122.4194, 1000)",
+    "calendarId": 2,
+    "attributes": {
+      "color": "#FF00FF",
+      "speedLimit": 20
+    }
+  },
+  {
+    "id": 6,
+    "name": "Highway Route",
+    "description": "Highway route with multiple segments",
+    "area": "LINESTRING (37.7749 -122.4194, 37.7759 -122.4184, 37.7769 -122.4174, 37.7779 -122.4164, 37.7789 -122.4154)",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#00FFFF",
+      "polylineDistance": 100
+    }
+  },
+  {
+    "id": 7,
+    "name": "City Boundary",
+    "description": "City boundary polygon",
+    "area": "POLYGON ((37.7759 -122.4194, 37.7759 -122.4184, 37.7749 -122.4184, 37.7749 -122.4194, 37.7759 -122.4194))",
+    "calendarId": 3,
+    "attributes": {
+      "color": "#FF8800",
+      "speedLimit": 25
+    }
+  },
+  {
+    "id": 8,
+    "name": "School Zone",
+    "description": "School zone with calendar restrictions",
+    "area": "CIRCLE (37.7729 -122.4194, 200)",
+    "calendarId": 4,
+    "attributes": {
+      "color": "#880000",
+      "speedLimit": 5,
+      "emailNotification": true
+    }
+  },
+  {
+    "id": 9,
+    "name": "Park Area",
+    "description": "Public park boundaries",
+    "area": "POLYGON ((37.7759 -122.4194, 37.7769 -122.4184, 37.7779 -122.4194, 37.7769 -122.4204, 37.7759 -122.4194))",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#008800",
+      "speedLimit": 10,
+      "smsNotification": true
+    }
+  },
+  {
+    "id": 10,
+    "name": "Bike Path",
+    "description": "Bicycle path with narrow corridor",
+    "area": "LINESTRING (37.7749 -122.4194, 37.7759 -122.4184, 37.7769 -122.4174)",
+    "calendarId": 0,
+    "attributes": {
+      "color": "#000088",
+      "polylineDistance": 20,
+      "pushNotification": true
+    }
+  }
+]
