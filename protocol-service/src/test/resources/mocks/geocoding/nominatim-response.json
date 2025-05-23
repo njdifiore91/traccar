@@ -1,0 +1,449 @@
+{
+  "responses": [
+    {
+      "coordinates": {
+        "lat": 40.7337807,
+        "lon": -73.9974401
+      },
+      "response": {
+        "place_id": 159811639,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 5710493,
+        "lat": "40.7337807",
+        "lon": "-73.9974401",
+        "display_name": "35 West 9th Street, NYC, New York, 10011, United States",
+        "address": {
+          "house_number": "35",
+          "road": "West 9th Street",
+          "suburb": "Greenwich Village",
+          "city": "NYC",
+          "state": "New York",
+          "postcode": "10011",
+          "country": "United States",
+          "country_code": "us"
+        },
+        "boundingbox": [
+          "40.7336807",
+          "40.7338807",
+          "-73.9975401",
+          "-73.9973401"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 31.776797,
+        "lon": 35.211489
+      },
+      "response": {
+        "place_id": 287076450,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 28565522,
+        "lat": "31.776797",
+        "lon": "35.211489",
+        "display_name": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, Israel",
+        "address": {
+          "house_number": "1",
+          "road": "Ibn Shaprut St",
+          "city": "Jerusalem",
+          "state": "Jerusalem District",
+          "country": "Israel",
+          "country_code": "il"
+        },
+        "boundingbox": [
+          "31.776697",
+          "31.776897",
+          "35.211389",
+          "35.211589"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 48.8530000,
+        "lon": 2.3400000
+      },
+      "response": {
+        "place_id": 97753024,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 7777777,
+        "lat": "48.8530000",
+        "lon": "2.3400000",
+        "display_name": "Rue du Jardinet, Paris, Île-de-France, France",
+        "address": {
+          "road": "Rue du Jardinet",
+          "city": "Paris",
+          "state": "Île-de-France",
+          "country": "France",
+          "country_code": "fr"
+        },
+        "boundingbox": [
+          "48.8529000",
+          "48.8531000",
+          "2.3399000",
+          "2.3401000"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 34.116302,
+        "lon": -118.051519
+      },
+      "response": {
+        "place_id": 159822456,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 8888888,
+        "lat": "34.116302",
+        "lon": "-118.051519",
+        "display_name": "604 Estrella Ave, Arcadia, California, United States",
+        "address": {
+          "house_number": "604",
+          "road": "Estrella Ave",
+          "city": "Arcadia",
+          "state": "California",
+          "postcode": "91007",
+          "country": "United States",
+          "country_code": "us"
+        },
+        "boundingbox": [
+          "34.116202",
+          "34.116402",
+          "-118.051619",
+          "-118.051419"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 52.520856,
+        "lon": 13.413779
+      },
+      "response": {
+        "place_id": 159833567,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 9999999,
+        "lat": "52.520856",
+        "lon": "13.413779",
+        "display_name": "Alexanderplatz, Mitte, Berlin, 10178, Germany",
+        "address": {
+          "road": "Alexanderplatz",
+          "suburb": "Mitte",
+          "city_district": "Mitte",
+          "city": "Berlin",
+          "postcode": "10178",
+          "country": "Germany",
+          "country_code": "de"
+        },
+        "boundingbox": [
+          "52.520756",
+          "52.520956",
+          "13.413679",
+          "13.413879"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": -33.865143,
+        "lon": 151.209900
+      },
+      "response": {
+        "place_id": 159844678,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 1111111,
+        "lat": "-33.865143",
+        "lon": "151.209900",
+        "display_name": "Sydney Opera House, Bennelong Point, Sydney, New South Wales, 2000, Australia",
+        "address": {
+          "tourism": "Sydney Opera House",
+          "road": "Bennelong Point",
+          "city": "Sydney",
+          "state": "New South Wales",
+          "postcode": "2000",
+          "country": "Australia",
+          "country_code": "au"
+        },
+        "boundingbox": [
+          "-33.865243",
+          "-33.865043",
+          "151.209800",
+          "151.210000"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 35.689487,
+        "lon": 139.691706
+      },
+      "response": {
+        "place_id": 159855789,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 2222222,
+        "lat": "35.689487",
+        "lon": "139.691706",
+        "display_name": "Shinjuku, Tokyo, Japan",
+        "address": {
+          "suburb": "Shinjuku",
+          "city": "Tokyo",
+          "country": "Japan",
+          "country_code": "jp"
+        },
+        "boundingbox": [
+          "35.689387",
+          "35.689587",
+          "139.691606",
+          "139.691806"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 0.0,
+        "lon": 0.0
+      },
+      "response": {
+        "error": "Unable to geocode",
+        "status": 404
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 90.0,
+        "lon": 180.0
+      },
+      "response": {
+        "place_id": 159866890,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "node",
+        "osm_id": 3333333,
+        "lat": "90.0",
+        "lon": "180.0",
+        "display_name": "North Pole, Arctic Ocean",
+        "address": {
+          "natural": "North Pole",
+          "sea": "Arctic Ocean",
+          "country_code": "xz"
+        },
+        "boundingbox": [
+          "89.9",
+          "90.0",
+          "179.9",
+          "180.0"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 28.6129602407977,
+        "lon": 77.2294557094574
+      },
+      "response": {
+        "place_id": 159877901,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 4444444,
+        "lat": "28.6129602407977",
+        "lon": "77.2294557094574",
+        "display_name": "India Gate, New Delhi, Delhi, 110001, India",
+        "address": {
+          "attraction": "India Gate",
+          "city": "New Delhi",
+          "state": "Delhi",
+          "postcode": "110001",
+          "country": "India",
+          "country_code": "in"
+        },
+        "boundingbox": [
+          "28.6128602407977",
+          "28.6130602407977",
+          "77.2293557094574",
+          "77.2295557094574"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 40.733,
+        "lon": -73.989
+      },
+      "response": {
+        "place_id": 159888912,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 5555555,
+        "lat": "40.733",
+        "lon": "-73.989",
+        "display_name": "120 East 13th Street, New York, New York, 10003, United States",
+        "address": {
+          "house_number": "120",
+          "road": "East 13th Street",
+          "city": "New York",
+          "state": "New York",
+          "postcode": "10003",
+          "country": "United States",
+          "country_code": "us"
+        },
+        "boundingbox": [
+          "40.732",
+          "40.734",
+          "-73.990",
+          "-73.988"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 48.8575,
+        "lon": 2.2944
+      },
+      "response": {
+        "place_id": 159899923,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 6666666,
+        "lat": "48.8575",
+        "lon": "2.2944",
+        "display_name": "8 Avenue Gustave Eiffel, Paris, Île-de-France, France",
+        "address": {
+          "house_number": "8",
+          "road": "Avenue Gustave Eiffel",
+          "city": "Paris",
+          "state": "Île-de-France",
+          "country": "France",
+          "country_code": "fr"
+        },
+        "boundingbox": [
+          "48.8574",
+          "48.8576",
+          "2.2943",
+          "2.2945"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": -34.44076,
+        "lon": -58.70521
+      },
+      "response": {
+        "place_id": 134140761,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 7777778,
+        "lat": "-34.44076",
+        "lon": "-58.70521",
+        "display_name": "Avenida Libertador, Tigre, Buenos Aires, Argentina",
+        "address": {
+          "road": "Avenida Libertador",
+          "city": "Tigre",
+          "state": "Buenos Aires",
+          "country": "Argentina",
+          "country_code": "ar"
+        },
+        "boundingbox": [
+          "-34.44176",
+          "-34.43976",
+          "-58.70621",
+          "-58.70421"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 12.975360,
+        "lon": 80.190122
+      },
+      "response": {
+        "place_id": 159900034,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 8888889,
+        "lat": "12.975360",
+        "lon": "80.190122",
+        "display_name": "Anna Salai, Teynampet, Chennai, Tamil Nadu, 600002, India",
+        "address": {
+          "road": "Anna Salai",
+          "neighbourhood": "Teynampet",
+          "suburb": "Teynampet",
+          "city": "Chennai",
+          "state": "Tamil Nadu",
+          "postcode": "600002",
+          "country": "India",
+          "country_code": "in"
+        },
+        "boundingbox": [
+          "12.974360",
+          "12.976360",
+          "80.189122",
+          "80.191122"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 40.119198,
+        "lon": -75.355764
+      },
+      "response": {
+        "place_id": 159911145,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "node",
+        "osm_id": 9999991,
+        "lat": "40.119198",
+        "lon": "-75.355764",
+        "display_name": "Valley Forge National Historical Park, Montgomery County, Pennsylvania, United States",
+        "address": {
+          "tourism": "Valley Forge National Historical Park",
+          "county": "Montgomery County",
+          "state": "Pennsylvania",
+          "country": "United States",
+          "country_code": "us"
+        },
+        "boundingbox": [
+          "40.118198",
+          "40.120198",
+          "-75.356764",
+          "-75.354764"
+        ]
+      }
+    },
+    {
+      "coordinates": {
+        "lat": 60.2299,
+        "lon": 11.1663
+      },
+      "response": {
+        "place_id": 159922256,
+        "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+        "osm_type": "way",
+        "osm_id": 1111112,
+        "lat": "60.2299",
+        "lon": "11.1663",
+        "display_name": "Oslo Lufthavn, Gardermoen, Ullensaker, Viken, Norway",
+        "address": {
+          "aeroway": "Oslo Lufthavn",
+          "suburb": "Gardermoen",
+          "city": "Ullensaker",
+          "state": "Viken",
+          "country": "Norway",
+          "country_code": "no"
+        },
+        "boundingbox": [
+          "60.2199",
+          "60.2399",
+          "11.1563",
+          "11.1763"
+        ]
+      }
+    }
+  ]
+}
