@@ -1,0 +1,148 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "format": {
+            "matches": "json.*"
+          },
+          "lat": {
+            "matches": "51\\.5074.*"
+          },
+          "lon": {
+            "matches": "-0\\.1278.*"
+          },
+          "zoom": {
+            "matches": "18"
+          },
+          "addressdetails": {
+            "matches": "1"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "place_id": 235101158,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 432031252,
+          "lat": "51.5074",
+          "lon": "-0.1278",
+          "display_name": "Trafalgar Square, Charing Cross, Westminster, London, Greater London, England, SW1A 2DX, United Kingdom",
+          "address": {
+            "road": "Trafalgar Square",
+            "suburb": "Charing Cross",
+            "city": "London",
+            "state_district": "Greater London",
+            "state": "England",
+            "postcode": "SW1A 2DX",
+            "country": "United Kingdom",
+            "country_code": "gb"
+          },
+          "boundingbox": [
+            "51.5073",
+            "51.5075",
+            "-0.1279",
+            "-0.1277"
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "format": {
+            "matches": "json.*"
+          },
+          "lat": {
+            "matches": "40\\.7337.*"
+          },
+          "lon": {
+            "matches": "-73\\.9974.*"
+          },
+          "zoom": {
+            "matches": "18"
+          },
+          "addressdetails": {
+            "matches": "1"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "place_id": 158484588,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 267751483,
+          "lat": "40.7337807",
+          "lon": "-73.9974401",
+          "display_name": "35 West 9th Street, NYC, New York, US",
+          "address": {
+            "house_number": "35",
+            "road": "West 9th Street",
+            "city": "NYC",
+            "state": "New York",
+            "country": "United States",
+            "country_code": "us"
+          },
+          "boundingbox": [
+            "40.7336807",
+            "40.7338807",
+            "-73.9975401",
+            "-73.9973401"
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "format": {
+            "matches": "json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "place_id": 123456789,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 987654321,
+          "lat": "0.0000",
+          "lon": "0.0000",
+          "display_name": "Unknown Location",
+          "address": {
+            "road": "Unknown Road",
+            "city": "Unknown City",
+            "country": "Unknown Country",
+            "country_code": "xx"
+          },
+          "boundingbox": [
+            "-0.0001",
+            "0.0001",
+            "-0.0001",
+            "0.0001"
+          ]
+        }
+      }
+    }
+  ]
+}
