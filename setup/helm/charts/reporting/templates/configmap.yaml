@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "reporting.fullname" . }}-config
+  labels:
+    {{- include "reporting.labels" . | nindent 4 }}
+data:
+  # Database configuration for historical data access
+  application-db.yml: |
+    database:
+      driver: {{ .Values.database.driver | default "org.h2.Driver" }}
+      url: {{ .Values.database.url | default "jdbc:h2:./data/database" }}
+      user: {{ .Values.database.user | default "sa" }}
+      password: {{ .Values.database.password | default "" }}
+      # Connection pool settings
+      maxPoolSize: {{ .Values.database.maxPoolSize | default 10 }}
+      checkConnection: {{ .Values.database.checkConnection | default true }}
+      # Query timeout in seconds
+      queryTimeout: {{ .Values.database.queryTimeout | default 60 }}
+      # Read-only mode for report generation
+      readOnly: {{ .Values.database.readOnly | default true }}
+
+  # Application configuration
+  application.yml: |
+    server:
+      port: 8084
+      # Maximum request size for report generation
+      max-http-header-size: 16KB
+      tomcat:
+        max-threads: {{ .Values.server.maxThreads | default 20 }}
+        connection-timeout: {{ .Values.server.connectionTimeout | default 20000 }}
+
+    spring:
+      application:
+        name: reporting-service
+      # Message broker configuration for report requests
+      rabbitmq:
+        host: {{ .Values.rabbitmq.host | default "rabbitmq" }}
+        port: {{ .Values.rabbitmq.port | default 5672 }}
+        username: {{ .Values.rabbitmq.username | default "guest" }}
+        password: {{ .Values.rabbitmq.password | default "guest" }}
+        virtual-host: {{ .Values.rabbitmq.virtualHost | default "/" }}
+
+    # Service discovery configuration
+    eureka:
+      client:
+        serviceUrl:
+          defaultZone: {{ .Values.serviceDiscovery.url | default "http://discovery-service:8761/eureka/" }}
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        preferIpAddress: true
+
+    # Reporting service specific configuration
+    reporting:
+      # Report generation settings
+      generation:
+        # Maximum memory allocation per report in MB
+        maxMemoryMB: {{ .Values.reporting.generation.maxMemoryMB | default 512 }}
+        # Maximum CPU time per report in seconds
+        maxCpuTimeSeconds: {{ .Values.reporting.generation.maxCpuTimeSeconds | default 300 }}
+        # Maximum execution time per report in seconds
+        timeoutSeconds: {{ .Values.reporting.generation.timeoutSeconds | default 300 }}
+        # Default report format if not specified
+        defaultFormat: {{ .Values.reporting.generation.defaultFormat | default "PDF" }}
+        # Supported formats
+        formats:
+          - JSON
+          - CSV
+          - Excel
+          - PDF
+          - Mail
+        # Temporary file storage path
+        tempPath: {{ .Values.reporting.generation.tempPath | default "/tmp/reports" }}
+
+      # Report scheduling configuration
+      scheduling:
+        # Enable scheduled reports
+        enabled: {{ .Values.reporting.scheduling.enabled | default true }}
+        # Cron expression for report scheduler
+        cronExpression: {{ .Values.reporting.scheduling.cronExpression | default "0 */15 * * * ?" }}
+        # Maximum concurrent scheduled reports
+        maxConcurrent: {{ .Values.reporting.scheduling.maxConcurrent | default 5 }}
+
+      # Report delivery configuration
+      delivery:
+        # Email delivery settings
+        email:
+          enabled: {{ .Values.reporting.delivery.email.enabled | default true }}
+          # Default subject template
+          subjectTemplate: {{ .Values.reporting.delivery.email.subjectTemplate | default "Traccar Report: {reportType}" }}
+          # Default body template
+          bodyTemplate: {{ .Values.reporting.delivery.email.bodyTemplate | default "Please find attached your {reportType} report." }}
+
+    # Logging configuration
+    logging:
+      level:
+        root: {{ .Values.logging.level.root | default "INFO" }}
+        org.traccar: {{ .Values.logging.level.traccar | default "INFO" }}
+        org.traccar.reporting: {{ .Values.logging.level.reporting | default "DEBUG" }}
+      pattern:
+        console: {{ .Values.logging.pattern.console | default "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" }}
+        file: {{ .Values.logging.pattern.file | default "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" }}
+      file:
+        name: {{ .Values.logging.file.name | default "logs/reporting-service.log" }}
+        max-size: {{ .Values.logging.file.maxSize | default "10MB" }}
+        max-history: {{ .Values.logging.file.maxHistory | default 10 }}
+
+    # Health check configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
