@@ -1,0 +1,277 @@
+{
+  "sessions": {
+    "valid-session-id": {
+      "userId": 1,
+      "username": "admin",
+      "created": "2023-05-22T10:15:30Z",
+      "lastAccessed": "2023-05-22T11:45:22Z",
+      "expiresAt": "2023-05-22T12:15:30Z",
+      "userEnabled": true,
+      "roles": ["admin"],
+      "permissions": ["read", "write", "manage"],
+      "attributes": {
+        "ip": "192.168.1.100",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "deviceId": null
+      }
+    }
+  },
+  "responses": {
+    "session_creation": {
+      "success": {
+        "status": "success",
+        "sessionId": "new-session-id",
+        "expiresAt": "2023-05-22T14:30:00Z",
+        "userId": 1,
+        "username": "admin"
+      },
+      "failure": {
+        "status": "error",
+        "code": "AUTH_FAILED",
+        "message": "Authentication failed"
+      },
+      "user_disabled": {
+        "status": "error",
+        "code": "USER_DISABLED",
+        "message": "User account is disabled"
+      }
+    },
+    "session_validation": {
+      "valid": {
+        "status": "valid",
+        "sessionId": "valid-session-id",
+        "userId": 1,
+        "username": "admin",
+        "roles": ["admin"],
+        "permissions": ["read", "write", "manage"],
+        "expiresAt": "2023-05-22T12:15:30Z"
+      },
+      "expired": {
+        "status": "error",
+        "code": "SESSION_EXPIRED",
+        "message": "Session has expired"
+      },
+      "invalid": {
+        "status": "error",
+        "code": "INVALID_SESSION",
+        "message": "Session does not exist"
+      },
+      "user_disabled": {
+        "status": "error",
+        "code": "USER_DISABLED",
+        "message": "User account is disabled"
+      }
+    },
+    "session_heartbeat": {
+      "success": {
+        "status": "success",
+        "sessionId": "valid-session-id",
+        "expiresAt": "2023-05-22T13:15:30Z"
+      },
+      "failure": {
+        "status": "error",
+        "code": "SESSION_NOT_FOUND",
+        "message": "Session not found for heartbeat update"
+      }
+    },
+    "session_termination": {
+      "success": {
+        "status": "success",
+        "message": "Session terminated successfully"
+      },
+      "not_found": {
+        "status": "error",
+        "code": "SESSION_NOT_FOUND",
+        "message": "Session not found for termination"
+      }
+    }
+  },
+  "user_sessions": {
+    "1": ["valid-session-id", "another-session-id"],
+    "2": ["user2-session-id"],
+    "3": []
+  },
+  "ttl_refresh": {
+    "success": {
+      "status": "success",
+      "refreshed": 3,
+      "failed": 0
+    },
+    "partial": {
+      "status": "partial",
+      "refreshed": 2,
+      "failed": 1,
+      "failures": ["expired-session-id"]
+    }
+  },
+  "kubernetes": {
+    "liveness": {
+      "status": "UP",
+      "sessionStoreAvailable": true,
+      "timestamp": "2023-05-22T11:50:00Z"
+    },
+    "readiness": {
+      "status": "READY",
+      "sessionCacheAvailable": true,
+      "connections": 5,
+      "timestamp": "2023-05-22T11:50:00Z"
+    },
+    "termination": {
+      "status": "success",
+      "sessionsCleanedUp": 12,
+      "timestamp": "2023-05-22T11:55:00Z"
+    }
+  },
+  "error_scenarios": {
+    "redis_unavailable": {
+      "status": "error",
+      "code": "REDIS_UNAVAILABLE",
+      "message": "Session store is currently unavailable"
+    },
+    "redis_timeout": {
+      "status": "error",
+      "code": "REDIS_TIMEOUT",
+      "message": "Session store operation timed out"
+    },
+    "redis_connection_refused": {
+      "status": "error",
+      "code": "CONNECTION_REFUSED",
+      "message": "Connection refused to session store"
+    },
+    "redis_auth_error": {
+      "status": "error",
+      "code": "REDIS_AUTH_ERROR",
+      "message": "Authentication failed for session store"
+    },
+    "circuit_open": {
+      "status": "error",
+      "code": "CIRCUIT_OPEN",
+      "message": "Circuit breaker is open for session store operations"
+    }
+  },
+  "sample_sessions": {
+    "admin_session": {
+      "sessionId": "admin-session-id",
+      "userId": 1,
+      "username": "admin",
+      "created": "2023-05-22T09:00:00Z",
+      "lastAccessed": "2023-05-22T11:30:00Z",
+      "expiresAt": "2023-05-22T13:00:00Z",
+      "userEnabled": true,
+      "roles": ["admin"],
+      "permissions": ["read", "write", "manage"],
+      "attributes": {
+        "ip": "192.168.1.10",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "deviceId": null
+      }
+    },
+    "manager_session": {
+      "sessionId": "manager-session-id",
+      "userId": 2,
+      "username": "manager",
+      "created": "2023-05-22T10:00:00Z",
+      "lastAccessed": "2023-05-22T11:20:00Z",
+      "expiresAt": "2023-05-22T14:00:00Z",
+      "userEnabled": true,
+      "roles": ["manager"],
+      "permissions": ["read", "write"],
+      "attributes": {
+        "ip": "192.168.1.20",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "deviceId": null
+      }
+    },
+    "user_session": {
+      "sessionId": "user-session-id",
+      "userId": 3,
+      "username": "user",
+      "created": "2023-05-22T10:30:00Z",
+      "lastAccessed": "2023-05-22T11:15:00Z",
+      "expiresAt": "2023-05-22T14:30:00Z",
+      "userEnabled": true,
+      "roles": ["user"],
+      "permissions": ["read"],
+      "attributes": {
+        "ip": "192.168.1.30",
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+        "deviceId": null
+      }
+    },
+    "device_session": {
+      "sessionId": "device-session-id",
+      "userId": null,
+      "deviceId": 101,
+      "created": "2023-05-22T08:00:00Z",
+      "lastAccessed": "2023-05-22T11:40:00Z",
+      "expiresAt": "2023-05-23T08:00:00Z",
+      "enabled": true,
+      "roles": ["device"],
+      "permissions": ["report"],
+      "attributes": {
+        "ip": "192.168.1.50",
+        "protocol": "tk103",
+        "uniqueId": "device-unique-id-123"
+      }
+    },
+    "expired_session": {
+      "sessionId": "expired-session-id",
+      "userId": 4,
+      "username": "expired_user",
+      "created": "2023-05-21T10:00:00Z",
+      "lastAccessed": "2023-05-21T11:30:00Z",
+      "expiresAt": "2023-05-21T14:00:00Z",
+      "userEnabled": true,
+      "roles": ["user"],
+      "permissions": ["read"],
+      "attributes": {
+        "ip": "192.168.1.40",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "deviceId": null
+      }
+    },
+    "disabled_user_session": {
+      "sessionId": "disabled-user-session-id",
+      "userId": 5,
+      "username": "disabled_user",
+      "created": "2023-05-22T09:30:00Z",
+      "lastAccessed": "2023-05-22T10:00:00Z",
+      "expiresAt": "2023-05-22T13:30:00Z",
+      "userEnabled": false,
+      "roles": ["user"],
+      "permissions": ["read"],
+      "attributes": {
+        "ip": "192.168.1.60",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "deviceId": null
+      }
+    }
+  },
+  "two_factor_auth": {
+    "required": {
+      "status": "2fa_required",
+      "sessionId": "2fa-pending-session-id",
+      "userId": 1,
+      "username": "admin",
+      "expiresAt": "2023-05-22T12:00:00Z",
+      "method": "totp"
+    },
+    "success": {
+      "status": "success",
+      "sessionId": "2fa-complete-session-id",
+      "userId": 1,
+      "username": "admin",
+      "expiresAt": "2023-05-22T14:00:00Z"
+    },
+    "failure": {
+      "status": "error",
+      "code": "INVALID_2FA_CODE",
+      "message": "Invalid two-factor authentication code"
+    },
+    "too_many_attempts": {
+      "status": "error",
+      "code": "TOO_MANY_2FA_ATTEMPTS",
+      "message": "Too many failed two-factor authentication attempts"
+    }
+  }
+}
