@@ -1,0 +1,189 @@
+{{- /*
+Template for creating a PodDisruptionBudget resource.
+
+This template creates a Kubernetes PodDisruptionBudget (PDB) that ensures high availability
+of Traccar microservices during cluster operations such as node drains, upgrades, or scaling events.
+It standardizes availability policies across all Traccar services to prevent service disruptions
+during routine cluster maintenance operations.
+
+The template implements intelligent defaults based on:
+1. Service type (protocol, position, api-gateway, etc.)
+2. Environment (production vs. non-production)
+3. Explicit configuration in values.yaml
+
+Usage in service chart templates:
+  # Include this in each service's deployment template
+  {{- include "traccar.pdb" . }}
+
+Configuration in values.yaml:
+  podDisruptionBudget:
+    enabled: true                # Whether to create a PDB for this service
+    minAvailable: 1              # Minimum number of pods that must be available (absolute or percentage like "50%")
+    # maxUnavailable: 1          # Maximum number of pods that can be unavailable (absolute or percentage like "50%")
+    # labels:                    # Optional additional labels
+    #   custom-label: value
+    # annotations:               # Optional additional annotations
+    #   custom-annotation: value
+  
+  # Global settings that affect PDB behavior
+  global:
+    environment: production      # Environment type: production, staging, development
+
+Service-specific defaults (when not explicitly configured):
+  - Protocol Service: minAvailable=50% in production
+  - API Gateway Service: minAvailable=50% in production
+  - Position Service: minAvailable=50% in production
+  - Other services: minAvailable=1 in production
+  - All services in non-production: maxUnavailable=1
+
+Parameters:
+  - .Values.podDisruptionBudget.enabled: Whether to create a PDB for the service
+  - .Values.podDisruptionBudget.minAvailable: Minimum number of pods that must be available
+  - .Values.podDisruptionBudget.maxUnavailable: Maximum number of pods that can be unavailable
+  - .Values.podDisruptionBudget.labels: Additional labels to apply to the PDB
+  - .Values.podDisruptionBudget.annotations: Annotations to add to the PDB
+  - .Values.global.environment: Environment type (production, staging, development)
+  - .Values.serviceType: Service type identifier (optional, defaults to chart name)
+
+Dependencies:
+  This template requires the following helper templates to be defined in _helpers.tpl:
+  - "traccar.fullname": Generates the full name for resources
+  - "traccar.labels": Provides standard labels for resources
+  - "traccar.selectorLabels": Provides selector labels for resources
+
+Notes:
+  - Either minAvailable or maxUnavailable should be specified, but not both.
+  - For critical services, it's recommended to use minAvailable to ensure service availability.
+  - In production environments, a PDB will always be created with appropriate defaults if not explicitly disabled.
+  - This template is part of the zero-downtime deployment strategy for Traccar microservices.
+*/}}
+{{- define "traccar.pdb" -}}
+{{- /* Determine if PDB should be created based on configuration and environment */}}
+{{- $createPdb := false }}
+
+{{- /* Check if PDB is explicitly enabled */}}
+{{- if hasKey .Values "podDisruptionBudget" }}
+  {{- if hasKey .Values.podDisruptionBudget "enabled" }}
+    {{- $createPdb = .Values.podDisruptionBudget.enabled }}
+  {{- end }}
+{{- end }}
+
+{{- /* Apply environment-specific overrides if defined */}}
+{{- $environment := "development" }}
+{{- if .Values.global }}
+  {{- if .Values.global.environment }}
+    {{- $environment = .Values.global.environment }}
+  {{- end }}
+{{- end }}
+
+{{- /* In production, ensure PDB is always created unless explicitly disabled */}}
+{{- if eq $environment "production" }}
+  {{- if not (hasKey .Values "podDisruptionBudget") }}
+    {{- $createPdb = true }}
+  {{- else if not (hasKey .Values.podDisruptionBudget "enabled") }}
+    {{- $createPdb = true }}
+  {{- end }}
+{{- end }}
+
+{{- /* Validate that only one of minAvailable or maxUnavailable is set if both are defined */}}
+{{- if hasKey .Values "podDisruptionBudget" }}
+  {{- if and (hasKey .Values.podDisruptionBudget "minAvailable") (hasKey .Values.podDisruptionBudget "maxUnavailable") }}
+    {{- fail "Cannot specify both minAvailable and maxUnavailable in PodDisruptionBudget" }}
+  {{- end }}
+{{- end }}
+
+{{- if $createPdb }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "traccar.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "traccar.labels" . | nindent 4 }}
+    {{- if .Values.podDisruptionBudget.labels }}
+    {{- toYaml .Values.podDisruptionBudget.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.podDisruptionBudget.annotations }}
+  annotations:
+    {{- toYaml .Values.podDisruptionBudget.annotations | nindent 4 }}
+  {{- end }}
+  {{- if not .Values.podDisruptionBudget.annotations }}
+  annotations:
+    helm.sh/managed-by: {{ .Release.Service }}
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+    kubernetes.io/description: "Ensures high availability of {{ include "traccar.fullname" . }} service during cluster operations"
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "traccar.selectorLabels" . | nindent 6 }}
+  {{- /* Determine the appropriate availability setting based on configuration and service type */}}
+  {{- /* Initialize availability variables */}}
+  {{- $minAvailable := "" }}
+  {{- $maxUnavailable := "" }}
+  
+  {{- /* Get configured values if they exist */}}
+  {{- if hasKey .Values "podDisruptionBudget" }}
+    {{- if hasKey .Values.podDisruptionBudget "minAvailable" }}
+      {{- $minAvailable = .Values.podDisruptionBudget.minAvailable }}
+    {{- end }}
+    {{- if hasKey .Values.podDisruptionBudget "maxUnavailable" }}
+      {{- $maxUnavailable = .Values.podDisruptionBudget.maxUnavailable }}
+    {{- end }}
+  {{- end }}
+  
+  {{- /* Apply service-specific defaults if neither is specified */}}
+  {{- if and (not $minAvailable) (not $maxUnavailable) }}
+    {{- if .Values.global }}
+      {{- if eq .Values.global.environment "production" }}
+        {{- /* Production defaults based on service type */}}
+        {{- /* Extract service type from chart name or app.kubernetes.io/name label */}}
+        {{- $serviceType := .Chart.Name }}
+        {{- if .Values.serviceType }}
+          {{- $serviceType = .Values.serviceType }}
+        {{- else if .Values.nameOverride }}
+          {{- $serviceType = .Values.nameOverride }}
+        {{- end }}
+        
+        {{- /* Apply service-specific availability requirements */}}
+        {{- if or (eq $serviceType "protocol") (eq $serviceType "protocol-service") }}
+          {{- /* Protocol service handles device connections - needs higher availability */}}
+          {{- $minAvailable = "50%" }}
+        {{- else if or (eq $serviceType "api-gateway") (eq $serviceType "api-gateway-service") }}
+          {{- /* API Gateway is the entry point for all client requests - needs higher availability */}}
+          {{- $minAvailable = "50%" }}
+        {{- else if or (eq $serviceType "position") (eq $serviceType "position-service") }}
+          {{- /* Position service processes critical location data */}}
+          {{- $minAvailable = "50%" }}
+        {{- else if or (eq $serviceType "event") (eq $serviceType "event-service") }}
+          {{- /* Event service handles event detection */}}
+          {{- $minAvailable = 1 }}
+        {{- else if or (eq $serviceType "notification") (eq $serviceType "notification-service") }}
+          {{- /* Notification service can tolerate brief disruptions */}}
+          {{- $minAvailable = 1 }}
+        {{- else if or (eq $serviceType "reporting") (eq $serviceType "reporting-service") }}
+          {{- /* Reporting service is less time-sensitive */}}
+          {{- $minAvailable = 1 }}
+        {{- else }}
+          {{- /* Default for any other service */}}
+          {{- $minAvailable = 1 }}
+        {{- end }}
+      {{- else }}
+        {{- /* Non-production defaults */}}
+        {{- $maxUnavailable = 1 }}
+      {{- end }}
+    {{- else }}
+      {{- /* Default if no global context */}}
+      {{- $minAvailable = 1 }}
+    {{- end }}
+  {{- end }}
+  
+  {{- if $minAvailable }}
+  minAvailable: {{ $minAvailable }}
+  {{- end }}
+  {{- if $maxUnavailable }}
+  maxUnavailable: {{ $maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end -}}
