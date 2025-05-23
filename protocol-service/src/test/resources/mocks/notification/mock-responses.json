@@ -1,0 +1,273 @@
+{
+  "responses": [
+    {
+      "id": "notification-success-all-channels",
+      "description": "Successful notification delivery to all channels",
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-123e4567-e89b-12d3-a456-426614174000"
+      },
+      "body": {
+        "success": true,
+        "message": "Notification successfully delivered to all channels",
+        "notificationId": "notif-123e4567-e89b-12d3-a456-426614174000",
+        "timestamp": "2023-05-15T14:30:45.123Z",
+        "channels": [
+          {
+            "type": "email",
+            "status": "DELIVERED",
+            "recipients": 2,
+            "timestamp": "2023-05-15T14:30:46.234Z"
+          },
+          {
+            "type": "sms",
+            "status": "DELIVERED",
+            "recipients": 1,
+            "timestamp": "2023-05-15T14:30:47.345Z"
+          },
+          {
+            "type": "push",
+            "status": "DELIVERED",
+            "recipients": 3,
+            "timestamp": "2023-05-15T14:30:48.456Z"
+          },
+          {
+            "type": "web",
+            "status": "DELIVERED",
+            "recipients": 2,
+            "timestamp": "2023-05-15T14:30:49.567Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "notification-partial-success",
+      "description": "Partial success with some channels failing",
+      "status": 207,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-223e4567-e89b-12d3-a456-426614174001"
+      },
+      "body": {
+        "success": true,
+        "message": "Notification partially delivered",
+        "notificationId": "notif-223e4567-e89b-12d3-a456-426614174001",
+        "timestamp": "2023-05-15T15:45:12.789Z",
+        "channels": [
+          {
+            "type": "email",
+            "status": "DELIVERED",
+            "recipients": 2,
+            "timestamp": "2023-05-15T15:45:13.123Z"
+          },
+          {
+            "type": "sms",
+            "status": "FAILED",
+            "recipients": 0,
+            "timestamp": "2023-05-15T15:45:14.234Z",
+            "error": {
+              "code": "SMS_GATEWAY_ERROR",
+              "message": "SMS gateway service unavailable",
+              "retryable": true
+            }
+          },
+          {
+            "type": "push",
+            "status": "DELIVERED",
+            "recipients": 1,
+            "timestamp": "2023-05-15T15:45:15.345Z"
+          },
+          {
+            "type": "web",
+            "status": "DELIVERED",
+            "recipients": 2,
+            "timestamp": "2023-05-15T15:45:16.456Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "notification-complete-failure",
+      "description": "Complete failure across all notification channels",
+      "status": 500,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-323e4567-e89b-12d3-a456-426614174002"
+      },
+      "body": {
+        "success": false,
+        "message": "Failed to deliver notification to any channel",
+        "notificationId": "notif-323e4567-e89b-12d3-a456-426614174002",
+        "timestamp": "2023-05-15T16:15:22.456Z",
+        "error": {
+          "code": "NOTIFICATION_DELIVERY_FAILED",
+          "message": "All notification channels failed",
+          "retryable": true
+        },
+        "channels": [
+          {
+            "type": "email",
+            "status": "FAILED",
+            "recipients": 0,
+            "timestamp": "2023-05-15T16:15:23.567Z",
+            "error": {
+              "code": "SMTP_CONNECTION_ERROR",
+              "message": "Failed to connect to SMTP server",
+              "retryable": true
+            }
+          },
+          {
+            "type": "sms",
+            "status": "FAILED",
+            "recipients": 0,
+            "timestamp": "2023-05-15T16:15:24.678Z",
+            "error": {
+              "code": "SMS_GATEWAY_ERROR",
+              "message": "SMS gateway service unavailable",
+              "retryable": true
+            }
+          },
+          {
+            "type": "push",
+            "status": "FAILED",
+            "recipients": 0,
+            "timestamp": "2023-05-15T16:15:25.789Z",
+            "error": {
+              "code": "FCM_SERVICE_ERROR",
+              "message": "Firebase Cloud Messaging service error",
+              "retryable": true
+            }
+          },
+          {
+            "type": "web",
+            "status": "FAILED",
+            "recipients": 0,
+            "timestamp": "2023-05-15T16:15:26.890Z",
+            "error": {
+              "code": "NO_ACTIVE_SESSIONS",
+              "message": "No active web sessions found for recipients",
+              "retryable": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "notification-invalid-request",
+      "description": "Invalid notification request format",
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-423e4567-e89b-12d3-a456-426614174003"
+      },
+      "body": {
+        "success": false,
+        "message": "Invalid notification request format",
+        "timestamp": "2023-05-15T17:20:33.123Z",
+        "error": {
+          "code": "INVALID_REQUEST",
+          "message": "Request validation failed",
+          "details": [
+            {
+              "field": "recipients",
+              "message": "Recipients list cannot be empty"
+            },
+            {
+              "field": "message",
+              "message": "Notification message is required"
+            }
+          ],
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "notification-service-unavailable",
+      "description": "Notification service temporarily unavailable",
+      "status": 503,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-523e4567-e89b-12d3-a456-426614174004",
+        "Retry-After": "30"
+      },
+      "body": {
+        "success": false,
+        "message": "Notification service temporarily unavailable",
+        "timestamp": "2023-05-15T18:05:44.567Z",
+        "error": {
+          "code": "SERVICE_UNAVAILABLE",
+          "message": "The notification service is currently unavailable. Please try again later.",
+          "retryable": true,
+          "retryAfterSeconds": 30
+        }
+      }
+    },
+    {
+      "id": "notification-rate-limited",
+      "description": "Rate limit exceeded for notification requests",
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-623e4567-e89b-12d3-a456-426614174005",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "1621094400",
+        "Retry-After": "60"
+      },
+      "body": {
+        "success": false,
+        "message": "Rate limit exceeded",
+        "timestamp": "2023-05-15T18:45:55.678Z",
+        "error": {
+          "code": "RATE_LIMIT_EXCEEDED",
+          "message": "You have exceeded the rate limit for notification requests. Please try again later.",
+          "retryable": true,
+          "retryAfterSeconds": 60
+        }
+      }
+    },
+    {
+      "id": "notification-success-external-channel",
+      "description": "Successful notification delivery to external channel (Telegram)",
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-723e4567-e89b-12d3-a456-426614174006"
+      },
+      "body": {
+        "success": true,
+        "message": "Notification successfully delivered to external channel",
+        "notificationId": "notif-723e4567-e89b-12d3-a456-426614174006",
+        "timestamp": "2023-05-15T19:30:22.345Z",
+        "channels": [
+          {
+            "type": "telegram",
+            "status": "DELIVERED",
+            "recipients": 1,
+            "timestamp": "2023-05-15T19:30:23.456Z",
+            "externalId": "telegram-msg-12345"
+          }
+        ]
+      }
+    },
+    {
+      "id": "notification-queued",
+      "description": "Notification accepted and queued for processing",
+      "status": 202,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "corr-823e4567-e89b-12d3-a456-426614174007",
+        "Location": "/api/notifications/notif-823e4567-e89b-12d3-a456-426614174007/status"
+      },
+      "body": {
+        "success": true,
+        "message": "Notification accepted and queued for processing",
+        "notificationId": "notif-823e4567-e89b-12d3-a456-426614174007",
+        "timestamp": "2023-05-15T20:15:33.789Z",
+        "status": "QUEUED",
+        "estimatedDeliveryTime": "2023-05-15T20:15:43.789Z"
+      }
+    }
+  ]
+}
