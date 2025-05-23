@@ -1,0 +1,156 @@
+{
+  "version": "1.0.0",
+  "environment": {
+    "type": "local",
+    "containerized": true,
+    "serviceDiscovery": {
+      "enabled": true,
+      "provider": "consul",
+      "consulHost": "localhost",
+      "consulPort": 8500,
+      "kubernetesNamespace": "traccar-test",
+      "registrationDelay": 5000
+    },
+    "messageBroker": {
+      "type": "kafka",
+      "bootstrapServers": "localhost:9092",
+      "topicPrefix": "test-",
+      "positionTopic": "positions",
+      "eventTopic": "events",
+      "commandTopic": "commands",
+      "ackTimeout": 10000
+    }
+  },
+  "testParameters": {
+    "defaultTimeout": 30000,
+    "connectionTimeout": 5000,
+    "responseTimeout": 10000,
+    "retryCount": 3,
+    "retryDelay": 1000,
+    "batchSize": 100,
+    "parallelTests": true,
+    "cleanupAfterTest": true
+  },
+  "mockServices": {
+    "positionService": {
+      "enabled": true,
+      "port": 8091,
+      "grpcPort": 9091,
+      "responseDelay": 50
+    },
+    "eventService": {
+      "enabled": true,
+      "port": 8092,
+      "grpcPort": 9092,
+      "responseDelay": 50
+    },
+    "deviceService": {
+      "enabled": true,
+      "port": 8093,
+      "grpcPort": 9093,
+      "responseDelay": 50
+    },
+    "geocoder": {
+      "enabled": true,
+      "port": 8094,
+      "responseDelay": 100
+    }
+  },
+  "protocols": {
+    "common": {
+      "testDataPath": "protocols/common/data",
+      "simulateNetworkErrors": false,
+      "simulateDeviceErrors": false,
+      "validatePositions": true
+    },
+    "tk103": {
+      "testPort": 5001,
+      "testDataPath": "protocols/tk103/data",
+      "customParameters": {
+        "extendedFormat": true
+      }
+    },
+    "teltonika": {
+      "testPort": 5002,
+      "testDataPath": "protocols/teltonika/data",
+      "customParameters": {
+        "codecId": 8
+      }
+    },
+    "meitrack": {
+      "testPort": 5003,
+      "testDataPath": "protocols/meitrack/data"
+    },
+    "atrack": {
+      "testPort": 5004,
+      "testDataPath": "protocols/atrack/data"
+    },
+    "totem": {
+      "testPort": 5005,
+      "testDataPath": "protocols/totem/data"
+    },
+    "meiligao": {
+      "testPort": 5006,
+      "testDataPath": "protocols/meiligao/data"
+    }
+  },
+  "testData": {
+    "devices": [
+      {
+        "id": 1,
+        "uniqueId": "test-device-1",
+        "protocol": "tk103",
+        "phone": "+1234567890",
+        "model": "Test Model"
+      },
+      {
+        "id": 2,
+        "uniqueId": "test-device-2",
+        "protocol": "teltonika",
+        "phone": "+0987654321",
+        "model": "Test Model 2"
+      }
+    ],
+    "positions": [
+      {
+        "deviceId": 1,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 10.0,
+        "speed": 50.0,
+        "course": 90.0,
+        "accuracy": 5.0,
+        "attributes": {
+          "batteryLevel": 75,
+          "ignition": true
+        }
+      }
+    ]
+  },
+  "observability": {
+    "metrics": {
+      "enabled": true,
+      "port": 8080,
+      "path": "/actuator/prometheus"
+    },
+    "tracing": {
+      "enabled": true,
+      "exporter": "jaeger",
+      "endpoint": "http://localhost:14268/api/traces",
+      "samplingRate": 1.0
+    },
+    "logging": {
+      "level": "DEBUG",
+      "format": "JSON",
+      "includeCorrelationId": true
+    }
+  },
+  "security": {
+    "testTokens": {
+      "admin": "test-admin-token",
+      "user": "test-user-token"
+    },
+    "mockAuthentication": true,
+    "skipTlsVerification": true
+  }
+}
