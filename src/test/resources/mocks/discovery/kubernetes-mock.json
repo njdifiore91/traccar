@@ -1,0 +1,957 @@
+{
+  "endpoints": {
+    "/api/v1/services": {
+      "default": {
+        "kind": "ServiceList",
+        "apiVersion": "v1",
+        "metadata": {
+          "selfLink": "/api/v1/services",
+          "resourceVersion": "1234567"
+        },
+        "items": [
+          {
+            "metadata": {
+              "name": "api-gateway",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/services/api-gateway",
+              "uid": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890",
+              "resourceVersion": "1234567",
+              "creationTimestamp": "2023-01-01T00:00:00Z",
+              "labels": {
+                "app": "api-gateway",
+                "service": "api-gateway"
+              }
+            },
+            "spec": {
+              "ports": [
+                {
+                  "name": "http",
+                  "protocol": "TCP",
+                  "port": 8080,
+                  "targetPort": 8080
+                },
+                {
+                  "name": "https",
+                  "protocol": "TCP",
+                  "port": 8443,
+                  "targetPort": 8443
+                }
+              ],
+              "selector": {
+                "app": "api-gateway"
+              },
+              "clusterIP": "10.0.0.1",
+              "type": "ClusterIP",
+              "sessionAffinity": "None"
+            },
+            "status": {
+              "loadBalancer": {}
+            }
+          },
+          {
+            "metadata": {
+              "name": "protocol-service",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/services/protocol-service",
+              "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78901",
+              "resourceVersion": "1234568",
+              "creationTimestamp": "2023-01-01T00:00:00Z",
+              "labels": {
+                "app": "protocol-service",
+                "service": "protocol-service"
+              }
+            },
+            "spec": {
+              "ports": [
+                {
+                  "name": "http",
+                  "protocol": "TCP",
+                  "port": 8080,
+                  "targetPort": 8080
+                },
+                {
+                  "name": "device",
+                  "protocol": "TCP",
+                  "port": 5000,
+                  "targetPort": 5000
+                }
+              ],
+              "selector": {
+                "app": "protocol-service"
+              },
+              "clusterIP": "10.0.0.2",
+              "type": "ClusterIP",
+              "sessionAffinity": "None"
+            },
+            "status": {
+              "loadBalancer": {}
+            }
+          },
+          {
+            "metadata": {
+              "name": "position-service",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/services/position-service",
+              "uid": "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89012",
+              "resourceVersion": "1234569",
+              "creationTimestamp": "2023-01-01T00:00:00Z",
+              "labels": {
+                "app": "position-service",
+                "service": "position-service"
+              }
+            },
+            "spec": {
+              "ports": [
+                {
+                  "name": "http",
+                  "protocol": "TCP",
+                  "port": 8080,
+                  "targetPort": 8080
+                },
+                {
+                  "name": "grpc",
+                  "protocol": "TCP",
+                  "port": 9090,
+                  "targetPort": 9090
+                }
+              ],
+              "selector": {
+                "app": "position-service"
+              },
+              "clusterIP": "10.0.0.3",
+              "type": "ClusterIP",
+              "sessionAffinity": "None"
+            },
+            "status": {
+              "loadBalancer": {}
+            }
+          }
+        ]
+      },
+      "watch": {
+        "type": "ADDED",
+        "object": {
+          "kind": "Service",
+          "apiVersion": "v1",
+          "metadata": {
+            "name": "event-service",
+            "namespace": "default",
+            "selfLink": "/api/v1/namespaces/default/services/event-service",
+            "uid": "d4e5f6a7-b8c9-0123-d4e5-f6a7b8c90123",
+            "resourceVersion": "1234570",
+            "creationTimestamp": "2023-01-01T00:00:10Z",
+            "labels": {
+              "app": "event-service",
+              "service": "event-service"
+            }
+          },
+          "spec": {
+            "ports": [
+              {
+                "name": "http",
+                "protocol": "TCP",
+                "port": 8080,
+                "targetPort": 8080
+              },
+              {
+                "name": "grpc",
+                "protocol": "TCP",
+                "port": 9090,
+                "targetPort": 9090
+              }
+            ],
+            "selector": {
+              "app": "event-service"
+            },
+            "clusterIP": "10.0.0.4",
+            "type": "ClusterIP",
+            "sessionAffinity": "None"
+          },
+          "status": {
+            "loadBalancer": {}
+          }
+        }
+      },
+      "namespaced": {
+        "traccar": {
+          "kind": "ServiceList",
+          "apiVersion": "v1",
+          "metadata": {
+            "selfLink": "/api/v1/namespaces/traccar/services",
+            "resourceVersion": "1234571"
+          },
+          "items": [
+            {
+              "metadata": {
+                "name": "notification-service",
+                "namespace": "traccar",
+                "selfLink": "/api/v1/namespaces/traccar/services/notification-service",
+                "uid": "e5f6a7b8-c9d0-1234-e5f6-a7b8c9d01234",
+                "resourceVersion": "1234572",
+                "creationTimestamp": "2023-01-01T00:00:00Z",
+                "labels": {
+                  "app": "notification-service",
+                  "service": "notification-service"
+                }
+              },
+              "spec": {
+                "ports": [
+                  {
+                    "name": "http",
+                    "protocol": "TCP",
+                    "port": 8080,
+                    "targetPort": 8080
+                  },
+                  {
+                    "name": "grpc",
+                    "protocol": "TCP",
+                    "port": 9090,
+                    "targetPort": 9090
+                  }
+                ],
+                "selector": {
+                  "app": "notification-service"
+                },
+                "clusterIP": "10.0.1.1",
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+              },
+              "status": {
+                "loadBalancer": {}
+              }
+            },
+            {
+              "metadata": {
+                "name": "reporting-service",
+                "namespace": "traccar",
+                "selfLink": "/api/v1/namespaces/traccar/services/reporting-service",
+                "uid": "f6a7b8c9-d0e1-2345-f6a7-b8c9d0e12345",
+                "resourceVersion": "1234573",
+                "creationTimestamp": "2023-01-01T00:00:00Z",
+                "labels": {
+                  "app": "reporting-service",
+                  "service": "reporting-service"
+                }
+              },
+              "spec": {
+                "ports": [
+                  {
+                    "name": "http",
+                    "protocol": "TCP",
+                    "port": 8080,
+                    "targetPort": 8080
+                  },
+                  {
+                    "name": "grpc",
+                    "protocol": "TCP",
+                    "port": 9090,
+                    "targetPort": 9090
+                  }
+                ],
+                "selector": {
+                  "app": "reporting-service"
+                },
+                "clusterIP": "10.0.1.2",
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+              },
+              "status": {
+                "loadBalancer": {}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "/api/v1/endpoints": {
+      "default": {
+        "kind": "EndpointsList",
+        "apiVersion": "v1",
+        "metadata": {
+          "selfLink": "/api/v1/endpoints",
+          "resourceVersion": "1234574"
+        },
+        "items": [
+          {
+            "metadata": {
+              "name": "api-gateway",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/endpoints/api-gateway",
+              "uid": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67891",
+              "resourceVersion": "1234575",
+              "creationTimestamp": "2023-01-01T00:00:00Z"
+            },
+            "subsets": [
+              {
+                "addresses": [
+                  {
+                    "ip": "192.168.1.10",
+                    "nodeName": "node-1",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "api-gateway-pod-1",
+                      "uid": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67892",
+                      "resourceVersion": "1234576"
+                    }
+                  },
+                  {
+                    "ip": "192.168.1.11",
+                    "nodeName": "node-2",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "api-gateway-pod-2",
+                      "uid": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67893",
+                      "resourceVersion": "1234577"
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "port": 8080,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "https",
+                    "port": 8443,
+                    "protocol": "TCP"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "metadata": {
+              "name": "protocol-service",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/endpoints/protocol-service",
+              "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78902",
+              "resourceVersion": "1234578",
+              "creationTimestamp": "2023-01-01T00:00:00Z"
+            },
+            "subsets": [
+              {
+                "addresses": [
+                  {
+                    "ip": "192.168.1.20",
+                    "nodeName": "node-1",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "protocol-service-pod-1",
+                      "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78903",
+                      "resourceVersion": "1234579"
+                    }
+                  },
+                  {
+                    "ip": "192.168.1.21",
+                    "nodeName": "node-2",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "protocol-service-pod-2",
+                      "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78904",
+                      "resourceVersion": "1234580"
+                    }
+                  },
+                  {
+                    "ip": "192.168.1.22",
+                    "nodeName": "node-3",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "protocol-service-pod-3",
+                      "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78905",
+                      "resourceVersion": "1234581"
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "port": 8080,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "device",
+                    "port": 5000,
+                    "protocol": "TCP"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "metadata": {
+              "name": "position-service",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/endpoints/position-service",
+              "uid": "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89013",
+              "resourceVersion": "1234582",
+              "creationTimestamp": "2023-01-01T00:00:00Z"
+            },
+            "subsets": [
+              {
+                "addresses": [
+                  {
+                    "ip": "192.168.1.30",
+                    "nodeName": "node-1",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "position-service-pod-1",
+                      "uid": "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89014",
+                      "resourceVersion": "1234583"
+                    }
+                  },
+                  {
+                    "ip": "192.168.1.31",
+                    "nodeName": "node-2",
+                    "targetRef": {
+                      "kind": "Pod",
+                      "namespace": "default",
+                      "name": "position-service-pod-2",
+                      "uid": "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89015",
+                      "resourceVersion": "1234584"
+                    }
+                  }
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "port": 8080,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "grpc",
+                    "port": 9090,
+                    "protocol": "TCP"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "watch": {
+        "type": "MODIFIED",
+        "object": {
+          "kind": "Endpoints",
+          "apiVersion": "v1",
+          "metadata": {
+            "name": "protocol-service",
+            "namespace": "default",
+            "selfLink": "/api/v1/namespaces/default/endpoints/protocol-service",
+            "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78902",
+            "resourceVersion": "1234585",
+            "creationTimestamp": "2023-01-01T00:00:00Z"
+          },
+          "subsets": [
+            {
+              "addresses": [
+                {
+                  "ip": "192.168.1.20",
+                  "nodeName": "node-1",
+                  "targetRef": {
+                    "kind": "Pod",
+                    "namespace": "default",
+                    "name": "protocol-service-pod-1",
+                    "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78903",
+                    "resourceVersion": "1234579"
+                  }
+                },
+                {
+                  "ip": "192.168.1.21",
+                  "nodeName": "node-2",
+                  "targetRef": {
+                    "kind": "Pod",
+                    "namespace": "default",
+                    "name": "protocol-service-pod-2",
+                    "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78904",
+                    "resourceVersion": "1234580"
+                  }
+                },
+                {
+                  "ip": "192.168.1.22",
+                  "nodeName": "node-3",
+                  "targetRef": {
+                    "kind": "Pod",
+                    "namespace": "default",
+                    "name": "protocol-service-pod-3",
+                    "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78905",
+                    "resourceVersion": "1234581"
+                  }
+                },
+                {
+                  "ip": "192.168.1.23",
+                  "nodeName": "node-4",
+                  "targetRef": {
+                    "kind": "Pod",
+                    "namespace": "default",
+                    "name": "protocol-service-pod-4",
+                    "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78906",
+                    "resourceVersion": "1234586"
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "name": "http",
+                  "port": 8080,
+                  "protocol": "TCP"
+                },
+                {
+                  "name": "device",
+                  "port": 5000,
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "namespaced": {
+        "traccar": {
+          "kind": "EndpointsList",
+          "apiVersion": "v1",
+          "metadata": {
+            "selfLink": "/api/v1/namespaces/traccar/endpoints",
+            "resourceVersion": "1234587"
+          },
+          "items": [
+            {
+              "metadata": {
+                "name": "notification-service",
+                "namespace": "traccar",
+                "selfLink": "/api/v1/namespaces/traccar/endpoints/notification-service",
+                "uid": "e5f6a7b8-c9d0-1234-e5f6-a7b8c9d01235",
+                "resourceVersion": "1234588",
+                "creationTimestamp": "2023-01-01T00:00:00Z"
+              },
+              "subsets": [
+                {
+                  "addresses": [
+                    {
+                      "ip": "192.168.2.10",
+                      "nodeName": "node-1",
+                      "targetRef": {
+                        "kind": "Pod",
+                        "namespace": "traccar",
+                        "name": "notification-service-pod-1",
+                        "uid": "e5f6a7b8-c9d0-1234-e5f6-a7b8c9d01236",
+                        "resourceVersion": "1234589"
+                      }
+                    }
+                  ],
+                  "ports": [
+                    {
+                      "name": "http",
+                      "port": 8080,
+                      "protocol": "TCP"
+                    },
+                    {
+                      "name": "grpc",
+                      "port": 9090,
+                      "protocol": "TCP"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "metadata": {
+                "name": "reporting-service",
+                "namespace": "traccar",
+                "selfLink": "/api/v1/namespaces/traccar/endpoints/reporting-service",
+                "uid": "f6a7b8c9-d0e1-2345-f6a7-b8c9d0e12346",
+                "resourceVersion": "1234590",
+                "creationTimestamp": "2023-01-01T00:00:00Z"
+              },
+              "subsets": [
+                {
+                  "addresses": [
+                    {
+                      "ip": "192.168.2.20",
+                      "nodeName": "node-1",
+                      "targetRef": {
+                        "kind": "Pod",
+                        "namespace": "traccar",
+                        "name": "reporting-service-pod-1",
+                        "uid": "f6a7b8c9-d0e1-2345-f6a7-b8c9d0e12347",
+                        "resourceVersion": "1234591"
+                      }
+                    }
+                  ],
+                  "ports": [
+                    {
+                      "name": "http",
+                      "port": 8080,
+                      "protocol": "TCP"
+                    },
+                    {
+                      "name": "grpc",
+                      "port": 9090,
+                      "protocol": "TCP"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "/api/v1/pods": {
+      "default": {
+        "kind": "PodList",
+        "apiVersion": "v1",
+        "metadata": {
+          "selfLink": "/api/v1/pods",
+          "resourceVersion": "1234592"
+        },
+        "items": [
+          {
+            "metadata": {
+              "name": "api-gateway-pod-1",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/pods/api-gateway-pod-1",
+              "uid": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67892",
+              "resourceVersion": "1234576",
+              "creationTimestamp": "2023-01-01T00:00:00Z",
+              "labels": {
+                "app": "api-gateway",
+                "pod-template-hash": "7d8c9f0a1b"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "api-gateway",
+                  "image": "traccar/api-gateway:latest",
+                  "ports": [
+                    {
+                      "name": "http",
+                      "containerPort": 8080,
+                      "protocol": "TCP"
+                    },
+                    {
+                      "name": "https",
+                      "containerPort": 8443,
+                      "protocol": "TCP"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "cpu": "500m",
+                      "memory": "512Mi"
+                    },
+                    "requests": {
+                      "cpu": "200m",
+                      "memory": "256Mi"
+                    }
+                  },
+                  "livenessProbe": {
+                    "httpGet": {
+                      "path": "/health",
+                      "port": 8080,
+                      "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 30,
+                    "timeoutSeconds": 5,
+                    "periodSeconds": 10,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                  },
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/health",
+                      "port": 8080,
+                      "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 10,
+                    "timeoutSeconds": 5,
+                    "periodSeconds": 10,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                  }
+                }
+              ],
+              "nodeName": "node-1"
+            },
+            "status": {
+              "phase": "Running",
+              "conditions": [
+                {
+                  "type": "Ready",
+                  "status": "True",
+                  "lastProbeTime": null,
+                  "lastTransitionTime": "2023-01-01T00:00:30Z"
+                }
+              ],
+              "hostIP": "10.0.0.10",
+              "podIP": "192.168.1.10",
+              "startTime": "2023-01-01T00:00:00Z",
+              "containerStatuses": [
+                {
+                  "name": "api-gateway",
+                  "state": {
+                    "running": {
+                      "startedAt": "2023-01-01T00:00:10Z"
+                    }
+                  },
+                  "ready": true,
+                  "restartCount": 0,
+                  "image": "traccar/api-gateway:latest",
+                  "imageID": "docker-pullable://traccar/api-gateway@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                  "containerID": "docker://a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2"
+                }
+              ]
+            }
+          },
+          {
+            "metadata": {
+              "name": "protocol-service-pod-1",
+              "namespace": "default",
+              "selfLink": "/api/v1/namespaces/default/pods/protocol-service-pod-1",
+              "uid": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78903",
+              "resourceVersion": "1234579",
+              "creationTimestamp": "2023-01-01T00:00:00Z",
+              "labels": {
+                "app": "protocol-service",
+                "pod-template-hash": "8e9f0a1b2c"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "protocol-service",
+                  "image": "traccar/protocol-service:latest",
+                  "ports": [
+                    {
+                      "name": "http",
+                      "containerPort": 8080,
+                      "protocol": "TCP"
+                    },
+                    {
+                      "name": "device",
+                      "containerPort": 5000,
+                      "protocol": "TCP"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "cpu": "1000m",
+                      "memory": "1Gi"
+                    },
+                    "requests": {
+                      "cpu": "500m",
+                      "memory": "512Mi"
+                    }
+                  },
+                  "livenessProbe": {
+                    "httpGet": {
+                      "path": "/health",
+                      "port": 8080,
+                      "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 30,
+                    "timeoutSeconds": 5,
+                    "periodSeconds": 10,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                  },
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/health",
+                      "port": 8080,
+                      "scheme": "HTTP"
+                    },
+                    "initialDelaySeconds": 10,
+                    "timeoutSeconds": 5,
+                    "periodSeconds": 10,
+                    "successThreshold": 1,
+                    "failureThreshold": 3
+                  }
+                }
+              ],
+              "nodeName": "node-1"
+            },
+            "status": {
+              "phase": "Running",
+              "conditions": [
+                {
+                  "type": "Ready",
+                  "status": "True",
+                  "lastProbeTime": null,
+                  "lastTransitionTime": "2023-01-01T00:00:30Z"
+                }
+              ],
+              "hostIP": "10.0.0.10",
+              "podIP": "192.168.1.20",
+              "startTime": "2023-01-01T00:00:00Z",
+              "containerStatuses": [
+                {
+                  "name": "protocol-service",
+                  "state": {
+                    "running": {
+                      "startedAt": "2023-01-01T00:00:10Z"
+                    }
+                  },
+                  "ready": true,
+                  "restartCount": 0,
+                  "image": "traccar/protocol-service:latest",
+                  "imageID": "docker-pullable://traccar/protocol-service@sha256:2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef",
+                  "containerID": "docker://b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2c"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "watch": {
+        "type": "DELETED",
+        "object": {
+          "kind": "Pod",
+          "apiVersion": "v1",
+          "metadata": {
+            "name": "position-service-pod-2",
+            "namespace": "default",
+            "selfLink": "/api/v1/namespaces/default/pods/position-service-pod-2",
+            "uid": "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89015",
+            "resourceVersion": "1234593",
+            "creationTimestamp": "2023-01-01T00:00:00Z",
+            "labels": {
+              "app": "position-service",
+              "pod-template-hash": "9f0a1b2c3d"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "position-service",
+                "image": "traccar/position-service:latest",
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "grpc",
+                    "containerPort": 9090,
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "800m",
+                    "memory": "768Mi"
+                  },
+                  "requests": {
+                    "cpu": "400m",
+                    "memory": "384Mi"
+                  }
+                }
+              }
+            ],
+            "nodeName": "node-2"
+          },
+          "status": {
+            "phase": "Running",
+            "hostIP": "10.0.0.11",
+            "podIP": "192.168.1.31",
+            "startTime": "2023-01-01T00:00:00Z"
+          }
+        }
+      },
+      "namespaced": {
+        "traccar": {
+          "kind": "PodList",
+          "apiVersion": "v1",
+          "metadata": {
+            "selfLink": "/api/v1/namespaces/traccar/pods",
+            "resourceVersion": "1234594"
+          },
+          "items": [
+            {
+              "metadata": {
+                "name": "notification-service-pod-1",
+                "namespace": "traccar",
+                "selfLink": "/api/v1/namespaces/traccar/pods/notification-service-pod-1",
+                "uid": "e5f6a7b8-c9d0-1234-e5f6-a7b8c9d01236",
+                "resourceVersion": "1234589",
+                "creationTimestamp": "2023-01-01T00:00:00Z",
+                "labels": {
+                  "app": "notification-service",
+                  "pod-template-hash": "0a1b2c3d4e"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "notification-service",
+                    "image": "traccar/notification-service:latest",
+                    "ports": [
+                      {
+                        "name": "http",
+                        "containerPort": 8080,
+                        "protocol": "TCP"
+                      },
+                      {
+                        "name": "grpc",
+                        "containerPort": 9090,
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "resources": {
+                      "limits": {
+                        "cpu": "500m",
+                        "memory": "512Mi"
+                      },
+                      "requests": {
+                        "cpu": "200m",
+                        "memory": "256Mi"
+                      }
+                    }
+                  }
+                ],
+                "nodeName": "node-1"
+              },
+              "status": {
+                "phase": "Running",
+                "conditions": [
+                  {
+                    "type": "Ready",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2023-01-01T00:00:30Z"
+                  }
+                ],
+                "hostIP": "10.0.0.10",
+                "podIP": "192.168.2.10",
+                "startTime": "2023-01-01T00:00:00Z",
+                "containerStatuses": [
+                  {
+                    "name": "notification-service",
+                    "state": {
+                      "running": {
+                        "startedAt": "2023-01-01T00:00:10Z"
+                      }
+                    },
+                    "ready": true,
+                    "restartCount": 0,
+                    "image": "traccar/notification-service:latest",
+                    "imageID": "docker-pullable://traccar/notification-service@sha256:3456789012abcdef3456789012abcdef3456789012abcdef3456789012abcdef",
+                    "containerID": "docker://e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
