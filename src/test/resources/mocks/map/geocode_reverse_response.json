@@ -1,0 +1,101 @@
+{
+  "status": "OK",
+  "results": [
+    {
+      "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0",
+      "osm_type": "way",
+      "osm_id": "123456789",
+      "formatted_address": "123 Main Street, Springfield, State 12345, United States",
+      "address_components": [
+        {
+          "long_name": "123",
+          "short_name": "123",
+          "types": ["street_number"]
+        },
+        {
+          "long_name": "Main Street",
+          "short_name": "Main St",
+          "types": ["route"]
+        },
+        {
+          "long_name": "Downtown",
+          "short_name": "Downtown",
+          "types": ["neighborhood", "political"]
+        },
+        {
+          "long_name": "Springfield",
+          "short_name": "Springfield",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Springfield County",
+          "short_name": "Springfield County",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "State",
+          "short_name": "ST",
+          "types": ["administrative_area_level_1", "political"]
+        },
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": ["country", "political"]
+        },
+        {
+          "long_name": "12345",
+          "short_name": "12345",
+          "types": ["postal_code"]
+        }
+      ],
+      "geometry": {
+        "location": {
+          "lat": 40.7128,
+          "lng": -74.0060
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 40.7141489,
+            "lng": -74.0046511
+          },
+          "southwest": {
+            "lat": 40.7114511,
+            "lng": -74.0073489
+          }
+        },
+        "bounds": {
+          "northeast": {
+            "lat": 40.7141489,
+            "lng": -74.0046511
+          },
+          "southwest": {
+            "lat": 40.7114511,
+            "lng": -74.0073489
+          }
+        }
+      },
+      "types": ["street_address"],
+      "plus_code": {
+        "compound_code": "P27Q+MC New York, NY, USA",
+        "global_code": "87G8P27Q+MC"
+      },
+      "confidence": 9,
+      "attribution": "This data is provided by the Geocoding service for testing purposes"
+    }
+  ],
+  "plus_code": {
+    "compound_code": "P27Q+MC New York, NY, USA",
+    "global_code": "87G8P27Q+MC"
+  },
+  "timestamp": {
+    "created_http": "Wed, 22 May 2024 12:34:56 GMT",
+    "created_unix": 1716379696
+  },
+  "rate": {
+    "limit": 2500,
+    "remaining": 2499,
+    "reset": 86400
+  }
+}
