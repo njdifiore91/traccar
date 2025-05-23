@@ -1,0 +1,84 @@
+{
+  "error": {
+    "code": 535,
+    "command": "AUTH",
+    "message": "5.7.8 Authentication credentials invalid",
+    "serverResponse": "535 5.7.8 Authentication failed: Invalid username or password",
+    "returnCode": 535,
+    "exceptionType": "jakarta.mail.AuthenticationFailedException",
+    "exceptionMessage": "Authentication failed; nested exception is: jakarta.mail.AuthenticationFailedException: 535 5.7.8 Authentication failed: Invalid username or password"
+  },
+  "metadata": {
+    "timestamp": "2023-11-15T14:32:45.123Z",
+    "host": "smtp.example.com",
+    "port": 587,
+    "protocol": "smtp",
+    "authType": "LOGIN",
+    "securityType": "STARTTLS",
+    "retryable": true,
+    "category": "CREDENTIAL_ERROR",
+    "retryStrategy": "ALERT_ADMIN",
+    "correlationId": "smtp-auth-test-001"
+  },
+  "context": {
+    "smtpSession": {
+      "id": "session-12345",
+      "properties": {
+        "mail.smtp.auth": "true",
+        "mail.smtp.starttls.enable": "true",
+        "mail.smtp.host": "smtp.example.com",
+        "mail.smtp.port": "587"
+      }
+    },
+    "transportState": {
+      "connected": false,
+      "authenticated": false,
+      "lastCommand": "AUTH LOGIN",
+      "lastServerResponse": "535 5.7.8 Authentication failed: Invalid username or password",
+      "lastReturnCode": 535
+    },
+    "debugOutput": [
+      "DEBUG SMTP: trying to connect to host \"smtp.example.com\", port 587, isSSL false",
+      "DEBUG SMTP: connected to host \"smtp.example.com\", port: 587",
+      "EHLO localhost",
+      "250-smtp.example.com at your service, [192.168.1.1]",
+      "250-SIZE 35882577",
+      "250-8BITMIME",
+      "250-STARTTLS",
+      "250-ENHANCEDSTATUSCODES",
+      "250-PIPELINING",
+      "250-CHUNKING",
+      "250 AUTH LOGIN PLAIN XOAUTH2",
+      "DEBUG SMTP: Found extension \"SIZE\", arg \"35882577\"",
+      "DEBUG SMTP: Found extension \"8BITMIME\", arg \"\"",
+      "DEBUG SMTP: Found extension \"STARTTLS\", arg \"\"",
+      "DEBUG SMTP: Found extension \"ENHANCEDSTATUSCODES\", arg \"\"",
+      "DEBUG SMTP: Found extension \"PIPELINING\", arg \"\"",
+      "DEBUG SMTP: Found extension \"CHUNKING\", arg \"\"",
+      "DEBUG SMTP: Found extension \"AUTH\", arg \"LOGIN PLAIN XOAUTH2\"",
+      "STARTTLS",
+      "220 2.0.0 Ready to start TLS",
+      "EHLO localhost",
+      "250-smtp.example.com at your service, [192.168.1.1]",
+      "250-SIZE 35882577",
+      "250-8BITMIME",
+      "250-ENHANCEDSTATUSCODES",
+      "250-PIPELINING",
+      "250-CHUNKING",
+      "250 AUTH LOGIN PLAIN XOAUTH2",
+      "DEBUG SMTP: Found extension \"SIZE\", arg \"35882577\"",
+      "DEBUG SMTP: Found extension \"8BITMIME\", arg \"\"",
+      "DEBUG SMTP: Found extension \"ENHANCEDSTATUSCODES\", arg \"\"",
+      "DEBUG SMTP: Found extension \"PIPELINING\", arg \"\"",
+      "DEBUG SMTP: Found extension \"CHUNKING\", arg \"\"",
+      "DEBUG SMTP: Found extension \"AUTH\", arg \"LOGIN PLAIN XOAUTH2\"",
+      "DEBUG SMTP: Attempt to authenticate using LOGIN",
+      "AUTH LOGIN",
+      "334 VXNlcm5hbWU6",
+      "334 UGFzc3dvcmQ6",
+      "535 5.7.8 Authentication failed: Invalid username or password",
+      "DEBUG SMTP: AUTH LOGIN failed",
+      "DEBUG SMTP: authentication failed"
+    ]
+  }
+}
