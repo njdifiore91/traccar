@@ -1,0 +1,190 @@
+{
+  "scenarios": [
+    {
+      "name": "temporary_broker_unavailability",
+      "description": "Simulates a temporary broker outage where the broker becomes unavailable for a short period",
+      "configuration": {
+        "duration_ms": 5000,
+        "affected_brokers": [0],
+        "error_code": "NETWORK_EXCEPTION",
+        "recovery_behavior": "automatic"
+      }
+    },
+    {
+      "name": "extended_broker_outage",
+      "description": "Simulates a longer broker outage requiring circuit breaker activation",
+      "configuration": {
+        "duration_ms": 30000,
+        "affected_brokers": [0, 1],
+        "error_code": "BROKER_NOT_AVAILABLE",
+        "recovery_behavior": "manual"
+      }
+    },
+    {
+      "name": "message_rejection",
+      "description": "Broker accepts connection but rejects messages with an error",
+      "configuration": {
+        "rejection_rate_percentage": 75,
+        "error_code": "NOT_ENOUGH_REPLICAS",
+        "affected_topics": ["raw-positions"],
+        "duration_ms": 10000
+      }
+    },
+    {
+      "name": "partition_leader_change",
+      "description": "Simulates a partition leader election during normal operation",
+      "configuration": {
+        "affected_topics": ["raw-positions", "enriched-positions"],
+        "affected_partitions": [0, 1, 2],
+        "leader_change_delay_ms": 2000,
+        "rebalance_timeout_ms": 5000
+      }
+    },
+    {
+      "name": "network_partition",
+      "description": "Simulates a network partition where some brokers become unreachable",
+      "configuration": {
+        "partition_groups": [
+          [0, 1],
+          [2]
+        ],
+        "duration_ms": 15000,
+        "recovery_behavior": "automatic"
+      }
+    },
+    {
+      "name": "high_latency",
+      "description": "Simulates high network latency to broker responses",
+      "configuration": {
+        "affected_brokers": [0, 1, 2],
+        "latency_ms": 1500,
+        "jitter_ms": 500,
+        "duration_ms": 20000
+      }
+    },
+    {
+      "name": "broker_throttling",
+      "description": "Broker throttles message production due to quota limits",
+      "configuration": {
+        "throttle_time_ms": 2000,
+        "affected_topics": ["raw-positions"],
+        "duration_ms": 30000,
+        "error_code": "THROTTLING_QUOTA_EXCEEDED"
+      }
+    },
+    {
+      "name": "sequential_broker_failure",
+      "description": "Brokers fail one after another and recover in sequence",
+      "configuration": {
+        "failure_sequence": [
+          {"broker_id": 0, "fail_at_ms": 0, "recover_at_ms": 10000},
+          {"broker_id": 1, "fail_at_ms": 5000, "recover_at_ms": 15000},
+          {"broker_id": 2, "fail_at_ms": 10000, "recover_at_ms": 20000}
+        ],
+        "error_code": "BROKER_NOT_AVAILABLE"
+      }
+    },
+    {
+      "name": "metadata_refresh_failure",
+      "description": "Broker fails to provide metadata updates",
+      "configuration": {
+        "affected_brokers": [0],
+        "error_code": "NETWORK_EXCEPTION",
+        "duration_ms": 8000,
+        "affected_operations": ["METADATA"]
+      }
+    },
+    {
+      "name": "produce_only_failure",
+      "description": "Broker rejects only produce requests but allows other operations",
+      "configuration": {
+        "affected_brokers": [0, 1, 2],
+        "error_code": "INVALID_REQUIRED_ACKS",
+        "duration_ms": 12000,
+        "affected_operations": ["PRODUCE"]
+      }
+    },
+    {
+      "name": "corrupt_messages",
+      "description": "Broker occasionally returns corrupted messages",
+      "configuration": {
+        "corruption_percentage": 15,
+        "affected_topics": ["raw-positions"],
+        "corruption_type": "CRC_FAILURE",
+        "duration_ms": 10000
+      }
+    },
+    {
+      "name": "rebalance_timeout",
+      "description": "Consumer group rebalance takes longer than expected",
+      "configuration": {
+        "rebalance_delay_ms": 15000,
+        "affected_consumer_groups": ["protocol-service-group"],
+        "error_code": "REBALANCE_IN_PROGRESS"
+      }
+    },
+    {
+      "name": "complete_cluster_failure",
+      "description": "All brokers become unavailable simultaneously",
+      "configuration": {
+        "duration_ms": 20000,
+        "affected_brokers": [0, 1, 2],
+        "error_code": "BROKER_NOT_AVAILABLE",
+        "recovery_behavior": "automatic"
+      }
+    },
+    {
+      "name": "intermittent_failures",
+      "description": "Random intermittent failures across the cluster",
+      "configuration": {
+        "failure_probability_percentage": 25,
+        "max_failure_duration_ms": 3000,
+        "affected_brokers": [0, 1, 2],
+        "error_code": "NETWORK_EXCEPTION",
+        "interval_between_failures_ms": 5000,
+        "total_test_duration_ms": 60000
+      }
+    }
+  ],
+  "error_codes": {
+    "NETWORK_EXCEPTION": {
+      "code": -1,
+      "retriable": true,
+      "description": "Network connection failure"
+    },
+    "BROKER_NOT_AVAILABLE": {
+      "code": -2,
+      "retriable": true,
+      "description": "Broker is not available"
+    },
+    "NOT_ENOUGH_REPLICAS": {
+      "code": 19,
+      "retriable": true,
+      "description": "Message was sent but not enough replicas acknowledged it"
+    },
+    "INVALID_REQUIRED_ACKS": {
+      "code": 21,
+      "retriable": false,
+      "description": "Invalid required acknowledgments value"
+    },
+    "THROTTLING_QUOTA_EXCEEDED": {
+      "code": 59,
+      "retriable": true,
+      "description": "Client exceeded its quota and is being throttled"
+    },
+    "REBALANCE_IN_PROGRESS": {
+      "code": 27,
+      "retriable": true,
+      "description": "Group is rebalancing, so a rejoin is needed"
+    }
+  },
+  "global_configuration": {
+    "enable_detailed_logging": true,
+    "default_recovery_behavior": "automatic",
+    "default_error_code": "NETWORK_EXCEPTION",
+    "retry_backoff_ms": 100,
+    "retry_backoff_max_ms": 10000,
+    "retry_backoff_multiplier": 2.0,
+    "max_retries": 10
+  }
+}
