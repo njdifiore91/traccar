@@ -1,0 +1,499 @@
+{
+  "commands": [
+    {
+      "type": "positionSingle",
+      "description": "Request single position update",
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AP01)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@Q25,123456789012345,A10*68\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040100000000000016"
+        },
+        "atrack": {
+          "format": "text",
+          "data": "$WP+GETLOCATION=123456789012345"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,GETLOCATION,A,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541060000000001D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,LOC#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;LOC\r"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,LOC#"
+        },
+        "gt06": {
+          "format": "binary",
+          "data": "787812800C0000000000000000000000000000000D0A"
+        }
+      }
+    },
+    {
+      "type": "positionPeriodic",
+      "description": "Configure periodic position reporting",
+      "attributes": {
+        "frequency": 60
+      },
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AR00006000)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@Q26,123456789012345,0000,60,A10*F5\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040200000000003C16"
+        },
+        "atrack": {
+          "format": "text",
+          "data": "$WP+INTERVAL=123456789012345,60"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,TIMER,60,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541070000003C00D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,UPLOAD,60#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;TRACK,60\r"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S71,60#"
+        },
+        "gt06": {
+          "format": "binary",
+          "data": "78780D8100000000000000003C000D0A"
+        }
+      }
+    },
+    {
+      "type": "engineStop",
+      "description": "Stop vehicle engine",
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AV010)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@S20,123456789012345,A10,1,1*6A\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040300000000000116"
+        },
+        "atrack": {
+          "format": "text",
+          "data": "$WP+RELAY=123456789012345,1,1"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,RELAY,1,1,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541080000000100D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,RELAY,1,1#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;Enable1\r"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S20,1,1,#"
+        },
+        "gt06": {
+          "format": "binary",
+          "data": "787810800E0000000000000000010100000D0A"
+        }
+      }
+    },
+    {
+      "type": "engineResume",
+      "description": "Resume vehicle engine",
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AV000)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@S20,123456789012345,A10,1,0*69\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040300000000000016"
+        },
+        "atrack": {
+          "format": "text",
+          "data": "$WP+RELAY=123456789012345,1,0"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,RELAY,1,0,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541080000000000D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,RELAY,1,0#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;Disable1\r"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S20,1,0,#"
+        },
+        "gt06": {
+          "format": "binary",
+          "data": "787810800E0000000000000000010000000D0A"
+        }
+      }
+    },
+    {
+      "type": "alarmArm",
+      "description": "Arm the alarm system",
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AS001)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@S23,123456789012345,A10,1*0C\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040400000000000116"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,ARM,1,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541090000000100D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,SCF,ON#"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,SCF,ON#"
+        }
+      }
+    },
+    {
+      "type": "alarmDisarm",
+      "description": "Disarm the alarm system",
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "(013500001111AS000)"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "@@S23,123456789012345,A10,0*0B\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040400000000000016"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,ARM,0,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541090000000000D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,SCF,OFF#"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,SCF,OFF#"
+        }
+      }
+    },
+    {
+      "type": "setTimezone",
+      "description": "Set device timezone",
+      "attributes": {
+        "timezone": "GMT+8"
+      },
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S13,123456789012345,A10,8*1D\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040500000000000816"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,GMT,8,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541100000000800D4C142383838380D0A"
+        }
+      }
+    },
+    {
+      "type": "requestPhoto",
+      "description": "Request photo from camera",
+      "attributes": {
+        "camera": 1
+      },
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@D46,123456789012345,A10,1*F0\r\n"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,PHOTOGRAPH,1,#"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,D46,1,#"
+        }
+      }
+    },
+    {
+      "type": "configuration",
+      "description": "Send configuration parameter to device",
+      "attributes": {
+        "key": "OutputControl",
+        "value": "1"
+      },
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S67,123456789012345,A10,OutputControl,1*2D\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F3132333435363738393031323334350406000000000C4F757470757443616E74726F6C0131C8"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,CONFIG,OutputControl:1,#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;ParamSet;OutputControl;1\r"
+        }
+      }
+    },
+    {
+      "type": "custom",
+      "description": "Send custom command to device",
+      "attributes": {
+        "data": "*000000,001,CUSTOM,#"
+      },
+      "protocols": {
+        "tk103": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "meitrack": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "teltonika": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "atrack": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "meiligao": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        },
+        "gt06": {
+          "format": "text",
+          "data": "*000000,001,CUSTOM,#"
+        }
+      }
+    },
+    {
+      "type": "rebootDevice",
+      "description": "Reboot the device",
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S07,123456789012345,A10*1D\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040700000000000016"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,RESET,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541110000000000D4C142383838380D0A"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;Reset\r"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S07,#"
+        }
+      }
+    },
+    {
+      "type": "factoryReset",
+      "description": "Reset device to factory settings",
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S08,123456789012345,A10*12\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F313233343536373839303132333435040800000000000016"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,FACTORY,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541120000000000D4C142383838380D0A"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S08,#"
+        }
+      }
+    },
+    {
+      "type": "setConnection",
+      "description": "Configure server connection parameters",
+      "attributes": {
+        "server": "tracking.example.com",
+        "port": 5055
+      },
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S09,123456789012345,A10,tracking.example.com,5055*F1\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F31323334353637383930313233343504090000000015747261636B696E672E6578616D706C652E636F6D13BF16"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,SERVER,tracking.example.com,5055,#"
+        },
+        "meiligao": {
+          "format": "binary",
+          "data": "242442393030464631323334353637383930313233343541130000747261636B696E672E6578616D706C652E636F6D3A35303535D4C142383838380D0A"
+        },
+        "coban": {
+          "format": "text",
+          "data": "*HQ,123456789012345,IP,tracking.example.com,5055#"
+        },
+        "h02": {
+          "format": "text",
+          "data": "*HQ,123456789012345,S09,tracking.example.com,5055,#"
+        },
+        "gt06": {
+          "format": "binary",
+          "data": "78782D8000000000000000747261636B696E672E6578616D706C652E636F6D0013BF0D0A"
+        }
+      }
+    },
+    {
+      "type": "setOdometer",
+      "description": "Set vehicle odometer value",
+      "attributes": {
+        "value": 50000
+      },
+      "protocols": {
+        "meitrack": {
+          "format": "text",
+          "data": "@@S27,123456789012345,A10,50000*A2\r\n"
+        },
+        "teltonika": {
+          "format": "binary",
+          "data": "000F3132333435363738393031323334350410000000000C35303030300016"
+        },
+        "totem": {
+          "format": "text",
+          "data": "*000000,001,MILEAGE,50000,#"
+        },
+        "suntech": {
+          "format": "text",
+          "data": "SA200CMD;123456789012345;02;Odometer;50000\r"
+        }
+      }
+    }
+  ]
+}
