@@ -1,0 +1,660 @@
+{
+  "services": {
+    "protocol-service": {
+      "registration": {
+        "ID": "protocol-service-1",
+        "Name": "protocol-service",
+        "Address": "protocol-service.service.consul",
+        "Port": 8080,
+        "Tags": ["protocol", "device-communication", "traccar"],
+        "Meta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "Check": {
+          "HTTP": "http://protocol-service:8080/actuator/health/liveness",
+          "Interval": "10s",
+          "Timeout": "5s",
+          "DeregisterCriticalServiceAfter": "30s"
+        },
+        "response": {
+          "success": true,
+          "message": "Service registered successfully"
+        }
+      },
+      "catalog": {
+        "ID": "protocol-service-1",
+        "Node": "node1",
+        "Address": "protocol-service.service.consul",
+        "ServiceID": "protocol-service-1",
+        "ServiceName": "protocol-service",
+        "ServiceTags": ["protocol", "device-communication", "traccar"],
+        "ServiceAddress": "protocol-service.service.consul",
+        "ServicePort": 8080,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 14,
+        "ModifyIndex": 14
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "protocol-service-1",
+            "Service": "protocol-service",
+            "Tags": ["protocol", "device-communication", "traccar"],
+            "Address": "protocol-service.service.consul",
+            "Port": 8080,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:protocol-service-1",
+              "Name": "Service 'protocol-service' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://protocol-service:8080/actuator/health/liveness: 200 OK",
+              "ServiceID": "protocol-service-1",
+              "ServiceName": "protocol-service"
+            }
+          ]
+        }
+      ],
+      "deregistration": {
+        "response": {
+          "success": true,
+          "message": "Service deregistered successfully"
+        }
+      }
+    },
+    "position-service": {
+      "catalog": {
+        "ID": "position-service-1",
+        "Node": "node1",
+        "Address": "position-service.service.consul",
+        "ServiceID": "position-service-1",
+        "ServiceName": "position-service",
+        "ServiceTags": ["position", "processing", "traccar"],
+        "ServiceAddress": "position-service.service.consul",
+        "ServicePort": 8080,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 15,
+        "ModifyIndex": 15
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "position-service-1",
+            "Service": "position-service",
+            "Tags": ["position", "processing", "traccar"],
+            "Address": "position-service.service.consul",
+            "Port": 8080,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:position-service-1",
+              "Name": "Service 'position-service' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://position-service:8080/actuator/health/liveness: 200 OK",
+              "ServiceID": "position-service-1",
+              "ServiceName": "position-service"
+            }
+          ]
+        }
+      ]
+    },
+    "event-service": {
+      "catalog": {
+        "ID": "event-service-1",
+        "Node": "node1",
+        "Address": "event-service.service.consul",
+        "ServiceID": "event-service-1",
+        "ServiceName": "event-service",
+        "ServiceTags": ["event", "processing", "traccar"],
+        "ServiceAddress": "event-service.service.consul",
+        "ServicePort": 8080,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 16,
+        "ModifyIndex": 16
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "event-service-1",
+            "Service": "event-service",
+            "Tags": ["event", "processing", "traccar"],
+            "Address": "event-service.service.consul",
+            "Port": 8080,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:event-service-1",
+              "Name": "Service 'event-service' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://event-service:8080/actuator/health/liveness: 200 OK",
+              "ServiceID": "event-service-1",
+              "ServiceName": "event-service"
+            }
+          ]
+        }
+      ]
+    },
+    "notification-service": {
+      "catalog": {
+        "ID": "notification-service-1",
+        "Node": "node1",
+        "Address": "notification-service.service.consul",
+        "ServiceID": "notification-service-1",
+        "ServiceName": "notification-service",
+        "ServiceTags": ["notification", "alert", "traccar"],
+        "ServiceAddress": "notification-service.service.consul",
+        "ServicePort": 8080,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 17,
+        "ModifyIndex": 17
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "notification-service-1",
+            "Service": "notification-service",
+            "Tags": ["notification", "alert", "traccar"],
+            "Address": "notification-service.service.consul",
+            "Port": 8080,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:notification-service-1",
+              "Name": "Service 'notification-service' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://notification-service:8080/actuator/health/liveness: 200 OK",
+              "ServiceID": "notification-service-1",
+              "ServiceName": "notification-service"
+            }
+          ]
+        }
+      ]
+    },
+    "api-gateway": {
+      "catalog": {
+        "ID": "api-gateway-1",
+        "Node": "node1",
+        "Address": "api-gateway.service.consul",
+        "ServiceID": "api-gateway-1",
+        "ServiceName": "api-gateway",
+        "ServiceTags": ["api", "gateway", "traccar"],
+        "ServiceAddress": "api-gateway.service.consul",
+        "ServicePort": 8082,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 18,
+        "ModifyIndex": 18
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "api-gateway-1",
+            "Service": "api-gateway",
+            "Tags": ["api", "gateway", "traccar"],
+            "Address": "api-gateway.service.consul",
+            "Port": 8082,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:api-gateway-1",
+              "Name": "Service 'api-gateway' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://api-gateway:8082/actuator/health/liveness: 200 OK",
+              "ServiceID": "api-gateway-1",
+              "ServiceName": "api-gateway"
+            }
+          ]
+        }
+      ]
+    },
+    "reporting-service": {
+      "catalog": {
+        "ID": "reporting-service-1",
+        "Node": "node1",
+        "Address": "reporting-service.service.consul",
+        "ServiceID": "reporting-service-1",
+        "ServiceName": "reporting-service",
+        "ServiceTags": ["reporting", "analytics", "traccar"],
+        "ServiceAddress": "reporting-service.service.consul",
+        "ServicePort": 8080,
+        "ServiceMeta": {
+          "version": "1.0.0",
+          "environment": "test"
+        },
+        "ServiceEnableTagOverride": false,
+        "CreateIndex": 19,
+        "ModifyIndex": 19
+      },
+      "health": [
+        {
+          "Node": {
+            "ID": "node1",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "Datacenter": "dc1",
+            "Meta": {}
+          },
+          "Service": {
+            "ID": "reporting-service-1",
+            "Service": "reporting-service",
+            "Tags": ["reporting", "analytics", "traccar"],
+            "Address": "reporting-service.service.consul",
+            "Port": 8080,
+            "Meta": {
+              "version": "1.0.0",
+              "environment": "test"
+            },
+            "EnableTagOverride": false
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": ""
+            },
+            {
+              "Node": "node1",
+              "CheckID": "service:reporting-service-1",
+              "Name": "Service 'reporting-service' check",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "HTTP GET http://reporting-service:8080/actuator/health/liveness: 200 OK",
+              "ServiceID": "reporting-service-1",
+              "ServiceName": "reporting-service"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "catalog": {
+    "services": [
+      {
+        "Name": "protocol-service",
+        "Tags": ["protocol", "device-communication", "traccar"]
+      },
+      {
+        "Name": "position-service",
+        "Tags": ["position", "processing", "traccar"]
+      },
+      {
+        "Name": "event-service",
+        "Tags": ["event", "processing", "traccar"]
+      },
+      {
+        "Name": "notification-service",
+        "Tags": ["notification", "alert", "traccar"]
+      },
+      {
+        "Name": "api-gateway",
+        "Tags": ["api", "gateway", "traccar"]
+      },
+      {
+        "Name": "reporting-service",
+        "Tags": ["reporting", "analytics", "traccar"]
+      }
+    ],
+    "datacenters": ["dc1"]
+  },
+  "health": {
+    "checks": {
+      "protocol-service": [
+        {
+          "Node": "node1",
+          "CheckID": "service:protocol-service-1",
+          "Name": "Service 'protocol-service' check",
+          "Status": "passing",
+          "Notes": "",
+          "Output": "HTTP GET http://protocol-service:8080/actuator/health/liveness: 200 OK",
+          "ServiceID": "protocol-service-1",
+          "ServiceName": "protocol-service"
+        }
+      ],
+      "failing": [
+        {
+          "Node": "node2",
+          "CheckID": "service:protocol-service-2",
+          "Name": "Service 'protocol-service' check",
+          "Status": "critical",
+          "Notes": "",
+          "Output": "HTTP GET http://protocol-service-2:8080/actuator/health/liveness: connection refused",
+          "ServiceID": "protocol-service-2",
+          "ServiceName": "protocol-service"
+        }
+      ],
+      "warning": [
+        {
+          "Node": "node3",
+          "CheckID": "service:protocol-service-3",
+          "Name": "Service 'protocol-service' check",
+          "Status": "warning",
+          "Notes": "",
+          "Output": "HTTP GET http://protocol-service-3:8080/actuator/health/liveness: response time 2.5s exceeds 1s warning threshold",
+          "ServiceID": "protocol-service-3",
+          "ServiceName": "protocol-service"
+        }
+      ]
+    },
+    "state": {
+      "node1": "passing",
+      "node2": "critical",
+      "node3": "warning"
+    }
+  },
+  "kv": {
+    "config/protocol-service/default": {
+      "Value": "ewogICJzZXJ2aWNlIjogewogICAgIm5hbWUiOiAicHJvdG9jb2wtc2VydmljZSIsCiAgICAidmVyc2lvbiI6ICIxLjAuMCIsCiAgICAiZW52aXJvbm1lbnQiOiAidGVzdCIKICB9LAogICJuZXR3b3JrIjogewogICAgInBvcnRzIjogewogICAgICAib3NtYW5kIjogNTA1NSwKICAgICAgInRlbHRvbmlrYSI6IDUwMjcsCiAgICAgICJtZWl0cmFjayI6IDUwMjAsCiAgICAgICJ0b3RlbSI6IDUwMTksCiAgICAgICJhdHJhY2siOiA1MDEwCiAgICB9LAogICAgInRpbWVvdXQiOiAzMCwKICAgICJib3NzVGhyZWFkcyI6IDIsCiAgICAid29ya2VyVGhyZWFkcyI6IDEwCiAgfSwKICAibWVzc2FnaW5nIjogewogICAgImJyb2tlciI6ICJrYWZrYSIsCiAgICAidG9waWNzIjogewogICAgICAicmF3UG9zaXRpb25zIjogInJhdy1wb3NpdGlvbnMiLAogICAgICAiY29tbWFuZHMiOiAiZGV2aWNlLWNvbW1hbmRzIgogICAgfQogIH0sCiAgImRpc2NvdmVyeSI6IHsKICAgICJyZWdpc3RyYXRpb24iOiB7CiAgICAgICJpbnRlcnZhbCI6IDEwLAogICAgICAidGltZW91dCI6IDUsCiAgICAgICJkZXJlZ2lzdGVyQWZ0ZXIiOiAzMAogICAgfQogIH0KfQ==",
+      "CreateIndex": 20,
+      "ModifyIndex": 20,
+      "LockIndex": 0,
+      "Flags": 0,
+      "Session": "",
+      "Key": "config/protocol-service/default"
+    },
+    "config/protocol-service/test": {
+      "Value": "ewogICJzZXJ2aWNlIjogewogICAgImVudmlyb25tZW50IjogInRlc3QiCiAgfSwKICAibmV0d29yayI6IHsKICAgICJ0aW1lb3V0IjogNSwKICAgICJib3NzVGhyZWFkcyI6IDEsCiAgICAid29ya2VyVGhyZWFkcyI6IDUKICB9Cn0=",
+      "CreateIndex": 21,
+      "ModifyIndex": 21,
+      "LockIndex": 0,
+      "Flags": 0,
+      "Session": "",
+      "Key": "config/protocol-service/test"
+    },
+    "config/services/protocol-dependencies": {
+      "Value": "ewogICJkZXBlbmRlbmNpZXMiOiBbCiAgICB7CiAgICAgICJuYW1lIjogInBvc2l0aW9uLXNlcnZpY2UiLAogICAgICAicmVxdWlyZWQiOiB0cnVlLAogICAgICAiaGVhbHRoQ2hlY2tQYXRoIjogIi9hY3R1YXRvci9oZWFsdGgvbGl2ZW5lc3MiCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICJldmVudC1zZXJ2aWNlIiwKICAgICAgInJlcXVpcmVkIjogZmFsc2UsCiAgICAgICJoZWFsdGhDaGVja1BhdGgiOiAiL2FjdHVhdG9yL2hlYWx0aC9saXZlbmVzcyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogIm5vdGlmaWNhdGlvbi1zZXJ2aWNlIiwKICAgICAgInJlcXVpcmVkIjogZmFsc2UsCiAgICAgICJoZWFsdGhDaGVja1BhdGgiOiAiL2FjdHVhdG9yL2hlYWx0aC9saXZlbmVzcyIKICAgIH0KICBdCn0=",
+      "CreateIndex": 22,
+      "ModifyIndex": 22,
+      "LockIndex": 0,
+      "Flags": 0,
+      "Session": "",
+      "Key": "config/services/protocol-dependencies"
+    }
+  },
+  "agent": {
+    "self": {
+      "Config": {
+        "Bootstrap": true,
+        "Server": true,
+        "Datacenter": "dc1",
+        "DataDir": "/consul/data",
+        "DNSRecursors": [],
+        "DNSConfig": {
+          "AllowStale": true,
+          "MaxStale": "87600h",
+          "NodeTTL": "0s",
+          "ServiceTTL": null,
+          "EnableTruncate": false,
+          "OnlyPassing": false
+        },
+        "Domain": "consul",
+        "LogLevel": "INFO",
+        "NodeName": "consul-server-1",
+        "ClientAddr": "0.0.0.0",
+        "BindAddr": "0.0.0.0",
+        "AdvertiseAddr": "10.0.0.1",
+        "Ports": {
+          "DNS": 8600,
+          "HTTP": 8500,
+          "HTTPS": -1,
+          "SerfLan": 8301,
+          "SerfWan": 8302,
+          "Server": 8300
+        },
+        "Addresses": {
+          "DNS": "",
+          "HTTP": "",
+          "HTTPS": ""
+        },
+        "EnableUI": true
+      },
+      "DebugConfig": {},
+      "Member": {
+        "Name": "consul-server-1",
+        "Addr": "10.0.0.1",
+        "Port": 8301,
+        "Tags": {
+          "bootstrap": "1",
+          "dc": "dc1",
+          "port": "8300",
+          "role": "consul",
+          "vsn": "1",
+          "vsn_max": "1",
+          "vsn_min": "1"
+        },
+        "Status": 1,
+        "ProtocolMin": 1,
+        "ProtocolMax": 5,
+        "ProtocolCur": 2,
+        "DelegateMin": 2,
+        "DelegateMax": 5,
+        "DelegateCur": 4
+      },
+      "Stats": {
+        "agent": {
+          "check_monitors": "7",
+          "check_ttls": "0",
+          "checks": "7",
+          "services": "6"
+        },
+        "consul": {
+          "leader": "true",
+          "leader_addr": "10.0.0.1:8300",
+          "server": "true"
+        },
+        "runtime": {
+          "arch": "amd64",
+          "cpu_count": "4",
+          "goroutines": "96",
+          "max_procs": "4",
+          "os": "linux",
+          "version": "go1.16.4"
+        },
+        "serf_lan": {
+          "encrypted": "false",
+          "event_queue": "0",
+          "event_time": "1",
+          "failed": "0",
+          "intent_queue": "0",
+          "left": "0",
+          "member_time": "1",
+          "members": "1",
+          "query_queue": "0",
+          "query_time": "1"
+        },
+        "serf_wan": {
+          "encrypted": "false",
+          "event_queue": "0",
+          "event_time": "1",
+          "failed": "0",
+          "intent_queue": "0",
+          "left": "0",
+          "member_time": "1",
+          "members": "1",
+          "query_queue": "0",
+          "query_time": "1"
+        }
+      }
+    }
+  },
+  "error_scenarios": {
+    "service_not_found": {
+      "error": "service not found",
+      "status": 404
+    },
+    "service_registration_failed": {
+      "error": "service registration failed",
+      "status": 500
+    },
+    "health_check_failed": {
+      "error": "health check failed",
+      "status": 503
+    },
+    "kv_not_found": {
+      "error": "key not found",
+      "status": 404
+    },
+    "connection_refused": {
+      "error": "connection refused",
+      "status": 503
+    },
+    "timeout": {
+      "error": "request timeout",
+      "status": 504
+    }
+  },
+  "api_endpoints": {
+    "register": "/v1/agent/service/register",
+    "deregister": "/v1/agent/service/deregister/{serviceId}",
+    "services": "/v1/agent/services",
+    "service": "/v1/catalog/service/{serviceName}",
+    "health": "/v1/health/service/{serviceName}",
+    "kv_get": "/v1/kv/{key}",
+    "kv_put": "/v1/kv/{key}",
+    "kv_delete": "/v1/kv/{key}"
+  }
+}
