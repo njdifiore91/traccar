@@ -1,0 +1,334 @@
+{
+  "version": "1.0",
+  "description": "Notification channel behavior configuration for Protocol Service testing",
+  "channels": {
+    "email": {
+      "success_rate": 0.95,
+      "latency": {
+        "min_ms": 500,
+        "max_ms": 2000,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "smtp_connection_failure",
+          "probability": 0.02,
+          "message": "Failed to connect to SMTP server"
+        },
+        {
+          "type": "invalid_recipient",
+          "probability": 0.02,
+          "message": "Invalid email recipient address"
+        },
+        {
+          "type": "rate_limit_exceeded",
+          "probability": 0.01,
+          "message": "Email sending rate limit exceeded"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 3,
+        "backoff_factor": 2.0,
+        "initial_delay_ms": 1000
+      }
+    },
+    "sms": {
+      "success_rate": 0.90,
+      "latency": {
+        "min_ms": 1000,
+        "max_ms": 5000,
+        "distribution": "exponential"
+      },
+      "error_conditions": [
+        {
+          "type": "gateway_unavailable",
+          "probability": 0.03,
+          "message": "SMS gateway unavailable"
+        },
+        {
+          "type": "invalid_phone_number",
+          "probability": 0.02,
+          "message": "Invalid phone number format"
+        },
+        {
+          "type": "quota_exceeded",
+          "probability": 0.03,
+          "message": "SMS quota exceeded"
+        },
+        {
+          "type": "message_too_long",
+          "probability": 0.02,
+          "message": "SMS message exceeds maximum length"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 2,
+        "backoff_factor": 1.5,
+        "initial_delay_ms": 2000
+      }
+    },
+    "push": {
+      "success_rate": 0.85,
+      "latency": {
+        "min_ms": 200,
+        "max_ms": 1500,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "fcm_unavailable",
+          "probability": 0.05,
+          "message": "Firebase Cloud Messaging service unavailable"
+        },
+        {
+          "type": "invalid_token",
+          "probability": 0.05,
+          "message": "Invalid or expired device token"
+        },
+        {
+          "type": "device_not_registered",
+          "probability": 0.03,
+          "message": "Device is not registered for push notifications"
+        },
+        {
+          "type": "payload_too_large",
+          "probability": 0.02,
+          "message": "Push notification payload exceeds size limit"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 3,
+        "backoff_factor": 2.0,
+        "initial_delay_ms": 500
+      }
+    },
+    "web": {
+      "success_rate": 0.98,
+      "latency": {
+        "min_ms": 50,
+        "max_ms": 500,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "websocket_disconnected",
+          "probability": 0.01,
+          "message": "WebSocket connection not available"
+        },
+        {
+          "type": "session_expired",
+          "probability": 0.01,
+          "message": "User session has expired"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 5,
+        "backoff_factor": 1.2,
+        "initial_delay_ms": 100
+      }
+    },
+    "telegram": {
+      "success_rate": 0.92,
+      "latency": {
+        "min_ms": 800,
+        "max_ms": 3000,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "api_unavailable",
+          "probability": 0.03,
+          "message": "Telegram API unavailable"
+        },
+        {
+          "type": "bot_token_invalid",
+          "probability": 0.02,
+          "message": "Invalid Telegram bot token"
+        },
+        {
+          "type": "chat_not_found",
+          "probability": 0.02,
+          "message": "Telegram chat not found"
+        },
+        {
+          "type": "rate_limited",
+          "probability": 0.01,
+          "message": "Telegram API rate limit exceeded"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 3,
+        "backoff_factor": 2.0,
+        "initial_delay_ms": 1000
+      }
+    },
+    "pushover": {
+      "success_rate": 0.94,
+      "latency": {
+        "min_ms": 300,
+        "max_ms": 2000,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "api_unavailable",
+          "probability": 0.02,
+          "message": "Pushover API unavailable"
+        },
+        {
+          "type": "invalid_user_key",
+          "probability": 0.02,
+          "message": "Invalid Pushover user key"
+        },
+        {
+          "type": "invalid_app_token",
+          "probability": 0.01,
+          "message": "Invalid Pushover application token"
+        },
+        {
+          "type": "rate_limited",
+          "probability": 0.01,
+          "message": "Pushover API rate limit exceeded"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 3,
+        "backoff_factor": 1.5,
+        "initial_delay_ms": 800
+      }
+    },
+    "command": {
+      "success_rate": 0.80,
+      "latency": {
+        "min_ms": 100,
+        "max_ms": 1000,
+        "distribution": "normal"
+      },
+      "error_conditions": [
+        {
+          "type": "command_execution_failed",
+          "probability": 0.10,
+          "message": "Failed to execute command"
+        },
+        {
+          "type": "command_timeout",
+          "probability": 0.05,
+          "message": "Command execution timed out"
+        },
+        {
+          "type": "permission_denied",
+          "probability": 0.05,
+          "message": "Permission denied for command execution"
+        }
+      ],
+      "retry_behavior": {
+        "max_retries": 2,
+        "backoff_factor": 2.0,
+        "initial_delay_ms": 500
+      }
+    }
+  },
+  "global_settings": {
+    "enable_circuit_breaker": true,
+    "circuit_breaker": {
+      "failure_threshold": 5,
+      "reset_timeout_ms": 30000,
+      "half_open_allowed_calls": 2
+    },
+    "correlation_id_required": true,
+    "dead_letter_queue_enabled": true,
+    "network_conditions": {
+      "packet_loss_probability": 0.01,
+      "network_partition_probability": 0.005,
+      "high_latency_probability": 0.02,
+      "high_latency_factor": 5.0
+    }
+  },
+  "test_scenarios": {
+    "normal_operation": {
+      "description": "Normal operation with expected success rates",
+      "override": {}
+    },
+    "degraded_network": {
+      "description": "Simulates degraded network conditions",
+      "override": {
+        "global_settings": {
+          "network_conditions": {
+            "packet_loss_probability": 0.05,
+            "network_partition_probability": 0.02,
+            "high_latency_probability": 0.10,
+            "high_latency_factor": 10.0
+          }
+        }
+      }
+    },
+    "service_outage": {
+      "description": "Simulates complete outage of external notification services",
+      "override": {
+        "channels": {
+          "email": { "success_rate": 0.0 },
+          "sms": { "success_rate": 0.0 },
+          "push": { "success_rate": 0.0 },
+          "telegram": { "success_rate": 0.0 },
+          "pushover": { "success_rate": 0.0 }
+        }
+      }
+    },
+    "high_latency": {
+      "description": "Simulates high latency across all channels",
+      "override": {
+        "channels": {
+          "email": { "latency": { "min_ms": 2000, "max_ms": 5000 } },
+          "sms": { "latency": { "min_ms": 3000, "max_ms": 8000 } },
+          "push": { "latency": { "min_ms": 1000, "max_ms": 3000 } },
+          "web": { "latency": { "min_ms": 500, "max_ms": 2000 } },
+          "telegram": { "latency": { "min_ms": 2000, "max_ms": 6000 } },
+          "pushover": { "latency": { "min_ms": 1500, "max_ms": 4000 } },
+          "command": { "latency": { "min_ms": 1000, "max_ms": 3000 } }
+        }
+      }
+    },
+    "rate_limited": {
+      "description": "Simulates rate limiting on all channels",
+      "override": {
+        "channels": {
+          "email": { 
+            "error_conditions": [{
+              "type": "rate_limit_exceeded",
+              "probability": 0.5,
+              "message": "Email sending rate limit exceeded"
+            }]
+          },
+          "sms": { 
+            "error_conditions": [{
+              "type": "quota_exceeded",
+              "probability": 0.5,
+              "message": "SMS quota exceeded"
+            }]
+          },
+          "push": { 
+            "error_conditions": [{
+              "type": "fcm_unavailable",
+              "probability": 0.5,
+              "message": "Firebase Cloud Messaging service unavailable"
+            }]
+          },
+          "telegram": { 
+            "error_conditions": [{
+              "type": "rate_limited",
+              "probability": 0.5,
+              "message": "Telegram API rate limit exceeded"
+            }]
+          },
+          "pushover": { 
+            "error_conditions": [{
+              "type": "rate_limited",
+              "probability": 0.5,
+              "message": "Pushover API rate limit exceeded"
+            }]
+          }
+        }
+      }
+    }
+  }
+}
