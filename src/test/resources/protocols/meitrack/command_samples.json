@@ -1,0 +1,116 @@
+[
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "positionSingle"
+    },
+    "expected": "@@A25,123456789012345,A10*58\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "engineStop"
+    },
+    "expected": "@@A33,123456789012345,C01,0,12222*7A\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "engineResume"
+    },
+    "expected": "@@A33,123456789012345,C01,0,02222*6A\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "alarmArm"
+    },
+    "expected": "@@A33,123456789012345,C01,0,22122*7B\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "alarmDisarm"
+    },
+    "expected": "@@A33,123456789012345,C01,0,22022*7A\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "alarmArm",
+      "attributes": {
+        "protocol.alternative": true
+      }
+    },
+    "expected": "@@A27,123456789012345,B21,1*41\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "alarmDisarm",
+      "attributes": {
+        "protocol.alternative": true
+      }
+    },
+    "expected": "@@A27,123456789012345,B21,0*40\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "requestPhoto"
+    },
+    "expected": "@@A46,123456789012345,D03,1,camera_picture.jpg*1C\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "requestPhoto",
+      "attributes": {
+        "index": 3
+      }
+    },
+    "expected": "@@A46,123456789012345,D03,3,camera_picture.jpg*1E\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "sendSms",
+      "attributes": {
+        "phone": "15360853789",
+        "message": "Meitrack"
+      }
+    },
+    "expected": "@@A48,123456789012345,C02,0,15360853789,Meitrack*8B\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "sendSms",
+      "attributes": {
+        "phone": "15360853789",
+        "message": "Test Message"
+      }
+    },
+    "expected": "@@A52,123456789012345,C02,0,15360853789,Test Message*0D\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "custom",
+      "attributes": {
+        "data": "S71,1,22"
+      }
+    },
+    "expected": "@@A30,123456789012345,S71,1,22*1D\r\n"
+  },
+  {
+    "command": {
+      "deviceId": 1,
+      "type": "custom",
+      "attributes": {
+        "data": "B05,1,5"
+      }
+    },
+    "expected": "@@A30,123456789012345,B05,1,5*0B\r\n"
+  }
+]
