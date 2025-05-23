@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,192 +15,223 @@
  */
 package org.traccar.discovery;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import org.traccar.config.Config;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Configuration class for service registry settings, including registry type (Consul or Kubernetes),
- * connection details, health check settings, and service metadata. This class centralizes all
- * configuration related to service discovery and registration.
+ * Configuration class for service registry settings.
+ * Supports both Consul and Kubernetes service registries.
  */
 @Singleton
 public class ServiceRegistryConfig {
 
-    private String registryType;
-    private String namespace;
-    
-    // Consul specific configuration
-    private String consulHost;
-    private int consulPort;
-    private String consulScheme;
-    private String consulAclToken;
-    
-    // Health check configuration
-    private boolean healthCheckEnabled;
-    private String healthCheckEndpoint;
-    private int healthCheckInterval;
-    private int healthCheckTimeout;
-    private int deregisterCriticalServiceAfter;
-    
     /**
-     * Default constructor with default values.
+     * Supported service registry types.
      */
-    public ServiceRegistryConfig() {
-        // Default values
-        this.registryType = ServiceRegistryFactory.DEFAULT_REGISTRY_TYPE;
-        this.namespace = "default";
-        this.consulHost = "localhost";
-        this.consulPort = 8500;
-        this.consulScheme = "http";
-        this.healthCheckEnabled = true;
-        this.healthCheckEndpoint = "/health";
-        this.healthCheckInterval = 10;
-        this.healthCheckTimeout = 5;
-        this.deregisterCriticalServiceAfter = 30;
+    public enum RegistryType {
+        CONSUL,
+        KUBERNETES,
+        NONE
+    }
+
+    private final RegistryType registryType;
+    private final String serviceId;
+    private final String serviceName;
+    private final String serviceHost;
+    private final int servicePort;
+    private final String registryHost;
+    private final int registryPort;
+    private final int healthCheckInterval;
+    private final int healthCheckTimeout;
+    private final int healthCheckFailThreshold;
+    private final Map<String, String> serviceMetadata;
+
+    /**
+     * Constructs a new ServiceRegistryConfig with settings from the provided Config.
+     *
+     * @param config The application configuration
+     */
+    @Inject
+    public ServiceRegistryConfig(Config config) {
+        // Registry type (CONSUL, KUBERNETES, or NONE)
+        String registryTypeStr = config.getString("service.registry.type", "NONE");
+        try {
+            this.registryType = RegistryType.valueOf(registryTypeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid service registry type: " + registryTypeStr +
+                    ". Supported types are: CONSUL, KUBERNETES, NONE", e);
+        }
+
+        // Service identification
+        this.serviceId = config.getString("service.id", generateDefaultServiceId());
+        this.serviceName = config.getString("service.name", "protocol-service");
+        this.serviceHost = config.getString("service.host", "localhost");
+        this.servicePort = config.getInteger("service.port", 8082);
+
+        // Registry connection details
+        this.registryHost = config.getString("service.registry.host", "localhost");
+        this.registryPort = config.getInteger("service.registry.port", getDefaultRegistryPort());
+
+        // Health check settings
+        this.healthCheckInterval = config.getInteger("service.healthCheck.interval", 10);
+        this.healthCheckTimeout = config.getInteger("service.healthCheck.timeout", 5);
+        this.healthCheckFailThreshold = config.getInteger("service.healthCheck.failThreshold", 3);
+
+        // Service metadata
+        this.serviceMetadata = new HashMap<>();
+        String metadataStr = config.getString("service.metadata", "");
+        if (!metadataStr.isEmpty()) {
+            String[] entries = metadataStr.split(",");
+            for (String entry : entries) {
+                String[] keyValue = entry.split("=");
+                if (keyValue.length == 2) {
+                    serviceMetadata.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+
+        // Add environment tag if available
+        String environment = config.getString("service.environment", "production");
+        serviceMetadata.put("environment", environment);
+
+        // Validate configuration if service discovery is enabled
+        if (registryType != RegistryType.NONE) {
+            validateConfiguration();
+        }
     }
 
     /**
-     * Gets the registry type (consul or kubernetes).
+     * Validates that all required configuration properties are set.
+     * Throws IllegalArgumentException if validation fails.
+     */
+    private void validateConfiguration() {
+        if (serviceId == null || serviceId.isEmpty()) {
+            throw new IllegalArgumentException("service.id is required");
+        }
+        if (serviceName == null || serviceName.isEmpty()) {
+            throw new IllegalArgumentException("service.name is required");
+        }
+        if (serviceHost == null || serviceHost.isEmpty()) {
+            throw new IllegalArgumentException("service.host is required");
+        }
+        if (servicePort <= 0) {
+            throw new IllegalArgumentException("service.port must be a positive integer");
+        }
+        if (registryHost == null || registryHost.isEmpty()) {
+            throw new IllegalArgumentException("service.registry.host is required");
+        }
+        if (registryPort <= 0) {
+            throw new IllegalArgumentException("service.registry.port must be a positive integer");
+        }
+        if (healthCheckInterval <= 0) {
+            throw new IllegalArgumentException("service.healthCheck.interval must be a positive integer");
+        }
+        if (healthCheckTimeout <= 0) {
+            throw new IllegalArgumentException("service.healthCheck.timeout must be a positive integer");
+        }
+        if (healthCheckFailThreshold <= 0) {
+            throw new IllegalArgumentException("service.healthCheck.failThreshold must be a positive integer");
+        }
+    }
+
+    /**
+     * Generates a default service ID if none is provided.
+     * Uses the service name and a random suffix for uniqueness.
+     *
+     * @return A generated service ID
+     */
+    private String generateDefaultServiceId() {
+        return "protocol-service-" + System.currentTimeMillis() % 10000;
+    }
+
+    /**
+     * Returns the default port for the selected registry type.
+     *
+     * @return The default port number
+     */
+    private int getDefaultRegistryPort() {
+        return switch (registryType) {
+            case CONSUL -> 8500;
+            case KUBERNETES -> 443;
+            default -> 0;
+        };
+    }
+
+    /**
+     * Gets the configured registry type.
      *
      * @return The registry type
      */
-    public String getRegistryType() {
+    @NotNull
+    public RegistryType getRegistryType() {
         return registryType;
     }
 
     /**
-     * Sets the registry type (consul or kubernetes).
+     * Gets the service ID used for registration.
      *
-     * @param registryType The registry type to set
+     * @return The service ID
      */
-    public void setRegistryType(String registryType) {
-        this.registryType = registryType;
+    @NotBlank
+    public String getServiceId() {
+        return serviceId;
     }
 
     /**
-     * Gets the namespace (for Kubernetes) or datacenter (for Consul).
+     * Gets the service name.
      *
-     * @return The namespace
+     * @return The service name
      */
-    public String getNamespace() {
-        return namespace;
+    @NotBlank
+    public String getServiceName() {
+        return serviceName;
     }
 
     /**
-     * Sets the namespace (for Kubernetes) or datacenter (for Consul).
+     * Gets the service host address.
      *
-     * @param namespace The namespace to set
+     * @return The service host
      */
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+    @NotBlank
+    public String getServiceHost() {
+        return serviceHost;
     }
 
     /**
-     * Gets the Consul host.
+     * Gets the service port number.
      *
-     * @return The Consul host
+     * @return The service port
      */
-    public String getConsulHost() {
-        return consulHost;
+    @Positive
+    public int getServicePort() {
+        return servicePort;
     }
 
     /**
-     * Sets the Consul host.
+     * Gets the registry host address.
      *
-     * @param consulHost The Consul host to set
+     * @return The registry host
      */
-    public void setConsulHost(String consulHost) {
-        this.consulHost = consulHost;
+    @NotBlank
+    public String getRegistryHost() {
+        return registryHost;
     }
 
     /**
-     * Gets the Consul port.
+     * Gets the registry port number.
      *
-     * @return The Consul port
+     * @return The registry port
      */
-    public int getConsulPort() {
-        return consulPort;
-    }
-
-    /**
-     * Sets the Consul port.
-     *
-     * @param consulPort The Consul port to set
-     */
-    public void setConsulPort(int consulPort) {
-        this.consulPort = consulPort;
-    }
-
-    /**
-     * Gets the Consul scheme (http or https).
-     *
-     * @return The Consul scheme
-     */
-    public String getConsulScheme() {
-        return consulScheme;
-    }
-
-    /**
-     * Sets the Consul scheme (http or https).
-     *
-     * @param consulScheme The Consul scheme to set
-     */
-    public void setConsulScheme(String consulScheme) {
-        this.consulScheme = consulScheme;
-    }
-
-    /**
-     * Gets the Consul ACL token.
-     *
-     * @return The Consul ACL token
-     */
-    public String getConsulAclToken() {
-        return consulAclToken;
-    }
-
-    /**
-     * Sets the Consul ACL token.
-     *
-     * @param consulAclToken The Consul ACL token to set
-     */
-    public void setConsulAclToken(String consulAclToken) {
-        this.consulAclToken = consulAclToken;
-    }
-
-    /**
-     * Checks if health checks are enabled.
-     *
-     * @return true if health checks are enabled, false otherwise
-     */
-    public boolean isHealthCheckEnabled() {
-        return healthCheckEnabled;
-    }
-
-    /**
-     * Sets whether health checks are enabled.
-     *
-     * @param healthCheckEnabled true to enable health checks, false to disable
-     */
-    public void setHealthCheckEnabled(boolean healthCheckEnabled) {
-        this.healthCheckEnabled = healthCheckEnabled;
-    }
-
-    /**
-     * Gets the health check endpoint.
-     *
-     * @return The health check endpoint
-     */
-    public String getHealthCheckEndpoint() {
-        return healthCheckEndpoint;
-    }
-
-    /**
-     * Sets the health check endpoint.
-     *
-     * @param healthCheckEndpoint The health check endpoint to set
-     */
-    public void setHealthCheckEndpoint(String healthCheckEndpoint) {
-        this.healthCheckEndpoint = healthCheckEndpoint;
+    @Positive
+    public int getRegistryPort() {
+        return registryPort;
     }
 
     /**
@@ -208,17 +239,9 @@ public class ServiceRegistryConfig {
      *
      * @return The health check interval
      */
+    @Positive
     public int getHealthCheckInterval() {
         return healthCheckInterval;
-    }
-
-    /**
-     * Sets the health check interval in seconds.
-     *
-     * @param healthCheckInterval The health check interval to set
-     */
-    public void setHealthCheckInterval(int healthCheckInterval) {
-        this.healthCheckInterval = healthCheckInterval;
     }
 
     /**
@@ -226,34 +249,36 @@ public class ServiceRegistryConfig {
      *
      * @return The health check timeout
      */
+    @Positive
     public int getHealthCheckTimeout() {
         return healthCheckTimeout;
     }
 
     /**
-     * Sets the health check timeout in seconds.
+     * Gets the number of consecutive health check failures before a service is marked as unhealthy.
      *
-     * @param healthCheckTimeout The health check timeout to set
+     * @return The health check failure threshold
      */
-    public void setHealthCheckTimeout(int healthCheckTimeout) {
-        this.healthCheckTimeout = healthCheckTimeout;
+    @Positive
+    public int getHealthCheckFailThreshold() {
+        return healthCheckFailThreshold;
     }
 
     /**
-     * Gets the time in minutes after which a critical service is deregistered.
+     * Gets the service metadata map.
      *
-     * @return The deregister critical service after time
+     * @return The service metadata
      */
-    public int getDeregisterCriticalServiceAfter() {
-        return deregisterCriticalServiceAfter;
+    public Map<String, String> getServiceMetadata() {
+        return new HashMap<>(serviceMetadata);
     }
 
     /**
-     * Sets the time in minutes after which a critical service is deregistered.
+     * Checks if service discovery is enabled.
      *
-     * @param deregisterCriticalServiceAfter The deregister critical service after time to set
+     * @return true if service discovery is enabled, false otherwise
      */
-    public void setDeregisterCriticalServiceAfter(int deregisterCriticalServiceAfter) {
-        this.deregisterCriticalServiceAfter = deregisterCriticalServiceAfter;
+    public boolean isEnabled() {
+        return registryType != RegistryType.NONE;
     }
 }
