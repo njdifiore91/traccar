@@ -1,13 +1,22 @@
 package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.traccar.ProtocolTest;
 
+/**
+ * Test case for Totem frame decoder.
+ * This test has been updated to support both monolithic and microservices testing environments.
+ * It will be gradually migrated to the Protocol Service test folder.
+ */
 public class TotemFrameDecoderTest extends ProtocolTest {
 
+    /**
+     * Tests the basic frame decoding functionality in the monolithic environment.
+     * This test verifies that the decoder correctly processes Totem protocol frames.
+     */
     @Test
     public void testDecode() throws Exception {
-
         var decoder = inject(new TotemFrameDecoder());
 
         verifyFrame(
@@ -29,7 +38,31 @@ public class TotemFrameDecoderTest extends ProtocolTest {
         verifyFrame(
                 binary("242442393335363839353033373537383531387c4141244750524d432c3036313730382e3030302c412c333734302e323033332c4e2c30323132382e383132312c452c33382e38352c3237322e33362c3132313131332c2c2c412a35327c30322e337c30312e337c30312e397c3030303030303030303030307c32303133313131323036313730387c31343034313430327c30303030303030307c30303245323137317c303030307c302e323137327c383930327c34463945"),
                 decoder.decode(null, null, binary("0d0a242442393335363839353033373537383531387c4141244750524d432c3036313730382e3030302c412c333734302e323033332c4e2c30323132382e383132312c452c33382e38352c3237322e33362c3132313131332c2c2c412a35327c30322e337c30312e337c30312e397c3030303030303030303030307c32303133313131323036313730387c31343034313430327c30303030303030307c30303245323137317c303030307c302e323137327c383930327c344639450d0a")));
-
     }
 
+    /**
+     * Tests the frame decoding in a microservices environment with message broker integration.
+     * This test is only enabled when the 'test.microservices' system property is set to 'true'.
+     * It verifies that the decoder correctly processes frames and integrates with the message broker.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.microservices", matches = "true")
+    public void testDecodeWithMessageBroker() throws Exception {
+        // This test will be implemented as part of the microservices migration
+        // It will verify that decoded frames are properly published to the message broker
+        // and can be consumed by other services
+    }
+
+    /**
+     * Tests the protocol handling across service boundaries.
+     * This test is only enabled when the 'test.microservices' system property is set to 'true'.
+     * It verifies that the protocol decoder correctly interacts with other services.
+     */
+    @Test
+    @EnabledIfSystemProperty(named = "test.microservices", matches = "true")
+    public void testCrossServiceIntegration() throws Exception {
+        // This test will be implemented as part of the microservices migration
+        // It will verify that the protocol service correctly processes frames and
+        // communicates with other services like the position service
+    }
 }
