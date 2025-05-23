@@ -1,0 +1,201 @@
+{
+  "positionSingle": {
+    "type": "positionSingle",
+    "description": "Request single position update",
+    "attributes": {
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.position",
+        "partition": 0
+      }
+    }
+  },
+  "positionPeriodic": {
+    "type": "positionPeriodic",
+    "description": "Configure periodic position reporting",
+    "attributes": {
+      "frequency": 60,
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.position",
+        "partition": 0
+      }
+    }
+  },
+  "positionStop": {
+    "type": "positionStop",
+    "description": "Stop periodic position reporting",
+    "attributes": {
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.position",
+        "partition": 0
+      }
+    }
+  },
+  "engineStop": {
+    "type": "engineStop",
+    "description": "Stop vehicle engine",
+    "attributes": {
+      "priority": 1,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.engine",
+        "partition": 0
+      }
+    }
+  },
+  "engineResume": {
+    "type": "engineResume",
+    "description": "Resume vehicle engine",
+    "attributes": {
+      "priority": 1,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.engine",
+        "partition": 0
+      }
+    }
+  },
+  "alarmArm": {
+    "type": "alarmArm",
+    "description": "Arm alarm system",
+    "attributes": {
+      "priority": 1,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.alarm",
+        "partition": 0
+      }
+    }
+  },
+  "alarmDisarm": {
+    "type": "alarmDisarm",
+    "description": "Disarm alarm system",
+    "attributes": {
+      "priority": 1,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.alarm",
+        "partition": 0
+      }
+    }
+  },
+  "setTimezone": {
+    "type": "setTimezone",
+    "description": "Set device timezone",
+    "attributes": {
+      "timezone": "UTC",
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.config",
+        "partition": 0
+      }
+    }
+  },
+  "requestPhoto": {
+    "type": "requestPhoto",
+    "description": "Request photo from device camera",
+    "attributes": {
+      "camera": 0,
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.media",
+        "partition": 0
+      }
+    }
+  },
+  "powerOff": {
+    "type": "powerOff",
+    "description": "Power off device",
+    "attributes": {
+      "priority": 2,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.device",
+        "partition": 0
+      }
+    }
+  },
+  "rebootDevice": {
+    "type": "rebootDevice",
+    "description": "Reboot device",
+    "attributes": {
+      "priority": 2,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.device",
+        "partition": 0
+      }
+    }
+  },
+  "sendSms": {
+    "type": "sendSms",
+    "description": "Send SMS message",
+    "attributes": {
+      "phone": "",
+      "message": "",
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.communication",
+        "partition": 0
+      }
+    }
+  },
+  "setSpeedLimit": {
+    "type": "setSpeedLimit",
+    "description": "Set speed limit",
+    "attributes": {
+      "speedLimit": 0,
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.config",
+        "partition": 0
+      }
+    }
+  },
+  "getVersion": {
+    "type": "getVersion",
+    "description": "Get device firmware version",
+    "attributes": {
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.device",
+        "partition": 0
+      }
+    }
+  },
+  "factoryReset": {
+    "type": "factoryReset",
+    "description": "Reset device to factory settings",
+    "attributes": {
+      "priority": 3,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.device",
+        "partition": 0
+      }
+    }
+  },
+  "custom": {
+    "type": "custom",
+    "description": "Custom command",
+    "attributes": {
+      "data": "",
+      "priority": 0,
+      "correlationId": "00000000-0000-0000-0000-000000000000",
+      "broker": {
+        "topic": "commands.custom",
+        "partition": 0
+      }
+    }
+  }
+}
