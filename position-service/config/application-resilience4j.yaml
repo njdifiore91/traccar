@@ -1,0 +1,158 @@
+# Resilience4j Configuration for Position Processing Service
+
+# Circuit Breaker Configuration
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 100
+      minimumNumberOfCalls: 10
+      permittedNumberOfCallsInHalfOpenState: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 30s
+      failureRateThreshold: 50
+      eventConsumerBufferSize: 10
+  instances:
+    geocoderService:
+      baseConfig: default
+      slidingWindowSize: 10
+      waitDurationInOpenState: 15s
+      failureRateThreshold: 40
+    speedLimitService:
+      baseConfig: default
+      slidingWindowSize: 10
+      waitDurationInOpenState: 15s
+      failureRateThreshold: 40
+    eventService:
+      baseConfig: default
+      slidingWindowSize: 20
+      waitDurationInOpenState: 20s
+      failureRateThreshold: 50
+    notificationService:
+      baseConfig: default
+      slidingWindowSize: 20
+      waitDurationInOpenState: 20s
+      failureRateThreshold: 50
+
+# Retry Configuration
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 500ms
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+      retryExceptions:
+        - java.io.IOException
+        - java.net.ConnectException
+        - org.springframework.web.client.ResourceAccessException
+  instances:
+    geocoderService:
+      baseConfig: default
+      maxAttempts: 3
+      waitDuration: 1s
+    speedLimitService:
+      baseConfig: default
+      maxAttempts: 3
+      waitDuration: 1s
+    databaseOperations:
+      baseConfig: default
+      maxAttempts: 2
+      waitDuration: 100ms
+      retryExceptions:
+        - org.springframework.dao.DataAccessException
+        - java.sql.SQLException
+
+# Bulkhead Configuration
+resilience4j.bulkhead:
+  configs:
+    default:
+      maxConcurrentCalls: 25
+      maxWaitDuration: 0ms
+  instances:
+    geocoderService:
+      maxConcurrentCalls: 10
+      maxWaitDuration: 10ms
+    speedLimitService:
+      maxConcurrentCalls: 10
+      maxWaitDuration: 10ms
+    eventService:
+      maxConcurrentCalls: 20
+      maxWaitDuration: 5ms
+    notificationService:
+      maxConcurrentCalls: 15
+      maxWaitDuration: 5ms
+    databaseOperations:
+      maxConcurrentCalls: 50
+      maxWaitDuration: 0ms
+
+# Thread Pool Bulkhead Configuration
+resilience4j.thread-pool-bulkhead:
+  configs:
+    default:
+      maxThreadPoolSize: 4
+      coreThreadPoolSize: 2
+      queueCapacity: 50
+      keepAliveDuration: 20ms
+  instances:
+    asyncProcessing:
+      maxThreadPoolSize: 10
+      coreThreadPoolSize: 5
+      queueCapacity: 100
+    batchOperations:
+      maxThreadPoolSize: 5
+      coreThreadPoolSize: 2
+      queueCapacity: 20
+
+# Rate Limiter Configuration
+resilience4j.ratelimiter:
+  configs:
+    default:
+      limitForPeriod: 50
+      limitRefreshPeriod: 1s
+      timeoutDuration: 0s
+      registerHealthIndicator: true
+      eventConsumerBufferSize: 100
+  instances:
+    geocoderService:
+      limitForPeriod: 10
+      limitRefreshPeriod: 1s
+      timeoutDuration: 500ms
+    speedLimitService:
+      limitForPeriod: 10
+      limitRefreshPeriod: 1s
+      timeoutDuration: 500ms
+    externalApiCalls:
+      limitForPeriod: 20
+      limitRefreshPeriod: 1s
+      timeoutDuration: 1s
+
+# Time Limiter Configuration
+resilience4j.timelimiter:
+  configs:
+    default:
+      timeoutDuration: 5s
+      cancelRunningFuture: true
+  instances:
+    geocoderService:
+      timeoutDuration: 3s
+    speedLimitService:
+      timeoutDuration: 3s
+    eventService:
+      timeoutDuration: 2s
+    notificationService:
+      timeoutDuration: 2s
+
+# Metrics Configuration
+resilience4j.metrics:
+  enabled: true
+  legacy:
+    enabled: false
+
+# Aspect Order Configuration (higher value = higher priority)
+resilience4j.retry.retryAspectOrder: 3
+resilience4j.circuitbreaker.circuitBreakerAspectOrder: 2
+resilience4j.ratelimiter.rateLimiterAspectOrder: 1
+resilience4j.bulkhead.bulkheadAspectOrder: 0
+resilience4j.timelimiter.timeLimiterAspectOrder: 4
