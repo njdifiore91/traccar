@@ -1,0 +1,441 @@
+{
+  "version": "1.0",
+  "description": "Common message format definitions for protocol testing",
+  "position": {
+    "basic": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 25.0,
+      "course": 90.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {}
+    },
+    "extended": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 25.0,
+      "course": 90.0,
+      "address": "1 Infinite Loop, Cupertino, CA",
+      "accuracy": 5.0,
+      "network": {
+        "radioType": "gsm",
+        "cellTowers": [
+          {
+            "cellId": 12345,
+            "locationAreaCode": 1000,
+            "mobileCountryCode": 310,
+            "mobileNetworkCode": 410,
+            "signalStrength": -70
+          }
+        ]
+      },
+      "attributes": {
+        "batteryLevel": 85,
+        "ignition": true,
+        "motion": true,
+        "odometer": 12345.6,
+        "hours": 1234.5,
+        "rssi": -67,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "invalid": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": false,
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "altitude": 0.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 0.0,
+      "network": null,
+      "attributes": {
+        "reason": "no_fix"
+      }
+    }
+  },
+  "status": {
+    "basic": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": null,
+      "valid": false,
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "altitude": 0.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 0.0,
+      "network": null,
+      "attributes": {
+        "status": "online",
+        "batteryLevel": 75,
+        "externalPower": true
+      }
+    },
+    "detailed": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": null,
+      "valid": false,
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "altitude": 0.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 0.0,
+      "network": null,
+      "attributes": {
+        "status": "online",
+        "batteryLevel": 75,
+        "externalPower": true,
+        "ip": "192.168.1.100",
+        "rssi": -65,
+        "temperature": 25.5,
+        "firmware": "1.2.3",
+        "hardware": "v2",
+        "memory": 85,
+        "storage": 60,
+        "uptime": 86400
+      }
+    },
+    "heartbeat": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": null,
+      "valid": false,
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "altitude": 0.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 0.0,
+      "network": null,
+      "attributes": {
+        "type": "heartbeat"
+      }
+    }
+  },
+  "alarm": {
+    "sos": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "sos",
+        "alarmSource": "user"
+      }
+    },
+    "powerCut": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "powerCut",
+        "batteryLevel": 85
+      }
+    },
+    "lowBattery": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "lowBattery",
+        "batteryLevel": 15
+      }
+    },
+    "geofenceEnter": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 15.0,
+      "course": 90.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "geofenceEnter",
+        "geofenceId": 1001
+      }
+    },
+    "geofenceExit": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 15.0,
+      "course": 90.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "geofenceExit",
+        "geofenceId": 1001
+      }
+    },
+    "overspeed": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 120.0,
+      "course": 90.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "overspeed",
+        "speedLimit": 100.0
+      }
+    },
+    "deviceTamper": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "alarm": "deviceTamper",
+        "tamperType": "case_open"
+      }
+    }
+  },
+  "command": {
+    "positionSingle": {
+      "type": "positionSingle",
+      "deviceId": 123456,
+      "description": "Request single position update",
+      "attributes": {}
+    },
+    "positionPeriodic": {
+      "type": "positionPeriodic",
+      "deviceId": 123456,
+      "description": "Set position update frequency",
+      "attributes": {
+        "frequency": 60
+      }
+    },
+    "engineStop": {
+      "type": "engineStop",
+      "deviceId": 123456,
+      "description": "Stop vehicle engine",
+      "attributes": {}
+    },
+    "engineResume": {
+      "type": "engineResume",
+      "deviceId": 123456,
+      "description": "Resume vehicle engine",
+      "attributes": {}
+    },
+    "alarmArm": {
+      "type": "alarmArm",
+      "deviceId": 123456,
+      "description": "Arm the alarm system",
+      "attributes": {}
+    },
+    "alarmDisarm": {
+      "type": "alarmDisarm",
+      "deviceId": 123456,
+      "description": "Disarm the alarm system",
+      "attributes": {}
+    },
+    "setTimezone": {
+      "type": "custom",
+      "deviceId": 123456,
+      "description": "Set device timezone",
+      "attributes": {
+        "data": "TZ+0800"
+      }
+    },
+    "requestPhoto": {
+      "type": "custom",
+      "deviceId": 123456,
+      "description": "Request photo from camera",
+      "attributes": {
+        "data": "PHOTO",
+        "cameraId": 1
+      }
+    },
+    "rebootDevice": {
+      "type": "rebootDevice",
+      "deviceId": 123456,
+      "description": "Reboot the device",
+      "attributes": {}
+    },
+    "sendSms": {
+      "type": "sendSms",
+      "deviceId": 123456,
+      "description": "Send SMS through device",
+      "attributes": {
+        "phone": "+1234567890",
+        "message": "Test message"
+      }
+    },
+    "custom": {
+      "type": "custom",
+      "deviceId": 123456,
+      "description": "Custom command",
+      "attributes": {
+        "data": "CUSTOM,COMMAND,PARAMETERS"
+      }
+    }
+  },
+  "media": {
+    "photo": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "media": "photo",
+        "mediaPath": "${MEDIA_PATH}",
+        "cameraId": 1,
+        "mediaSize": 65536
+      }
+    },
+    "video": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "media": "video",
+        "mediaPath": "${MEDIA_PATH}",
+        "cameraId": 1,
+        "mediaSize": 1048576,
+        "mediaDuration": 30
+      }
+    },
+    "audio": {
+      "deviceId": 123456,
+      "protocol": "test-protocol",
+      "serverTime": "${TIMESTAMP}",
+      "deviceTime": "${TIMESTAMP}",
+      "fixTime": "${TIMESTAMP}",
+      "valid": true,
+      "latitude": 37.35,
+      "longitude": -122.03,
+      "altitude": 50.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "address": null,
+      "accuracy": 10.0,
+      "network": null,
+      "attributes": {
+        "media": "audio",
+        "mediaPath": "${MEDIA_PATH}",
+        "mediaSize": 262144,
+        "mediaDuration": 60
+      }
+    }
+  }
+}
