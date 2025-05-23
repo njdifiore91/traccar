@@ -1,0 +1,1312 @@
+# Protocol Service Configuration
+# This file defines settings for all supported device protocols in the Protocol Service
+
+# Global protocol settings
+global:
+  # Network interface to bind to (leave empty to bind to all interfaces)
+  interface: ""
+  # Default connection timeout in seconds
+  timeout: 60
+  # Enable buffering of incoming data (in milliseconds, 0 to disable)
+  buffer: 0
+  # Send device responses immediately before database write
+  immediateResponse: true
+
+# Protocol-specific configurations
+protocols:
+  # GPS103 Protocol (TK103, TK103-2)
+  gps103:
+    enabled: true
+    port: 5001
+    # Protocol-specific options
+    options:
+      extended: false
+
+  # TK103 Protocol
+  tk103:
+    enabled: true
+    port: 5002
+    # Protocol-specific options
+    options:
+      extended: false
+
+  # GL100 Protocol
+  gl100:
+    enabled: true
+    port: 5003
+
+  # GL200 Protocol
+  gl200:
+    enabled: true
+    port: 5004
+    # Protocol-specific options
+    options:
+      ignoreFixTime: false
+
+  # T55 Protocol
+  t55:
+    enabled: true
+    port: 5005
+
+  # Xexun Protocol
+  xexun:
+    enabled: true
+    port: 5006
+
+  # Totem Protocol
+  totem:
+    enabled: true
+    port: 5007
+
+  # Enfora Protocol
+  enfora:
+    enabled: true
+    port: 5008
+
+  # Meiligao Protocol
+  meiligao:
+    enabled: true
+    port: 5009
+
+  # TRV Protocol
+  trv:
+    enabled: true
+    port: 5010
+
+  # Suntech Protocol
+  suntech:
+    enabled: true
+    port: 5011
+
+  # Progress Protocol
+  progress:
+    enabled: true
+    port: 5012
+
+  # H02 Protocol
+  h02:
+    enabled: true
+    port: 5013
+
+  # JT600 Protocol
+  jt600:
+    enabled: true
+    port: 5014
+
+  # Huabao Protocol
+  huabao:
+    enabled: true
+    port: 5015
+
+  # V680 Protocol
+  v680:
+    enabled: true
+    port: 5016
+
+  # PT502 Protocol
+  pt502:
+    enabled: true
+    port: 5017
+
+  # TR20 Protocol
+  tr20:
+    enabled: true
+    port: 5018
+
+  # Navis Protocol
+  navis:
+    enabled: true
+    port: 5019
+
+  # Meitrack Protocol
+  meitrack:
+    enabled: true
+    port: 5020
+
+  # Skypatrol Protocol
+  skypatrol:
+    enabled: true
+    port: 5021
+
+  # GT02 Protocol
+  gt02:
+    enabled: true
+    port: 5022
+
+  # GT06 Protocol
+  gt06:
+    enabled: true
+    port: 5023
+
+  # Megastek Protocol
+  megastek:
+    enabled: true
+    port: 5024
+
+  # Navigil Protocol
+  navigil:
+    enabled: true
+    port: 5025
+
+  # GpsGate Protocol
+  gpsgate:
+    enabled: true
+    port: 5026
+
+  # Teltonika Protocol
+  teltonika:
+    enabled: true
+    port: 5027
+
+  # MTA6 Protocol
+  mta6:
+    enabled: true
+    port: 5028
+
+  # Tzone Protocol
+  tzone:
+    enabled: true
+    port: 5029
+
+  # TLT2H Protocol
+  tlt2h:
+    enabled: true
+    port: 5030
+
+  # TAIP Protocol
+  taip:
+    enabled: true
+    port: 5031
+    # Protocol-specific options
+    options:
+      prefix: false
+
+  # Wondex Protocol
+  wondex:
+    enabled: true
+    port: 5032
+
+  # Cellocator Protocol
+  cellocator:
+    enabled: true
+    port: 5033
+
+  # Galileo Protocol
+  galileo:
+    enabled: true
+    port: 5034
+
+  # YWT Protocol
+  ywt:
+    enabled: true
+    port: 5035
+
+  # TK102 Protocol
+  tk102:
+    enabled: true
+    port: 5036
+
+  # Intellitrac Protocol
+  intellitrac:
+    enabled: true
+    port: 5037
+
+  # GPSMTA Protocol
+  gpsmta:
+    enabled: true
+    port: 5038
+
+  # Wialon Protocol
+  wialon:
+    enabled: true
+    port: 5039
+
+  # Carscop Protocol
+  carscop:
+    enabled: true
+    port: 5040
+
+  # Apel Protocol
+  apel:
+    enabled: true
+    port: 5041
+
+  # Manpower Protocol
+  manpower:
+    enabled: true
+    port: 5042
+
+  # Globalsat Protocol
+  globalsat:
+    enabled: true
+    port: 5043
+
+  # Atrack Protocol
+  atrack:
+    enabled: true
+    port: 5044
+    # Protocol-specific options
+    options:
+      longDate: false
+      decimalFuel: false
+      customFormat: ""
+
+  # PT3000 Protocol
+  pt3000:
+    enabled: true
+    port: 5045
+
+  # Ruptela Protocol
+  ruptela:
+    enabled: true
+    port: 5046
+
+  # Topflytech Protocol
+  topflytech:
+    enabled: true
+    port: 5047
+
+  # Laipac Protocol
+  laipac:
+    enabled: true
+    port: 5048
+
+  # Aplicom Protocol
+  aplicom:
+    enabled: true
+    port: 5049
+
+  # Gotop Protocol
+  gotop:
+    enabled: true
+    port: 5050
+
+  # Sanav Protocol
+  sanav:
+    enabled: true
+    port: 5051
+
+  # Gator Protocol
+  gator:
+    enabled: true
+    port: 5052
+
+  # Noran Protocol
+  noran:
+    enabled: true
+    port: 5053
+
+  # M2M Protocol
+  m2m:
+    enabled: true
+    port: 5054
+
+  # OsmAnd Protocol
+  osmand:
+    enabled: true
+    port: 5055
+
+  # EasyTrack Protocol
+  easytrack:
+    enabled: true
+    port: 5056
+
+  # GPSMARKER Protocol
+  gpsmarker:
+    enabled: true
+    port: 5057
+
+  # KHD Protocol
+  khd:
+    enabled: true
+    port: 5058
+
+  # Piligrim Protocol
+  piligrim:
+    enabled: true
+    port: 5059
+
+  # STL060 Protocol
+  stl060:
+    enabled: true
+    port: 5060
+
+  # Cartrack Protocol
+  cartrack:
+    enabled: true
+    port: 5061
+
+  # MiniFinder Protocol
+  minifinder:
+    enabled: true
+    port: 5062
+
+  # Haicom Protocol
+  haicom:
+    enabled: true
+    port: 5063
+
+  # EelinkV10 Protocol
+  eelink:
+    enabled: true
+    port: 5064
+
+  # Box Protocol
+  box:
+    enabled: true
+    port: 5065
+
+  # Freedom Protocol
+  freedom:
+    enabled: true
+    port: 5066
+
+  # Telic Protocol
+  telic:
+    enabled: true
+    port: 5067
+
+  # Trackbox Protocol
+  trackbox:
+    enabled: true
+    port: 5068
+
+  # Visiontek Protocol
+  visiontek:
+    enabled: true
+    port: 5069
+
+  # Orion Protocol
+  orion:
+    enabled: true
+    port: 5070
+
+  # Riti Protocol
+  riti:
+    enabled: true
+    port: 5071
+
+  # Ulbotech Protocol
+  ulbotech:
+    enabled: true
+    port: 5072
+
+  # Tramigo Protocol
+  tramigo:
+    enabled: true
+    port: 5073
+
+  # TR900 Protocol
+  tr900:
+    enabled: true
+    port: 5074
+
+  # Ardi01 Protocol
+  ardi01:
+    enabled: true
+    port: 5075
+
+  # XT013 Protocol
+  xt013:
+    enabled: true
+    port: 5076
+
+  # Autofon Protocol
+  autofon:
+    enabled: true
+    port: 5077
+
+  # GoSafe Protocol
+  gosafe:
+    enabled: true
+    port: 5078
+
+  # TT8850 Protocol
+  tt8850:
+    enabled: true
+    port: 5079
+
+  # BCE Protocol
+  bce:
+    enabled: true
+    port: 5080
+
+  # Xirgo Protocol
+  xirgo:
+    enabled: true
+    port: 5081
+
+  # CalAmp Protocol
+  calamp:
+    enabled: true
+    port: 5082
+
+  # MTX Protocol
+  mtx:
+    enabled: true
+    port: 5083
+
+  # Tytan Protocol
+  tytan:
+    enabled: true
+    port: 5084
+
+  # AVL301 Protocol
+  avl301:
+    enabled: true
+    port: 5085
+
+  # Castel Protocol
+  castel:
+    enabled: true
+    port: 5086
+
+  # MXT Protocol
+  mxt:
+    enabled: true
+    port: 5087
+
+  # CityEasy Protocol
+  cityeasy:
+    enabled: true
+    port: 5088
+
+  # Aquila Protocol
+  aquila:
+    enabled: true
+    port: 5089
+
+  # FlexTrack Protocol
+  flextrack:
+    enabled: true
+    port: 5090
+
+  # BlackKite Protocol
+  blackkite:
+    enabled: true
+    port: 5091
+
+  # ADM Protocol
+  adm:
+    enabled: true
+    port: 5092
+
+  # Watch Protocol
+  watch:
+    enabled: true
+    port: 5093
+
+  # T800X Protocol
+  t800x:
+    enabled: true
+    port: 5094
+
+  # Upro Protocol
+  upro:
+    enabled: true
+    port: 5095
+
+  # Auro Protocol
+  auro:
+    enabled: true
+    port: 5096
+
+  # Disha Protocol
+  disha:
+    enabled: true
+    port: 5097
+
+  # Thinkrace Protocol
+  thinkrace:
+    enabled: true
+    port: 5098
+
+  # PathAway Protocol
+  pathaway:
+    enabled: true
+    port: 5099
+
+  # Arnavi Protocol
+  arnavi:
+    enabled: true
+    port: 5100
+
+  # NVS Protocol
+  nvs:
+    enabled: true
+    port: 5101
+
+  # Kenji Protocol
+  kenji:
+    enabled: true
+    port: 5102
+
+  # Astra Protocol
+  astra:
+    enabled: true
+    port: 5103
+
+  # Homtecs Protocol
+  homtecs:
+    enabled: true
+    port: 5104
+
+  # Fox Protocol
+  fox:
+    enabled: true
+    port: 5105
+
+  # GNX Protocol
+  gnx:
+    enabled: true
+    port: 5106
+
+  # Arknav Protocol
+  arknav:
+    enabled: true
+    port: 5107
+
+  # SuperMate Protocol
+  supermate:
+    enabled: true
+    port: 5108
+
+  # Appello Protocol
+  appello:
+    enabled: true
+    port: 5109
+
+  # IDPL Protocol
+  idpl:
+    enabled: true
+    port: 5110
+
+  # Huasheng Protocol
+  huasheng:
+    enabled: true
+    port: 5111
+
+  # L100 Protocol
+  l100:
+    enabled: true
+    port: 5112
+
+  # Granit Protocol
+  granit:
+    enabled: true
+    port: 5113
+
+  # Carcell Protocol
+  carcell:
+    enabled: true
+    port: 5114
+
+  # OBDDongle Protocol
+  obddongle:
+    enabled: true
+    port: 5115
+
+  # HunterPro Protocol
+  hunterpro:
+    enabled: true
+    port: 5116
+
+  # Raveon Protocol
+  raveon:
+    enabled: true
+    port: 5117
+
+  # CradlePoint Protocol
+  cradlepoint:
+    enabled: true
+    port: 5118
+
+  # ArknavX8 Protocol
+  arknavx8:
+    enabled: true
+    port: 5119
+
+  # AutoGrade Protocol
+  autograde:
+    enabled: true
+    port: 5120
+
+  # Oigo Protocol
+  oigo:
+    enabled: true
+    port: 5121
+
+  # JPKorjar Protocol
+  jpkorjar:
+    enabled: true
+    port: 5122
+
+  # CGuard Protocol
+  cguard:
+    enabled: true
+    port: 5123
+
+  # Fifotrack Protocol
+  fifotrack:
+    enabled: true
+    port: 5124
+
+  # Smokey Protocol
+  smokey:
+    enabled: true
+    port: 5125
+
+  # ExtremTrack Protocol
+  extremtrac:
+    enabled: true
+    port: 5126
+
+  # Trakmate Protocol
+  trakmate:
+    enabled: true
+    port: 5127
+
+  # AT2000 Protocol
+  at2000:
+    enabled: true
+    port: 5128
+
+  # Maestro Protocol
+  maestro:
+    enabled: true
+    port: 5129
+
+  # AIS Protocol
+  ais:
+    enabled: true
+    port: 5130
+
+  # GT30 Protocol
+  gt30:
+    enabled: true
+    port: 5131
+
+  # TMG Protocol
+  tmg:
+    enabled: true
+    port: 5132
+
+  # Pretrace Protocol
+  pretrace:
+    enabled: true
+    port: 5133
+
+  # Pricol Protocol
+  pricol:
+    enabled: true
+    port: 5134
+
+  # Siwi Protocol
+  siwi:
+    enabled: true
+    port: 5135
+
+  # Starlink Protocol
+  starlink:
+    enabled: true
+    port: 5136
+
+  # DMT Protocol
+  dmt:
+    enabled: true
+    port: 5137
+
+  # XT2400 Protocol
+  xt2400:
+    enabled: true
+    port: 5138
+
+  # DMTHTTP Protocol
+  dmthttp:
+    enabled: true
+    port: 5139
+
+  # Alematics Protocol
+  alematics:
+    enabled: true
+    port: 5140
+
+  # GPS056 Protocol
+  gps056:
+    enabled: true
+    port: 5141
+
+  # Flexcomm Protocol
+  flexcomm:
+    enabled: true
+    port: 5142
+
+  # VT200 Protocol
+  vt200:
+    enabled: true
+    port: 5143
+
+  # OwnTracks Protocol
+  owntracks:
+    enabled: true
+    port: 5144
+
+  # VTFMS Protocol
+  vtfms:
+    enabled: true
+    port: 5145
+
+  # TLV Protocol
+  tlv:
+    enabled: true
+    port: 5146
+
+  # ESky Protocol
+  esky:
+    enabled: true
+    port: 5147
+
+  # Genx Protocol
+  genx:
+    enabled: true
+    port: 5148
+
+  # Flespi Protocol
+  flespi:
+    enabled: true
+    port: 5149
+
+  # Dway Protocol
+  dway:
+    enabled: true
+    port: 5150
+
+  # Recoda Protocol
+  recoda:
+    enabled: true
+    port: 5151
+
+  # OKO Protocol
+  oko:
+    enabled: true
+    port: 5152
+
+  # IVT401 Protocol
+  ivt401:
+    enabled: true
+    port: 5153
+
+  # Sigfox Protocol
+  sigfox:
+    enabled: true
+    port: 5154
+
+  # T57 Protocol
+  t57:
+    enabled: true
+    port: 5155
+
+  # Spot Protocol
+  spot:
+    enabled: true
+    port: 5156
+
+  # M2C Protocol
+  m2c:
+    enabled: true
+    port: 5157
+
+  # AustinNB Protocol
+  austinnb:
+    enabled: true
+    port: 5158
+
+  # OpenGTS Protocol
+  opengts:
+    enabled: true
+    port: 5159
+
+  # Cautela Protocol
+  cautela:
+    enabled: true
+    port: 5160
+
+  # Continental Protocol
+  continental:
+    enabled: true
+    port: 5161
+
+  # EGTS Protocol
+  egts:
+    enabled: true
+    port: 5162
+
+  # Robotrack Protocol
+  robotrack:
+    enabled: true
+    port: 5163
+
+  # PT60 Protocol
+  pt60:
+    enabled: true
+    port: 5164
+
+  # Telemax Protocol
+  telemax:
+    enabled: true
+    port: 5165
+
+  # Sabertek Protocol
+  sabertek:
+    enabled: true
+    port: 5166
+
+  # Retranslator Protocol
+  retranslator:
+    enabled: true
+    port: 5167
+
+  # Svias Protocol
+  svias:
+    enabled: true
+    port: 5168
+
+  # ESeal Protocol
+  eseal:
+    enabled: true
+    port: 5169
+
+  # Freematics Protocol
+  freematics:
+    enabled: true
+    port: 5170
+
+  # Avema Protocol
+  avema:
+    enabled: true
+    port: 5171
+
+  # Autotrack Protocol
+  autotrack:
+    enabled: true
+    port: 5172
+
+  # Tek Protocol
+  tek:
+    enabled: true
+    port: 5173
+
+  # Wristband Protocol
+  wristband:
+    enabled: true
+    port: 5174
+
+  # MilesMate Protocol
+  milesmate:
+    enabled: true
+    port: 5176
+
+  # Anytrek Protocol
+  anytrek:
+    enabled: true
+    port: 5177
+
+  # SmartSole Protocol
+  smartsole:
+    enabled: true
+    port: 5178
+
+  # ITS Protocol
+  its:
+    enabled: true
+    port: 5179
+
+  # XRB28 Protocol
+  xrb28:
+    enabled: true
+    port: 5180
+
+  # C2STEK Protocol
+  c2stek:
+    enabled: true
+    port: 5181
+
+  # Nyitech Protocol
+  nyitech:
+    enabled: true
+    port: 5182
+
+  # Neos Protocol
+  neos:
+    enabled: true
+    port: 5183
+
+  # Satsol Protocol
+  satsol:
+    enabled: true
+    port: 5184
+
+  # Globalstar Protocol
+  globalstar:
+    enabled: true
+    port: 5185
+
+  # Sanul Protocol
+  sanul:
+    enabled: true
+    port: 5186
+
+  # MiniFinder2 Protocol
+  minifinder2:
+    enabled: true
+    port: 5187
+
+  # Radar Protocol
+  radar:
+    enabled: true
+    port: 5188
+
+  # Techtlt Protocol
+  techtlt:
+    enabled: true
+    port: 5189
+
+  # Starcom Protocol
+  starcom:
+    enabled: true
+    port: 5190
+
+  # Mictrack Protocol
+  mictrack:
+    enabled: true
+    port: 5191
+
+  # Plugin Protocol
+  plugin:
+    enabled: true
+    port: 5192
+
+  # Leafspy Protocol
+  leafspy:
+    enabled: true
+    port: 5193
+
+  # Naviset Protocol
+  naviset:
+    enabled: true
+    port: 5194
+
+  # Racedynamics Protocol
+  racedynamics:
+    enabled: true
+    port: 5195
+
+  # RST Protocol
+  rst:
+    enabled: true
+    port: 5196
+
+  # PT215 Protocol
+  pt215:
+    enabled: true
+    port: 5197
+
+  # PacificTrack Protocol
+  pacifictrack:
+    enabled: true
+    port: 5198
+
+  # Topin Protocol
+  topin:
+    enabled: true
+    port: 5199
+
+  # Outsafe Protocol
+  outsafe:
+    enabled: true
+    port: 5200
+
+  # SolarPowered Protocol
+  solarpowered:
+    enabled: true
+    port: 5201
+
+  # Motor Protocol
+  motor:
+    enabled: true
+    port: 5202
+
+  # Omnicomm Protocol
+  omnicomm:
+    enabled: true
+    port: 5203
+
+  # S168 Protocol
+  s168:
+    enabled: true
+    port: 5204
+
+  # VNet Protocol
+  vnet:
+    enabled: true
+    port: 5205
+
+  # Blue Protocol
+  blue:
+    enabled: true
+    port: 5206
+
+  # PST Protocol
+  pst:
+    enabled: true
+    port: 5207
+
+  # Dingtek Protocol
+  dingtek:
+    enabled: true
+    port: 5208
+
+  # WLI Protocol
+  wli:
+    enabled: true
+    port: 5209
+
+  # NIOT Protocol
+  niot:
+    enabled: true
+    port: 5210
+
+  # Portman Protocol
+  portman:
+    enabled: true
+    port: 5211
+
+  # Moovbox Protocol
+  moovbox:
+    enabled: true
+    port: 5212
+
+  # Futureway Protocol
+  futureway:
+    enabled: true
+    port: 5213
+
+  # Polte Protocol
+  polte:
+    enabled: true
+    port: 5214
+
+  # Net Protocol
+  net:
+    enabled: true
+    port: 5215
+
+  # Mobilogix Protocol
+  mobilogix:
+    enabled: true
+    port: 5216
+
+  # Swiftech Protocol
+  swiftech:
+    enabled: true
+    port: 5217
+
+  # IOTM Protocol
+  iotm:
+    enabled: true
+    port: 5218
+
+  # Dolphin Protocol
+  dolphin:
+    enabled: true
+    port: 5219
+
+  # Ennfu Protocol
+  ennfu:
+    enabled: true
+    port: 5220
+
+  # Navtelecom Protocol
+  navtelecom:
+    enabled: true
+    port: 5221
+
+  # Startek Protocol
+  startek:
+    enabled: true
+    port: 5222
+
+  # GS100 Protocol
+  gs100:
+    enabled: true
+    port: 5223
+
+  # Mavlink2 Protocol
+  mavlink2:
+    enabled: true
+    port: 5224
+
+  # UUX Protocol
+  uux:
+    enabled: true
+    port: 5225
+
+  # R12W Protocol
+  r12w:
+    enabled: true
+    port: 5226
+
+  # FlexibleReport Protocol
+  flexiblereport:
+    enabled: true
+    port: 5227
+
+  # ThinkPower Protocol
+  thinkpower:
+    enabled: true
+    port: 5228
+
+  # STB Protocol
+  stb:
+    enabled: true
+    port: 5229
+
+  # B2316 Protocol
+  b2316:
+    enabled: true
+    port: 5230
+
+  # Hoopo Protocol
+  hoopo:
+    enabled: true
+    port: 5231
+
+  # Dualcam Protocol
+  dualcam:
+    enabled: true
+    port: 5232
+
+  # Xexun2 Protocol
+  xexun2:
+    enabled: true
+    port: 5233
+
+  # Techtocruz Protocol
+  techtocruz:
+    enabled: true
+    port: 5234
+
+  # FlexAPI Protocol
+  flexapi:
+    enabled: true
+    port: 5235
+
+  # DSF22 Protocol
+  dsf22:
+    enabled: true
+    port: 5236
+
+  # Jido Protocol
+  jido:
+    enabled: true
+    port: 5237
+
+  # Armoli Protocol
+  armoli:
+    enabled: true
+    port: 5238
+
+  # Teratrack Protocol
+  teratrack:
+    enabled: true
+    port: 5239
+
+  # Envotech Protocol
+  envotech:
+    enabled: true
+    port: 5240
+
+  # BSTPL Protocol
+  bstpl:
+    enabled: true
+    port: 5241
+
+  # Thuraya Protocol
+  thuraya:
+    enabled: true
+    port: 5242
+
+  # NDTPV6 Protocol
+  ndtpv6:
+    enabled: true
+    port: 5243
+
+  # G1RUS Protocol
+  g1rus:
+    enabled: true
+    port: 5244
+
+  # RFTrack Protocol
+  rftrack:
+    enabled: true
+    port: 5245
+
+  # VLT Protocol
+  vlt:
+    enabled: true
+    port: 5246
+
+  # Transync Protocol
+  transync:
+    enabled: true
+    port: 5247
+
+  # T622Iridium Protocol
+  t622iridium:
+    enabled: true
+    port: 5248
+
+  # PUI Protocol
+  pui:
+    enabled: true
+    port: 5249
+
+  # NTO Protocol
+  nto:
+    enabled: true
+    port: 5250
+
+  # Ramac Protocol
+  ramac:
+    enabled: true
+    port: 5251
+
+  # Positrex Protocol
+  positrex:
+    enabled: true
+    port: 5252
+
+  # Dragino Protocol
+  dragino:
+    enabled: true
+    port: 5253
+
+  # Fleetguide Protocol
+  fleetguide:
+    enabled: true
+    port: 5254
+
+  # Valtrack Protocol
+  valtrack:
+    enabled: true
+    port: 5255
+
+  # Snapper Protocol
+  snapper:
+    enabled: true
+    port: 5256
+
+  # GL601 Protocol
+  gl601:
+    enabled: true
+    port: 5257
