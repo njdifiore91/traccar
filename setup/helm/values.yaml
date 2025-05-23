@@ -1,0 +1,822 @@
+# Global Traccar Helm Chart Values
+# This file contains the default configuration values for all Traccar microservices
+
+# Global settings that apply to all services
+global:
+  # Environment settings
+  environment: production # Options: development, staging, production
+  
+  # Image settings
+  image:
+    registry: docker.io
+    repository: traccar
+    tag: latest
+    pullPolicy: IfNotPresent
+    # Credentials for private registry
+    pullSecrets: []
+    # - name: registry-credentials
+  
+  # Common labels to be applied to all resources
+  labels: {}
+  
+  # Common annotations to be applied to all resources
+  annotations: {}
+  
+  # Network settings
+  network:
+    # Domain name for ingress resources
+    domain: traccar.example.com
+    # TLS configuration
+    tls:
+      enabled: true
+      secretName: traccar-tls
+  
+  # Database configuration
+  database:
+    type: postgresql # Options: postgresql, mysql, h2
+    host: "traccar-db"
+    port: 5432
+    name: "traccar"
+    user: "traccar"
+    # password should be provided via secret
+    existingSecret: "traccar-db-credentials"
+    existingSecretKey: "password"
+    # Connection pool settings
+    pool:
+      maxSize: 25
+      minIdle: 5
+      idleTimeout: 600000
+      maxLifetime: 1800000
+  
+  # Message broker configuration
+  messageBroker:
+    type: kafka # Options: kafka, rabbitmq
+    # Kafka settings
+    kafka:
+      bootstrapServers: "kafka:9092"
+      # Security settings
+      security:
+        enabled: false
+        # authentication:
+        #   mechanism: PLAIN
+        #   username: "kafka"
+        #   password: "kafka-password"
+        # tls:
+        #   enabled: false
+        #   truststore: "/path/to/truststore.jks"
+        #   truststorePassword: "password"
+    # RabbitMQ settings
+    rabbitmq:
+      host: "rabbitmq"
+      port: 5672
+      username: "guest"
+      # password should be provided via secret
+      existingSecret: "rabbitmq-credentials"
+      existingSecretKey: "password"
+      virtualHost: "/"
+  
+  # Service discovery configuration
+  serviceDiscovery:
+    type: kubernetes # Options: kubernetes, consul
+    # Consul settings
+    consul:
+      host: "consul"
+      port: 8500
+  
+  # Distributed cache configuration
+  cache:
+    type: redis # Options: redis, hazelcast
+    redis:
+      host: "redis"
+      port: 6379
+      # password should be provided via secret
+      existingSecret: "redis-credentials"
+      existingSecretKey: "password"
+  
+  # Common resource defaults
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  # Pod security context
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  
+  # Container security context
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
+  
+  # Node selector for all pods
+  nodeSelector: {}
+  
+  # Tolerations for all pods
+  tolerations: []
+  
+  # Affinity for all pods
+  affinity: {}
+  
+  # Priority class name
+  priorityClassName: ""
+  
+  # Pod disruption budget
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+    # maxUnavailable: 1
+
+# Protocol Service configuration
+protocolService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/protocol
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    # Protocol ports configuration
+    ports:
+      - name: http
+        port: 8090
+        targetPort: 8090
+        protocol: TCP
+      - name: tcp-default
+        port: 5000
+        targetPort: 5000
+        protocol: TCP
+      - name: udp-default
+        port: 5000
+        targetPort: 5000
+        protocol: UDP
+      # Add additional protocol ports as needed
+  
+  # Protocol-specific configuration
+  protocols:
+    enabled:
+      - name: default
+        port: 5000
+        type: tcp
+      # Add more protocols as needed
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    # Custom metrics
+    customMetrics: []
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: active_connections
+    #     target:
+    #       type: AverageValue
+    #       averageValue: 1000
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8090
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8090
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Environment variables
+  env: []
+  # - name: PROTOCOL_DEBUG
+  #   value: "false"
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+    # protocol.conf: |
+    #   protocol.debug=false
+  
+  # Persistence configuration
+  persistence:
+    enabled: false
+    # storageClass: ""
+    # accessMode: ReadWriteOnce
+    # size: 1Gi
+    # annotations: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Position Service configuration
+positionService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/position
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    port: 8081
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8081
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8081
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Environment variables
+  env: []
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Event Service configuration
+eventService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/event
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    port: 8082
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8082
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8082
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Environment variables
+  env: []
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Notification Service configuration
+notificationService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/notification
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    port: 8083
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 300m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8083
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8083
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Notification channel configuration
+  channels:
+    email:
+      enabled: true
+      host: "smtp.example.com"
+      port: 587
+      starttls: true
+      from: "traccar@example.com"
+      # auth credentials should be provided via secret
+      existingSecret: "email-credentials"
+      existingSecretUsernameKey: "username"
+      existingSecretPasswordKey: "password"
+    sms:
+      enabled: false
+      provider: "aws" # Options: aws, twilio, etc.
+      # Provider-specific settings
+      aws:
+        region: "us-east-1"
+        # credentials should be provided via secret
+        existingSecret: "aws-credentials"
+        existingSecretAccessKeyKey: "access-key"
+        existingSecretSecretKeyKey: "secret-key"
+    push:
+      enabled: false
+      provider: "firebase"
+      # Provider-specific settings
+      firebase:
+        # credentials should be provided via secret
+        existingSecret: "firebase-credentials"
+        existingSecretKeyKey: "service-account-key"
+  
+  # Environment variables
+  env: []
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# API Gateway Service configuration
+apiGatewayService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/api-gateway
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    port: 8080
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations: {}
+    hosts:
+      - host: "api.traccar.example.com"
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+    # - secretName: api-traccar-tls
+    #   hosts:
+    #     - api.traccar.example.com
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 300m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # API Gateway specific configuration
+  api:
+    # Authentication configuration
+    auth:
+      type: "jwt" # Options: jwt, oauth2, basic
+      jwt:
+        secret: ""
+        # or use existing secret
+        existingSecret: "jwt-secret"
+        existingSecretKey: "jwt-key"
+      # CORS configuration
+      cors:
+        enabled: true
+        allowedOrigins:
+          - "*"
+        allowedMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        allowedHeaders:
+          - "*"
+        allowCredentials: true
+        maxAge: 3600
+  
+  # WebSocket configuration
+  websocket:
+    enabled: true
+    path: "/api/socket"
+  
+  # Environment variables
+  env: []
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Reporting Service configuration
+reportingService:
+  enabled: true
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Deployment specific settings
+  replicaCount: 2
+  
+  # Image settings (overrides global)
+  image:
+    repository: traccar/reporting
+    tag: ""
+    pullPolicy: ""
+  
+  # Service settings
+  service:
+    type: ClusterIP
+    port: 8084
+  
+  # Resource allocation (overrides global)
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: 8084
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 8084
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Report generation configuration
+  reports:
+    # Storage for generated reports
+    storage:
+      enabled: true
+      # storageClass: ""
+      accessMode: ReadWriteMany
+      size: 5Gi
+      # or use existing PVC
+      # existingClaim: "reports-pvc"
+  
+  # Environment variables
+  env: []
+  
+  # ConfigMap for configuration
+  configMap:
+    enabled: true
+    data: {}
+  
+  # Additional pod annotations
+  podAnnotations: {}
+  
+  # Additional pod labels
+  podLabels: {}
+  
+  # Node selector, tolerations, and affinity (overrides global)
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Infrastructure components configuration
+infrastructure:
+  # Kafka configuration
+  kafka:
+    enabled: false # Set to true to deploy Kafka with this chart
+    # If false, external Kafka should be configured in global.messageBroker.kafka
+    # For detailed Kafka configuration, refer to the Kafka Helm chart values
+    # This is just a minimal example
+    replicas: 3
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+    persistence:
+      enabled: true
+      size: 20Gi
+    zookeeper:
+      enabled: true
+      replicaCount: 3
+      persistence:
+        enabled: true
+        size: 5Gi
+  
+  # RabbitMQ configuration
+  rabbitmq:
+    enabled: false # Set to true to deploy RabbitMQ with this chart
+    # If false, external RabbitMQ should be configured in global.messageBroker.rabbitmq
+    # For detailed RabbitMQ configuration, refer to the RabbitMQ Helm chart values
+    # This is just a minimal example
+    replicaCount: 3
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    persistence:
+      enabled: true
+      size: 10Gi
+  
+  # Redis configuration
+  redis:
+    enabled: false # Set to true to deploy Redis with this chart
+    # If false, external Redis should be configured in global.cache.redis
+    # For detailed Redis configuration, refer to the Redis Helm chart values
+    # This is just a minimal example
+    architecture: replication
+    master:
+      persistence:
+        enabled: true
+        size: 5Gi
+    replica:
+      replicaCount: 2
+      persistence:
+        enabled: true
+        size: 5Gi
+  
+  # Consul configuration
+  consul:
+    enabled: false # Set to true to deploy Consul with this chart
+    # If false, external Consul should be configured in global.serviceDiscovery.consul
+    # For detailed Consul configuration, refer to the Consul Helm chart values
+    # This is just a minimal example
+    server:
+      replicas: 3
+      storage: 10Gi
+    client:
+      enabled: true
+
+# Prometheus ServiceMonitor configuration
+serviceMonitor:
+  enabled: false
+  labels: {}
+  interval: 30s
+  scrapeTimeout: 10s
+  metricRelabelings: []
+  relabelings: []
+
+# Prometheus Rules configuration
+prometheusRules:
+  enabled: false
+  labels: {}
+  rules: []
+  # - alert: HighCPUUsage
+  #   expr: avg(rate(container_cpu_usage_seconds_total{namespace="traccar"}[5m])) by (pod) > 0.8
+  #   for: 5m
+  #   labels:
+  #     severity: warning
+  #   annotations:
+  #     summary: High CPU usage for {{ $labels.pod }}
+  #     description: Pod {{ $labels.pod }} has high CPU usage ({{ $value | printf "%.2f" }})
+
+# Grafana Dashboard configuration
+grafanaDashboards:
+  enabled: false
+  labels: {}
+  dashboards: []
+  # - name: traccar-overview
+  #   json: |
+  #     {...dashboard json...}
