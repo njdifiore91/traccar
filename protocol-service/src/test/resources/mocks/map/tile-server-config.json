@@ -1,0 +1,197 @@
+{
+  "version": "1.0.0",
+  "description": "Mock tile server configuration for protocol service testing",
+  "providers": [
+    {
+      "id": "osm",
+      "name": "OpenStreetMap",
+      "enabled": true,
+      "attribution": "© OpenStreetMap contributors",
+      "tileJson": {
+        "tilejson": "2.0.0",
+        "name": "OSM Standard",
+        "minzoom": 0,
+        "maxzoom": 19,
+        "bounds": [-180, -85.0511, 180, 85.0511],
+        "format": "png",
+        "type": "baselayer",
+        "center": [0, 0, 3],
+        "tiles": [
+          "http://mock-tile-server/osm/{z}/{x}/{y}.png"
+        ]
+      },
+      "mockResponses": {
+        "simulateLatency": true,
+        "latencyRange": [50, 200],
+        "errorRate": 0.05,
+        "notFoundRate": 0.02,
+        "timeoutRate": 0.01
+      }
+    },
+    {
+      "id": "satellite",
+      "name": "Satellite Imagery",
+      "enabled": true,
+      "attribution": "© Satellite Imagery Contributors",
+      "tileJson": {
+        "tilejson": "2.0.0",
+        "name": "Satellite",
+        "minzoom": 0,
+        "maxzoom": 18,
+        "bounds": [-180, -85.0511, 180, 85.0511],
+        "format": "jpg",
+        "type": "baselayer",
+        "center": [0, 0, 3],
+        "tiles": [
+          "http://mock-tile-server/satellite/{z}/{x}/{y}.jpg"
+        ]
+      },
+      "mockResponses": {
+        "simulateLatency": true,
+        "latencyRange": [100, 300],
+        "errorRate": 0.03,
+        "notFoundRate": 0.02,
+        "timeoutRate": 0.01
+      }
+    },
+    {
+      "id": "vector",
+      "name": "Vector Tiles",
+      "enabled": true,
+      "attribution": "© Vector Tile Contributors",
+      "tileJson": {
+        "tilejson": "2.0.0",
+        "name": "Vector",
+        "minzoom": 0,
+        "maxzoom": 16,
+        "bounds": [-180, -85.0511, 180, 85.0511],
+        "format": "mvt",
+        "type": "baselayer",
+        "center": [0, 0, 3],
+        "tiles": [
+          "http://mock-tile-server/vector/{z}/{x}/{y}.mvt"
+        ]
+      },
+      "mockResponses": {
+        "simulateLatency": true,
+        "latencyRange": [30, 150],
+        "errorRate": 0.02,
+        "notFoundRate": 0.01,
+        "timeoutRate": 0.005
+      }
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": "normal-operation",
+      "description": "Normal operation with standard latency",
+      "providerOverrides": {
+        "osm": {
+          "mockResponses": {
+            "errorRate": 0.0,
+            "notFoundRate": 0.0,
+            "timeoutRate": 0.0
+          }
+        },
+        "satellite": {
+          "mockResponses": {
+            "errorRate": 0.0,
+            "notFoundRate": 0.0,
+            "timeoutRate": 0.0
+          }
+        },
+        "vector": {
+          "mockResponses": {
+            "errorRate": 0.0,
+            "notFoundRate": 0.0,
+            "timeoutRate": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "high-latency",
+      "description": "High latency scenario",
+      "providerOverrides": {
+        "osm": {
+          "mockResponses": {
+            "latencyRange": [500, 2000]
+          }
+        },
+        "satellite": {
+          "mockResponses": {
+            "latencyRange": [800, 3000]
+          }
+        },
+        "vector": {
+          "mockResponses": {
+            "latencyRange": [400, 1500]
+          }
+        }
+      }
+    },
+    {
+      "id": "error-prone",
+      "description": "High error rate scenario",
+      "providerOverrides": {
+        "osm": {
+          "mockResponses": {
+            "errorRate": 0.2,
+            "notFoundRate": 0.1,
+            "timeoutRate": 0.05
+          }
+        },
+        "satellite": {
+          "mockResponses": {
+            "errorRate": 0.25,
+            "notFoundRate": 0.15,
+            "timeoutRate": 0.1
+          }
+        },
+        "vector": {
+          "mockResponses": {
+            "errorRate": 0.15,
+            "notFoundRate": 0.08,
+            "timeoutRate": 0.04
+          }
+        }
+      }
+    }
+  ],
+  "mockTileResponses": {
+    "defaultContentType": {
+      "png": "image/png",
+      "jpg": "image/jpeg",
+      "mvt": "application/x-protobuf"
+    },
+    "defaultHeaders": {
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=86400"
+    },
+    "defaultStatusCodes": {
+      "success": 200,
+      "notFound": 404,
+      "error": 500,
+      "timeout": 504
+    },
+    "mockDataPath": "mocks/map/tiles",
+    "fallbackImagePath": "mocks/map/fallback"
+  },
+  "coordinateBoundaries": {
+    "world": [-180, -85.0511, 180, 85.0511],
+    "northAmerica": [-170, 15, -50, 70],
+    "europe": [-15, 35, 40, 70],
+    "asia": [60, 0, 150, 70],
+    "australia": [110, -45, 155, -10],
+    "africa": [-20, -35, 55, 40],
+    "southAmerica": [-85, -60, -30, 15]
+  },
+  "zoomLevelSettings": {
+    "cityLevel": 13,
+    "streetLevel": 16,
+    "buildingLevel": 18,
+    "continentLevel": 4,
+    "countryLevel": 6,
+    "regionLevel": 8
+  }
+}
