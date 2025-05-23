@@ -1,0 +1,242 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api-gateway.fullname" . }}-config
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+data:
+  # API Gateway configuration
+  api-gateway.yaml: |
+    # Server configuration
+    server:
+      port: {{ .Values.service.port }}
+      contextPath: /api
+      # Maximum request size in bytes
+      maxRequestSize: {{ .Values.config.server.maxRequestSize | default "10485760" }}
+      # CORS configuration
+      cors:
+        enabled: {{ .Values.config.server.cors.enabled | default true }}
+        allowedOrigins: {{ .Values.config.server.cors.allowedOrigins | default "*" | quote }}
+        allowedMethods: {{ .Values.config.server.cors.allowedMethods | default "GET,POST,PUT,DELETE,OPTIONS" | quote }}
+        allowedHeaders: {{ .Values.config.server.cors.allowedHeaders | default "*" | quote }}
+        exposedHeaders: {{ .Values.config.server.cors.exposedHeaders | default "Content-Disposition" | quote }}
+        allowCredentials: {{ .Values.config.server.cors.allowCredentials | default true }}
+
+    # Authentication configuration
+    authentication:
+      # Authentication type: basic, jwt, oauth2
+      type: {{ .Values.config.authentication.type | default "basic" }}
+      # Session timeout in minutes
+      sessionTimeout: {{ .Values.config.authentication.sessionTimeout | default 60 }}
+      # Whether to allow basic authentication
+      allowBasic: {{ .Values.config.authentication.allowBasic | default true }}
+      # Whether to allow cookie authentication
+      allowCookie: {{ .Values.config.authentication.allowCookie | default true }}
+      # JWT configuration if type is jwt
+      jwt:
+        secret: {{ .Values.config.authentication.jwt.secret | default "" | quote }}
+        issuer: {{ .Values.config.authentication.jwt.issuer | default "traccar" | quote }}
+        expirationTime: {{ .Values.config.authentication.jwt.expirationTime | default 86400 }}
+      # OAuth2 configuration if type is oauth2
+      oauth2:
+        clientId: {{ .Values.config.authentication.oauth2.clientId | default "" | quote }}
+        clientSecret: {{ .Values.config.authentication.oauth2.clientSecret | default "" | quote }}
+        authorizationUri: {{ .Values.config.authentication.oauth2.authorizationUri | default "" | quote }}
+        tokenUri: {{ .Values.config.authentication.oauth2.tokenUri | default "" | quote }}
+        userInfoUri: {{ .Values.config.authentication.oauth2.userInfoUri | default "" | quote }}
+        redirectUri: {{ .Values.config.authentication.oauth2.redirectUri | default "" | quote }}
+        scope: {{ .Values.config.authentication.oauth2.scope | default "openid email profile" | quote }}
+
+    # WebSocket configuration
+    websocket:
+      # WebSocket endpoint path
+      path: {{ .Values.config.websocket.path | default "/socket" | quote }}
+      # Maximum message size in bytes
+      maxMessageSize: {{ .Values.config.websocket.maxMessageSize | default "65536" }}
+      # Ping interval in seconds
+      pingInterval: {{ .Values.config.websocket.pingInterval | default 55 }}
+      # Ping timeout in seconds
+      pingTimeout: {{ .Values.config.websocket.pingTimeout | default 5 }}
+      # Maximum number of concurrent connections per instance
+      maxConnections: {{ .Values.config.websocket.maxConnections | default 1000 }}
+
+    # Service routing configuration
+    routing:
+      # Protocol Service routing
+      protocol:
+        # Service discovery method: kubernetes, consul, static
+        discoveryMethod: {{ .Values.config.routing.protocol.discoveryMethod | default "kubernetes" }}
+        # Service name for discovery
+        serviceName: {{ .Values.config.routing.protocol.serviceName | default "protocol-service" }}
+        # Static endpoint if discovery method is static
+        endpoint: {{ .Values.config.routing.protocol.endpoint | default "http://protocol-service:8080" | quote }}
+        # Circuit breaker configuration
+        circuitBreaker:
+          enabled: {{ .Values.config.routing.protocol.circuitBreaker.enabled | default true }}
+          failureThreshold: {{ .Values.config.routing.protocol.circuitBreaker.failureThreshold | default 50 }}
+          waitDuration: {{ .Values.config.routing.protocol.circuitBreaker.waitDuration | default "10s" | quote }}
+          permittedNumberOfCallsInHalfOpenState: {{ .Values.config.routing.protocol.circuitBreaker.permittedNumberOfCallsInHalfOpenState | default 10 }}
+
+      # Position Service routing
+      position:
+        discoveryMethod: {{ .Values.config.routing.position.discoveryMethod | default "kubernetes" }}
+        serviceName: {{ .Values.config.routing.position.serviceName | default "position-service" }}
+        endpoint: {{ .Values.config.routing.position.endpoint | default "http://position-service:8080" | quote }}
+        circuitBreaker:
+          enabled: {{ .Values.config.routing.position.circuitBreaker.enabled | default true }}
+          failureThreshold: {{ .Values.config.routing.position.circuitBreaker.failureThreshold | default 50 }}
+          waitDuration: {{ .Values.config.routing.position.circuitBreaker.waitDuration | default "10s" | quote }}
+          permittedNumberOfCallsInHalfOpenState: {{ .Values.config.routing.position.circuitBreaker.permittedNumberOfCallsInHalfOpenState | default 10 }}
+
+      # Event Service routing
+      event:
+        discoveryMethod: {{ .Values.config.routing.event.discoveryMethod | default "kubernetes" }}
+        serviceName: {{ .Values.config.routing.event.serviceName | default "event-service" }}
+        endpoint: {{ .Values.config.routing.event.endpoint | default "http://event-service:8080" | quote }}
+        circuitBreaker:
+          enabled: {{ .Values.config.routing.event.circuitBreaker.enabled | default true }}
+          failureThreshold: {{ .Values.config.routing.event.circuitBreaker.failureThreshold | default 50 }}
+          waitDuration: {{ .Values.config.routing.event.circuitBreaker.waitDuration | default "10s" | quote }}
+          permittedNumberOfCallsInHalfOpenState: {{ .Values.config.routing.event.circuitBreaker.permittedNumberOfCallsInHalfOpenState | default 10 }}
+
+      # Notification Service routing
+      notification:
+        discoveryMethod: {{ .Values.config.routing.notification.discoveryMethod | default "kubernetes" }}
+        serviceName: {{ .Values.config.routing.notification.serviceName | default "notification-service" }}
+        endpoint: {{ .Values.config.routing.notification.endpoint | default "http://notification-service:8080" | quote }}
+        circuitBreaker:
+          enabled: {{ .Values.config.routing.notification.circuitBreaker.enabled | default true }}
+          failureThreshold: {{ .Values.config.routing.notification.circuitBreaker.failureThreshold | default 50 }}
+          waitDuration: {{ .Values.config.routing.notification.circuitBreaker.waitDuration | default "10s" | quote }}
+          permittedNumberOfCallsInHalfOpenState: {{ .Values.config.routing.notification.circuitBreaker.permittedNumberOfCallsInHalfOpenState | default 10 }}
+
+      # Reporting Service routing
+      reporting:
+        discoveryMethod: {{ .Values.config.routing.reporting.discoveryMethod | default "kubernetes" }}
+        serviceName: {{ .Values.config.routing.reporting.serviceName | default "reporting-service" }}
+        endpoint: {{ .Values.config.routing.reporting.endpoint | default "http://reporting-service:8080" | quote }}
+        circuitBreaker:
+          enabled: {{ .Values.config.routing.reporting.circuitBreaker.enabled | default true }}
+          failureThreshold: {{ .Values.config.routing.reporting.circuitBreaker.failureThreshold | default 50 }}
+          waitDuration: {{ .Values.config.routing.reporting.circuitBreaker.waitDuration | default "10s" | quote }}
+          permittedNumberOfCallsInHalfOpenState: {{ .Values.config.routing.reporting.circuitBreaker.permittedNumberOfCallsInHalfOpenState | default 10 }}
+
+    # Message broker configuration
+    messageBroker:
+      # Broker type: kafka, rabbitmq
+      type: {{ .Values.config.messageBroker.type | default "kafka" }}
+      # Kafka configuration if type is kafka
+      kafka:
+        bootstrapServers: {{ .Values.config.messageBroker.kafka.bootstrapServers | default "kafka:9092" | quote }}
+        # Consumer configuration
+        consumer:
+          groupId: {{ .Values.config.messageBroker.kafka.consumer.groupId | default "api-gateway" | quote }}
+          autoOffsetReset: {{ .Values.config.messageBroker.kafka.consumer.autoOffsetReset | default "earliest" | quote }}
+          # Topics to subscribe to
+          topics:
+            positions: {{ .Values.config.messageBroker.kafka.consumer.topics.positions | default "enriched-positions" | quote }}
+            events: {{ .Values.config.messageBroker.kafka.consumer.topics.events | default "events" | quote }}
+            notifications: {{ .Values.config.messageBroker.kafka.consumer.topics.notifications | default "notifications" | quote }}
+      # RabbitMQ configuration if type is rabbitmq
+      rabbitmq:
+        host: {{ .Values.config.messageBroker.rabbitmq.host | default "rabbitmq" | quote }}
+        port: {{ .Values.config.messageBroker.rabbitmq.port | default 5672 }}
+        username: {{ .Values.config.messageBroker.rabbitmq.username | default "guest" | quote }}
+        password: {{ .Values.config.messageBroker.rabbitmq.password | default "guest" | quote }}
+        virtualHost: {{ .Values.config.messageBroker.rabbitmq.virtualHost | default "/" | quote }}
+        # Queues to subscribe to
+        queues:
+          positions: {{ .Values.config.messageBroker.rabbitmq.queues.positions | default "enriched-positions" | quote }}
+          events: {{ .Values.config.messageBroker.rabbitmq.queues.events | default "events" | quote }}
+          notifications: {{ .Values.config.messageBroker.rabbitmq.queues.notifications | default "notifications" | quote }}
+
+    # Rate limiting configuration
+    rateLimit:
+      enabled: {{ .Values.config.rateLimit.enabled | default true }}
+      # Default requests per second per client
+      defaultLimit: {{ .Values.config.rateLimit.defaultLimit | default 100 }}
+      # Burst capacity (maximum number of requests allowed to exceed the limit temporarily)
+      burstCapacity: {{ .Values.config.rateLimit.burstCapacity | default 200 }}
+      # Whether to include the client IP in the rate limit key
+      includeClientIp: {{ .Values.config.rateLimit.includeClientIp | default true }}
+      # Whether to include the user ID in the rate limit key
+      includeUserId: {{ .Values.config.rateLimit.includeUserId | default true }}
+      # Endpoint-specific rate limits
+      endpoints:
+        # Position endpoint rate limit
+        positions:
+          limit: {{ .Values.config.rateLimit.endpoints.positions.limit | default 200 }}
+          burstCapacity: {{ .Values.config.rateLimit.endpoints.positions.burstCapacity | default 300 }}
+        # Device endpoint rate limit
+        devices:
+          limit: {{ .Values.config.rateLimit.endpoints.devices.limit | default 100 }}
+          burstCapacity: {{ .Values.config.rateLimit.endpoints.devices.burstCapacity | default 200 }}
+        # Command endpoint rate limit
+        commands:
+          limit: {{ .Values.config.rateLimit.endpoints.commands.limit | default 50 }}
+          burstCapacity: {{ .Values.config.rateLimit.endpoints.commands.burstCapacity | default 100 }}
+
+    # Customization settings for UI
+    customization:
+      # Application title
+      title: {{ .Values.config.customization.title | default "Traccar" | quote }}
+      # Application description
+      description: {{ .Values.config.customization.description | default "Traccar GPS Tracking System" | quote }}
+      # Primary color
+      colorPrimary: {{ .Values.config.customization.colorPrimary | default "#1a237e" | quote }}
+      # Secondary color
+      colorSecondary: {{ .Values.config.customization.colorSecondary | default "#0d47a1" | quote }}
+      # Logo URL
+      logoUrl: {{ .Values.config.customization.logoUrl | default "" | quote }}
+      # Favicon URL
+      faviconUrl: {{ .Values.config.customization.faviconUrl | default "" | quote }}
+      # Whether to enable asset overrides
+      enableOverrides: {{ .Values.config.customization.enableOverrides | default false }}
+
+    # Resilience4j configuration for circuit breakers and retries
+    resilience4j:
+      # Circuit breaker global configuration
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+      # Retry global configuration
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+            enableRandomizedWait: true
+            randomizedWaitFactor: 0.5
+
+    # Logging configuration
+    logging:
+      # Log level: TRACE, DEBUG, INFO, WARN, ERROR
+      level: {{ .Values.config.logging.level | default "INFO" | quote }}
+      # Whether to log to console
+      console: {{ .Values.config.logging.console | default true }}
+      # Whether to log to file
+      file: {{ .Values.config.logging.file | default false }}
+      # Log file path if file logging is enabled
+      filePath: {{ .Values.config.logging.filePath | default "/var/log/traccar/api-gateway.log" | quote }}
+      # Whether to use JSON format for logs
+      jsonFormat: {{ .Values.config.logging.jsonFormat | default true }}
+      # Include correlation IDs for distributed tracing
+      includeCorrelationId: {{ .Values.config.logging.includeCorrelationId | default true }}
+
+    # Distributed tracing configuration
+    tracing:
+      enabled: {{ .Values.config.tracing.enabled | default true }}
+      # Sampling rate (0.0 - 1.0)
+      samplingRate: {{ .Values.config.tracing.samplingRate | default 0.1 }}
+      # Exporter type: jaeger, zipkin, otlp
+      exporterType: {{ .Values.config.tracing.exporterType | default "jaeger" }}
+      # Exporter endpoint
+      endpoint: {{ .Values.config.tracing.endpoint | default "" | quote }}
