@@ -1,0 +1,183 @@
+# Default values for API Gateway Service Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# API Gateway Service image configuration
+image:
+  repository: traccar/api-gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Number of replicas to deploy
+replicaCount: 2
+
+# Pod configuration
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: 0.3
+    memory: 256Mi
+  limits:
+    cpu: 0.5
+    memory: 512Mi
+
+# Service configuration
+service:
+  type: ClusterIP
+  # Main API port
+  apiPort: 8080
+  # WebSocket port (same as API port in this case)
+  websocketPort: 8080
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: api-gateway.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: api-gateway-tls
+  #    hosts:
+  #      - api-gateway.local
+
+# Health check configuration
+livenessProbe:
+  httpGet:
+    path: /health/liveness
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/readiness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# Horizontal Pod Autoscaler configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+# Node selector, tolerations, and affinity
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+  # podAntiAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #   - labelSelector:
+  #       matchExpressions:
+  #       - key: app.kubernetes.io/name
+  #         operator: In
+  #         values:
+  #         - api-gateway
+  #     topologyKey: "kubernetes.io/hostname"
+
+# API Gateway specific configuration
+config:
+  # Log level (INFO, DEBUG, WARN, ERROR)
+  logLevel: "INFO"
+  
+  # Backend service connection settings
+  services:
+    protocol:
+      url: "http://protocol-service:8090"
+      timeout: 10000
+    position:
+      url: "http://position-service:8081"
+      timeout: 10000
+    event:
+      url: "http://event-service:8082"
+      timeout: 10000
+    notification:
+      url: "http://notification-service:8083"
+      timeout: 10000
+    reporting:
+      url: "http://reporting-service:8084"
+      timeout: 10000
+  
+  # Authentication settings
+  auth:
+    jwtSecret: "" # Should be provided via secrets
+    tokenExpirationMinutes: 60
+    refreshTokenExpirationDays: 30
+  
+  # CORS configuration
+  cors:
+    enabled: true
+    allowedOrigins: "*"
+    allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+    allowedHeaders: "Origin,Content-Type,Accept,Authorization"
+    maxAge: 3600
+  
+  # Rate limiting configuration
+  rateLimit:
+    enabled: true
+    requestsPerMinute: 60
+  
+  # WebSocket configuration
+  websocket:
+    enabled: true
+    maxSessionsPerUser: 5
+    pingIntervalSeconds: 30
+
+# Environment variables to be added to the container
+env: []
+  # - name: EXAMPLE_VAR
+  #   value: "example-value"
+
+# Additional volumes to mount
+volumes: []
+  # - name: config-volume
+  #   configMap:
+  #     name: api-gateway-config
+
+volumeMounts: []
+  # - name: config-volume
+  #   mountPath: /app/config
+  #   readOnly: true
+
+# Additional configuration for the API Gateway service
+extraConfig: {}
+  # Any additional custom configuration can be added here
