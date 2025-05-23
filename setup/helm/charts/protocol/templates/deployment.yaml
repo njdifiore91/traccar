@@ -1,0 +1,281 @@
+{{- /*
+Protocol Service - Kubernetes Deployment Template
+
+This template defines the Kubernetes Deployment resource for the Protocol Service,
+which handles device connections and protocol implementations for 200+ GPS device protocols.
+The Protocol Service is the entry point for all device data in the Traccar system.
+
+Key features:
+1. Container image settings with version control
+2. Resource requests and limits (CPU: 0.5 cores request, 1 core limit; Memory: 512MB request, 1GB limit)
+3. Liveness and readiness probes for health monitoring
+4. Environment variables and configuration volume mounts
+5. Security context for non-root execution (UID 1000)
+6. Horizontal scaling with multiple replicas
+
+This deployment creates pods that:
+- Listen on multiple TCP/UDP ports (5000-5090) for device connections
+- Decode device protocols and convert to standardized position format
+- Publish position data to message broker for further processing
+- Expose health and metrics endpoints for monitoring
+*/ -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "protocol.fullname" . }}
+  labels:
+    {{- include "protocol.labels" . | nindent 4 }}
+  {{- with .Values.deployment.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Number of replicas to run
+  # Can be overridden by HorizontalPodAutoscaler if enabled
+  replicas: {{ .Values.replicaCount | default 2 }}
+  
+  # Selector defines how the Deployment finds which Pods to manage
+  selector:
+    matchLabels:
+      {{- include "protocol.selectorLabels" . | nindent 6 }}
+  
+  # Strategy defines how to replace existing pods with new ones
+  strategy:
+    {{- with .Values.deployment.strategy }}
+    {{- toYaml . | nindent 4 }}
+    {{- else }}
+    # Default to RollingUpdate strategy if not specified
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    {{- end }}
+  
+  # Template defines the pods that will be created
+  template:
+    metadata:
+      labels:
+        {{- include "protocol.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        # Annotations for pod metrics and monitoring
+        prometheus.io/scrape: "{{ .Values.metrics.prometheus.enabled | default "true" }}"
+        prometheus.io/port: "{{ .Values.service.managementPort | default 8090 }}"
+        prometheus.io/path: "{{ .Values.metrics.prometheus.path | default "/metrics" }}"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      # Service account for the pod
+      {{- with .Values.serviceAccount.name }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+      
+      # Security context for the pod
+      # Ensures the Protocol Service runs with appropriate security settings
+      securityContext:
+        {{- with .Values.podSecurityContext }}
+        {{- toYaml . | nindent 8 }}
+        {{- else }}
+        # Default pod security context if not specified
+        # Uses non-root user with appropriate filesystem permissions
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        {{- end }}
+      
+      # Containers within the pod
+      containers:
+        - name: {{ .Chart.Name }}
+          # Security context for the container
+          # Implements security best practices for containerized applications
+          securityContext:
+            {{- with .Values.securityContext }}
+            {{- toYaml . | nindent 12 }}
+            {{- else }}
+            # Default container security context if not specified
+            # Follows principle of least privilege
+            capabilities:
+              drop:
+              - ALL
+            runAsUser: 1000
+            runAsNonRoot: true
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            {{- end }}
+          
+          # Container image
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          
+          # Ports exposed by the container
+          ports:
+            # Management API port for health checks and administration
+            - name: management
+              containerPort: {{ .Values.service.managementPort | default 8090 }}
+              protocol: TCP
+            
+            # Protocol-specific ports for device connections
+            {{- range .Values.service.protocolPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          
+          # Environment variables
+          env:
+            # Pod metadata for service discovery and logging
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            
+            # Application configuration
+            - name: JAVA_OPTS
+              value: {{ .Values.javaOpts | default "-Xms256m -Xmx512m" | quote }}
+            - name: TRACCAR_CONFIG
+              value: "/config/traccar.xml"
+            
+            # Additional environment variables from values
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          
+          # Resource requests and limits
+          resources:
+            {{- with .Values.resources }}
+            {{- toYaml . | nindent 12 }}
+            {{- else }}
+            # Default resource requests and limits if not specified
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            {{- end }}
+          
+          # Liveness probe checks if the container is running
+          # Uses TCP socket check on protocol ports
+          livenessProbe:
+            {{- with .Values.livenessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- else }}
+            # Default liveness probe if not specified
+            # For Protocol Service, we check one of the protocol ports to ensure
+            # the service is actually listening for device connections
+            tcpSocket:
+              # Use the first protocol port if available, otherwise fall back to management port
+              {{- if and .Values.service.protocolPorts (gt (len .Values.service.protocolPorts) 0) }}
+              port: {{ (index .Values.service.protocolPorts 0).name }}
+              {{- else }}
+              port: management
+              {{- end }}
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            {{- end }}
+          
+          # Readiness probe checks if the container is ready to serve traffic
+          # Uses HTTP GET on the readiness endpoint
+          readinessProbe:
+            {{- with .Values.readinessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- else }}
+            # Default readiness probe if not specified
+            # For Protocol Service, we check the HTTP health endpoint to ensure
+            # the service is fully initialized and ready to process device connections
+            httpGet:
+              path: {{ .Values.server.healthCheck.readiness | default "/health/readiness" }}
+              port: management
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+            successThreshold: 1
+            {{- end }}
+          
+          # Startup probe for services with longer initialization times
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          # Volume mounts
+          volumeMounts:
+            # Configuration volume
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
+            
+            # Additional volume mounts from values
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      
+      # Volumes
+      volumes:
+        # Configuration volume from ConfigMap
+        - name: config-volume
+          configMap:
+            name: {{ include "protocol.fullname" . }}-config
+        
+        # Additional volumes from values
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      
+      # Node selection and affinity
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      # Default pod anti-affinity to spread across nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - {{ include "protocol.name" . }}
+              topologyKey: "kubernetes.io/hostname"
+      {{- end }}
+      
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      # Image pull secrets
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 60 }}
