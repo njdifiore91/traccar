@@ -2,6 +2,12 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.messaging.MessageProducer;
+import org.traccar.model.Position;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 public class LaipacProtocolDecoderTest extends ProtocolTest {
 
@@ -127,6 +133,55 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
         // New unknown parameters
         verifyPosition(decoder, text(
                 "$AVRMC,358174067149865,143747,P,5050.1124,N,00420.0542,E,1.34,161.96,190318,A,3416,119,1,0,0,0,0,0,0*5F"));
+    }
+
+    @Test
+    public void testMessageBrokerIntegration() throws Exception {
+        // Create decoder with mocked message producer
+        var messageProducer = mockMessageProducer();
+        var decoder = inject(new LaipacProtocolDecoder(null));
+        
+        // Set the mocked message producer in the decoder
+        var field = LaipacProtocolDecoder.class.getDeclaredField("messageProducer");
+        field.setAccessible(true);
+        field.set(decoder, messageProducer);
+        
+        // Test with a valid position message
+        Object result = decoder.decode(null, null, text(
+                "$AVRMC,99999999,164339,A,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*37"));
+        
+        // Verify that the message producer was called with the position
+        verify(messageProducer).sendPosition(any(Position.class));
+        
+        // Test with a message that doesn't produce a position
+        decoder.decode(null, null, text("$AVSYS,99999999,V1.50,SN0000103,32768*15"));
+        
+        // Verify that the message producer was not called again
+        verify(messageProducer).sendPosition(any(Position.class)); // Still only one call
+    }
+    
+    @Test
+    public void testCrossServiceHandling() throws Exception {
+        // Create decoder with mocked message producer
+        var messageProducer = mockMessageProducer();
+        var decoder = inject(new LaipacProtocolDecoder(null));
+        
+        // Set the mocked message producer in the decoder
+        var field = LaipacProtocolDecoder.class.getDeclaredField("messageProducer");
+        field.setAccessible(true);
+        field.set(decoder, messageProducer);
+        
+        // Test with a null message
+        decoder.decode(null, null, null);
+        
+        // Verify that the message producer was not called
+        verifyNoInteractions(messageProducer);
+        
+        // Test with an invalid message format
+        decoder.decode(null, null, text("INVALID_FORMAT"));
+        
+        // Verify that the message producer was still not called
+        verifyNoInteractions(messageProducer);
     }
 
 }
