@@ -1,270 +1,277 @@
-/*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.traccar;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.traccar.config.Config;
-import org.traccar.model.OutboxMessage;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Order;
-import org.traccar.storage.query.Request;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 /**
- * Implements the Transaction Outbox pattern for reliable message publishing.
- * 
- * This class provides methods to add messages to the outbox table as part of a database transaction,
- * and a scheduled task to publish those messages to the message broker. This ensures that messages
- * are reliably delivered to the broker even if the service fails after committing the transaction
- * but before publishing the message.
+ * Implements the transaction outbox pattern for reliable message publishing.
+ * <p>
+ * The transaction outbox pattern ensures that messages are published to the broker
+ * even in the event of service failures by storing them in a database table as part
+ * of the same transaction that updates business data. A separate process then reads
+ * from this table and publishes the messages to the broker.
+ * <p>
+ * This implementation provides:
+ * - Atomic database operations with message storage
+ * - Scheduled processing of outbox messages
+ * - Retry logic for failed publications
+ * - Message ordering based on creation time
  */
-@Singleton
+@Component
 public class TransactionOutboxManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionOutboxManager.class);
 
-    private final Storage storage;
-    private final ObjectMapper objectMapper;
-    private final MessageBrokerPublisher messageBrokerPublisher;
-    private final Tracer tracer;
-    private final MeterRegistry meterRegistry;
-    private final int batchSize;
-    private final int maxRetries;
+    private final DataSource dataSource;
+    private final MessagePublisher messagePublisher;
 
     /**
-     * Constructs a new TransactionOutboxManager with the necessary dependencies.
+     * Constructs a new TransactionOutboxManager.
      *
-     * @param config Configuration
-     * @param storage Storage for persisting outbox messages
-     * @param objectMapper JSON object mapper for serializing messages
-     * @param messageBrokerPublisher Publisher for sending messages to the broker
-     * @param tracer OpenTelemetry tracer for distributed tracing
-     * @param meterRegistry Metrics registry
+     * @param dataSource       the data source to use for database operations
+     * @param messagePublisher the publisher to use for sending messages to the broker
      */
-    @Inject
-    public TransactionOutboxManager(
-            Config config,
-            Storage storage,
-            ObjectMapper objectMapper,
-            MessageBrokerPublisher messageBrokerPublisher,
-            Tracer tracer,
-            MeterRegistry meterRegistry) {
-        this.storage = storage;
-        this.objectMapper = objectMapper;
-        this.messageBrokerPublisher = messageBrokerPublisher;
-        this.tracer = tracer;
-        this.meterRegistry = meterRegistry;
-        this.batchSize = config.getInteger("outbox.batchSize", 100);
-        this.maxRetries = config.getInteger("outbox.maxRetries", 5);
+    @Autowired
+    public TransactionOutboxManager(DataSource dataSource, MessagePublisher messagePublisher) {
+        this.dataSource = dataSource;
+        this.messagePublisher = messagePublisher;
+        initializeOutboxTable();
     }
 
     /**
-     * Add a message to the outbox table as part of a database transaction.
-     *
-     * @param transactionStorage Storage with an active transaction
-     * @param topic Topic to publish the message to
-     * @param payload Message payload
-     * @param correlationId Correlation ID for distributed tracing
-     * @throws StorageException If there is an error storing the message
+     * Initializes the outbox table if it doesn't exist.
      */
-    public void addToOutbox(Storage transactionStorage, String topic, Object payload, String correlationId) 
-            throws StorageException {
-        try {
-            // Serialize the payload to JSON
-            String payloadJson = objectMapper.writeValueAsString(payload);
-            
-            // Create a new outbox message
-            OutboxMessage outboxMessage = new OutboxMessage();
-            outboxMessage.setTopic(topic);
-            outboxMessage.setPayload(payloadJson);
-            outboxMessage.setCorrelationId(correlationId);
-            outboxMessage.setCreatedAt(new Date());
-            outboxMessage.setStatus(OutboxMessage.Status.PENDING);
-            outboxMessage.setRetryCount(0);
-            
-            // Store the outbox message in the database as part of the transaction
-            transactionStorage.addObject(outboxMessage, new Request(new Columns.Exclude("id")));
-            
-            // Record metric for outbox message creation
-            meterRegistry.counter("outbox.message.created", "topic", topic).increment();
-            
-            LOGGER.debug("Added message to outbox with correlation ID: {}", correlationId);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Error serializing payload to JSON: {}", e.getMessage());
-            throw new StorageException(e);
+    private void initializeOutboxTable() {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute(
+                "CREATE TABLE IF NOT EXISTS outbox (" +
+                "id VARCHAR(36) PRIMARY KEY, " +
+                "topic VARCHAR(255) NOT NULL, " +
+                "key VARCHAR(255), " +
+                "payload TEXT NOT NULL, " +
+                "status VARCHAR(20) NOT NULL, " +
+                "created_at TIMESTAMP NOT NULL, " +
+                "published_at TIMESTAMP, " +
+                "retry_count INT DEFAULT 0, " +
+                "last_error TEXT, " +
+                "version INT DEFAULT 0" +
+                ")");
+            LOGGER.info("Outbox table initialized");
+        } catch (SQLException e) {
+            LOGGER.error("Failed to initialize outbox table", e);
+            throw new RuntimeException("Failed to initialize outbox table", e);
         }
     }
 
     /**
-     * Scheduled task to process pending outbox messages and publish them to the message broker.
-     * 
-     * This method is scheduled to run at a fixed rate to ensure that messages are published
-     * to the broker even if the service fails after committing the transaction but before
-     * publishing the message.
+     * Stores a message in the outbox table as part of the current transaction.
+     * This method should be called within a transactional context.
+     *
+     * @param topic   the topic to publish the message to
+     * @param key     the key for the message (can be null)
+     * @param payload the message payload
+     * @return the ID of the stored message
      */
-    @Scheduled(fixedDelayString = "${outbox.processInterval:1000}")
+    @Transactional
+    public String storeMessage(String topic, String key, String payload) {
+        String id = UUID.randomUUID().toString();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                 "INSERT INTO outbox (id, topic, key, payload, status, created_at) " +
+                 "VALUES (?, ?, ?, ?, ?, ?)")) {
+            statement.setString(1, id);
+            statement.setString(2, topic);
+            statement.setString(3, key);
+            statement.setString(4, payload);
+            statement.setString(5, "PENDING");
+            statement.setTimestamp(6, Timestamp.from(Instant.now()));
+            statement.executeUpdate();
+            LOGGER.debug("Stored message in outbox: id={}, topic={}", id, topic);
+            return id;
+        } catch (SQLException e) {
+            LOGGER.error("Failed to store message in outbox", e);
+            throw new RuntimeException("Failed to store message in outbox", e);
+        }
+    }
+
+    /**
+     * Processes pending messages in the outbox table.
+     * This method is scheduled to run at a fixed rate.
+     */
+    @Scheduled(fixedDelayString = "${outbox.processing.interval:5000}")
     public void processOutbox() {
-        Span span = tracer.spanBuilder("process-outbox")
-                .setSpanKind(SpanKind.INTERNAL)
-                .startSpan();
-        
-        try (Scope scope = span.makeCurrent()) {
-            // Retrieve pending outbox messages from the database
-            List<OutboxMessage> pendingMessages = getPendingMessages();
-            
-            if (!pendingMessages.isEmpty()) {
-                LOGGER.debug("Processing {} pending outbox messages", pendingMessages.size());
-                span.setAttribute("outbox.messages.count", pendingMessages.size());
-                
-                // Process each pending message
-                for (OutboxMessage message : pendingMessages) {
-                    processMessage(message);
+        LOGGER.debug("Processing outbox messages");
+        List<OutboxMessage> messages = fetchPendingMessages();
+        if (messages.isEmpty()) {
+            LOGGER.debug("No pending messages found in outbox");
+            return;
+        }
+
+        LOGGER.info("Found {} pending messages in outbox", messages.size());
+        for (OutboxMessage message : messages) {
+            processMessage(message);
+        }
+    }
+
+    /**
+     * Fetches pending messages from the outbox table.
+     *
+     * @return a list of pending outbox messages
+     */
+    private List<OutboxMessage> fetchPendingMessages() {
+        List<OutboxMessage> messages = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                 "SELECT id, topic, key, payload, retry_count, version " +
+                 "FROM outbox " +
+                 "WHERE status = 'PENDING' " +
+                 "ORDER BY created_at ASC " +
+                 "LIMIT 100")) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    OutboxMessage message = new OutboxMessage(
+                        resultSet.getString("id"),
+                        resultSet.getString("topic"),
+                        resultSet.getString("key"),
+                        resultSet.getString("payload"),
+                        resultSet.getInt("retry_count"),
+                        resultSet.getInt("version")
+                    );
+                    messages.add(message);
                 }
             }
-        } catch (Exception e) {
-            span.recordException(e);
-            span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());
-            LOGGER.error("Error processing outbox: {}", e.getMessage());
-            meterRegistry.counter("outbox.process.error").increment();
-        } finally {
-            span.end();
+        } catch (SQLException e) {
+            LOGGER.error("Failed to fetch pending messages from outbox", e);
         }
+        return messages;
     }
 
     /**
-     * Retrieve pending outbox messages from the database.
+     * Processes a single outbox message.
      *
-     * @return List of pending outbox messages
-     * @throws StorageException If there is an error retrieving the messages
-     */
-    private List<OutboxMessage> getPendingMessages() throws StorageException {
-        return storage.getObjects(OutboxMessage.class, new Request(
-                new Condition.Equals("status", OutboxMessage.Status.PENDING),
-                new Order("createdAt", true, 0),
-                new Order("id", true, 0))
-                .setLimit(batchSize));
-    }
-
-    /**
-     * Process a single outbox message by publishing it to the message broker.
-     *
-     * @param message Outbox message to process
+     * @param message the message to process
      */
     private void processMessage(OutboxMessage message) {
-        Span span = tracer.spanBuilder("process-outbox-message")
-                .setParent(Context.current())
-                .setSpanKind(SpanKind.PRODUCER)
-                .setAttribute("outbox.message.id", message.getId())
-                .setAttribute("outbox.message.topic", message.getTopic())
-                .setAttribute("x-correlation-id", message.getCorrelationId())
-                .startSpan();
-        
-        try (Scope scope = span.makeCurrent()) {
-            // Create message headers with correlation ID for distributed tracing
-            Map<String, String> headers = new HashMap<>();
-            headers.put("x-correlation-id", message.getCorrelationId());
-            
-            // Add OpenTelemetry context to headers for distributed tracing
-            Map<String, String> tracingHeaders = new HashMap<>();
-            messageBrokerPublisher.getPropagator().inject(Context.current(), tracingHeaders, 
-                    (carrier, key, value) -> carrier.put(key, value));
-            headers.putAll(tracingHeaders);
-            
-            // Publish the message to the broker
-            messageBrokerPublisher.publish(message.getTopic(), message.getPayload(), headers);
-            
-            // Mark the message as processed
-            markAsProcessed(message);
-            
-            // Record metric for successful message publishing
-            meterRegistry.counter("outbox.message.published", "topic", message.getTopic()).increment();
-            
-            LOGGER.debug("Published message from outbox with correlation ID: {}", message.getCorrelationId());
+        try {
+            LOGGER.debug("Processing outbox message: id={}, topic={}", message.id(), message.topic());
+            messagePublisher.publish(message.topic(), message.key(), message.payload());
+            markMessageAsPublished(message.id(), message.version());
+            LOGGER.info("Successfully published message from outbox: id={}, topic={}", message.id(), message.topic());
         } catch (Exception e) {
-            span.recordException(e);
-            span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());
-            LOGGER.error("Error publishing message from outbox: {}", e.getMessage());
-            
-            // Increment retry count and mark as failed if max retries reached
-            handlePublishingFailure(message);
-            
-            // Record metric for failed message publishing
-            meterRegistry.counter("outbox.message.failed", "topic", message.getTopic()).increment();
-        } finally {
-            span.end();
+            LOGGER.warn("Failed to publish message from outbox: id={}, topic={}, error={}", 
+                message.id(), message.topic(), e.getMessage());
+            incrementRetryCount(message.id(), message.version(), e.getMessage());
         }
     }
 
     /**
-     * Mark an outbox message as processed in the database.
+     * Marks a message as published in the outbox table.
      *
-     * @param message Outbox message to mark as processed
+     * @param id      the ID of the message
+     * @param version the current version of the message
      */
-    private void markAsProcessed(OutboxMessage message) {
-        try {
-            message.setStatus(OutboxMessage.Status.PROCESSED);
-            message.setProcessedAt(new Date());
-            
-            storage.updateObject(message, new Request(
-                    new Condition.Equals("id", message.getId())));
-        } catch (StorageException e) {
-            LOGGER.error("Error marking outbox message as processed: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Handle a failure to publish an outbox message by incrementing the retry count
-     * and marking it as failed if the maximum number of retries has been reached.
-     *
-     * @param message Outbox message that failed to publish
-     */
-    private void handlePublishingFailure(OutboxMessage message) {
-        try {
-            message.setRetryCount(message.getRetryCount() + 1);
-            
-            if (message.getRetryCount() >= maxRetries) {
-                message.setStatus(OutboxMessage.Status.FAILED);
-                message.setFailedAt(new Date());
-                LOGGER.warn("Outbox message with correlation ID {} failed after {} retries", 
-                        message.getCorrelationId(), message.getRetryCount());
+    private void markMessageAsPublished(String id, int version) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                 "UPDATE outbox " +
+                 "SET status = 'PUBLISHED', published_at = ?, version = version + 1 " +
+                 "WHERE id = ? AND version = ?")) {
+            statement.setTimestamp(1, Timestamp.from(Instant.now()));
+            statement.setString(2, id);
+            statement.setInt(3, version);
+            int updated = statement.executeUpdate();
+            if (updated == 0) {
+                LOGGER.warn("Failed to mark message as published due to version mismatch: id={}", id);
             }
-            
-            storage.updateObject(message, new Request(
-                    new Condition.Equals("id", message.getId())));
-        } catch (StorageException e) {
-            LOGGER.error("Error updating outbox message retry count: {}", e.getMessage());
+        } catch (SQLException e) {
+            LOGGER.error("Failed to mark message as published: id={}", id, e);
         }
+    }
+
+    /**
+     * Increments the retry count for a message in the outbox table.
+     *
+     * @param id        the ID of the message
+     * @param version   the current version of the message
+     * @param errorMessage the error message from the failed publication attempt
+     */
+    private void incrementRetryCount(String id, int version, String errorMessage) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                 "UPDATE outbox " +
+                 "SET retry_count = retry_count + 1, last_error = ?, version = version + 1 " +
+                 "WHERE id = ? AND version = ?")) {
+            statement.setString(1, errorMessage);
+            statement.setString(2, id);
+            statement.setInt(3, version);
+            int updated = statement.executeUpdate();
+            if (updated == 0) {
+                LOGGER.warn("Failed to increment retry count due to version mismatch: id={}", id);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Failed to increment retry count: id={}", id, e);
+        }
+    }
+
+    /**
+     * Purges published messages from the outbox table that are older than the specified retention period.
+     * This method is scheduled to run at a fixed rate.
+     */
+    @Scheduled(cron = "${outbox.purge.cron:0 0 * * * *}")
+    public void purgePublishedMessages() {
+        LOGGER.debug("Purging published messages from outbox");
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                 "DELETE FROM outbox " +
+                 "WHERE status = 'PUBLISHED' " +
+                 "AND published_at < ?")) {
+            // Default retention period: 7 days
+            Timestamp retentionThreshold = Timestamp.from(Instant.now().minusSeconds(7 * 24 * 60 * 60));
+            statement.setTimestamp(1, retentionThreshold);
+            int deleted = statement.executeUpdate();
+            if (deleted > 0) {
+                LOGGER.info("Purged {} published messages from outbox", deleted);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Failed to purge published messages from outbox", e);
+        }
+    }
+
+    /**
+     * Represents a message in the outbox table.
+     */
+    private record OutboxMessage(String id, String topic, String key, String payload, int retryCount, int version) {}
+
+    /**
+     * Interface for publishing messages to a broker.
+     * This should be implemented by a class that knows how to interact with the specific message broker being used.
+     */
+    public interface MessagePublisher {
+        /**
+         * Publishes a message to the specified topic.
+         *
+         * @param topic   the topic to publish to
+         * @param key     the key for the message (can be null)
+         * @param payload the message payload
+         * @throws Exception if the publication fails
+         */
+        void publish(String topic, String key, String payload) throws Exception;
     }
 }
