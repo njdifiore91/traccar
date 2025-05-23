@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protocol-service
+  namespace: traccar
+  labels:
+    app: protocol-service
+    component: device-communication
+    part-of: traccar
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: protocol-service
+  template:
+    metadata:
+      labels:
+        app: protocol-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: protocol-service
+        image: registry.traccar.org/traccar/protocol:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8090
+          protocol: TCP
+        # Protocol-specific ports
+        - name: osmand
+          containerPort: 5055
+          protocol: TCP
+        - name: teltonika
+          containerPort: 5027
+          protocol: TCP
+        - name: meitrack
+          containerPort: 5020
+          protocol: TCP
+        - name: tk103
+          containerPort: 5006
+          protocol: TCP
+        - name: atrack
+          containerPort: 5013
+          protocol: TCP
+        - name: totem
+          containerPort: 5031
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        livenessProbe:
+          tcpSocket:
+            port: 5055
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: traccar-config
+              key: kafka.bootstrap-servers
+        - name: SERVICE_DISCOVERY_URI
+          valueFrom:
+            configMapKeyRef:
+              name: traccar-config
+              key: service.discovery.uri
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: PROTOCOL_ENABLED_PROTOCOLS
+          value: "osmand,teltonika,meitrack,tk103,atrack,totem"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        - name: protocol-data
+          mountPath: /app/data
+      volumes:
+      - name: config-volume
+        configMap:
+          name: protocol-service-config
+      - name: protocol-data
+        persistentVolumeClaim:
+          claimName: protocol-service-data
+          readOnly: false
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - protocol-service
+              topologyKey: "kubernetes.io/hostname"
+      terminationGracePeriodSeconds: 60
