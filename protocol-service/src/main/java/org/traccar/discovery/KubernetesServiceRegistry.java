@@ -68,6 +68,8 @@ public class KubernetesServiceRegistry implements ServiceRegistry {
     public KubernetesServiceRegistry(ServiceRegistryConfig config, HealthCheck healthCheck) throws IOException {
         this.healthCheck = healthCheck;
         this.registeredServices = new ConcurrentHashMap<>();
+        
+        // Initialize Kubernetes client
 
         // Initialize Kubernetes client
         ApiClient client = Config.defaultClient();
@@ -89,6 +91,16 @@ public class KubernetesServiceRegistry implements ServiceRegistry {
         this.namespace = ns;
 
         LOGGER.info("Initialized Kubernetes Service Registry in namespace: " + namespace);
+    }
+    
+    /**
+     * Constructs a new KubernetesServiceRegistry with the specified configuration.
+     *
+     * @param config The service registry configuration
+     * @throws IOException If there is an error initializing the Kubernetes client
+     */
+    public KubernetesServiceRegistry(ServiceRegistryConfig config) throws IOException {
+        this(config, new DefaultHealthCheck());
     }
 
     @Override
