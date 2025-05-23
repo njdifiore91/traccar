@@ -1,0 +1,268 @@
+syntax = "proto3";
+
+package org.traccar.proto;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto";
+option java_outer_classname = "ProtocolServiceProto";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Protocol Service gRPC contract
+// Defines the service interface for the Protocol Service which handles device connections
+// and protocol implementations, decoding raw messages from 200+ supported device protocols
+// into a standardized format.
+service ProtocolService {
+  // Processes a raw message from a device and returns the decoded position data
+  rpc ProcessMessage(ProcessMessageRequest) returns (ProcessMessageResponse);
+  
+  // Sends a command to a device and returns the command execution status
+  rpc SendCommand(SendCommandRequest) returns (SendCommandResponse);
+  
+  // Gets the status of a device connection
+  rpc GetDeviceStatus(GetDeviceStatusRequest) returns (GetDeviceStatusResponse);
+  
+  // Lists all supported protocols
+  rpc ListProtocols(google.protobuf.Empty) returns (ListProtocolsResponse);
+  
+  // Lists all connected devices
+  rpc ListConnectedDevices(google.protobuf.Empty) returns (ListConnectedDevicesResponse);
+  
+  // Gets protocol capabilities for a specific protocol
+  rpc GetProtocolCapabilities(GetProtocolCapabilitiesRequest) returns (GetProtocolCapabilitiesResponse);
+}
+
+// Request message for processing a raw device message
+message ProcessMessageRequest {
+  // Unique identifier for the protocol (e.g., "tk103", "meitrack", etc.)
+  string protocol_name = 1;
+  
+  // Raw binary message data from the device
+  bytes data = 2;
+  
+  // Connection information
+  ConnectionInfo connection_info = 3;
+}
+
+// Connection information for the device
+message ConnectionInfo {
+  // Remote address of the device (IP:port for TCP/UDP or phone number for SMS)
+  string remote_address = 1;
+  
+  // Connection type (TCP, UDP, HTTP, SMS, etc.)
+  ConnectionType connection_type = 2;
+  
+  // Timestamp when the message was received
+  google.protobuf.Timestamp received_at = 3;
+}
+
+// Connection type enumeration
+enum ConnectionType {
+  CONNECTION_TYPE_UNKNOWN = 0;
+  CONNECTION_TYPE_TCP = 1;
+  CONNECTION_TYPE_UDP = 2;
+  CONNECTION_TYPE_HTTP = 3;
+  CONNECTION_TYPE_SMS = 4;
+  CONNECTION_TYPE_MQTT = 5;
+  CONNECTION_TYPE_WEBSOCKET = 6;
+}
+
+// Response message for processing a raw device message
+message ProcessMessageResponse {
+  // Status of the message processing
+  ProcessStatus status = 1;
+  
+  // Device ID if identified
+  int64 device_id = 2;
+  
+  // Position data if successfully decoded
+  repeated PositionData positions = 3;
+  
+  // Error message if processing failed
+  string error_message = 4;
+}
+
+// Status of message processing
+enum ProcessStatus {
+  PROCESS_STATUS_UNKNOWN = 0;
+  PROCESS_STATUS_SUCCESS = 1;
+  PROCESS_STATUS_INVALID_MESSAGE = 2;
+  PROCESS_STATUS_DEVICE_NOT_FOUND = 3;
+  PROCESS_STATUS_PROTOCOL_ERROR = 4;
+  PROCESS_STATUS_INTERNAL_ERROR = 5;
+}
+
+// Position data decoded from a device message
+message PositionData {
+  // Device ID
+  int64 device_id = 1;
+  
+  // Protocol name
+  string protocol = 2;
+  
+  // Position timestamp
+  google.protobuf.Timestamp timestamp = 3;
+  
+  // Latitude in degrees
+  double latitude = 4;
+  
+  // Longitude in degrees
+  double longitude = 5;
+  
+  // Altitude in meters
+  double altitude = 6;
+  
+  // Speed in knots
+  double speed = 7;
+  
+  // Course in degrees
+  double course = 8;
+  
+  // Position validity flag
+  bool valid = 9;
+  
+  // Additional attributes
+  map<string, AttributeValue> attributes = 10;
+}
+
+// Attribute value for position data
+message AttributeValue {
+  oneof value {
+    string string_value = 1;
+    int64 int_value = 2;
+    double double_value = 3;
+    bool bool_value = 4;
+  }
+}
+
+// Request message for sending a command to a device
+message SendCommandRequest {
+  // Device ID
+  int64 device_id = 1;
+  
+  // Command type
+  string command_type = 2;
+  
+  // Command attributes
+  map<string, string> attributes = 3;
+}
+
+// Response message for sending a command to a device
+message SendCommandResponse {
+  // Status of the command execution
+  CommandStatus status = 1;
+  
+  // Result message
+  string message = 2;
+}
+
+// Status of command execution
+enum CommandStatus {
+  COMMAND_STATUS_UNKNOWN = 0;
+  COMMAND_STATUS_SUCCESS = 1;
+  COMMAND_STATUS_FAILURE = 2;
+  COMMAND_STATUS_DEVICE_NOT_FOUND = 3;
+  COMMAND_STATUS_PROTOCOL_NOT_SUPPORTED = 4;
+  COMMAND_STATUS_COMMAND_NOT_SUPPORTED = 5;
+  COMMAND_STATUS_DEVICE_OFFLINE = 6;
+  COMMAND_STATUS_TIMEOUT = 7;
+}
+
+// Request message for getting device status
+message GetDeviceStatusRequest {
+  // Device ID
+  int64 device_id = 1;
+}
+
+// Response message for getting device status
+message GetDeviceStatusResponse {
+  // Device ID
+  int64 device_id = 1;
+  
+  // Connection status
+  ConnectionStatus status = 2;
+  
+  // Last communication time
+  google.protobuf.Timestamp last_update = 3;
+  
+  // Protocol name
+  string protocol = 4;
+  
+  // Remote address if connected
+  string remote_address = 5;
+}
+
+// Connection status enumeration
+enum ConnectionStatus {
+  CONNECTION_STATUS_UNKNOWN = 0;
+  CONNECTION_STATUS_ONLINE = 1;
+  CONNECTION_STATUS_OFFLINE = 2;
+  CONNECTION_STATUS_TEMPORARILY_UNAVAILABLE = 3;
+}
+
+// Response message for listing protocols
+message ListProtocolsResponse {
+  // List of supported protocols
+  repeated ProtocolInfo protocols = 1;
+}
+
+// Protocol information
+message ProtocolInfo {
+  // Protocol name
+  string name = 1;
+  
+  // Protocol description
+  string description = 2;
+  
+  // Supported connection types
+  repeated ConnectionType supported_connections = 3;
+  
+  // Supported command types
+  repeated string supported_commands = 4;
+}
+
+// Response message for listing connected devices
+message ListConnectedDevicesResponse {
+  // List of connected devices
+  repeated ConnectedDeviceInfo devices = 1;
+}
+
+// Connected device information
+message ConnectedDeviceInfo {
+  // Device ID
+  int64 device_id = 1;
+  
+  // Protocol name
+  string protocol = 2;
+  
+  // Remote address
+  string remote_address = 3;
+  
+  // Connection time
+  google.protobuf.Timestamp connected_since = 4;
+}
+
+// Request message for getting protocol capabilities
+message GetProtocolCapabilitiesRequest {
+  // Protocol name
+  string protocol_name = 1;
+}
+
+// Response message for getting protocol capabilities
+message GetProtocolCapabilitiesResponse {
+  // Protocol name
+  string protocol_name = 1;
+  
+  // Supported connection types
+  repeated ConnectionType supported_connections = 2;
+  
+  // Supported command types
+  repeated string supported_commands = 3;
+  
+  // Supported data fields
+  repeated string supported_data_fields = 4;
+  
+  // Protocol-specific configuration options
+  map<string, string> configuration_options = 5;
+}
