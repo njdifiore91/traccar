@@ -1,0 +1,578 @@
+{
+  "version": "1.0.0",
+  "description": "Common test utilities and helper functions for protocol testing",
+  "utilities": {
+    "position": {
+      "description": "Utilities for creating and verifying position objects",
+      "functions": {
+        "createPosition": {
+          "description": "Creates a standard position object with the specified parameters",
+          "parameters": [
+            {
+              "name": "time",
+              "type": "string",
+              "format": "yyyy-MM-dd HH:mm:ss.SSS",
+              "description": "Timestamp in UTC"
+            },
+            {
+              "name": "valid",
+              "type": "boolean",
+              "description": "Whether the position is valid"
+            },
+            {
+              "name": "latitude",
+              "type": "double",
+              "description": "Latitude in degrees"
+            },
+            {
+              "name": "longitude",
+              "type": "double",
+              "description": "Longitude in degrees"
+            }
+          ],
+          "example": "position('2023-01-01 12:00:00.000', true, 37.7749, -122.4194)",
+          "returns": "Position object with the specified parameters"
+        },
+        "verifyPosition": {
+          "description": "Verifies that a decoder correctly decodes a position from the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode (ByteBuf, String, etc.)"
+            }
+          ],
+          "example": "verifyPosition(decoder, buffer('$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A'))",
+          "returns": "void"
+        },
+        "verifyPositions": {
+          "description": "Verifies that a decoder correctly decodes multiple positions from the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode (ByteBuf, String, etc.)"
+            }
+          ],
+          "example": "verifyPositions(decoder, buffer('...'))",
+          "returns": "void"
+        },
+        "verifyAttributes": {
+          "description": "Verifies that a decoder correctly decodes position attributes from the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode (ByteBuf, String, etc.)"
+            }
+          ],
+          "example": "verifyAttributes(decoder, buffer('...'))",
+          "returns": "void"
+        },
+        "verifyAttribute": {
+          "description": "Verifies that a decoder correctly decodes a specific attribute from the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode (ByteBuf, String, etc.)"
+            },
+            {
+              "name": "key",
+              "type": "String",
+              "description": "The attribute key to verify"
+            },
+            {
+              "name": "expected",
+              "type": "Object",
+              "description": "The expected value of the attribute"
+            }
+          ],
+          "example": "verifyAttribute(decoder, buffer('...'), 'fuel', 75.5)",
+          "returns": "void"
+        }
+      }
+    },
+    "binary": {
+      "description": "Utilities for working with binary data",
+      "functions": {
+        "binary": {
+          "description": "Converts hex string(s) to a ByteBuf",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "String...",
+              "description": "Hex string(s) to convert"
+            }
+          ],
+          "example": "binary('01020304', 'AABBCC')",
+          "returns": "ByteBuf containing the binary data"
+        },
+        "buffer": {
+          "description": "Converts string(s) to a ByteBuf using ISO-8859-1 encoding",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "String...",
+              "description": "String(s) to convert"
+            }
+          ],
+          "example": "buffer('Hello', 'World')",
+          "returns": "ByteBuf containing the encoded string data"
+        },
+        "text": {
+          "description": "Concatenates string(s) into a single string",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "String...",
+              "description": "String(s) to concatenate"
+            }
+          ],
+          "example": "text('Hello', 'World')",
+          "returns": "Concatenated string"
+        },
+        "concatenateBuffers": {
+          "description": "Concatenates multiple ByteBufs into a single ByteBuf",
+          "parameters": [
+            {
+              "name": "buffers",
+              "type": "ByteBuf...",
+              "description": "ByteBufs to concatenate"
+            }
+          ],
+          "example": "concatenateBuffers(buffer1, buffer2, buffer3)",
+          "returns": "Concatenated ByteBuf"
+        }
+      }
+    },
+    "http": {
+      "description": "Utilities for testing HTTP-based protocols",
+      "functions": {
+        "request": {
+          "description": "Creates an HTTP request with the specified URL",
+          "parameters": [
+            {
+              "name": "url",
+              "type": "String",
+              "description": "The URL for the request"
+            }
+          ],
+          "example": "request('/api/position')",
+          "returns": "DefaultFullHttpRequest with GET method"
+        },
+        "requestWithMethod": {
+          "description": "Creates an HTTP request with the specified method and URL",
+          "parameters": [
+            {
+              "name": "method",
+              "type": "HttpMethod",
+              "description": "The HTTP method (GET, POST, etc.)"
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "description": "The URL for the request"
+            }
+          ],
+          "example": "request(HttpMethod.POST, '/api/position')",
+          "returns": "DefaultFullHttpRequest with the specified method"
+        },
+        "requestWithData": {
+          "description": "Creates an HTTP request with the specified method, URL, and data",
+          "parameters": [
+            {
+              "name": "method",
+              "type": "HttpMethod",
+              "description": "The HTTP method (GET, POST, etc.)"
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "description": "The URL for the request"
+            },
+            {
+              "name": "data",
+              "type": "ByteBuf",
+              "description": "The request body data"
+            }
+          ],
+          "example": "request(HttpMethod.POST, '/api/position', buffer('{"lat":37.7749,"lon":-122.4194}'))",
+          "returns": "DefaultFullHttpRequest with the specified method and data"
+        },
+        "requestWithHeaders": {
+          "description": "Creates an HTTP request with the specified method, URL, and headers",
+          "parameters": [
+            {
+              "name": "method",
+              "type": "HttpMethod",
+              "description": "The HTTP method (GET, POST, etc.)"
+            },
+            {
+              "name": "url",
+              "type": "String",
+              "description": "The URL for the request"
+            },
+            {
+              "name": "headers",
+              "type": "HttpHeaders",
+              "description": "The HTTP headers"
+            }
+          ],
+          "example": "request(HttpMethod.GET, '/api/position', headers)",
+          "returns": "DefaultFullHttpRequest with the specified method and headers"
+        },
+        "response": {
+          "description": "Creates an HTTP response with the specified data",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "ByteBuf",
+              "description": "The response body data"
+            }
+          ],
+          "example": "response(buffer('{"success":true}'))",
+          "returns": "DefaultFullHttpResponse with OK status"
+        }
+      }
+    },
+    "verification": {
+      "description": "Utilities for verifying test results",
+      "functions": {
+        "verifyNotNull": {
+          "description": "Verifies that a decoder returns a non-null result for the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode"
+            }
+          ],
+          "example": "verifyNotNull(decoder, buffer('...'))",
+          "returns": "void"
+        },
+        "verifyNull": {
+          "description": "Verifies that a decoder returns null for the given object",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to test"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to decode"
+            }
+          ],
+          "example": "verifyNull(decoder, buffer('...'))",
+          "returns": "void"
+        },
+        "verifyCommand": {
+          "description": "Verifies that an encoder correctly encodes a command",
+          "parameters": [
+            {
+              "name": "encoder",
+              "type": "BaseProtocolEncoder",
+              "description": "The protocol encoder to test"
+            },
+            {
+              "name": "command",
+              "type": "Command",
+              "description": "The command to encode"
+            },
+            {
+              "name": "expected",
+              "type": "ByteBuf",
+              "description": "The expected encoded result"
+            }
+          ],
+          "example": "verifyCommand(encoder, command, binary('01020304'))",
+          "returns": "void"
+        },
+        "verifyFrame": {
+          "description": "Verifies that an object matches the expected ByteBuf",
+          "parameters": [
+            {
+              "name": "expected",
+              "type": "ByteBuf",
+              "description": "The expected ByteBuf"
+            },
+            {
+              "name": "object",
+              "type": "Object",
+              "description": "The object to verify"
+            }
+          ],
+          "example": "verifyFrame(binary('01020304'), encodedObject)",
+          "returns": "void"
+        }
+      }
+    },
+    "injection": {
+      "description": "Utilities for injecting dependencies into test objects",
+      "functions": {
+        "injectDecoder": {
+          "description": "Injects mock dependencies into a protocol decoder for testing",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseProtocolDecoder",
+              "description": "The protocol decoder to inject dependencies into"
+            }
+          ],
+          "example": "injectDecoder(new MyProtocolDecoder(protocol))",
+          "returns": "The decoder with injected dependencies"
+        },
+        "injectEncoder": {
+          "description": "Injects mock dependencies into a protocol encoder for testing",
+          "parameters": [
+            {
+              "name": "encoder",
+              "type": "BaseProtocolEncoder",
+              "description": "The protocol encoder to inject dependencies into"
+            }
+          ],
+          "example": "injectEncoder(new MyProtocolEncoder(protocol))",
+          "returns": "The encoder with injected dependencies"
+        },
+        "injectFrameDecoder": {
+          "description": "Injects mock dependencies into a frame decoder for testing",
+          "parameters": [
+            {
+              "name": "decoder",
+              "type": "BaseFrameDecoder",
+              "description": "The frame decoder to inject dependencies into"
+            }
+          ],
+          "example": "injectFrameDecoder(new MyFrameDecoder())",
+          "returns": "The frame decoder with injected dependencies"
+        }
+      }
+    },
+    "checksum": {
+      "description": "Utilities for calculating and verifying checksums",
+      "functions": {
+        "calculateCrc16": {
+          "description": "Calculates CRC-16 checksum for the given data",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "byte[]",
+              "description": "The data to calculate checksum for"
+            }
+          ],
+          "example": "calculateCrc16(DataConverter.parseHex('01020304'))",
+          "returns": "int - The calculated CRC-16 checksum"
+        },
+        "calculateCrc16Ccitt": {
+          "description": "Calculates CRC-16-CCITT checksum for the given data",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "byte[]",
+              "description": "The data to calculate checksum for"
+            }
+          ],
+          "example": "calculateCrc16Ccitt(DataConverter.parseHex('01020304'))",
+          "returns": "int - The calculated CRC-16-CCITT checksum"
+        },
+        "calculateXor": {
+          "description": "Calculates XOR checksum for the given data",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "byte[]",
+              "description": "The data to calculate checksum for"
+            }
+          ],
+          "example": "calculateXor(DataConverter.parseHex('01020304'))",
+          "returns": "byte - The calculated XOR checksum"
+        },
+        "calculateSum": {
+          "description": "Calculates sum checksum for the given data",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "byte[]",
+              "description": "The data to calculate checksum for"
+            }
+          ],
+          "example": "calculateSum(DataConverter.parseHex('01020304'))",
+          "returns": "int - The calculated sum checksum"
+        },
+        "verifyChecksum": {
+          "description": "Verifies that the checksum in the data is correct",
+          "parameters": [
+            {
+              "name": "data",
+              "type": "byte[]",
+              "description": "The data containing the checksum"
+            },
+            {
+              "name": "checksumType",
+              "type": "String",
+              "description": "The type of checksum (crc16, crc16-ccitt, xor, sum)"
+            },
+            {
+              "name": "checksumPosition",
+              "type": "int",
+              "description": "The position of the checksum in the data"
+            }
+          ],
+          "example": "verifyChecksum(DataConverter.parseHex('0102030475'), 'xor', 4)",
+          "returns": "boolean - Whether the checksum is correct"
+        }
+      }
+    },
+    "conversion": {
+      "description": "Utilities for converting between different data formats",
+      "functions": {
+        "hexStringToBytes": {
+          "description": "Converts a hex string to a byte array",
+          "parameters": [
+            {
+              "name": "hex",
+              "type": "String",
+              "description": "The hex string to convert"
+            }
+          ],
+          "example": "hexStringToBytes('01020304')",
+          "returns": "byte[] - The converted byte array"
+        },
+        "bytesToHexString": {
+          "description": "Converts a byte array to a hex string",
+          "parameters": [
+            {
+              "name": "bytes",
+              "type": "byte[]",
+              "description": "The byte array to convert"
+            }
+          ],
+          "example": "bytesToHexString(new byte[]{1, 2, 3, 4})",
+          "returns": "String - The hex string representation"
+        },
+        "asciiToBytes": {
+          "description": "Converts an ASCII string to a byte array",
+          "parameters": [
+            {
+              "name": "ascii",
+              "type": "String",
+              "description": "The ASCII string to convert"
+            }
+          ],
+          "example": "asciiToBytes('Hello')",
+          "returns": "byte[] - The converted byte array"
+        },
+        "bytesToAscii": {
+          "description": "Converts a byte array to an ASCII string",
+          "parameters": [
+            {
+              "name": "bytes",
+              "type": "byte[]",
+              "description": "The byte array to convert"
+            }
+          ],
+          "example": "bytesToAscii(new byte[]{72, 101, 108, 108, 111})",
+          "returns": "String - The ASCII string representation"
+        }
+      }
+    }
+  },
+  "examples": {
+    "decoderTest": {
+      "description": "Example of testing a protocol decoder",
+      "code": [
+        "@Test",
+        "public void testDecode() throws Exception {",
+        "    MyProtocolDecoder decoder = injectDecoder(new MyProtocolDecoder(null));",
+        "    ",
+        "    // Test valid message",
+        "    verifyPosition(decoder, binary('01020304050607080910'));",
+        "    ",
+        "    // Test invalid message",
+        "    verifyNull(decoder, binary('0102030405'));",
+        "    ",
+        "    // Test message with attributes",
+        "    verifyAttribute(decoder, binary('010203040506070809101112'), 'fuel', 75.5);",
+        "}"
+      ]
+    },
+    "encoderTest": {
+      "description": "Example of testing a protocol encoder",
+      "code": [
+        "@Test",
+        "public void testEncode() throws Exception {",
+        "    MyProtocolEncoder encoder = injectEncoder(new MyProtocolEncoder(null));",
+        "    ",
+        "    Command command = new Command();",
+        "    command.setDeviceId(1);",
+        "    command.setType(Command.TYPE_CUSTOM);",
+        "    command.set(Command.KEY_DATA, 'setParam 1,value');",
+        "    ",
+        "    verifyCommand(encoder, command, binary('01020304050607080910'));",
+        "}"
+      ]
+    },
+    "httpProtocolTest": {
+      "description": "Example of testing an HTTP-based protocol",
+      "code": [
+        "@Test",
+        "public void testHttp() throws Exception {",
+        "    MyHttpProtocolDecoder decoder = injectDecoder(new MyHttpProtocolDecoder(null));",
+        "    ",
+        "    // Test GET request",
+        "    verifyPosition(decoder, request('/api/position?lat=37.7749&lon=-122.4194&speed=50'));",
+        "    ",
+        "    // Test POST request with JSON body",
+        "    verifyPositions(decoder, request(HttpMethod.POST, '/api/positions', buffer('{"positions":[{"lat":37.7749,"lon":-122.4194}]}')));",
+        "}"
+      ]
+    },
+    "checksumTest": {
+      "description": "Example of using checksum utilities",
+      "code": [
+        "@Test",
+        "public void testChecksum() {",
+        "    byte[] data = DataConverter.parseHex('01020304');",
+        "    ",
+        "    // Calculate different checksums",
+        "    int crc16 = calculateCrc16(data);",
+        "    int crc16Ccitt = calculateCrc16Ccitt(data);",
+        "    byte xor = calculateXor(data);",
+        "    int sum = calculateSum(data);",
+        "    ",
+        "    // Verify a checksum in data",
+        "    byte[] dataWithChecksum = DataConverter.parseHex('0102030407'); // 07 is the XOR checksum",
+        "    boolean valid = verifyChecksum(dataWithChecksum, 'xor', 4);",
+        "    assertTrue(valid);",
+        "}"
+      ]
+    }
+  }
+}
