@@ -1,0 +1,243 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "generated": "2025-05-23T10:15:30Z",
+    "title": "Points of Interest Data",
+    "status": "success",
+    "count": 10
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4194, 37.7749]
+      },
+      "properties": {
+        "id": "poi-001",
+        "name": "Downtown Hotel",
+        "category": "accommodation",
+        "subcategory": "hotel",
+        "address": "123 Main Street, San Francisco, CA",
+        "phone": "+1-555-123-4567",
+        "website": "https://example.com/downtown-hotel",
+        "rating": 4.5,
+        "style": {
+          "iconUrl": "hotel.png",
+          "iconSize": [32, 32],
+          "iconColor": "#0078D4",
+          "markerColor": "blue"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4106, 37.7821]
+      },
+      "properties": {
+        "id": "poi-002",
+        "name": "City Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
+        "cuisine": "Italian",
+        "address": "456 Oak Avenue, San Francisco, CA",
+        "phone": "+1-555-234-5678",
+        "website": "https://example.com/city-restaurant",
+        "rating": 4.2,
+        "openingHours": "Mon-Sun 11:00-22:00",
+        "style": {
+          "iconUrl": "restaurant.png",
+          "iconSize": [32, 32],
+          "iconColor": "#E74C3C",
+          "markerColor": "red"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4269, 37.7749]
+      },
+      "properties": {
+        "id": "poi-003",
+        "name": "Central Gas Station",
+        "category": "automotive",
+        "subcategory": "gas_station",
+        "address": "789 Market Street, San Francisco, CA",
+        "phone": "+1-555-345-6789",
+        "fuel_types": ["regular", "premium", "diesel"],
+        "has_service_shop": true,
+        "style": {
+          "iconUrl": "gas_station.png",
+          "iconSize": [32, 32],
+          "iconColor": "#27AE60",
+          "markerColor": "green"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4314, 37.7837]
+      },
+      "properties": {
+        "id": "poi-004",
+        "name": "City Park",
+        "category": "leisure",
+        "subcategory": "park",
+        "address": "101 Park Avenue, San Francisco, CA",
+        "amenities": ["playground", "picnic_area", "restrooms"],
+        "opening_hours": "24/7",
+        "style": {
+          "iconUrl": "park.png",
+          "iconSize": [32, 32],
+          "iconColor": "#2ECC71",
+          "markerColor": "darkgreen"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4167, 37.7792]
+      },
+      "properties": {
+        "id": "poi-005",
+        "name": "Downtown Shopping Mall",
+        "category": "shopping",
+        "subcategory": "mall",
+        "address": "222 Shopping Center Road, San Francisco, CA",
+        "phone": "+1-555-456-7890",
+        "website": "https://example.com/downtown-mall",
+        "opening_hours": "Mon-Sat 10:00-21:00, Sun 11:00-19:00",
+        "style": {
+          "iconUrl": "shopping.png",
+          "iconSize": [32, 32],
+          "iconColor": "#9B59B6",
+          "markerColor": "purple"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4094, 37.7873]
+      },
+      "properties": {
+        "id": "poi-006",
+        "name": "City Hospital",
+        "category": "health",
+        "subcategory": "hospital",
+        "address": "333 Medical Center Drive, San Francisco, CA",
+        "phone": "+1-555-567-8901",
+        "emergency": true,
+        "opening_hours": "24/7",
+        "style": {
+          "iconUrl": "hospital.png",
+          "iconSize": [32, 32],
+          "iconColor": "#E74C3C",
+          "markerColor": "red"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4240, 37.7751]
+      },
+      "properties": {
+        "id": "poi-007",
+        "name": "Central Police Station",
+        "category": "public_service",
+        "subcategory": "police",
+        "address": "444 Safety Street, San Francisco, CA",
+        "phone": "+1-555-678-9012",
+        "emergency_phone": "911",
+        "opening_hours": "24/7",
+        "style": {
+          "iconUrl": "police.png",
+          "iconSize": [32, 32],
+          "iconColor": "#3498DB",
+          "markerColor": "blue"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4175, 37.7826]
+      },
+      "properties": {
+        "id": "poi-008",
+        "name": "City Museum",
+        "category": "tourism",
+        "subcategory": "museum",
+        "address": "555 Culture Avenue, San Francisco, CA",
+        "phone": "+1-555-789-0123",
+        "website": "https://example.com/city-museum",
+        "opening_hours": "Tue-Sun 09:00-17:00",
+        "entrance_fee": 12.50,
+        "style": {
+          "iconUrl": "museum.png",
+          "iconSize": [32, 32],
+          "iconColor": "#F39C12",
+          "markerColor": "orange"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4130, 37.7840]
+      },
+      "properties": {
+        "id": "poi-009",
+        "name": "Central Train Station",
+        "category": "transportation",
+        "subcategory": "train_station",
+        "address": "666 Transit Way, San Francisco, CA",
+        "phone": "+1-555-890-1234",
+        "website": "https://example.com/central-station",
+        "wheelchair_accessible": true,
+        "style": {
+          "iconUrl": "train.png",
+          "iconSize": [32, 32],
+          "iconColor": "#34495E",
+          "markerColor": "darkblue"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4220, 37.7800]
+      },
+      "properties": {
+        "id": "poi-010",
+        "name": "City Library",
+        "category": "education",
+        "subcategory": "library",
+        "address": "777 Book Street, San Francisco, CA",
+        "phone": "+1-555-901-2345",
+        "website": "https://example.com/city-library",
+        "opening_hours": "Mon-Fri 09:00-20:00, Sat 10:00-17:00",
+        "style": {
+          "iconUrl": "library.png",
+          "iconSize": [32, 32],
+          "iconColor": "#795548",
+          "markerColor": "brown"
+        }
+      }
+    }
+  ]
+}
