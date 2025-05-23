@@ -1,0 +1,252 @@
+{
+  "description": "Position message template for RabbitMQ published by Protocol Service",
+  "version": "1.0",
+  "messageTypes": [
+    {
+      "name": "position",
+      "description": "Standard GPS position message",
+      "routingKey": "position.update",
+      "exchange": "traccar.positions",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "protocol": "{{protocol}}",
+          "deviceId": "{{deviceId}}",
+          "timestamp": "{{timestamp}}"
+        }
+      },
+      "payload": {
+        "deviceId": "{{deviceId}}",
+        "protocol": "{{protocol}}",
+        "timestamp": "{{timestamp}}",
+        "serverTime": "{{serverTime}}",
+        "valid": true,
+        "latitude": "{{latitude}}",
+        "longitude": "{{longitude}}",
+        "altitude": "{{altitude}}",
+        "speed": "{{speed}}",
+        "course": "{{course}}",
+        "address": "{{address}}",
+        "accuracy": "{{accuracy}}",
+        "network": "{{network}}",
+        "attributes": "{{attributes}}"
+      }
+    },
+    {
+      "name": "position.raw",
+      "description": "Raw position data before processing",
+      "routingKey": "position.raw",
+      "exchange": "traccar.positions",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "protocol": "{{protocol}}",
+          "deviceId": "{{deviceId}}",
+          "timestamp": "{{timestamp}}"
+        }
+      },
+      "payload": {
+        "deviceId": "{{deviceId}}",
+        "protocol": "{{protocol}}",
+        "rawData": "{{rawData}}",
+        "timestamp": "{{timestamp}}"
+      }
+    }
+  ],
+  "samplePayloads": [
+    {
+      "type": "position",
+      "description": "Standard GPS position from Teltonika protocol",
+      "routingKey": "position.update",
+      "properties": {
+        "headers": {
+          "protocol": "teltonika",
+          "deviceId": "123456789012345",
+          "timestamp": "1621234567890"
+        }
+      },
+      "payload": {
+        "deviceId": "123456789012345",
+        "protocol": "teltonika",
+        "timestamp": 1621234567890,
+        "serverTime": 1621234568000,
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "address": null,
+        "accuracy": 5.0,
+        "network": {
+          "radioType": "gsm",
+          "cellTowers": [
+            {
+              "cellId": 12345,
+              "locationAreaCode": 1000,
+              "mobileCountryCode": 310,
+              "mobileNetworkCode": 410,
+              "signalStrength": -70
+            }
+          ]
+        },
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true,
+          "motion": true,
+          "io": {
+            "1": 1,
+            "2": 0,
+            "3": 12.4
+          }
+        }
+      }
+    },
+    {
+      "type": "position",
+      "description": "Standard GPS position from TK103 protocol",
+      "routingKey": "position.update",
+      "properties": {
+        "headers": {
+          "protocol": "tk103",
+          "deviceId": "987654321098765",
+          "timestamp": "1621234567890"
+        }
+      },
+      "payload": {
+        "deviceId": "987654321098765",
+        "protocol": "tk103",
+        "timestamp": 1621234567890,
+        "serverTime": 1621234568000,
+        "valid": true,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 15.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": null,
+        "accuracy": 10.0,
+        "network": null,
+        "attributes": {
+          "batteryLevel": 75,
+          "ignition": false,
+          "alarm": "powerCut"
+        }
+      }
+    },
+    {
+      "type": "position",
+      "description": "Standard GPS position from Meitrack protocol",
+      "routingKey": "position.update",
+      "properties": {
+        "headers": {
+          "protocol": "meitrack",
+          "deviceId": "135790246813579",
+          "timestamp": "1621234567890"
+        }
+      },
+      "payload": {
+        "deviceId": "135790246813579",
+        "protocol": "meitrack",
+        "timestamp": 1621234567890,
+        "serverTime": 1621234568000,
+        "valid": true,
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "altitude": 25.0,
+        "speed": 60.5,
+        "course": 90.0,
+        "address": null,
+        "accuracy": 3.0,
+        "network": null,
+        "attributes": {
+          "batteryLevel": 90,
+          "ignition": true,
+          "fuel": 75.5,
+          "temperature": 28.5,
+          "io": {
+            "1": 1,
+            "2": 1,
+            "3": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "position.raw",
+      "description": "Raw position data from Teltonika protocol",
+      "routingKey": "position.raw",
+      "properties": {
+        "headers": {
+          "protocol": "teltonika",
+          "deviceId": "123456789012345",
+          "timestamp": "1621234567890"
+        }
+      },
+      "payload": {
+        "deviceId": "123456789012345",
+        "protocol": "teltonika",
+        "timestamp": 1621234567890,
+        "rawData": "000000000000004308020000016B40D8EA30010000000000000000000000000000000105021503010101425E0F01F10000601A014E0000000000000000010000C7CF"
+      }
+    },
+    {
+      "type": "position.raw",
+      "description": "Raw position data from TK103 protocol",
+      "routingKey": "position.raw",
+      "properties": {
+        "headers": {
+          "protocol": "tk103",
+          "deviceId": "987654321098765",
+          "timestamp": "1621234567890"
+        }
+      },
+      "payload": {
+        "deviceId": "987654321098765",
+        "protocol": "tk103",
+        "timestamp": 1621234567890,
+        "rawData": "(013612345678BP05000013632782450323101251A2234.0297N11405.9101E000.0040331309.0000000000L00000000)"
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "name": "valid_position_message",
+      "messageType": "position",
+      "variables": {
+        "deviceId": "123456789012345",
+        "protocol": "teltonika",
+        "timestamp": 1621234567890,
+        "serverTime": 1621234568000,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "accuracy": 5.0,
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true
+        }
+      },
+      "expectedRoutingKey": "position.update"
+    },
+    {
+      "name": "valid_raw_message",
+      "messageType": "position.raw",
+      "variables": {
+        "deviceId": "987654321098765",
+        "protocol": "tk103",
+        "timestamp": 1621234567890,
+        "rawData": "(013612345678BP05000013632782450323101251A2234.0297N11405.9101E000.0040331309.0000000000L00000000)"
+      },
+      "expectedRoutingKey": "position.raw"
+    }
+  ]
+}
