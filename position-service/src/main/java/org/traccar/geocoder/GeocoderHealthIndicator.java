@@ -64,6 +64,11 @@ public class GeocoderHealthIndicator {
                     .tag("provider", name)
                     .description("Health status of the geocoder provider")
                     .register(meterRegistry);
+        } else if (geocoder instanceof GisgraphyGeocoder) {
+            Gauge.builder("geocoder.health", () -> ((GisgraphyGeocoder) geocoder).isHealthy() ? 1 : 0)
+                    .tag("provider", name)
+                    .description("Health status of the geocoder provider")
+                    .register(meterRegistry);
         }
     }
 
@@ -83,6 +88,8 @@ public class GeocoderHealthIndicator {
             // Check health based on geocoder type
             if (geocoder instanceof TomTomGeocoder) {
                 healthy = ((TomTomGeocoder) geocoder).isHealthy();
+            } else if (geocoder instanceof GisgraphyGeocoder) {
+                healthy = ((GisgraphyGeocoder) geocoder).isHealthy();
             }
 
             healthStatus.put(name, healthy);
