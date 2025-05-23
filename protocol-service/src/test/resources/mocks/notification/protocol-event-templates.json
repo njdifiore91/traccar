@@ -1,0 +1,218 @@
+{
+  "protocols": {
+    "teltonika": {
+      "DEVICE_ONLINE": {
+        "subject": "Device ${deviceName} is now online",
+        "body": "Your device ${deviceName} has connected to the server at ${eventTime}. Protocol: ${protocol}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "Device ${deviceName} is offline",
+        "body": "Your device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "CONNECTION_RESTORED": {
+        "subject": "Device ${deviceName} connection restored",
+        "body": "Your device ${deviceName} has reconnected to the server at ${eventTime} after being offline for ${downtime} seconds."
+      },
+      "SOS_BUTTON_PRESSED": {
+        "subject": "EMERGENCY: SOS Button Pressed on ${deviceName}",
+        "body": "EMERGENCY ALERT: The SOS button on device ${deviceName} was pressed at ${eventTime}.\n\nDriver: ${driverName}\nLocation: ${location}\nView on map: ${mapUrl}\n\nThis is an emergency notification that requires immediate attention."
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "${deviceName} has entered ${geofenceName}",
+        "body": "Your device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nDriver: ${driverName}\nSpeed: ${speed}\nEstimated arrival: ${estimatedArrival}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "${deviceName} has exited ${geofenceName}",
+        "body": "Your device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nDriver: ${driverName}\nSpeed: ${speed}\nTime spent in geofence: ${timeInGeofence}\nView on map: ${mapUrl}"
+      },
+      "OVERSPEED": {
+        "subject": "Speed limit exceeded by ${deviceName}",
+        "body": "Your device ${deviceName} has exceeded the speed limit at ${eventTime}.\n\nDriver: ${driverName}\nCurrent speed: ${speed}\nSpeed limit: ${speedLimit}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "HARSH_BRAKING": {
+        "subject": "Harsh braking detected on ${deviceName}",
+        "body": "A harsh braking event was detected on device ${deviceName} at ${eventTime}.\n\nDriver: ${driverName}\nDeceleration: ${deceleration}\nSpeed before: ${speedBefore}\nSpeed after: ${speedAfter}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "IGNITION_ON": {
+        "subject": "Ignition turned ON for ${deviceName}",
+        "body": "The ignition for device ${deviceName} was turned ON at ${eventTime}.\n\nDriver: ${driverName}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "IGNITION_OFF": {
+        "subject": "Ignition turned OFF for ${deviceName}",
+        "body": "The ignition for device ${deviceName} was turned OFF at ${eventTime}.\n\nDriver: ${driverName}\nEngine hours: ${engineHours}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "DEVICE_REBOOT": {
+        "subject": "Device ${deviceName} has rebooted",
+        "body": "Your device ${deviceName} has rebooted at ${eventTime}.\n\nReason: ${rebootReason}\nPrevious uptime: ${previousUptime}\nFirmware version: ${firmwareVersion}\nLocation: ${location}"
+      },
+      "POWER_LOST": {
+        "subject": "External power lost for ${deviceName}",
+        "body": "External power has been disconnected from device ${deviceName} at ${eventTime}.\n\nBattery level: ${batteryLevel}\nEstimated runtime: ${estimatedRuntime}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "POWER_RESTORED": {
+        "subject": "External power restored for ${deviceName}",
+        "body": "External power has been restored to device ${deviceName} at ${eventTime}.\n\nBattery level: ${batteryLevel}\nPower outage duration: ${powerOutageDuration}\nLocation: ${location}\nView on map: ${mapUrl}"
+      }
+    },
+    "tk103": {
+      "DEVICE_ONLINE": {
+        "subject": "TK103 device ${deviceName} is now online",
+        "body": "Your TK103 device ${deviceName} has connected to the server at ${eventTime}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "TK103 device ${deviceName} is offline",
+        "body": "Your TK103 device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "PROTOCOL_ERROR": {
+        "subject": "Protocol error detected on ${deviceName}",
+        "body": "A protocol error was detected on device ${deviceName} at ${eventTime}.\n\nError code: ${errorCode}\nDetails: ${errorDetails}"
+      },
+      "LOW_BATTERY": {
+        "subject": "Low battery alert for ${deviceName}",
+        "body": "Your device ${deviceName} has reported a low battery level at ${eventTime}.\n\nBattery level: ${batteryLevel}\nBattery voltage: ${batteryVoltage}\nEstimated runtime: ${estimatedRuntime}\nLocation: ${location}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "TK103 ${deviceName} has entered ${geofenceName}",
+        "body": "Your TK103 device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "TK103 ${deviceName} has exited ${geofenceName}",
+        "body": "Your TK103 device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "OVERSPEED": {
+        "subject": "TK103 ${deviceName} exceeded speed limit",
+        "body": "Your TK103 device ${deviceName} has exceeded the speed limit at ${eventTime}.\n\nCurrent speed: ${speed}\nSpeed limit: ${speedLimit}\nLocation: ${location}\nView on map: ${mapUrl}"
+      }
+    },
+    "meitrack": {
+      "DEVICE_ONLINE": {
+        "subject": "Meitrack device ${deviceName} is now online",
+        "body": "Your Meitrack device ${deviceName} has connected to the server at ${eventTime}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "Meitrack device ${deviceName} is offline",
+        "body": "Your Meitrack device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "PROTOCOL_COMMAND_RESULT": {
+        "subject": "Command result for ${deviceName}",
+        "body": "A command sent to device ${deviceName} has been executed at ${eventTime}.\n\nCommand type: ${commandType}\nResult: ${commandResult}\nLocation: Lat: ${latitude}, Lon: ${longitude}"
+      },
+      "DEVICE_AUTH_FAILURE": {
+        "subject": "Authentication failure for ${deviceName}",
+        "body": "Device ${deviceName} has failed authentication at ${eventTime}.\n\nIP Address: ${ipAddress}\nAttempt count: ${attemptCount}\nReason: ${failureReason}\nRecommendation: ${securityRecommendation}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "Meitrack ${deviceName} has entered ${geofenceName}",
+        "body": "Your Meitrack device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "Meitrack ${deviceName} has exited ${geofenceName}",
+        "body": "Your Meitrack device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      }
+    },
+    "atrack": {
+      "DEVICE_ONLINE": {
+        "subject": "ATrack device ${deviceName} is now online",
+        "body": "Your ATrack device ${deviceName} has connected to the server at ${eventTime}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "ATrack device ${deviceName} is offline",
+        "body": "Your ATrack device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "DEVICE_UNKNOWN": {
+        "subject": "Unknown ATrack device connection attempt",
+        "body": "An unknown ATrack device attempted to connect to the server at ${eventTime}.\n\nProtocol: ${protocol}\nDevice identifier: ${deviceIdentifier}\nIP Address: ${ipAddress}\nReason: ${reason}"
+      },
+      "DEVICE_AUTH_SUCCESS": {
+        "subject": "ATrack device ${deviceName} authenticated successfully",
+        "body": "Your ATrack device ${deviceName} has authenticated successfully at ${eventTime}.\n\nIP Address: ${ipAddress}\nDevice identifier: ${deviceIdentifier}\nAuthentication method: ${authMethod}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "ATrack ${deviceName} has entered ${geofenceName}",
+        "body": "Your ATrack device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "ATrack ${deviceName} has exited ${geofenceName}",
+        "body": "Your ATrack device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      }
+    },
+    "totem": {
+      "DEVICE_ONLINE": {
+        "subject": "Totem device ${deviceName} is now online",
+        "body": "Your Totem device ${deviceName} has connected to the server at ${eventTime}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "Totem device ${deviceName} is offline",
+        "body": "Your Totem device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "DEVICE_INACTIVE": {
+        "subject": "Totem device ${deviceName} is inactive",
+        "body": "Your Totem device ${deviceName} has been inactive since ${lastActivityTime}.\n\nInactivity duration: ${inactivityDuration}\nBattery level: ${batteryLevel}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "Totem ${deviceName} has entered ${geofenceName}",
+        "body": "Your Totem device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "Totem ${deviceName} has exited ${geofenceName}",
+        "body": "Your Totem device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      }
+    },
+    "meiligao": {
+      "DEVICE_ONLINE": {
+        "subject": "Meiligao device ${deviceName} is now online",
+        "body": "Your Meiligao device ${deviceName} has connected to the server at ${eventTime}. IP Address: ${ipAddress}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "Meiligao device ${deviceName} is offline",
+        "body": "Your Meiligao device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}. Reason: ${disconnectReason}."
+      },
+      "DEVICE_MOVING": {
+        "subject": "Meiligao device ${deviceName} has started moving",
+        "body": "Your Meiligao device ${deviceName} has started moving at ${eventTime}.\n\nSpeed: ${speed}\nHeading: ${heading}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "DEVICE_STOPPED": {
+        "subject": "Meiligao device ${deviceName} has stopped",
+        "body": "Your Meiligao device ${deviceName} has stopped at ${eventTime}.\n\nLocation: ${location}\nIgnition status: ${ignitionStatus}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "Meiligao ${deviceName} has entered ${geofenceName}",
+        "body": "Your Meiligao device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "Meiligao ${deviceName} has exited ${geofenceName}",
+        "body": "Your Meiligao device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nSpeed: ${speed}\nView on map: ${mapUrl}"
+      }
+    },
+    "default": {
+      "DEVICE_ONLINE": {
+        "subject": "Device ${deviceName} is now online",
+        "body": "Your device ${deviceName} has connected to the server at ${eventTime}."
+      },
+      "DEVICE_OFFLINE": {
+        "subject": "Device ${deviceName} is offline",
+        "body": "Your device ${deviceName} has disconnected from the server at ${eventTime}. Last communication time: ${lastCommunicationTime}."
+      },
+      "PROTOCOL_ERROR": {
+        "subject": "Protocol error detected on ${deviceName}",
+        "body": "A protocol error was detected on device ${deviceName} at ${eventTime}.\n\nError code: ${errorCode}\nDetails: ${errorDetails}"
+      },
+      "GEOFENCE_ENTER": {
+        "subject": "${deviceName} has entered ${geofenceName}",
+        "body": "Your device ${deviceName} has entered geofence ${geofenceName} at ${eventTime}.\n\nView on map: ${mapUrl}"
+      },
+      "GEOFENCE_EXIT": {
+        "subject": "${deviceName} has exited ${geofenceName}",
+        "body": "Your device ${deviceName} has exited geofence ${geofenceName} at ${eventTime}.\n\nView on map: ${mapUrl}"
+      },
+      "OVERSPEED": {
+        "subject": "Speed limit exceeded by ${deviceName}",
+        "body": "Your device ${deviceName} has exceeded the speed limit at ${eventTime}.\n\nCurrent speed: ${speed}\nSpeed limit: ${speedLimit}\nLocation: ${location}\nView on map: ${mapUrl}"
+      },
+      "SOS_BUTTON_PRESSED": {
+        "subject": "EMERGENCY: SOS Button Pressed on ${deviceName}",
+        "body": "EMERGENCY ALERT: The SOS button on device ${deviceName} was pressed at ${eventTime}.\n\nLocation: ${location}\nView on map: ${mapUrl}\n\nThis is an emergency notification that requires immediate attention."
+      }
+    }
+  }
+}
