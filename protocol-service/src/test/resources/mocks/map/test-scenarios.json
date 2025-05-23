@@ -1,0 +1,525 @@
+{
+  "version": "1.0",
+  "description": "Test scenarios for map-related protocol features",
+  "scenarios": [
+    {
+      "id": "geocoding-basic-1",
+      "name": "Basic Address Geocoding",
+      "category": "geocoding",
+      "description": "Test basic address to coordinate conversion",
+      "input": {
+        "type": "address",
+        "value": "1600 Amphitheatre Parkway, Mountain View, CA"
+      },
+      "expectedOutput": {
+        "latitude": 37.423021,
+        "longitude": -122.083739,
+        "accuracy": "high"
+      },
+      "validationCriteria": {
+        "maxDistanceMeters": 100
+      }
+    },
+    {
+      "id": "geocoding-basic-2",
+      "name": "International Address Geocoding",
+      "category": "geocoding",
+      "description": "Test international address to coordinate conversion",
+      "input": {
+        "type": "address",
+        "value": "Brandenburger Tor, Berlin, Germany"
+      },
+      "expectedOutput": {
+        "latitude": 52.516275,
+        "longitude": 13.377704,
+        "accuracy": "high"
+      },
+      "validationCriteria": {
+        "maxDistanceMeters": 100
+      }
+    },
+    {
+      "id": "geocoding-partial",
+      "name": "Partial Address Geocoding",
+      "category": "geocoding",
+      "description": "Test partial address to coordinate conversion",
+      "input": {
+        "type": "address",
+        "value": "Times Square, New York"
+      },
+      "expectedOutput": {
+        "latitude": 40.758896,
+        "longitude": -73.985130,
+        "accuracy": "medium"
+      },
+      "validationCriteria": {
+        "maxDistanceMeters": 200
+      }
+    },
+    {
+      "id": "reverse-geocoding-basic-1",
+      "name": "Basic Reverse Geocoding",
+      "category": "reverse-geocoding",
+      "description": "Test coordinate to address conversion",
+      "input": {
+        "type": "coordinates",
+        "latitude": 37.423021,
+        "longitude": -122.083739
+      },
+      "expectedOutput": {
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
+        "components": {
+          "street_number": "1600",
+          "route": "Amphitheatre Parkway",
+          "locality": "Mountain View",
+          "administrative_area": "California",
+          "country": "United States"
+        }
+      },
+      "validationCriteria": {
+        "requiredComponents": ["street_number", "route", "locality", "country"]
+      }
+    },
+    {
+      "id": "reverse-geocoding-basic-2",
+      "name": "International Reverse Geocoding",
+      "category": "reverse-geocoding",
+      "description": "Test international coordinate to address conversion",
+      "input": {
+        "type": "coordinates",
+        "latitude": 48.858844,
+        "longitude": 2.294351
+      },
+      "expectedOutput": {
+        "address": "Eiffel Tower, Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
+        "components": {
+          "point_of_interest": "Eiffel Tower",
+          "route": "Avenue Anatole France",
+          "locality": "Paris",
+          "country": "France"
+        }
+      },
+      "validationCriteria": {
+        "requiredComponents": ["point_of_interest", "locality", "country"]
+      }
+    },
+    {
+      "id": "routing-basic-1",
+      "name": "Basic Route Calculation",
+      "category": "routing",
+      "description": "Test basic route calculation between two points",
+      "input": {
+        "type": "route",
+        "origin": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "destination": {
+          "latitude": 37.3352,
+          "longitude": -121.8811
+        },
+        "routeType": "fastest",
+        "transportMode": "driving"
+      },
+      "expectedOutput": {
+        "distanceMeters": 77000,
+        "durationSeconds": 3600,
+        "tolerance": 0.1
+      },
+      "validationCriteria": {
+        "mustHaveSteps": true,
+        "mustHavePolyline": true
+      }
+    },
+    {
+      "id": "routing-waypoints",
+      "name": "Route with Waypoints",
+      "category": "routing",
+      "description": "Test route calculation with intermediate waypoints",
+      "input": {
+        "type": "route",
+        "origin": {
+          "latitude": 40.7128,
+          "longitude": -74.0060
+        },
+        "destination": {
+          "latitude": 42.3601,
+          "longitude": -71.0589
+        },
+        "waypoints": [
+          {
+            "latitude": 41.8781,
+            "longitude": -87.6298
+          }
+        ],
+        "routeType": "shortest",
+        "transportMode": "driving"
+      },
+      "expectedOutput": {
+        "distanceMeters": 1500000,
+        "durationSeconds": 54000,
+        "tolerance": 0.2
+      },
+      "validationCriteria": {
+        "mustHaveSteps": true,
+        "mustHavePolyline": true,
+        "mustVisitWaypoints": true
+      }
+    },
+    {
+      "id": "routing-alternatives",
+      "name": "Route with Alternatives",
+      "category": "routing",
+      "description": "Test route calculation with alternative routes",
+      "input": {
+        "type": "route",
+        "origin": {
+          "latitude": 51.5074,
+          "longitude": -0.1278
+        },
+        "destination": {
+          "latitude": 48.8566,
+          "longitude": 2.3522
+        },
+        "routeType": "fastest",
+        "transportMode": "driving",
+        "alternatives": true,
+        "avoidTolls": false,
+        "avoidHighways": false
+      },
+      "expectedOutput": {
+        "minAlternatives": 2,
+        "primaryRoute": {
+          "distanceMeters": 450000,
+          "durationSeconds": 18000,
+          "tolerance": 0.15
+        }
+      },
+      "validationCriteria": {
+        "mustHaveSteps": true,
+        "mustHavePolyline": true,
+        "alternativesMustDiffer": true
+      }
+    },
+    {
+      "id": "geofencing-circle-1",
+      "name": "Circle Geofence Test",
+      "category": "geofencing",
+      "description": "Test points against a circular geofence",
+      "input": {
+        "type": "geofence",
+        "geofence": {
+          "type": "circle",
+          "center": {
+            "latitude": 34.0522,
+            "longitude": -118.2437
+          },
+          "radiusMeters": 5000
+        },
+        "testPoints": [
+          {
+            "id": "inside-1",
+            "latitude": 34.0522,
+            "longitude": -118.2437,
+            "expected": "inside"
+          },
+          {
+            "id": "inside-2",
+            "latitude": 34.0600,
+            "longitude": -118.2500,
+            "expected": "inside"
+          },
+          {
+            "id": "outside-1",
+            "latitude": 34.1000,
+            "longitude": -118.3000,
+            "expected": "outside"
+          }
+        ]
+      },
+      "expectedOutput": {
+        "allPointsCorrect": true
+      },
+      "validationCriteria": {
+        "mustReportDistance": true
+      }
+    },
+    {
+      "id": "geofencing-polygon-1",
+      "name": "Polygon Geofence Test",
+      "category": "geofencing",
+      "description": "Test points against a polygon geofence",
+      "input": {
+        "type": "geofence",
+        "geofence": {
+          "type": "polygon",
+          "vertices": [
+            {
+              "latitude": 37.7749,
+              "longitude": -122.4194
+            },
+            {
+              "latitude": 37.7749,
+              "longitude": -122.4094
+            },
+            {
+              "latitude": 37.7649,
+              "longitude": -122.4094
+            },
+            {
+              "latitude": 37.7649,
+              "longitude": -122.4194
+            }
+          ]
+        },
+        "testPoints": [
+          {
+            "id": "inside-1",
+            "latitude": 37.7700,
+            "longitude": -122.4150,
+            "expected": "inside"
+          },
+          {
+            "id": "boundary-1",
+            "latitude": 37.7749,
+            "longitude": -122.4150,
+            "expected": "boundary"
+          },
+          {
+            "id": "outside-1",
+            "latitude": 37.7800,
+            "longitude": -122.4200,
+            "expected": "outside"
+          }
+        ]
+      },
+      "expectedOutput": {
+        "allPointsCorrect": true
+      },
+      "validationCriteria": {
+        "mustReportDistance": true,
+        "mustHandleBoundaryCorrectly": true
+      }
+    },
+    {
+      "id": "geofencing-multi-1",
+      "name": "Multiple Geofences Test",
+      "category": "geofencing",
+      "description": "Test points against multiple geofences",
+      "input": {
+        "type": "multi-geofence",
+        "geofences": [
+          {
+            "id": "geo-1",
+            "type": "circle",
+            "center": {
+              "latitude": 51.5074,
+              "longitude": -0.1278
+            },
+            "radiusMeters": 10000
+          },
+          {
+            "id": "geo-2",
+            "type": "circle",
+            "center": {
+              "latitude": 48.8566,
+              "longitude": 2.3522
+            },
+            "radiusMeters": 10000
+          }
+        ],
+        "testPoints": [
+          {
+            "id": "london-inside",
+            "latitude": 51.5074,
+            "longitude": -0.1278,
+            "expected": ["geo-1"]
+          },
+          {
+            "id": "paris-inside",
+            "latitude": 48.8566,
+            "longitude": 2.3522,
+            "expected": ["geo-2"]
+          },
+          {
+            "id": "outside-both",
+            "latitude": 52.5200,
+            "longitude": 13.4050,
+            "expected": []
+          }
+        ]
+      },
+      "expectedOutput": {
+        "allPointsCorrect": true
+      },
+      "validationCriteria": {
+        "mustReportAllMatchingGeofences": true
+      }
+    },
+    {
+      "id": "combined-geocode-route-1",
+      "name": "Geocode and Route Combined Test",
+      "category": "combined",
+      "description": "Test geocoding addresses and then calculating a route",
+      "input": {
+        "type": "geocode-then-route",
+        "originAddress": "Empire State Building, New York, NY",
+        "destinationAddress": "Statue of Liberty, New York, NY",
+        "routeType": "fastest",
+        "transportMode": "driving"
+      },
+      "expectedOutput": {
+        "originCoordinates": {
+          "latitude": 40.7484,
+          "longitude": -73.9857,
+          "accuracy": "high"
+        },
+        "destinationCoordinates": {
+          "latitude": 40.6892,
+          "longitude": -74.0445,
+          "accuracy": "high"
+        },
+        "route": {
+          "distanceMeters": 12000,
+          "durationSeconds": 1800,
+          "tolerance": 0.2
+        }
+      },
+      "validationCriteria": {
+        "geocodingAccuracyRequired": "high",
+        "mustHaveSteps": true,
+        "mustHavePolyline": true
+      }
+    },
+    {
+      "id": "combined-route-geofence-1",
+      "name": "Route and Geofence Intersection Test",
+      "category": "combined",
+      "description": "Test if a calculated route intersects with geofences",
+      "input": {
+        "type": "route-geofence-intersection",
+        "origin": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "destination": {
+          "latitude": 34.0522,
+          "longitude": -118.2437
+        },
+        "routeType": "fastest",
+        "transportMode": "driving",
+        "geofences": [
+          {
+            "id": "geo-1",
+            "type": "circle",
+            "center": {
+              "latitude": 36.0,
+              "longitude": -120.0
+            },
+            "radiusMeters": 50000
+          },
+          {
+            "id": "geo-2",
+            "type": "circle",
+            "center": {
+              "latitude": 35.0,
+              "longitude": -119.0
+            },
+            "radiusMeters": 30000
+          }
+        ]
+      },
+      "expectedOutput": {
+        "intersectingGeofences": ["geo-1"],
+        "route": {
+          "distanceMeters": 600000,
+          "durationSeconds": 21600,
+          "tolerance": 0.2
+        }
+      },
+      "validationCriteria": {
+        "mustDetectAllIntersections": true,
+        "mustProvideIntersectionPoints": true
+      }
+    },
+    {
+      "id": "combined-reverse-geocode-route-1",
+      "name": "Reverse Geocode Route Points Test",
+      "category": "combined",
+      "description": "Test reverse geocoding points along a route",
+      "input": {
+        "type": "route-reverse-geocode",
+        "origin": {
+          "latitude": 40.7128,
+          "longitude": -74.0060
+        },
+        "destination": {
+          "latitude": 40.7831,
+          "longitude": -73.9712
+        },
+        "routeType": "fastest",
+        "transportMode": "driving",
+        "pointsToReverseGeocode": "major-steps"
+      },
+      "expectedOutput": {
+        "route": {
+          "distanceMeters": 10000,
+          "durationSeconds": 1800,
+          "tolerance": 0.2
+        },
+        "minAddressPoints": 5
+      },
+      "validationCriteria": {
+        "mustHaveSteps": true,
+        "mustHavePolyline": true,
+        "addressesMustHaveComponents": ["route", "locality"]
+      }
+    },
+    {
+      "id": "error-handling-geocoding-1",
+      "name": "Geocoding Error Handling Test",
+      "category": "error-handling",
+      "description": "Test handling of invalid geocoding inputs",
+      "input": {
+        "type": "address",
+        "value": "Non-existent place, XYZ123"
+      },
+      "expectedOutput": {
+        "errorCode": "ZERO_RESULTS",
+        "errorHandling": "graceful"
+      },
+      "validationCriteria": {
+        "mustProvideErrorDetails": true,
+        "mustNotCrash": true
+      }
+    },
+    {
+      "id": "error-handling-routing-1",
+      "name": "Routing Error Handling Test",
+      "category": "error-handling",
+      "description": "Test handling of impossible routes",
+      "input": {
+        "type": "route",
+        "origin": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "destination": {
+          "latitude": 51.5074,
+          "longitude": -0.1278
+        },
+        "routeType": "fastest",
+        "transportMode": "walking"
+      },
+      "expectedOutput": {
+        "errorCode": "ROUTE_NOT_FOUND",
+        "errorHandling": "graceful"
+      },
+      "validationCriteria": {
+        "mustProvideErrorDetails": true,
+        "mustNotCrash": true,
+        "mustSuggestAlternativeTransportModes": true
+      }
+    }
+  ]
+}
