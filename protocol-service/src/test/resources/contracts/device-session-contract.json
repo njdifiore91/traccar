@@ -1,0 +1,173 @@
+{
+  "contractName": "device-session-contract",
+  "description": "Contract for device connection state changes published by the Protocol Service to the message broker",
+  "version": "1.0.0",
+  "provider": {
+    "name": "protocol-service"
+  },
+  "consumer": {
+    "name": "any-service-tracking-device-sessions"
+  },
+  "messageType": "device.sessions",
+  "schema": {
+    "type": "object",
+    "required": ["deviceId", "eventType", "timestamp"],
+    "properties": {
+      "deviceId": {
+        "type": "integer",
+        "description": "Unique identifier of the device",
+        "minimum": 1
+      },
+      "uniqueId": {
+        "type": "string",
+        "description": "Device unique identifier (IMEI, serial number, etc.)",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "eventType": {
+        "type": "string",
+        "description": "Type of session event",
+        "enum": ["connect", "disconnect", "idle"]
+      },
+      "timestamp": {
+        "type": "integer",
+        "description": "Unix timestamp in milliseconds when the event occurred",
+        "minimum": 0
+      },
+      "protocol": {
+        "type": "string",
+        "description": "Name of the protocol used by the device",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "remoteAddress": {
+        "type": "string",
+        "description": "Remote IP address and port of the device connection",
+        "format": "ipv4"
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Additional device metadata",
+        "properties": {
+          "lastActivityTime": {
+            "type": "integer",
+            "description": "Unix timestamp in milliseconds of the last activity from this device",
+            "minimum": 0
+          },
+          "connectionDuration": {
+            "type": "integer",
+            "description": "Duration of the connection in seconds (for disconnect events)",
+            "minimum": 0
+          },
+          "idleDuration": {
+            "type": "integer",
+            "description": "Duration of idle state in seconds (for idle events)",
+            "minimum": 0
+          },
+          "protocolVersion": {
+            "type": "string",
+            "description": "Version of the protocol used by the device"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for disconnect or idle state",
+            "enum": ["normal", "timeout", "error", "server_shutdown", "client_initiated", "network_failure", "protocol_error", "authentication_failure", "other"]
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "device-connect-event",
+      "description": "Example of a device connection event",
+      "value": {
+        "deviceId": 123456,
+        "uniqueId": "356938035643809",
+        "eventType": "connect",
+        "timestamp": 1621341245000,
+        "protocol": "teltonika",
+        "remoteAddress": "203.0.113.45",
+        "metadata": {
+          "lastActivityTime": 1621341245000,
+          "protocolVersion": "1.5"
+        }
+      }
+    },
+    {
+      "name": "device-disconnect-event",
+      "description": "Example of a device disconnection event",
+      "value": {
+        "deviceId": 123456,
+        "uniqueId": "356938035643809",
+        "eventType": "disconnect",
+        "timestamp": 1621345845000,
+        "protocol": "teltonika",
+        "remoteAddress": "203.0.113.45",
+        "metadata": {
+          "lastActivityTime": 1621345845000,
+          "connectionDuration": 4600,
+          "reason": "normal",
+          "protocolVersion": "1.5"
+        }
+      }
+    },
+    {
+      "name": "device-idle-event",
+      "description": "Example of a device idle event",
+      "value": {
+        "deviceId": 123456,
+        "uniqueId": "356938035643809",
+        "eventType": "idle",
+        "timestamp": 1621343045000,
+        "protocol": "teltonika",
+        "remoteAddress": "203.0.113.45",
+        "metadata": {
+          "lastActivityTime": 1621341245000,
+          "idleDuration": 1800,
+          "reason": "timeout",
+          "protocolVersion": "1.5"
+        }
+      }
+    }
+  ],
+  "validationRules": [
+    {
+      "description": "deviceId must be a positive integer",
+      "rule": "$.deviceId > 0"
+    },
+    {
+      "description": "eventType must be one of: connect, disconnect, idle",
+      "rule": "$.eventType in ['connect', 'disconnect', 'idle']"
+    },
+    {
+      "description": "timestamp must be a valid Unix timestamp in milliseconds",
+      "rule": "$.timestamp > 0"
+    },
+    {
+      "description": "For disconnect events, connectionDuration must be present",
+      "rule": "$.eventType == 'disconnect' implies $.metadata.connectionDuration != null"
+    },
+    {
+      "description": "For idle events, idleDuration must be present",
+      "rule": "$.eventType == 'idle' implies $.metadata.idleDuration != null"
+    },
+    {
+      "description": "lastActivityTime must not be after the event timestamp",
+      "rule": "$.metadata.lastActivityTime <= $.timestamp"
+    }
+  ],
+  "messageDelivery": {
+    "deliveryType": "at-least-once",
+    "messageFormat": "json",
+    "topic": "device.sessions",
+    "partitionKey": "deviceId"
+  },
+  "notes": [
+    "This contract defines the format of device session events published by the Protocol Service",
+    "The events are published to the 'device.sessions' topic in the message broker",
+    "Consumers should handle potential duplicate messages due to at-least-once delivery semantics",
+    "The deviceId is used as the partition key to ensure ordering of events for the same device",
+    "All timestamps are in Unix time (milliseconds since epoch)"
+  ]
+}
