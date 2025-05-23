@@ -26,6 +26,29 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
+  # Custom metrics for scaling
+  # customMetrics:
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: concurrent_report_jobs
+  #     target:
+  #       type: AverageValue
+  #       averageValue: 5
+  # Scaling behavior configuration
+  # behavior:
+  #   scaleUp:
+  #     stabilizationWindowSeconds: 60
+  #     policies:
+  #     - type: Percent
+  #       value: 100
+  #       periodSeconds: 60
+  #   scaleDown:
+  #     stabilizationWindowSeconds: 300
+  #     policies:
+  #     - type: Percent
+  #       value: 10
+  #       periodSeconds: 120
 
 ## Service configuration
 service:
