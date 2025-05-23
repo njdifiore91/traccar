@@ -1,0 +1,670 @@
+{
+  "mockResponses": [
+    {
+      "id": "route-urban-short",
+      "request": {
+        "origin": {
+          "lat": 37.7749,
+          "lng": -122.4194
+        },
+        "destination": {
+          "lat": 37.7833,
+          "lng": -122.4167
+        },
+        "mode": "driving"
+      },
+      "response": {
+        "status": "OK",
+        "routes": [
+          {
+            "summary": "Market St",
+            "distance": 1250,
+            "duration": 420,
+            "trafficDuration": 480,
+            "legs": [
+              {
+                "distance": 1250,
+                "duration": 420,
+                "steps": [
+                  {
+                    "distance": 350,
+                    "duration": 120,
+                    "instruction": "Head northeast on Market St",
+                    "startLocation": {
+                      "lat": 37.7749,
+                      "lng": -122.4194
+                    },
+                    "endLocation": {
+                      "lat": 37.7768,
+                      "lng": -122.4182
+                    }
+                  },
+                  {
+                    "distance": 450,
+                    "duration": 150,
+                    "instruction": "Continue on Market St",
+                    "startLocation": {
+                      "lat": 37.7768,
+                      "lng": -122.4182
+                    },
+                    "endLocation": {
+                      "lat": 37.7795,
+                      "lng": -122.4175
+                    }
+                  },
+                  {
+                    "distance": 450,
+                    "duration": 150,
+                    "instruction": "Turn right onto Powell St",
+                    "startLocation": {
+                      "lat": 37.7795,
+                      "lng": -122.4175
+                    },
+                    "endLocation": {
+                      "lat": 37.7833,
+                      "lng": -122.4167
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "summary": "Mission St",
+            "distance": 1450,
+            "duration": 480,
+            "trafficDuration": 540,
+            "legs": [
+              {
+                "distance": 1450,
+                "duration": 480,
+                "steps": [
+                  {
+                    "distance": 400,
+                    "duration": 130,
+                    "instruction": "Head southeast on 5th St",
+                    "startLocation": {
+                      "lat": 37.7749,
+                      "lng": -122.4194
+                    },
+                    "endLocation": {
+                      "lat": 37.7735,
+                      "lng": -122.4165
+                    }
+                  },
+                  {
+                    "distance": 600,
+                    "duration": 200,
+                    "instruction": "Turn left onto Mission St",
+                    "startLocation": {
+                      "lat": 37.7735,
+                      "lng": -122.4165
+                    },
+                    "endLocation": {
+                      "lat": 37.7790,
+                      "lng": -122.4130
+                    }
+                  },
+                  {
+                    "distance": 450,
+                    "duration": 150,
+                    "instruction": "Turn left onto 3rd St",
+                    "startLocation": {
+                      "lat": 37.7790,
+                      "lng": -122.4130
+                    },
+                    "endLocation": {
+                      "lat": 37.7833,
+                      "lng": -122.4167
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-highway-long",
+      "request": {
+        "origin": {
+          "lat": 37.7749,
+          "lng": -122.4194
+        },
+        "destination": {
+          "lat": 37.3352,
+          "lng": -121.8811
+        },
+        "mode": "driving"
+      },
+      "response": {
+        "status": "OK",
+        "routes": [
+          {
+            "summary": "US-101 S",
+            "distance": 77250,
+            "duration": 3480,
+            "trafficDuration": 4200,
+            "legs": [
+              {
+                "distance": 77250,
+                "duration": 3480,
+                "steps": [
+                  {
+                    "distance": 2500,
+                    "duration": 300,
+                    "instruction": "Head south toward US-101 S",
+                    "startLocation": {
+                      "lat": 37.7749,
+                      "lng": -122.4194
+                    },
+                    "endLocation": {
+                      "lat": 37.7550,
+                      "lng": -122.4050
+                    }
+                  },
+                  {
+                    "distance": 68000,
+                    "duration": 2700,
+                    "instruction": "Merge onto US-101 S",
+                    "startLocation": {
+                      "lat": 37.7550,
+                      "lng": -122.4050
+                    },
+                    "endLocation": {
+                      "lat": 37.3650,
+                      "lng": -121.9050
+                    }
+                  },
+                  {
+                    "distance": 6750,
+                    "duration": 480,
+                    "instruction": "Take exit 385B for I-880 N toward Oakland",
+                    "startLocation": {
+                      "lat": 37.3650,
+                      "lng": -121.9050
+                    },
+                    "endLocation": {
+                      "lat": 37.3352,
+                      "lng": -121.8811
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "summary": "I-280 S",
+            "distance": 79500,
+            "duration": 3600,
+            "trafficDuration": 3900,
+            "legs": [
+              {
+                "distance": 79500,
+                "duration": 3600,
+                "steps": [
+                  {
+                    "distance": 3000,
+                    "duration": 360,
+                    "instruction": "Head south toward I-280 S",
+                    "startLocation": {
+                      "lat": 37.7749,
+                      "lng": -122.4194
+                    },
+                    "endLocation": {
+                      "lat": 37.7450,
+                      "lng": -122.4350
+                    }
+                  },
+                  {
+                    "distance": 70000,
+                    "duration": 2760,
+                    "instruction": "Merge onto I-280 S",
+                    "startLocation": {
+                      "lat": 37.7450,
+                      "lng": -122.4350
+                    },
+                    "endLocation": {
+                      "lat": 37.3680,
+                      "lng": -121.9150
+                    }
+                  },
+                  {
+                    "distance": 6500,
+                    "duration": 480,
+                    "instruction": "Take exit 5B for CA-87 N toward Mineta San Jose Airport",
+                    "startLocation": {
+                      "lat": 37.3680,
+                      "lng": -121.9150
+                    },
+                    "endLocation": {
+                      "lat": 37.3352,
+                      "lng": -121.8811
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-traffic-congestion",
+      "request": {
+        "origin": {
+          "lat": 40.7128,
+          "lng": -74.0060
+        },
+        "destination": {
+          "lat": 40.7484,
+          "lng": -73.9857
+        },
+        "mode": "driving",
+        "departureTime": "2023-06-15T17:30:00Z"
+      },
+      "response": {
+        "status": "OK",
+        "routes": [
+          {
+            "summary": "Broadway",
+            "distance": 6500,
+            "duration": 1200,
+            "trafficDuration": 2400,
+            "trafficCondition": "heavy",
+            "legs": [
+              {
+                "distance": 6500,
+                "duration": 1200,
+                "trafficDuration": 2400,
+                "steps": [
+                  {
+                    "distance": 2000,
+                    "duration": 360,
+                    "trafficDuration": 720,
+                    "instruction": "Head north on Broadway",
+                    "startLocation": {
+                      "lat": 40.7128,
+                      "lng": -74.0060
+                    },
+                    "endLocation": {
+                      "lat": 40.7300,
+                      "lng": -73.9980
+                    }
+                  },
+                  {
+                    "distance": 2500,
+                    "duration": 420,
+                    "trafficDuration": 900,
+                    "instruction": "Continue on Broadway",
+                    "startLocation": {
+                      "lat": 40.7300,
+                      "lng": -73.9980
+                    },
+                    "endLocation": {
+                      "lat": 40.7400,
+                      "lng": -73.9900
+                    }
+                  },
+                  {
+                    "distance": 2000,
+                    "duration": 420,
+                    "trafficDuration": 780,
+                    "instruction": "Continue on Broadway",
+                    "startLocation": {
+                      "lat": 40.7400,
+                      "lng": -73.9900
+                    },
+                    "endLocation": {
+                      "lat": 40.7484,
+                      "lng": -73.9857
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "summary": "5th Ave",
+            "distance": 7200,
+            "duration": 1500,
+            "trafficDuration": 1800,
+            "trafficCondition": "moderate",
+            "legs": [
+              {
+                "distance": 7200,
+                "duration": 1500,
+                "trafficDuration": 1800,
+                "steps": [
+                  {
+                    "distance": 2200,
+                    "duration": 420,
+                    "trafficDuration": 480,
+                    "instruction": "Head east on Wall St",
+                    "startLocation": {
+                      "lat": 40.7128,
+                      "lng": -74.0060
+                    },
+                    "endLocation": {
+                      "lat": 40.7150,
+                      "lng": -73.9900
+                    }
+                  },
+                  {
+                    "distance": 3000,
+                    "duration": 600,
+                    "trafficDuration": 720,
+                    "instruction": "Turn left onto 5th Ave",
+                    "startLocation": {
+                      "lat": 40.7150,
+                      "lng": -73.9900
+                    },
+                    "endLocation": {
+                      "lat": 40.7350,
+                      "lng": -73.9880
+                    }
+                  },
+                  {
+                    "distance": 2000,
+                    "duration": 480,
+                    "trafficDuration": 600,
+                    "instruction": "Continue on 5th Ave",
+                    "startLocation": {
+                      "lat": 40.7350,
+                      "lng": -73.9880
+                    },
+                    "endLocation": {
+                      "lat": 40.7484,
+                      "lng": -73.9857
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-ferry-crossing",
+      "request": {
+        "origin": {
+          "lat": 37.8199,
+          "lng": -122.4783
+        },
+        "destination": {
+          "lat": 37.8044,
+          "lng": -122.2711
+        },
+        "mode": "driving"
+      },
+      "response": {
+        "status": "OK",
+        "routes": [
+          {
+            "summary": "Golden Gate Bridge",
+            "distance": 38500,
+            "duration": 2700,
+            "trafficDuration": 3000,
+            "legs": [
+              {
+                "distance": 38500,
+                "duration": 2700,
+                "steps": [
+                  {
+                    "distance": 5000,
+                    "duration": 420,
+                    "instruction": "Head south on Alexander Ave",
+                    "startLocation": {
+                      "lat": 37.8199,
+                      "lng": -122.4783
+                    },
+                    "endLocation": {
+                      "lat": 37.8080,
+                      "lng": -122.4750
+                    }
+                  },
+                  {
+                    "distance": 2500,
+                    "duration": 180,
+                    "instruction": "Continue onto Golden Gate Bridge",
+                    "startLocation": {
+                      "lat": 37.8080,
+                      "lng": -122.4750
+                    },
+                    "endLocation": {
+                      "lat": 37.7900,
+                      "lng": -122.4800
+                    }
+                  },
+                  {
+                    "distance": 31000,
+                    "duration": 2100,
+                    "instruction": "Continue onto US-101 S",
+                    "startLocation": {
+                      "lat": 37.7900,
+                      "lng": -122.4800
+                    },
+                    "endLocation": {
+                      "lat": 37.8044,
+                      "lng": -122.2711
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "summary": "Sausalito Ferry",
+            "distance": 15200,
+            "duration": 3600,
+            "trafficDuration": 3600,
+            "hasFerry": true,
+            "legs": [
+              {
+                "distance": 15200,
+                "duration": 3600,
+                "steps": [
+                  {
+                    "distance": 2000,
+                    "duration": 300,
+                    "instruction": "Head south to Sausalito Ferry Terminal",
+                    "startLocation": {
+                      "lat": 37.8199,
+                      "lng": -122.4783
+                    },
+                    "endLocation": {
+                      "lat": 37.8100,
+                      "lng": -122.4650
+                    }
+                  },
+                  {
+                    "distance": 11000,
+                    "duration": 2700,
+                    "instruction": "Take ferry from Sausalito to San Francisco Ferry Building",
+                    "travelMode": "ferry",
+                    "startLocation": {
+                      "lat": 37.8100,
+                      "lng": -122.4650
+                    },
+                    "endLocation": {
+                      "lat": 37.7955,
+                      "lng": -122.3937
+                    }
+                  },
+                  {
+                    "distance": 2200,
+                    "duration": 600,
+                    "instruction": "Head east on I-80 E",
+                    "startLocation": {
+                      "lat": 37.7955,
+                      "lng": -122.3937
+                    },
+                    "endLocation": {
+                      "lat": 37.8044,
+                      "lng": -122.2711
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-toll-road",
+      "request": {
+        "origin": {
+          "lat": 40.7128,
+          "lng": -74.0060
+        },
+        "destination": {
+          "lat": 40.6413,
+          "lng": -73.7781
+        },
+        "mode": "driving",
+        "avoidTolls": false
+      },
+      "response": {
+        "status": "OK",
+        "routes": [
+          {
+            "summary": "I-278 E",
+            "distance": 21500,
+            "duration": 1800,
+            "trafficDuration": 2100,
+            "hasTolls": true,
+            "tollPrice": 16.50,
+            "legs": [
+              {
+                "distance": 21500,
+                "duration": 1800,
+                "steps": [
+                  {
+                    "distance": 3000,
+                    "duration": 300,
+                    "instruction": "Head east toward Holland Tunnel",
+                    "startLocation": {
+                      "lat": 40.7128,
+                      "lng": -74.0060
+                    },
+                    "endLocation": {
+                      "lat": 40.7200,
+                      "lng": -74.0000
+                    }
+                  },
+                  {
+                    "distance": 2500,
+                    "duration": 240,
+                    "instruction": "Enter Holland Tunnel (toll: $16.00)",
+                    "hasToll": true,
+                    "startLocation": {
+                      "lat": 40.7200,
+                      "lng": -74.0000
+                    },
+                    "endLocation": {
+                      "lat": 40.7250,
+                      "lng": -73.9900
+                    }
+                  },
+                  {
+                    "distance": 16000,
+                    "duration": 1260,
+                    "instruction": "Continue onto I-278 E",
+                    "startLocation": {
+                      "lat": 40.7250,
+                      "lng": -73.9900
+                    },
+                    "endLocation": {
+                      "lat": 40.6413,
+                      "lng": -73.7781
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "summary": "Belt Parkway",
+            "distance": 25000,
+            "duration": 2400,
+            "trafficDuration": 2700,
+            "hasTolls": false,
+            "legs": [
+              {
+                "distance": 25000,
+                "duration": 2400,
+                "steps": [
+                  {
+                    "distance": 5000,
+                    "duration": 600,
+                    "instruction": "Head south on FDR Drive",
+                    "startLocation": {
+                      "lat": 40.7128,
+                      "lng": -74.0060
+                    },
+                    "endLocation": {
+                      "lat": 40.7000,
+                      "lng": -73.9800
+                    }
+                  },
+                  {
+                    "distance": 20000,
+                    "duration": 1800,
+                    "instruction": "Continue onto Belt Parkway",
+                    "startLocation": {
+                      "lat": 40.7000,
+                      "lng": -73.9800
+                    },
+                    "endLocation": {
+                      "lat": 40.6413,
+                      "lng": -73.7781
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-no-path",
+      "request": {
+        "origin": {
+          "lat": 37.7749,
+          "lng": -122.4194
+        },
+        "destination": {
+          "lat": 21.3099,
+          "lng": -157.8581
+        },
+        "mode": "driving"
+      },
+      "response": {
+        "status": "ZERO_RESULTS",
+        "errorMessage": "No route found: origin and destination are separated by water and no ferry service is available."
+      }
+    },
+    {
+      "id": "route-error-invalid-request",
+      "request": {
+        "origin": {
+          "lat": 999.9999,
+          "lng": 999.9999
+        },
+        "destination": {
+          "lat": 37.7833,
+          "lng": -122.4167
+        },
+        "mode": "driving"
+      },
+      "response": {
+        "status": "INVALID_REQUEST",
+        "errorMessage": "Invalid coordinates in origin parameter. Latitude must be between -90 and 90, longitude must be between -180 and 180."
+      }
+    }
+  ]
+}
