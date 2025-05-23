@@ -1,0 +1,222 @@
+{
+  "version": "1.0.0",
+  "description": "Specialized utilities for testing binary protocols in the Protocol Service microservice",
+  "conversionFunctions": {
+    "hexToBytes": {
+      "description": "Converts a hexadecimal string to a byte array",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.hexToBytes",
+      "parameters": ["hexString"],
+      "example": "hexToBytes('0A0B0C') => [10, 11, 12]"
+    },
+    "bytesToHex": {
+      "description": "Converts a byte array to a hexadecimal string",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.bytesToHex",
+      "parameters": ["byteArray"],
+      "example": "bytesToHex([10, 11, 12]) => '0A0B0C'"
+    },
+    "binaryToHex": {
+      "description": "Converts a binary string to a hexadecimal string",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.binaryToHex",
+      "parameters": ["binaryString"],
+      "example": "binaryToHex('10101010') => 'AA'"
+    },
+    "hexToBinary": {
+      "description": "Converts a hexadecimal string to a binary string",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.hexToBinary",
+      "parameters": ["hexString"],
+      "example": "hexToBinary('AA') => '10101010'"
+    },
+    "asciiToHex": {
+      "description": "Converts an ASCII string to a hexadecimal string",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.asciiToHex",
+      "parameters": ["asciiString"],
+      "example": "asciiToHex('ABC') => '414243'"
+    },
+    "hexToAscii": {
+      "description": "Converts a hexadecimal string to an ASCII string",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.hexToAscii",
+      "parameters": ["hexString"],
+      "example": "hexToAscii('414243') => 'ABC'"
+    }
+  },
+  "byteManipulation": {
+    "getBit": {
+      "description": "Gets the value of a specific bit in a byte",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.getBit",
+      "parameters": ["byteValue", "bitIndex"],
+      "example": "getBit(10, 1) => 1"
+    },
+    "setBit": {
+      "description": "Sets the value of a specific bit in a byte",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.setBit",
+      "parameters": ["byteValue", "bitIndex", "bitValue"],
+      "example": "setBit(10, 1, 0) => 8"
+    },
+    "reverseBytes": {
+      "description": "Reverses the order of bytes in a byte array",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.reverseBytes",
+      "parameters": ["byteArray"],
+      "example": "reverseBytes([1, 2, 3]) => [3, 2, 1]"
+    },
+    "xorBytes": {
+      "description": "Performs XOR operation on each byte with a key byte",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.xorBytes",
+      "parameters": ["byteArray", "keyByte"],
+      "example": "xorBytes([1, 2, 3], 1) => [0, 3, 2]"
+    },
+    "calculateChecksum": {
+      "description": "Calculates a checksum for a byte array using various algorithms",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.calculateChecksum",
+      "parameters": ["byteArray", "algorithm"],
+      "supportedAlgorithms": ["XOR", "SUM", "CRC16", "CRC16_CCITT", "CRC16_MODBUS", "CRC32"],
+      "example": "calculateChecksum([1, 2, 3], 'XOR') => 0"
+    },
+    "subBytes": {
+      "description": "Extracts a sub-array from a byte array",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.subBytes",
+      "parameters": ["byteArray", "startIndex", "length"],
+      "example": "subBytes([1, 2, 3, 4, 5], 1, 3) => [2, 3, 4]"
+    },
+    "concatBytes": {
+      "description": "Concatenates multiple byte arrays",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.concatBytes",
+      "parameters": ["byteArrays"],
+      "example": "concatBytes([[1, 2], [3, 4]]) => [1, 2, 3, 4]"
+    }
+  },
+  "messageParsing": {
+    "parseInteger": {
+      "description": "Parses an integer from a byte array with specified endianness",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseInteger",
+      "parameters": ["byteArray", "offset", "length", "endianness"],
+      "supportedEndianness": ["BIG_ENDIAN", "LITTLE_ENDIAN"],
+      "example": "parseInteger([0, 0, 0, 10], 0, 4, 'BIG_ENDIAN') => 10"
+    },
+    "parseUnsignedInteger": {
+      "description": "Parses an unsigned integer from a byte array with specified endianness",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseUnsignedInteger",
+      "parameters": ["byteArray", "offset", "length", "endianness"],
+      "supportedEndianness": ["BIG_ENDIAN", "LITTLE_ENDIAN"],
+      "example": "parseUnsignedInteger([0, 0, 0, 10], 0, 4, 'BIG_ENDIAN') => 10"
+    },
+    "parseFloat": {
+      "description": "Parses a float from a byte array with specified endianness",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseFloat",
+      "parameters": ["byteArray", "offset", "endianness"],
+      "supportedEndianness": ["BIG_ENDIAN", "LITTLE_ENDIAN"],
+      "example": "parseFloat([65, 0, 0, 0], 0, 'BIG_ENDIAN') => 1.0"
+    },
+    "parseDouble": {
+      "description": "Parses a double from a byte array with specified endianness",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseDouble",
+      "parameters": ["byteArray", "offset", "endianness"],
+      "supportedEndianness": ["BIG_ENDIAN", "LITTLE_ENDIAN"],
+      "example": "parseDouble([64, 0, 0, 0, 0, 0, 0, 0], 0, 'BIG_ENDIAN') => 2.0"
+    },
+    "parseString": {
+      "description": "Parses a string from a byte array with specified encoding",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseString",
+      "parameters": ["byteArray", "offset", "length", "encoding"],
+      "supportedEncodings": ["ASCII", "UTF-8", "UTF-16", "ISO-8859-1"],
+      "example": "parseString([65, 66, 67], 0, 3, 'ASCII') => 'ABC'"
+    },
+    "parseCoordinate": {
+      "description": "Parses a coordinate from a byte array with specified format",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseCoordinate",
+      "parameters": ["byteArray", "offset", "length", "format", "endianness"],
+      "supportedFormats": ["DEG", "DEG_MIN", "DEG_MIN_SEC", "RAW"],
+      "supportedEndianness": ["BIG_ENDIAN", "LITTLE_ENDIAN"],
+      "example": "parseCoordinate([0, 0, 0, 10], 0, 4, 'RAW', 'BIG_ENDIAN') => 10.0"
+    },
+    "parseBitField": {
+      "description": "Parses a bit field from a byte array",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseBitField",
+      "parameters": ["byteArray", "offset", "length"],
+      "example": "parseBitField([10], 0, 1) => [0, 1, 0, 1, 0, 0, 0, 0]"
+    }
+  },
+  "bufferHandling": {
+    "createBuffer": {
+      "description": "Creates a new buffer with specified capacity",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.createBuffer",
+      "parameters": ["capacity"],
+      "example": "createBuffer(10) => ByteBuf with capacity 10"
+    },
+    "releaseBuffer": {
+      "description": "Releases a buffer to prevent memory leaks",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.releaseBuffer",
+      "parameters": ["buffer"],
+      "example": "releaseBuffer(buffer) => void"
+    },
+    "writeToBuffer": {
+      "description": "Writes data to a buffer",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.writeToBuffer",
+      "parameters": ["buffer", "data"],
+      "example": "writeToBuffer(buffer, [1, 2, 3]) => buffer with data [1, 2, 3]"
+    },
+    "readFromBuffer": {
+      "description": "Reads data from a buffer",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.readFromBuffer",
+      "parameters": ["buffer", "length"],
+      "example": "readFromBuffer(buffer, 3) => [1, 2, 3]"
+    },
+    "copyBuffer": {
+      "description": "Creates a copy of a buffer",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.copyBuffer",
+      "parameters": ["buffer"],
+      "example": "copyBuffer(buffer) => copy of buffer"
+    }
+  },
+  "distributedTesting": {
+    "generateTestId": {
+      "description": "Generates a unique test ID for distributed test execution",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.generateTestId",
+      "parameters": [],
+      "example": "generateTestId() => 'test-123e4567-e89b-12d3-a456-426614174000'"
+    },
+    "getContainerInfo": {
+      "description": "Gets information about the current container environment",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.getContainerInfo",
+      "parameters": [],
+      "example": "getContainerInfo() => { 'containerId': '123abc', 'hostname': 'test-pod-1' }"
+    },
+    "shareTestResource": {
+      "description": "Shares a test resource across distributed test instances",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.shareTestResource",
+      "parameters": ["resourceName", "resourceData"],
+      "example": "shareTestResource('testDevice', { 'id': 123, 'uniqueId': 'test123' }) => true"
+    },
+    "getSharedTestResource": {
+      "description": "Gets a shared test resource from distributed test environment",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.getSharedTestResource",
+      "parameters": ["resourceName"],
+      "example": "getSharedTestResource('testDevice') => { 'id': 123, 'uniqueId': 'test123' }"
+    }
+  },
+  "protocolSpecific": {
+    "createProtocolMessage": {
+      "description": "Creates a protocol-specific message for testing",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.createProtocolMessage",
+      "parameters": ["protocolName", "messageType", "parameters"],
+      "example": "createProtocolMessage('tk103', 'position', { 'deviceId': 123, 'latitude': 37.4219, 'longitude': -122.0841 }) => byte array"
+    },
+    "parseProtocolMessage": {
+      "description": "Parses a protocol-specific message for testing",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.parseProtocolMessage",
+      "parameters": ["protocolName", "messageData"],
+      "example": "parseProtocolMessage('tk103', byteArray) => parsed message object"
+    },
+    "validateProtocolMessage": {
+      "description": "Validates a protocol-specific message against expected values",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.validateProtocolMessage",
+      "parameters": ["protocolName", "messageData", "expectedValues"],
+      "example": "validateProtocolMessage('tk103', byteArray, { 'deviceId': 123 }) => validation result"
+    },
+    "simulateProtocolDevice": {
+      "description": "Simulates a protocol-specific device for testing",
+      "implementation": "org.traccar.protocol.test.utils.BinaryTestUtils.simulateProtocolDevice",
+      "parameters": ["protocolName", "deviceParameters"],
+      "example": "simulateProtocolDevice('tk103', { 'uniqueId': 'test123' }) => device simulator"
+    }
+  }
+}
