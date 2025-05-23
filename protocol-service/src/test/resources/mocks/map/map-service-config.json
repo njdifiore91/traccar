@@ -1,0 +1,262 @@
+{
+  "mockServiceName": "map-service-mock",
+  "description": "Mock configuration for map service interactions in protocol service tests",
+  "version": "1.0.0",
+  "baseUrl": "http://map-service.traccar.local",
+  "endpoints": {
+    "geocoding": {
+      "path": "/geocode",
+      "method": "GET",
+      "queryParams": ["address"],
+      "responseTemplate": {
+        "status": "success",
+        "results": [
+          {
+            "latitude": 37.4219999,
+            "longitude": -122.0840575,
+            "accuracy": 0.9,
+            "formattedAddress": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA"
+          }
+        ]
+      },
+      "simulationParams": {
+        "successRate": 0.95,
+        "averageResponseTimeMs": 150,
+        "errorResponse": {
+          "status": "error",
+          "message": "Geocoding service unavailable"
+        }
+      }
+    },
+    "reverseGeocoding": {
+      "path": "/reverse",
+      "method": "GET",
+      "queryParams": ["lat", "lon"],
+      "responseTemplate": {
+        "status": "success",
+        "address": {
+          "road": "Amphitheatre Parkway",
+          "houseNumber": "1600",
+          "city": "Mountain View",
+          "state": "California",
+          "country": "United States",
+          "postalCode": "94043",
+          "formattedAddress": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA"
+        }
+      },
+      "simulationParams": {
+        "successRate": 0.95,
+        "averageResponseTimeMs": 120,
+        "errorResponse": {
+          "status": "error",
+          "message": "Reverse geocoding service unavailable"
+        }
+      },
+      "predefinedResponses": [
+        {
+          "conditions": {
+            "lat": 37.4219999,
+            "lon": -122.0840575
+          },
+          "response": {
+            "status": "success",
+            "address": {
+              "road": "Amphitheatre Parkway",
+              "houseNumber": "1600",
+              "city": "Mountain View",
+              "state": "California",
+              "country": "United States",
+              "postalCode": "94043",
+              "formattedAddress": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA"
+            }
+          }
+        },
+        {
+          "conditions": {
+            "lat": 40.7127753,
+            "lon": -74.0059728
+          },
+          "response": {
+            "status": "success",
+            "address": {
+              "road": "Broadway",
+              "houseNumber": "350",
+              "city": "New York",
+              "state": "New York",
+              "country": "United States",
+              "postalCode": "10013",
+              "formattedAddress": "350 Broadway, New York, NY 10013, USA"
+            }
+          }
+        }
+      ]
+    },
+    "routing": {
+      "path": "/route",
+      "method": "GET",
+      "queryParams": ["startLat", "startLon", "endLat", "endLon"],
+      "responseTemplate": {
+        "status": "success",
+        "distance": 10500,
+        "duration": 1200,
+        "polyline": "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
+        "instructions": [
+          {
+            "text": "Head north on Amphitheatre Parkway",
+            "distance": 200,
+            "duration": 30
+          },
+          {
+            "text": "Turn right onto Charleston Road",
+            "distance": 1500,
+            "duration": 180
+          },
+          {
+            "text": "Continue onto Rengstorff Avenue",
+            "distance": 2800,
+            "duration": 300
+          }
+        ]
+      },
+      "simulationParams": {
+        "successRate": 0.9,
+        "averageResponseTimeMs": 250,
+        "errorResponse": {
+          "status": "error",
+          "message": "Routing service unavailable"
+        }
+      }
+    },
+    "speedLimits": {
+      "path": "/speedlimit",
+      "method": "GET",
+      "queryParams": ["lat", "lon"],
+      "responseTemplate": {
+        "status": "success",
+        "speedLimit": 65,
+        "unit": "km/h",
+        "roadType": "highway"
+      },
+      "simulationParams": {
+        "successRate": 0.85,
+        "averageResponseTimeMs": 100,
+        "errorResponse": {
+          "status": "error",
+          "message": "Speed limit data unavailable"
+        }
+      },
+      "predefinedResponses": [
+        {
+          "conditions": {
+            "lat": 37.4219999,
+            "lon": -122.0840575
+          },
+          "response": {
+            "status": "success",
+            "speedLimit": 40,
+            "unit": "km/h",
+            "roadType": "urban"
+          }
+        },
+        {
+          "conditions": {
+            "lat": 37.3861,
+            "lon": -122.0839
+          },
+          "response": {
+            "status": "success",
+            "speedLimit": 100,
+            "unit": "km/h",
+            "roadType": "highway"
+          }
+        }
+      ]
+    }
+  },
+  "testScenarios": {
+    "normalOperation": {
+      "description": "All services working normally",
+      "endpoints": {
+        "geocoding": {
+          "successRate": 1.0,
+          "averageResponseTimeMs": 100
+        },
+        "reverseGeocoding": {
+          "successRate": 1.0,
+          "averageResponseTimeMs": 80
+        },
+        "routing": {
+          "successRate": 1.0,
+          "averageResponseTimeMs": 150
+        },
+        "speedLimits": {
+          "successRate": 1.0,
+          "averageResponseTimeMs": 50
+        }
+      }
+    },
+    "highLatency": {
+      "description": "Services experiencing high latency",
+      "endpoints": {
+        "geocoding": {
+          "successRate": 0.9,
+          "averageResponseTimeMs": 500
+        },
+        "reverseGeocoding": {
+          "successRate": 0.9,
+          "averageResponseTimeMs": 450
+        },
+        "routing": {
+          "successRate": 0.8,
+          "averageResponseTimeMs": 800
+        },
+        "speedLimits": {
+          "successRate": 0.9,
+          "averageResponseTimeMs": 300
+        }
+      }
+    },
+    "serviceOutage": {
+      "description": "Map services completely unavailable",
+      "endpoints": {
+        "geocoding": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        },
+        "reverseGeocoding": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        },
+        "routing": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        },
+        "speedLimits": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        }
+      }
+    },
+    "partialOutage": {
+      "description": "Only geocoding services available",
+      "endpoints": {
+        "geocoding": {
+          "successRate": 0.95,
+          "averageResponseTimeMs": 120
+        },
+        "reverseGeocoding": {
+          "successRate": 0.9,
+          "averageResponseTimeMs": 100
+        },
+        "routing": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        },
+        "speedLimits": {
+          "successRate": 0.0,
+          "averageResponseTimeMs": 50
+        }
+      }
+    }
+  }
+}
