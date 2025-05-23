@@ -1,0 +1,230 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "event.fullname" . }}-config
+  labels:
+    {{- include "event.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+data:
+  application.yaml: |
+    # Event Service Configuration
+    
+    # Server Configuration
+    server:
+      port: {{ .Values.service.port }}
+      servlet:
+        context-path: /
+      tomcat:
+        max-threads: 50
+        max-connections: 1000
+        connection-timeout: 30000
+        accesslog:
+          enabled: true
+          directory: logs
+          pattern: '%h %l %u %t "%r" %s %b %D'
+          suffix: .log
+          prefix: access_log
+          rotate: true
+    
+    # Spring Configuration
+    spring:
+      application:
+        name: {{ include "event.name" . }}
+      main:
+        banner-mode: "off"
+      # Message Broker Configuration
+      cloud:
+        stream:
+          function:
+            definition: processEnrichedPosition;processCommand
+          bindings:
+            processEnrichedPosition-in-0:
+              destination: enriched-positions
+              group: event-service
+              consumer:
+                maxAttempts: 3
+                backOffInitialInterval: 1000
+                backOffMaxInterval: 10000
+                backOffMultiplier: 2.0
+            eventOutput:
+              destination: events
+              producer:
+                required-groups: position-service,notification-service,api-gateway
+          kafka:
+            binder:
+              brokers: ${KAFKA_BROKERS:kafka:9092}
+              required-acks: 1
+              auto-create-topics: true
+              configuration:
+                security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+                sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+                sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+                ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+                ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+    
+    # Management (Metrics & Health Checks)
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+          base-path: /actuator
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+          group:
+            readiness:
+              include: readinessState,kafka
+            liveness:
+              include: livenessState
+      metrics:
+        export:
+          prometheus:
+            enabled: true
+      health:
+        livenessstate:
+          enabled: true
+        readinessstate:
+          enabled: true
+    
+    # Logging Configuration
+    logging:
+      level:
+        root: ${LOG_LEVEL_ROOT:INFO}
+        org.traccar: ${LOG_LEVEL_TRACCAR:INFO}
+        org.traccar.handler.events: ${LOG_LEVEL_EVENTS:INFO}
+      pattern:
+        console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+      file:
+        name: ${LOG_FILE:/tmp/event-service.log}
+        max-size: ${LOG_FILE_MAX_SIZE:10MB}
+        max-history: ${LOG_FILE_MAX_HISTORY:10}
+    
+    # Event Service Configuration
+    event:
+      # Event Detection Rules and Thresholds
+      detection:
+        # Overspeed event detection
+        overspeed:
+          enabled: ${EVENT_OVERSPEED_ENABLED:true}
+          threshold-factor: ${EVENT_OVERSPEED_THRESHOLD_FACTOR:1.0}
+          minimal-duration: ${EVENT_OVERSPEED_MINIMAL_DURATION:10000}
+        
+        # Geofence event detection
+        geofence:
+          enabled: ${EVENT_GEOFENCE_ENABLED:true}
+          # Minimum distance in meters to consider a position inside/outside a geofence
+          min-distance: ${EVENT_GEOFENCE_MIN_DISTANCE:50}
+        
+        # Device online/offline detection
+        device-status:
+          enabled: ${EVENT_DEVICE_STATUS_ENABLED:true}
+          # Time in seconds after which a device is considered offline
+          offline-threshold: ${EVENT_DEVICE_OFFLINE_THRESHOLD:300}
+        
+        # Motion event detection
+        motion:
+          enabled: ${EVENT_MOTION_ENABLED:true}
+          # Speed threshold in knots to consider a device in motion
+          speed-threshold: ${EVENT_MOTION_SPEED_THRESHOLD:0.5}
+          # Minimum duration in milliseconds for motion state change
+          min-duration: ${EVENT_MOTION_MIN_DURATION:10000}
+        
+        # Fuel level change detection
+        fuel:
+          enabled: ${EVENT_FUEL_ENABLED:true}
+          # Percentage threshold for fuel level change detection
+          threshold: ${EVENT_FUEL_THRESHOLD:10.0}
+        
+        # Driver behavior events
+        driver-behavior:
+          enabled: ${EVENT_DRIVER_BEHAVIOR_ENABLED:true}
+          # Acceleration threshold in m/s² for harsh acceleration detection
+          acceleration-threshold: ${EVENT_ACCELERATION_THRESHOLD:4.0}
+          # Braking threshold in m/s² for harsh braking detection
+          braking-threshold: ${EVENT_BRAKING_THRESHOLD:4.0}
+          # Cornering threshold in m/s² for harsh cornering detection
+          cornering-threshold: ${EVENT_CORNERING_THRESHOLD:4.0}
+      
+      # Stateful Event Processing Configuration
+      processing:
+        # Maximum number of positions to keep in memory per device for stateful processing
+        max-positions-per-device: ${EVENT_MAX_POSITIONS_PER_DEVICE:10}
+        # Time window in milliseconds for stateful event detection
+        time-window: ${EVENT_TIME_WINDOW:60000}
+        # Maximum number of events to process in a single batch
+        batch-size: ${EVENT_BATCH_SIZE:100}
+        # Thread pool size for event processing
+        thread-pool-size: ${EVENT_THREAD_POOL_SIZE:5}
+        # Maximum queue size for event processing
+        queue-capacity: ${EVENT_QUEUE_CAPACITY:1000}
+      
+      # Event Storage Configuration
+      storage:
+        # Whether to store events in the database
+        enabled: ${EVENT_STORAGE_ENABLED:true}
+        # Maximum number of events to store in a single batch
+        batch-size: ${EVENT_STORAGE_BATCH_SIZE:100}
+        # Maximum time in milliseconds to wait before flushing events to storage
+        flush-interval: ${EVENT_STORAGE_FLUSH_INTERVAL:1000}
+    
+    # Circuit Breaker Configuration
+    resilience4j:
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+        instances:
+          eventStorage:
+            baseConfig: default
+          messageBroker:
+            baseConfig: default
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+            retryExceptions:
+              - org.springframework.kafka.KafkaException
+              - java.io.IOException
+              - java.net.ConnectException
+        instances:
+          eventPublisher:
+            baseConfig: default
+            maxAttempts: 5
+      ratelimiter:
+        configs:
+          default:
+            limitForPeriod: 100
+            limitRefreshPeriod: 1s
+            timeoutDuration: 0s
+        instances:
+          eventProcessing:
+            baseConfig: default
+            limitForPeriod: 1000
+    
+    # Service Discovery Configuration
+    eureka:
+      client:
+        enabled: ${EUREKA_CLIENT_ENABLED:false}
+        serviceUrl:
+          defaultZone: ${EUREKA_SERVICE_URL:http://eureka:8761/eureka/}
+      instance:
+        preferIpAddress: true
+    
+    # OpenTelemetry Configuration
+    opentelemetry:
+      enabled: ${OPENTELEMETRY_ENABLED:true}
+      endpoint: ${OPENTELEMETRY_ENDPOINT:http://otel-collector:4317}
+      resource-attributes:
+        service.name: ${spring.application.name}
+        deployment.environment: ${DEPLOYMENT_ENVIRONMENT:production}
