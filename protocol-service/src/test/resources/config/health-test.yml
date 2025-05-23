@@ -1,0 +1,124 @@
+# Health endpoint configuration for Protocol Service testing
+
+# Management endpoints configuration
+management:
+  endpoints:
+    web:
+      # Expose health, info, and metrics endpoints for testing
+      exposure:
+        include: health,info,metrics,prometheus
+      # Base path for all actuator endpoints
+      base-path: /actuator
+  # Dedicated port for management endpoints to separate from application traffic
+  server:
+    port: 8081
+  # Health endpoint configuration
+  endpoint:
+    health:
+      # Show detailed health information in test environment
+      show-details: always
+      # Enable health groups for different probe types
+      group:
+        # Liveness probe checks if the service is running
+        liveness:
+          include: livenessState,diskSpace
+        # Readiness probe checks if the service can handle requests
+        readiness:
+          include: readinessState,messageBroker
+        # Startup probe for initial service availability
+        startup:
+          include: livenessState
+      # Status mapping for health states
+      status:
+        http-mapping:
+          # Map DEGRADED state to HTTP 200 to prevent premature restarts
+          DEGRADED: 200
+          DOWN: 503
+  # Enable health indicators
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    # Define order of health statuses
+    status:
+      order: DOWN, OUT_OF_SERVICE, DEGRADED, UNKNOWN, UP
+
+# Metrics configuration for testing
+metrics:
+  # Enable metrics collection
+  enabled: true
+  # Namespace for metrics to avoid conflicts
+  namespace: traccar_protocol_test
+  # Export metrics to Prometheus format
+  export:
+    prometheus:
+      enabled: true
+
+# Protocol Service specific health configuration for testing
+protocol:
+  health:
+    # Mock connection pool metrics for testing
+    connection-pool:
+      max-size: 100
+      active-connections: 10
+      # Threshold for health status degradation
+      threshold: 80
+    # Mock message processing metrics for testing
+    message-processing:
+      # Message drop ratio threshold for health status
+      drop-threshold: 0.1
+      # Mock values for testing
+      messages-received: 1000
+      messages-processed: 990
+    # Mock protocol handler health for testing
+    protocol-handlers:
+      # List of mock protocol handlers for testing
+      handlers:
+        - name: osmand
+          status: UP
+        - name: teltonika
+          status: UP
+        - name: meitrack
+          status: DEGRADED
+          message: "Simulated degraded state for testing"
+
+# Mock external dependencies health for testing
+dependencies:
+  # Mock message broker health
+  message-broker:
+    # Simulate healthy broker for most tests
+    status: UP
+    # Connection details for test environment
+    host: localhost
+    port: 5672
+    # Set to false to simulate broker unavailability in specific tests
+    available: true
+  # Mock database health
+  database:
+    status: UP
+    # Connection details for test environment
+    url: jdbc:h2:mem:testdb
+    # Set to false to simulate database unavailability in specific tests
+    available: true
+
+# Test-specific circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10  # Smaller window for testing
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s  # Shorter duration for testing
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      testCircuitBreaker:
+        baseConfig: default
+
+# Test-specific logging configuration
+logging:
+  level:
+    org.traccar.health: DEBUG  # More verbose logging for health components in tests
+    org.traccar.metrics: DEBUG  # More verbose logging for metrics in tests
