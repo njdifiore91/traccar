@@ -1,0 +1,58 @@
+{{- /*
+Service template for the Event Processing Service.
+
+This creates a Kubernetes Service resource that exposes the Event Service to other services within the cluster.
+The service provides a stable network endpoint for API access and health checks on port 8082.
+
+The Event Service is a critical component in the event detection and notification pipeline:
+- It consumes enriched position data from the message broker
+- It analyzes positions to detect significant events (geofence transitions, speed violations, etc.)
+- It publishes detected events to the message broker for the Notification Service
+
+This service definition enables other services to communicate with the Event Service via its API
+and allows monitoring systems to check its health and collect metrics.
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "event.fullname" . }}
+  labels:
+    {{- include "event.labels" . | nindent 4 }}
+    app.kubernetes.io/component: event-processing
+    app.kubernetes.io/part-of: traccar-platform
+  annotations:
+    {{- /* Default annotations for service discovery and monitoring */}}
+    prometheus.io/scrape: "{{ .Values.metrics.enabled | default "true" }}"
+    prometheus.io/port: "{{ .Values.service.port | default "8082" }}"
+    prometheus.io/path: "{{ .Values.metrics.path | default "/actuator/prometheus" }}"
+    {{- /* Health check annotations */}}
+    health.traccar.org/ready-path: "/actuator/health/readiness"
+    health.traccar.org/live-path: "/actuator/health/liveness"
+    {{- /* Service discovery annotations */}}
+    service.traccar.org/name: "event-service"
+    service.traccar.org/api-version: "v1"
+    {{- /* Include any additional custom annotations from values */}}
+    {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ .Values.service.port | default 8082 }}
+      targetPort: http
+      protocol: TCP
+      name: http
+      {{- if .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+    {{- if .Values.grpc.enabled }}
+    - port: {{ .Values.grpc.port | default 9090 }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+      {{- if .Values.grpc.nodePort }}
+      nodePort: {{ .Values.grpc.nodePort }}
+      {{- end }}
+    {{- end }}
+  selector:
+    {{- include "event.selectorLabels" . | nindent 4 }}
