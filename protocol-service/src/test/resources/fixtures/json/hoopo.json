@@ -1,0 +1,125 @@
+[
+  {
+    "deviceId": "BCCD0654",
+    "assetName": "BCCD0654",
+    "assetType": "Standard Tracker",
+    "eventData": {
+      "latitude": 31.97498,
+      "longitude": 34.80802,
+      "locationName": "",
+      "accuracyLevel": "High",
+      "eventType": "Arrival",
+      "batteryLevel": 100,
+      "receiveTime": "2021-09-20T18:52:32Z"
+    },
+    "eventTime": "2021-09-20T08:52:02Z",
+    "serverReportTime": "0001-01-01T00:00:00Z"
+  },
+  {
+    "deviceId": "BCCD2559",
+    "assetName": "BCCD2559",
+    "assetType": "Standard",
+    "eventData": {
+      "latitude": 32.04746,
+      "longitude": 34.75843,
+      "locationName": "",
+      "accuracyLevel": "High",
+      "eventType": "InMotion",
+      "batteryLevel": 100,
+      "receiveTime": "2022-01-20T08:02:44Z"
+    },
+    "address": {
+      "line1": "70 Main Street",
+      "city": "Tel Aviv",
+      "stateOrProvince": "",
+      "postalCode": "",
+      "countryCode": "IL"
+    },
+    "movement": {
+      "Speed": 1
+    },
+    "eventTime": "2022-01-20T05:55:27Z",
+    "serverReportTime": "2022-01-20T08:02:48Z"
+  },
+  {
+    "deviceId": "BCCD3456",
+    "assetName": "BCCD3456",
+    "assetType": "Industrial",
+    "eventData": {
+      "latitude": 32.10987,
+      "longitude": 34.85432,
+      "locationName": "Warehouse Zone B",
+      "accuracyLevel": "Medium",
+      "eventType": "Departure",
+      "batteryLevel": 85,
+      "receiveTime": "2022-02-15T14:30:22Z"
+    },
+    "eventTime": "2022-02-15T14:28:45Z",
+    "serverReportTime": "2022-02-15T14:31:00Z"
+  },
+  {
+    "deviceId": "BCCD7890",
+    "assetName": "BCCD7890",
+    "assetType": "Vehicle Tracker",
+    "eventData": {
+      "latitude": 31.78654,
+      "longitude": 35.21098,
+      "locationName": "Highway 1",
+      "accuracyLevel": "High",
+      "eventType": "InMotion",
+      "batteryLevel": 92,
+      "receiveTime": "2022-03-10T09:45:12Z"
+    },
+    "address": {
+      "line1": "Highway 1, Km 25",
+      "city": "Jerusalem",
+      "stateOrProvince": "",
+      "postalCode": "",
+      "countryCode": "IL"
+    },
+    "movement": {
+      "Speed": 75
+    },
+    "eventTime": "2022-03-10T09:44:30Z",
+    "serverReportTime": "2022-03-10T09:45:30Z"
+  },
+  {
+    "deviceId": "BCCD5432",
+    "assetName": "BCCD5432",
+    "assetType": "Container Tracker",
+    "eventData": {
+      "latitude": 32.81543,
+      "longitude": 34.98765,
+      "locationName": "Haifa Port",
+      "accuracyLevel": "High",
+      "eventType": "Stationary",
+      "batteryLevel": 65,
+      "receiveTime": "2022-04-05T16:20:33Z"
+    },
+    "address": {
+      "line1": "Haifa Port, Terminal 3",
+      "city": "Haifa",
+      "stateOrProvince": "",
+      "postalCode": "31000",
+      "countryCode": "IL"
+    },
+    "eventTime": "2022-04-05T16:18:22Z",
+    "serverReportTime": "2022-04-05T16:21:00Z"
+  },
+  {
+    "deviceId": "BCCD9876",
+    "assetName": "BCCD9876",
+    "assetType": "Asset Tracker",
+    "eventData": {
+      "latitude": 31.25478,
+      "longitude": 34.78965,
+      "locationName": "",
+      "accuracyLevel": "Low",
+      "eventType": "LowBattery",
+      "batteryLevel": 15,
+      "receiveTime": "2022-05-20T22:10:45Z"
+    },
+    "eventTime": "2022-05-20T22:08:33Z",
+    "serverReportTime": "2022-05-20T22:11:00Z"
+  }
+]
