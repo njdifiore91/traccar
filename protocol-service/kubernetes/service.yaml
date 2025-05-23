@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: protocol-service
+  namespace: traccar
+  labels:
+    app: protocol-service
+    component: device-communication
+  annotations:
+    # Cloud provider-specific load balancer annotations
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Use Network Load Balancer on AWS
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"  # External facing on Azure
+    cloud.google.com/load-balancer-type: "External"
+    # Prometheus monitoring annotations
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8090"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  type: LoadBalancer  # Expose service externally
+  selector:
+    app: protocol-service  # Match pods with this label
+  # TCP ports for device protocols
+  ports:
+    # Management API port
+    - name: management-api
+      port: 8090
+      targetPort: 8090
+      protocol: TCP
+    # Common device protocol ports
+    - name: osmand
+      port: 5055
+      targetPort: 5055
+      protocol: TCP
+    - name: teltonika
+      port: 5027
+      targetPort: 5027
+      protocol: TCP
+    - name: meitrack
+      port: 5020
+      targetPort: 5020
+      protocol: TCP
+    - name: gt06
+      port: 5023
+      targetPort: 5023
+      protocol: TCP
+    - name: h02
+      port: 5033
+      targetPort: 5033
+      protocol: TCP
+    - name: totem
+      port: 5005
+      targetPort: 5005
+      protocol: TCP
+    - name: tk103
+      port: 5006
+      targetPort: 5006
+      protocol: TCP
+    - name: atrack
+      port: 5013
+      targetPort: 5013
+      protocol: TCP
+    - name: coban
+      port: 5007
+      targetPort: 5007
+      protocol: TCP
+    - name: suntech
+      port: 5008
+      targetPort: 5008
+      protocol: TCP
+    - name: xexun
+      port: 5017
+      targetPort: 5017
+      protocol: TCP
+    - name: watch
+      port: 5045
+      targetPort: 5045
+      protocol: TCP
+    - name: concox
+      port: 5047
+      targetPort: 5047
+      protocol: TCP
+    # UDP ports for device protocols
+    - name: t55
+      port: 5003
+      targetPort: 5003
+      protocol: UDP
+    - name: navtelecom
+      port: 5031
+      targetPort: 5031
+      protocol: UDP
+    - name: galileo
+      port: 5042
+      targetPort: 5042
+      protocol: UDP
+  externalTrafficPolicy: Local  # Preserve client source IP addresses
+  sessionAffinity: ClientIP  # Maintain session affinity for stateful protocols
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours session timeout
