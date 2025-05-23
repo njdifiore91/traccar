@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback test configuration for Protocol Service
+    
+    This configuration controls logging during test execution with:
+    - Appropriate log levels for different components
+    - MDC support for tracking test context
+    - Separate log file for protocol decoder output
+    - Reduced noise from third-party libraries
+-->
+<configuration debug="false" scan="true" scanPeriod="30 seconds">
+
+    <!-- Properties for configuration -->
+    <property name="LOG_DIR" value="${LOG_DIR:-target/logs}" />
+    <property name="LOG_ARCHIVE" value="${LOG_DIR}/archive" />
+
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- File appender for protocol decoder output -->
+    <appender name="PROTOCOL_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/protocol-test.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- MDC appender for tracking test execution context -->
+    <appender name="MDC_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{testName}][%X{deviceId}][%X{protocolName}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Debug file appender for detailed test logs -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/protocol-debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/protocol-debug.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{testName}][%X{deviceId}][%X{protocolName}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set default log level to INFO -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="DEBUG_FILE" />
+    </root>
+
+    <!-- Protocol package with DEBUG level for detailed protocol information -->
+    <logger name="org.traccar.protocol" level="DEBUG" additivity="false">
+        <appender-ref ref="PROTOCOL_FILE" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="DEBUG_FILE" />
+    </logger>
+
+    <!-- Base protocol classes with DEBUG level -->
+    <logger name="org.traccar.BaseProtocolDecoder" level="DEBUG" />
+    <logger name="org.traccar.BaseProtocolEncoder" level="DEBUG" />
+
+    <!-- Network handlers with INFO level -->
+    <logger name="org.traccar.BasePipelineFactory" level="INFO" />
+    <logger name="org.traccar.TrackerConnector" level="INFO" />
+
+    <!-- Reduce noise from third-party libraries -->
+    <logger name="io.netty" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <logger name="org.springframework" level="WARN" />
+
+    <!-- Test-specific loggers -->
+    <logger name="org.traccar.test" level="DEBUG" additivity="false">
+        <appender-ref ref="MDC_CONSOLE" />
+        <appender-ref ref="DEBUG_FILE" />
+    </logger>
+
+    <!-- Health check and metrics loggers -->
+    <logger name="org.traccar.health" level="DEBUG" />
+    <logger name="org.traccar.metrics" level="DEBUG" />
+
+    <!-- Message broker integration -->
+    <logger name="org.traccar.messaging" level="DEBUG" />
+    
+    <!-- Discovery service integration -->
+    <logger name="org.traccar.discovery" level="DEBUG" />
+
+</configuration>
