@@ -1,0 +1,342 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: protocol-service-config
+  namespace: protocol-service
+  labels:
+    app: protocol-service
+    component: config
+  annotations:
+    description: "Configuration for the Protocol Service handling 200+ GPS device protocols"
+    version: "1.0.0"
+    kubernetes.io/part-of: "traccar"
+    kubernetes.io/component: "protocol-service"
+data:
+  # Main configuration file for Protocol Service
+  # This configuration is mounted at /config/application.yml
+  application.yml: |
+    server:
+      port: 8090
+      # Worker thread configuration for Netty server
+      bossThreads: 4
+      workerThreads: 16
+      # Default timeout for idle connections (in seconds)
+      timeout: 60
+
+    # Protocol Service specific configuration
+    protocol:
+      # Enable/disable specific protocols
+      enabled: true
+      # Default port range for protocols (5000-5090)
+      portRange: 5000-5090
+      # Maximum concurrent connections per protocol
+      maxConnections: 10000
+      # Connection buffer sizes
+      bufferSize: 1024
+      # Protocol detection timeout (in milliseconds)
+      detectionTimeout: 5000
+      # Position forwarding configuration
+      forward:
+        enabled: false
+        url: ${FORWARD_URL:}
+        header: ${FORWARD_HEADER:}
+      # Position acknowledgment configuration
+      ack:
+        enabled: true
+        timeout: 5000
+      # Protocol filtering configuration
+      filter:
+        # Enable/disable invalid position filtering
+        invalid: true
+        # Enable/disable zero position filtering
+        zero: true
+        # Enable/disable future position filtering (in seconds)
+        future: 300
+        # Enable/disable past position filtering (in seconds)
+        past: 86400
+        # Enable/disable accuracy filtering (in meters)
+        accuracy: 500
+        # Enable/disable duplicate filtering (in seconds)
+        duplicate: 60
+
+    # Logging configuration
+    logging:
+      level:
+        root: INFO
+        org.traccar: INFO
+        org.traccar.protocol: INFO
+        # Set to DEBUG for troubleshooting specific protocols
+        # org.traccar.protocol.meitrack: DEBUG
+        # org.traccar.protocol.teltonika: DEBUG
+      pattern:
+        console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [trace_id=%X{trace_id}] %-5level %logger{36} - %msg%n'
+        file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [trace_id=%X{trace_id}] %-5level %logger{36} - %msg%n'
+      file:
+        name: /var/log/traccar/protocol-service.log
+        maxHistory: 10
+        maxSize: 100MB
+      # JSON format for production environments
+      json:
+        enabled: ${JSON_LOGGING:false}
+        pattern: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","thread":"%thread","trace_id":"%X{trace_id}","level":"%-5level","logger":"%logger{36}","message":"%msg"}%n'
+
+    # Message broker configuration for position data publishing
+    messaging:
+      # Kafka configuration
+      kafka:
+        enabled: true
+        bootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+        # Topic for raw position data
+        positionTopic: raw-positions
+        # Producer configuration
+        producer:
+          acks: 1
+          retries: 3
+          batchSize: 16384
+          lingerMs: 1
+          bufferMemory: 33554432
+          # Compression type (none, gzip, snappy, lz4, zstd)
+          compressionType: snappy
+          # Key serializer
+          keySerializer: org.apache.kafka.common.serialization.StringSerializer
+          # Value serializer
+          valueSerializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      # RabbitMQ configuration (alternative to Kafka)
+      rabbitmq:
+        enabled: false
+        host: ${RABBITMQ_HOST:rabbitmq}
+        port: ${RABBITMQ_PORT:5672}
+        username: ${RABBITMQ_USERNAME:guest}
+        password: ${RABBITMQ_PASSWORD:guest}
+        # Exchange and routing key for position data
+        exchange: traccar
+        routingKey: positions
+
+    # Service discovery configuration
+    discovery:
+      # Consul configuration
+      consul:
+        enabled: ${CONSUL_ENABLED:false}
+        host: ${CONSUL_HOST:consul}
+        port: ${CONSUL_PORT:8500}
+        # Service registration configuration
+        registration:
+          enabled: true
+          serviceName: protocol-service
+          serviceId: ${HOSTNAME:protocol-service-1}
+          tags: [protocol, traccar]
+          healthCheckPath: /health/liveness
+          healthCheckInterval: 10s
+      # Kubernetes native service discovery
+      kubernetes:
+        enabled: ${K8S_ENABLED:true}
+        namespace: ${K8S_NAMESPACE:protocol-service}
+        # Label selector for service discovery
+        labelSelector: app=traccar
+
+    # Health check configuration
+    health:
+      # Readiness check configuration
+      readiness:
+        enabled: true
+        path: /health/readiness
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+      # Liveness check configuration
+      liveness:
+        enabled: true
+        path: /health/liveness
+        initialDelaySeconds: 60
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+      # Metrics endpoint configuration
+      metrics:
+        enabled: true
+        path: /actuator/prometheus
+
+  # Protocol-specific configuration
+  # This configuration is mounted at /config/protocols.yml
+  protocols.yml: |
+    # Configuration for individual protocols
+    # Each protocol can have custom settings
+    # The Protocol Service supports 200+ GPS device protocols
+    # This configuration file defines settings for the most commonly used protocols
+    
+    # Teltonika protocol configuration
+    teltonika:
+      enabled: true
+      port: 5027
+      connectionTimeout: 60
+      ackResponse: true
+
+    # Meitrack protocol configuration
+    meitrack:
+      enabled: true
+      port: 5020
+      connectionTimeout: 60
+
+    # TK103 protocol configuration
+    tk103:
+      enabled: true
+      port: 5006
+      connectionTimeout: 60
+
+    # Atrack protocol configuration
+    atrack:
+      enabled: true
+      port: 5013
+      connectionTimeout: 60
+
+    # Totem protocol configuration
+    totem:
+      enabled: true
+      port: 5007
+      connectionTimeout: 60
+
+    # Meiligao protocol configuration
+    meiligao:
+      enabled: true
+      port: 5009
+      connectionTimeout: 60
+
+    # GT06 protocol configuration
+    gt06:
+      enabled: true
+      port: 5023
+      connectionTimeout: 60
+
+    # H02 protocol configuration
+    h02:
+      enabled: true
+      port: 5008
+      connectionTimeout: 60
+
+    # Coban protocol configuration
+    coban:
+      enabled: true
+      port: 5003
+      connectionTimeout: 60
+
+    # Suntech protocol configuration
+    suntech:
+      enabled: true
+      port: 5033
+      connectionTimeout: 60
+
+    # Eelink protocol configuration
+    eelink:
+      enabled: true
+      port: 5012
+      connectionTimeout: 60
+
+    # Concox protocol configuration
+    concox:
+      enabled: true
+      port: 5047
+      connectionTimeout: 60
+
+    # Galileosky protocol configuration
+    galileosky:
+      enabled: true
+      port: 5055
+      connectionTimeout: 60
+
+    # OsmAnd protocol configuration
+    osmand:
+      enabled: true
+      port: 5055
+      connectionTimeout: 60
+
+    # Wialon protocol configuration
+    wialon:
+      enabled: true
+      port: 5017
+      connectionTimeout: 60
+
+    # Ulbotech protocol configuration
+    ulbotech:
+      enabled: true
+      port: 5024
+      connectionTimeout: 60
+
+    # Tramigo protocol configuration
+    tramigo:
+      enabled: true
+      port: 5026
+      connectionTimeout: 60
+
+    # Ruptela protocol configuration
+    ruptela:
+      enabled: true
+      port: 5030
+      connectionTimeout: 60
+
+    # Navis protocol configuration
+    navis:
+      enabled: true
+      port: 5031
+      connectionTimeout: 60
+
+    # HTTP protocol configuration
+    http:
+      enabled: true
+      port: 5055
+      connectionTimeout: 60
+    
+    # MQTT protocol configuration
+    mqtt:
+      enabled: true
+      port: 1883
+      connectionTimeout: 60
+      topicPrefix: owntracks/
+    
+    # WebSocket protocol configuration
+    websocket:
+      enabled: true
+      port: 5144
+      connectionTimeout: 60
+    
+    # Additional protocols can be added here
+    # The Protocol Service supports 200+ protocols
+    # This is a subset of the most commonly used ones
+    # For a complete list, refer to the Protocol Service documentation
+
+  # JVM configuration
+  # This configuration is mounted at /config/jvm.options
+  jvm.options: |
+    # JVM heap size configuration
+    -Xms256m
+    -Xmx512m
+    
+    # GC configuration
+    -XX:+UseG1GC
+    -XX:MaxGCPauseMillis=200
+    -XX:G1HeapRegionSize=4m
+    -XX:+ParallelRefProcEnabled
+    -XX:+DisableExplicitGC
+    
+    # Memory settings
+    -XX:+AlwaysPreTouch
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/var/log/traccar/protocol-service-heapdump.hprof
+    
+    # Enable remote debugging if needed (disabled by default)
+    # -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+    
+    # Enable JMX monitoring if needed (disabled by default)
+    # -Dcom.sun.management.jmxremote
+    # -Dcom.sun.management.jmxremote.port=9010
+    # -Dcom.sun.management.jmxremote.local.only=false
+    # -Dcom.sun.management.jmxremote.authenticate=false
+    # -Dcom.sun.management.jmxremote.ssl=false
+    
+    # Set timezone to UTC
+    -Duser.timezone=UTC
+    
+    # Enable Netty leak detection (for development/testing)
+    # -Dio.netty.leakDetection.level=PARANOID
