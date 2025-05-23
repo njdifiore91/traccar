@@ -1,0 +1,332 @@
+{
+  "version": "1.0",
+  "description": "Geographic areas with speed limits for testing location-based speed limit functionality",
+  "areas": [
+    {
+      "id": "urban_area",
+      "name": "Urban Area",
+      "description": "Densely populated city center with lower speed limits",
+      "center": {
+        "latitude": 37.7749,
+        "longitude": -122.4194
+      },
+      "radius_meters": 5000,
+      "speed_limits": {
+        "residential": {
+          "value": 25,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 35,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 30,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 25,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 55,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 45,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 25,
+          "unit": "mph"
+        }
+      }
+    },
+    {
+      "id": "suburban_area",
+      "name": "Suburban Area",
+      "description": "Residential area outside the city center with moderate speed limits",
+      "center": {
+        "latitude": 37.3382,
+        "longitude": -121.8863
+      },
+      "radius_meters": 8000,
+      "speed_limits": {
+        "residential": {
+          "value": 25,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 40,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 35,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 30,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 65,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 55,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 25,
+          "unit": "mph"
+        }
+      }
+    },
+    {
+      "id": "highway_area",
+      "name": "Highway Area",
+      "description": "Major highway corridor with higher speed limits",
+      "center": {
+        "latitude": 38.5816,
+        "longitude": -121.4944
+      },
+      "radius_meters": 10000,
+      "speed_limits": {
+        "residential": {
+          "value": 30,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 55,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 45,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 40,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 70,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 65,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 35,
+          "unit": "mph"
+        }
+      }
+    },
+    {
+      "id": "rural_area",
+      "name": "Rural Area",
+      "description": "Sparsely populated countryside with varied speed limits",
+      "center": {
+        "latitude": 39.5296,
+        "longitude": -123.7972
+      },
+      "radius_meters": 15000,
+      "speed_limits": {
+        "residential": {
+          "value": 35,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 55,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 50,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 45,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 70,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 65,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 40,
+          "unit": "mph"
+        }
+      }
+    },
+    {
+      "id": "school_zone",
+      "name": "School Zone",
+      "description": "Area around a school with reduced speed limits during school hours",
+      "center": {
+        "latitude": 37.4419,
+        "longitude": -122.1430
+      },
+      "radius_meters": 500,
+      "speed_limits": {
+        "residential": {
+          "value": 15,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 25,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 20,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 15,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 55,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 45,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 15,
+          "unit": "mph"
+        }
+      },
+      "time_restrictions": {
+        "active": true,
+        "weekdays": [1, 2, 3, 4, 5],
+        "start_time": "07:30:00",
+        "end_time": "16:30:00"
+      }
+    },
+    {
+      "id": "construction_zone",
+      "name": "Construction Zone",
+      "description": "Temporary construction area with reduced speed limits",
+      "center": {
+        "latitude": 37.6213,
+        "longitude": -122.3790
+      },
+      "radius_meters": 2000,
+      "speed_limits": {
+        "residential": {
+          "value": 15,
+          "unit": "mph"
+        },
+        "primary": {
+          "value": 25,
+          "unit": "mph"
+        },
+        "secondary": {
+          "value": 20,
+          "unit": "mph"
+        },
+        "tertiary": {
+          "value": 15,
+          "unit": "mph"
+        },
+        "motorway": {
+          "value": 45,
+          "unit": "mph"
+        },
+        "trunk": {
+          "value": 35,
+          "unit": "mph"
+        },
+        "unclassified": {
+          "value": 15,
+          "unit": "mph"
+        }
+      },
+      "date_restrictions": {
+        "active": true,
+        "start_date": "2023-06-01",
+        "end_date": "2023-12-31"
+      }
+    },
+    {
+      "id": "international_area",
+      "name": "International Area (Metric)",
+      "description": "Area using metric speed limits (km/h)",
+      "center": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "radius_meters": 10000,
+      "speed_limits": {
+        "residential": {
+          "value": 30,
+          "unit": "kph"
+        },
+        "primary": {
+          "value": 50,
+          "unit": "kph"
+        },
+        "secondary": {
+          "value": 40,
+          "unit": "kph"
+        },
+        "tertiary": {
+          "value": 30,
+          "unit": "kph"
+        },
+        "motorway": {
+          "value": 110,
+          "unit": "kph"
+        },
+        "trunk": {
+          "value": 80,
+          "unit": "kph"
+        },
+        "unclassified": {
+          "value": 30,
+          "unit": "kph"
+        }
+      }
+    },
+    {
+      "id": "maritime_area",
+      "name": "Maritime Speed Zone",
+      "description": "Coastal area with speed limits in knots",
+      "center": {
+        "latitude": 25.7617,
+        "longitude": -80.1918
+      },
+      "radius_meters": 5000,
+      "speed_limits": {
+        "harbor": {
+          "value": 5,
+          "unit": "knots"
+        },
+        "channel": {
+          "value": 10,
+          "unit": "knots"
+        },
+        "coastal": {
+          "value": 25,
+          "unit": "knots"
+        },
+        "open_water": {
+          "value": 0,
+          "unit": "knots"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "created": "2023-05-15",
+    "updated": "2023-05-15",
+    "author": "Traccar Development Team",
+    "purpose": "Testing speed limit functionality across different geographic contexts",
+    "notes": "Speed limits are representative and may not match actual legal limits in the specified locations. For testing purposes only."
+  }
+}
