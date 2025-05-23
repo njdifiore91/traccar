@@ -1,0 +1,98 @@
+{{- /* NOTES.txt for API Gateway Service Helm Chart */ -}}
+
+==========================================================
+  Traccar API Gateway Service Installation Notes
+==========================================================
+
+Thank you for installing {{ .Chart.Name }} (version: {{ .Chart.Version }}).
+
+1. ACCESSING THE API GATEWAY SERVICE:
+
+{{- if .Values.ingress.enabled }}  
+   Your API Gateway Service has been deployed with an Ingress controller.
+   You can access the API at:
+   {{- range .Values.ingress.hosts }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+   {{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+   Your API Gateway Service has been deployed with a NodePort service.
+   You can access the API by running:
+
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "api-gateway.fullname" . }})
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "API Gateway URL: http://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.service.type }}
+   Your API Gateway Service has been deployed with a LoadBalancer service.
+   It may take a few minutes for the LoadBalancer IP to be available.
+   You can check the status by running:
+
+   kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "api-gateway.fullname" . }}
+
+   Once the external IP is available, you can access the API at:
+   http://<LoadBalancer-IP>:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+   Your API Gateway Service has been deployed with a ClusterIP service.
+   To access it from within the cluster, use:
+
+   {{ include "api-gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+   To access it from your local machine, run:
+
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "api-gateway.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+   echo "API Gateway URL: http://localhost:{{ .Values.service.port }}"
+{{- end }}
+
+2. VERIFYING THE DEPLOYMENT:
+
+   To verify the API Gateway Service is running correctly, check the pod status:
+
+   kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+   Check the health endpoint:
+
+   kubectl exec -it $(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath='{.items[0].metadata.name}') -- curl http://localhost:8080/actuator/health
+
+   You should see a response indicating the service is UP.
+
+3. TROUBLESHOOTING:
+
+   If you encounter issues with the API Gateway Service, try the following:
+
+   a. Check pod logs:
+      kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+   b. Check service endpoints:
+      kubectl get endpoints --namespace {{ .Release.Namespace }} {{ include "api-gateway.fullname" . }}
+
+   c. Verify connectivity to dependent services:
+      kubectl exec -it $(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8080/actuator/health | grep -A 10 "dependencies"
+
+   d. Check for configuration issues:
+      kubectl describe configmap --namespace {{ .Release.Namespace }} {{ include "api-gateway.fullname" . }}-config
+
+   e. Verify service discovery is working:
+      kubectl exec -it $(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8080/actuator/health/readiness
+
+4. MONITORING THE SERVICE:
+
+   The API Gateway Service exposes metrics for monitoring:
+
+   a. View Prometheus metrics:
+      kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "api-gateway.fullname" . }} 8080:8080
+      curl http://localhost:8080/actuator/prometheus
+
+   b. Check resource usage:
+      kubectl top pod --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "api-gateway.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+   c. View detailed health information:
+      kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "api-gateway.fullname" . }} 8080:8080
+      curl http://localhost:8080/actuator/health/details
+
+5. ADDITIONAL RESOURCES:
+
+   For more information about the Traccar API Gateway Service, visit:
+   - Documentation: https://www.traccar.org/documentation/
+   - API Reference: https://www.traccar.org/api-reference/
+   - Support: https://www.traccar.org/support/
+
+==========================================================
