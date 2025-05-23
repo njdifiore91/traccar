@@ -1,0 +1,340 @@
+[
+  {
+    "testCase": "Test case with multiple positions from binary message",
+    "binary": "2424533232312c3836323331313036323737393431362c4343452c000000000100bb001c0006012305000600071f1500fe6961050800000900000a00000b00001aca000702a72c52030340a0c90004f3408b2c0ca80100000d238d08001c01000000fe37000000000a0e0cf00001002700167aa601a0ff1d082abd890a491cd2ff1e0828bd890a491cd2ff1f0842490f526db0caff20083c286d5b082cc9ff21083e286d5b082cc9ff2208ac233fc0d2e0c7ff2308b0411d64d9d5c7ff2408ae233fc0d496c3ff4b150101124c54452845555452414e2d42414e443230292a38420d0a",
+    "positions": [
+      {
+        "deviceId": 862311062779416,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:31:00.000Z",
+        "latitude": 42.123456,
+        "longitude": -71.654321,
+        "altitude": 100.0,
+        "speed": 50.0,
+        "course": 180.0,
+        "valid": true,
+        "attributes": {
+          "event": 1,
+          "satellites": 6,
+          "rssi": 1,
+          "hdop": 0.0,
+          "input": 105,
+          "output": 0
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with position and battery level attribute",
+    "binary": "2424593434312c3836353431333035303839313733372c4343452c00000000030088001800050501061607191400150008080000098e000a05000b0c001608001a0000402300fe9000000602c3fe5ffe03e22a1f0904e6688d2b0cd94002000d5f6f03001c01000000050e0cf901010032700298c80899ff4b16010113464444204c5445284c54452042414e44203329fea50601ffffff7ffffea807024d0000000000feb205010000000083001700050501061607191400150008080000098e000a05000b0c001608001a0000405100fe9000000502c3fe5ffe03e22a1f0904e6688d2b0cd94002000d606f0300050e0cf901010032700298c80899ff4b16010113464444204c5445284c54452042414e44203329fea50601ffffff7ffffea807024d0000000000feb205010000000088001800050501061607151400150008080000098e000a05000b0c001607001a0000402300fe9000000602c3fe5ffe03e22a1f0904f0688d2b0cd94002000d696f03001c01000000050e0cf901010032700298c80897ff4b16010113464444204c5445284c54452042414e44203329fea50601ffffff7ffffea807024d0000000000feb20501000000002a36320d0a",
+    "positions": [
+      {
+        "deviceId": 865413050891737,
+        "protocol": "meitrack",
+        "time": "2023-06-16T07:19:00.000Z",
+        "latitude": 40.123456,
+        "longitude": -74.654321,
+        "altitude": 50.0,
+        "speed": 30.0,
+        "course": 90.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 77,
+          "event": 3,
+          "satellites": 5,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 0,
+          "output": 21
+        }
+      },
+      {
+        "deviceId": 865413050891737,
+        "protocol": "meitrack",
+        "time": "2023-06-16T07:19:00.000Z",
+        "latitude": 40.123456,
+        "longitude": -74.654321,
+        "altitude": 50.0,
+        "speed": 30.0,
+        "course": 90.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 77,
+          "event": 3,
+          "satellites": 5,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 0,
+          "output": 21
+        }
+      },
+      {
+        "deviceId": 865413050891737,
+        "protocol": "meitrack",
+        "time": "2023-06-16T07:15:00.000Z",
+        "latitude": 40.123456,
+        "longitude": -74.654321,
+        "altitude": 50.0,
+        "speed": 30.0,
+        "course": 90.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 77,
+          "event": 3,
+          "satellites": 5,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 0,
+          "output": 21
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with position and lock attribute",
+    "binary": "24245b3131342c3836343630363034343939333938372c4343452c0000000001005000130006012305000600070f1b004702060800000900000a00000b0000199d011a00000602d179570103b25ccc0604cf04862b0cc65b01000da4090d001c01000000010e0ccc010000b627be11000000002a41300d0a",
+    "positions": [
+      {
+        "deviceId": 864606044993987,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:15:00.000Z",
+        "latitude": 37.123456,
+        "longitude": -122.654321,
+        "altitude": 75.0,
+        "speed": 25.0,
+        "course": 270.0,
+        "valid": true,
+        "attributes": {
+          "lock": true,
+          "event": 1,
+          "satellites": 6,
+          "rssi": 1,
+          "hdop": 0.0,
+          "input": 71,
+          "output": 2
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with position and power attribute",
+    "binary": "$$F160,861412043027965,AAA,22,45.499458,-82.493581,220718171428,V,0,0,0,0,0.0,0,227940,119812,302|220|D8D6|086E1B2B,0000,0000|0000|0000|0191|0573,,,3,,002134,0,0*FA",
+    "positions": [
+      {
+        "deviceId": 861412043027965,
+        "protocol": "meitrack",
+        "time": "2022-07-18T17:14:28.000Z",
+        "latitude": 45.499458,
+        "longitude": -82.493581,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "valid": false,
+        "attributes": {
+          "power": 13.95,
+          "event": 22,
+          "satellites": 0,
+          "rssi": 0,
+          "hdop": 0.0,
+          "input": 0,
+          "output": 0
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with position and coordinates",
+    "binary": "$$D149,867047043162018,AAA,35,-1.264865,36.800705,211001105240,A,9,20,41.0,323,1,1697,1,0,000|00||,0000,4.33|12.96|1.92|2.72|2.69,0.000000|0|0.000000,*E1",
+    "positions": [
+      {
+        "deviceId": 867047043162018,
+        "protocol": "meitrack",
+        "time": "2021-10-01T10:52:40.000Z",
+        "latitude": -1.264865,
+        "longitude": 36.800705,
+        "altitude": 0.0,
+        "speed": 41.0,
+        "course": 323.0,
+        "valid": true,
+        "attributes": {
+          "event": 35,
+          "satellites": 9,
+          "rssi": 20,
+          "hdop": 1.0,
+          "input": 0,
+          "output": 0
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with multiple positions from binary message 2",
+    "binary": "24245B3139312C3836343630363034343939333938372C4343452C010000000200500013000601250500060007111B00470206080000093E000AE7030B0000199E011A850306028D7A570103F35ACC0604F9D06C2B0CB92E00000D3FA40C00250CA2B900010E0CCC010000B6276313000000004B00120006012A0500060007111B00470206080000093E000AE7030B0000199E011A7C0305028D7A570103F35ACC0604F9D06C2B0CB92E00000D3FA40C00010E0CCC010000B6276313000000002A31340D0A",
+    "positions": [
+      {
+        "deviceId": 864606044993987,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:17:00.000Z",
+        "latitude": 35.123456,
+        "longitude": -120.654321,
+        "altitude": 80.0,
+        "speed": 35.0,
+        "course": 90.0,
+        "valid": true,
+        "attributes": {
+          "event": 2,
+          "satellites": 6,
+          "rssi": 1,
+          "hdop": 0.0,
+          "input": 71,
+          "output": 2
+        }
+      },
+      {
+        "deviceId": 864606044993987,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:17:00.000Z",
+        "latitude": 35.123456,
+        "longitude": -120.654321,
+        "altitude": 80.0,
+        "speed": 35.0,
+        "course": 90.0,
+        "valid": true,
+        "attributes": {
+          "event": 2,
+          "satellites": 6,
+          "rssi": 1,
+          "hdop": 0.0,
+          "input": 71,
+          "output": 2
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with multiple positions from binary message 3",
+    "binary": "2424423233322c3836323039303035303030323831332c4343452c0400000003004400110004050006000700fe6962060800000900000a00000b00001aef044023000602d65fbcfd03173b9c0804cc76ae2a0c14ae1b000d00aa0d001c01000000014b030101003f00100004050006000700fe695f060800000900000a00000b00001aea044016000502d65fbcfd03173b9c0804cf76ae2a0c14ae1b000d03aa0d00014b030101003f00100004050006000700fe695f060800000900000a00000b00001aed044001000502d65fbcfd03173b9c0804d076ae2a0c14ae1b000d04aa0d00014b030101002a30460d0a",
+    "positions": [
+      {
+        "deviceId": 862090050002813,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:00:00.000Z",
+        "latitude": 30.123456,
+        "longitude": -110.654321,
+        "altitude": 60.0,
+        "speed": 15.0,
+        "course": 180.0,
+        "valid": true,
+        "attributes": {
+          "event": 4,
+          "satellites": 4,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 98,
+          "output": 0
+        }
+      },
+      {
+        "deviceId": 862090050002813,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:00:00.000Z",
+        "latitude": 30.123456,
+        "longitude": -110.654321,
+        "altitude": 60.0,
+        "speed": 15.0,
+        "course": 180.0,
+        "valid": true,
+        "attributes": {
+          "event": 4,
+          "satellites": 4,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 95,
+          "output": 0
+        }
+      },
+      {
+        "deviceId": 862090050002813,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:00:00.000Z",
+        "latitude": 30.123456,
+        "longitude": -110.654321,
+        "altitude": 60.0,
+        "speed": 15.0,
+        "course": 180.0,
+        "valid": true,
+        "attributes": {
+          "event": 4,
+          "satellites": 4,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 95,
+          "output": 0
+        }
+      }
+    ]
+  },
+  {
+    "testCase": "Test case with multiple positions from binary message 4",
+    "binary": "2424423233392c3836323039303035303030373436352c4343452c0100000003004300130006050006000700140015801b00080800000900000a00000b0000165105198d011a630540160005024c5e910103590bfe0204922153290c6b2501000dd5b50200004300130006050006000700140015011b00080800000900000a00000b0000165005198d011a630540010005024c5e910103590bfe0204932153290c6b2501000dd6b50200004300130006050006000700140015011b00080800000900000a00000b0000165205198d011a630540230005024c5e910103590bfe0204942153290c6b2501000dd7b50200002a43330d0a",
+    "positions": [
+      {
+        "deviceId": 862090050007465,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:20:00.000Z",
+        "latitude": 25.123456,
+        "longitude": -100.654321,
+        "altitude": 40.0,
+        "speed": 10.0,
+        "course": 270.0,
+        "valid": true,
+        "attributes": {
+          "event": 1,
+          "satellites": 6,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 128,
+          "output": 27
+        }
+      },
+      {
+        "deviceId": 862090050007465,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:20:00.000Z",
+        "latitude": 25.123456,
+        "longitude": -100.654321,
+        "altitude": 40.0,
+        "speed": 10.0,
+        "course": 270.0,
+        "valid": true,
+        "attributes": {
+          "event": 1,
+          "satellites": 6,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 1,
+          "output": 27
+        }
+      },
+      {
+        "deviceId": 862090050007465,
+        "protocol": "meitrack",
+        "time": "2023-05-06T07:20:00.000Z",
+        "latitude": 25.123456,
+        "longitude": -100.654321,
+        "altitude": 40.0,
+        "speed": 10.0,
+        "course": 270.0,
+        "valid": true,
+        "attributes": {
+          "event": 1,
+          "satellites": 6,
+          "rssi": 5,
+          "hdop": 0.0,
+          "input": 1,
+          "output": 27
+        }
+      }
+    ]
+  }
+]
