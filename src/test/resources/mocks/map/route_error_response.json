@@ -1,0 +1,105 @@
+[
+  {
+    "status": 404,
+    "error": "NOT_FOUND",
+    "message": "No route found between the specified coordinates",
+    "details": {
+      "errorCode": "NO_ROUTE",
+      "requestId": "req-12345-abcde",
+      "timestamp": "2023-09-15T14:30:45Z",
+      "coordinates": {
+        "origin": [48.8584, 2.2945],
+        "destination": [40.7128, -74.0060]
+      },
+      "reason": "No feasible route exists between the provided points. This may be due to physical barriers, restricted areas, or water bodies without crossings."
+    }
+  },
+  {
+    "status": 400,
+    "error": "BAD_REQUEST",
+    "message": "Invalid coordinates provided",
+    "details": {
+      "errorCode": "INVALID_COORDINATES",
+      "requestId": "req-67890-fghij",
+      "timestamp": "2023-09-15T15:45:22Z",
+      "coordinates": {
+        "origin": [91.5, 180.5],
+        "destination": [40.7128, -74.0060]
+      },
+      "reason": "The provided coordinates are outside the valid range. Latitude must be between -90 and 90, and longitude must be between -180 and 180."
+    }
+  },
+  {
+    "status": 503,
+    "error": "SERVICE_UNAVAILABLE",
+    "message": "Routing service is temporarily unavailable",
+    "details": {
+      "errorCode": "SERVICE_DOWN",
+      "requestId": "req-24680-klmno",
+      "timestamp": "2023-09-15T16:20:10Z",
+      "retryAfter": 300,
+      "reason": "The routing service is currently experiencing high load or maintenance. Please try again later."
+    }
+  },
+  {
+    "status": 401,
+    "error": "UNAUTHORIZED",
+    "message": "Invalid or missing API key",
+    "details": {
+      "errorCode": "INVALID_API_KEY",
+      "requestId": "req-13579-pqrst",
+      "timestamp": "2023-09-15T17:05:33Z",
+      "reason": "The request did not include a valid API key. Please check your credentials and try again."
+    }
+  },
+  {
+    "status": 429,
+    "error": "TOO_MANY_REQUESTS",
+    "message": "Rate limit exceeded",
+    "details": {
+      "errorCode": "RATE_LIMIT_EXCEEDED",
+      "requestId": "req-97531-uvwxy",
+      "timestamp": "2023-09-15T18:12:45Z",
+      "retryAfter": 60,
+      "limit": 100,
+      "period": "hour",
+      "reason": "You have exceeded the allowed number of requests per hour. Please reduce your request rate or upgrade your plan."
+    }
+  },
+  {
+    "status": 500,
+    "error": "INTERNAL_SERVER_ERROR",
+    "message": "An unexpected error occurred while processing your request",
+    "details": {
+      "errorCode": "INTERNAL_ERROR",
+      "requestId": "req-86420-zabcd",
+      "timestamp": "2023-09-15T19:30:15Z",
+      "reason": "The routing service encountered an unexpected error. Our team has been notified and is working to resolve the issue."
+    }
+  },
+  {
+    "status": 422,
+    "error": "UNPROCESSABLE_ENTITY",
+    "message": "The request was well-formed but contains semantic errors",
+    "details": {
+      "errorCode": "INVALID_ROUTE_PARAMETERS",
+      "requestId": "req-75319-efghi",
+      "timestamp": "2023-09-15T20:45:30Z",
+      "invalidParameters": ["mode", "avoid"],
+      "reason": "The route parameters contain invalid values. 'mode' must be one of [driving, walking, bicycling, transit] and 'avoid' must be one of [tolls, highways, ferries]."
+    }
+  },
+  {
+    "status": 413,
+    "error": "PAYLOAD_TOO_LARGE",
+    "message": "Request payload too large",
+    "details": {
+      "errorCode": "TOO_MANY_WAYPOINTS",
+      "requestId": "req-24680-jklmn",
+      "timestamp": "2023-09-15T21:15:40Z",
+      "maxWaypoints": 25,
+      "providedWaypoints": 50,
+      "reason": "The request contains too many waypoints. The maximum allowed is 25, but 50 were provided."
+    }
+  }
+]
