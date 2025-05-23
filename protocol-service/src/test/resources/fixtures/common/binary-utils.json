@@ -1,0 +1,349 @@
+{
+  "version": "1.0.0",
+  "description": "Utility data for binary protocol testing that includes common binary patterns, checksums, and data conversion references",
+  "commonPatterns": {
+    "headers": {
+      "startBytes": {
+        "description": "Common start bytes used in binary protocols",
+        "values": {
+          "standard": ["0x24", "0x28", "0x7e", "0xff"],
+          "meitrack": ["0x24", "0x24"],
+          "teltonika": ["0x00", "0x00", "0x00", "0x00"],
+          "atrack": ["0x28", "0x58", "0x58"],
+          "tk103": ["0x28", "0x0d", "0x0a"],
+          "totem": ["0x24", "0x24"],
+          "meiligao": ["0x24", "0x24"]
+        }
+      },
+      "endBytes": {
+        "description": "Common end bytes used in binary protocols",
+        "values": {
+          "standard": ["0x0d", "0x0a", "0x7e", "0x23"],
+          "meitrack": ["0x0d", "0x0a"],
+          "teltonika": ["0x0d", "0x0a"],
+          "atrack": ["0x29", "0x0d", "0x0a"],
+          "tk103": ["0x29", "0x0d", "0x0a"],
+          "totem": ["0x0d", "0x0a"],
+          "meiligao": ["0x0d", "0x0a"]
+        }
+      },
+      "delimiters": {
+        "description": "Common field delimiters in binary protocols",
+        "values": {
+          "comma": "0x2c",
+          "semicolon": "0x3b",
+          "pipe": "0x7c",
+          "asterisk": "0x2a",
+          "hash": "0x23",
+          "colon": "0x3a"
+        }
+      }
+    },
+    "messageStructures": {
+      "description": "Common message structure patterns used across protocols",
+      "patterns": {
+        "headerPayloadChecksum": {
+          "description": "Header followed by payload and checksum",
+          "structure": ["header", "length", "payload", "checksum", "footer"],
+          "examples": [
+            "meitrack",
+            "teltonika",
+            "meiligao"
+          ]
+        },
+        "headerPayloadFooter": {
+          "description": "Header followed by payload and footer without explicit checksum",
+          "structure": ["header", "payload", "footer"],
+          "examples": [
+            "tk103",
+            "atrack"
+          ]
+        },
+        "lengthPrefixed": {
+          "description": "Message with length prefix",
+          "structure": ["header", "length", "payload", "footer"],
+          "examples": [
+            "teltonika",
+            "totem"
+          ]
+        }
+      }
+    }
+  },
+  "checksums": {
+    "description": "Common checksum algorithms used in binary protocols",
+    "algorithms": {
+      "xor": {
+        "description": "XOR of all bytes in a range",
+        "implementation": "byte result = 0; for (byte b : data) { result ^= b; }",
+        "testVectors": [
+          {
+            "input": "0102030405",
+            "output": "05"
+          },
+          {
+            "input": "FFFEFDFC",
+            "output": "02"
+          }
+        ]
+      },
+      "sum": {
+        "description": "Sum of all bytes in a range (ignoring overflow)",
+        "implementation": "int sum = 0; for (byte b : data) { sum += b & 0xFF; } return (byte) sum;",
+        "testVectors": [
+          {
+            "input": "0102030405",
+            "output": "0F"
+          },
+          {
+            "input": "FFFEFDFC",
+            "output": "3FC"
+          }
+        ]
+      },
+      "crc16": {
+        "description": "CRC-16 (common in CCITT protocols)",
+        "implementation": "See standard CRC-16 implementation",
+        "testVectors": [
+          {
+            "input": "0102030405",
+            "output": "BF07"
+          },
+          {
+            "input": "FFFEFDFC",
+            "output": "5FE6"
+          }
+        ]
+      },
+      "modulo256": {
+        "description": "Sum of all bytes modulo 256",
+        "implementation": "int sum = 0; for (byte b : data) { sum += b & 0xFF; } return (byte) (sum % 256);",
+        "testVectors": [
+          {
+            "input": "0102030405",
+            "output": "0F"
+          },
+          {
+            "input": "FFFEFDFC",
+            "output": "FC"
+          }
+        ]
+      }
+    }
+  },
+  "dataConversion": {
+    "description": "Common data conversion patterns for binary protocols",
+    "conversions": {
+      "hexToBytes": {
+        "description": "Convert hexadecimal string to byte array",
+        "implementation": "DataConverter.parseHex(hexString)",
+        "examples": [
+          {
+            "input": "48656C6C6F",
+            "output": "Hello"
+          },
+          {
+            "input": "54726163636172",
+            "output": "Traccar"
+          }
+        ]
+      },
+      "bytesToHex": {
+        "description": "Convert byte array to hexadecimal string",
+        "implementation": "DataConverter.printHex(byteArray)",
+        "examples": [
+          {
+            "input": "Hello",
+            "output": "48656C6C6F"
+          },
+          {
+            "input": "Traccar",
+            "output": "54726163636172"
+          }
+        ]
+      },
+      "base64ToBytes": {
+        "description": "Convert Base64 string to byte array",
+        "implementation": "DataConverter.parseBase64(base64String)",
+        "examples": [
+          {
+            "input": "SGVsbG8=",
+            "output": "Hello"
+          },
+          {
+            "input": "VHJhY2Nhcg==",
+            "output": "Traccar"
+          }
+        ]
+      },
+      "bytesToBase64": {
+        "description": "Convert byte array to Base64 string",
+        "implementation": "DataConverter.printBase64(byteArray)",
+        "examples": [
+          {
+            "input": "Hello",
+            "output": "SGVsbG8="
+          },
+          {
+            "input": "Traccar",
+            "output": "VHJhY2Nhcg=="
+          }
+        ]
+      }
+    }
+  },
+  "bitOperations": {
+    "description": "Common bit manipulation operations used in binary protocols",
+    "operations": {
+      "checkBit": {
+        "description": "Check if a specific bit is set in a number",
+        "implementation": "BitUtil.check(number, index)",
+        "examples": [
+          {
+            "input": {"number": 10, "index": 1},
+            "output": true
+          },
+          {
+            "input": {"number": 10, "index": 0},
+            "output": false
+          }
+        ]
+      },
+      "extractBitRange": {
+        "description": "Extract a range of bits from a number",
+        "implementation": "BitUtil.between(number, from, to)",
+        "examples": [
+          {
+            "input": {"number": 171, "from": 2, "to": 6},
+            "output": 10
+          },
+          {
+            "input": {"number": 0xABCD, "from": 8, "to": 16},
+            "output": 0xAB
+          }
+        ]
+      },
+      "extractBitsFrom": {
+        "description": "Extract bits from a specific position to the end",
+        "implementation": "BitUtil.from(number, from)",
+        "examples": [
+          {
+            "input": {"number": 171, "from": 4},
+            "output": 10
+          },
+          {
+            "input": {"number": 0xABCD, "from": 8},
+            "output": 0xAB
+          }
+        ]
+      },
+      "extractBitsTo": {
+        "description": "Extract bits from the start to a specific position",
+        "implementation": "BitUtil.to(number, to)",
+        "examples": [
+          {
+            "input": {"number": 171, "to": 4},
+            "output": 11
+          },
+          {
+            "input": {"number": 0xABCD, "to": 8},
+            "output": 0xCD
+          }
+        ]
+      }
+    }
+  },
+  "bufferOperations": {
+    "description": "Common buffer operations used in binary protocols",
+    "operations": {
+      "readSignedMagnitudeInt": {
+        "description": "Read a signed magnitude integer from a buffer",
+        "implementation": "BufferUtil.readSignedMagnitudeInt(buffer)",
+        "examples": [
+          {
+            "input": "00000001",
+            "output": 1
+          },
+          {
+            "input": "80000001",
+            "output": -1
+          }
+        ]
+      },
+      "indexOf": {
+        "description": "Find the index of a byte in a buffer",
+        "implementation": "BufferUtil.indexOf(buffer, fromIndex, toIndex, value, count)",
+        "examples": [
+          {
+            "input": {"buffer": "48656C6C6F", "value": "0x6C", "count": 1},
+            "output": 2
+          },
+          {
+            "input": {"buffer": "48656C6C6F", "value": "0x6C", "count": 2},
+            "output": 3
+          }
+        ]
+      },
+      "isPrintable": {
+        "description": "Check if a buffer contains only printable ASCII characters",
+        "implementation": "BufferUtil.isPrintable(buffer, length)",
+        "examples": [
+          {
+            "input": {"buffer": "48656C6C6F", "length": 5},
+            "output": true
+          },
+          {
+            "input": {"buffer": "0001020304", "length": 5},
+            "output": false
+          }
+        ]
+      },
+      "readString": {
+        "description": "Read a string from a buffer",
+        "implementation": "BufferUtil.readString(buffer, length)",
+        "examples": [
+          {
+            "input": {"buffer": "48656C6C6F", "length": 5},
+            "output": "Hello"
+          },
+          {
+            "input": {"buffer": "54726163636172", "length": 7},
+            "output": "Traccar"
+          }
+        ]
+      }
+    }
+  },
+  "testData": {
+    "description": "Sample test data for binary protocol testing",
+    "samples": {
+      "meitrack": {
+        "description": "Sample Meitrack protocol messages",
+        "messages": [
+          {
+            "hex": "24240060123456789012345601035BA45E100B0C0D0E1F20210A0B0C0D0E1F2021000C000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000023",
+            "description": "Position report with GPS info"
+          }
+        ]
+      },
+      "teltonika": {
+        "description": "Sample Teltonika protocol messages",
+        "messages": [
+          {
+            "hex": "000000000000003608010000016B40D8EA30010000000000000000000000000000000105021503010101425E0F01F10000601A014E0000000000000000",
+            "description": "Position report with GPS info"
+          }
+        ]
+      },
+      "tk103": {
+        "description": "Sample TK103 protocol messages",
+        "messages": [
+          {
+            "hex": "28123456789012BP05123456789012345120803A5957.7558N01047.7728E024.1141112.6111100000L000770AD",
+            "description": "Position report with GPS info"
+          }
+        ]
+      }
+    }
+  }
+}
