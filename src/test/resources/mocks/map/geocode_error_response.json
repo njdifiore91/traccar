@@ -1,0 +1,75 @@
+{
+  "errors": [
+    {
+      "type": "INVALID_REQUEST",
+      "status": 400,
+      "message": "Invalid request parameters",
+      "details": "The request was invalid. Please verify the coordinates or address parameters.",
+      "code": "GEOCODE_INVALID_PARAMS",
+      "timestamp": "2023-05-15T10:23:45Z"
+    },
+    {
+      "type": "SERVICE_UNAVAILABLE",
+      "status": 503,
+      "message": "Geocoding service temporarily unavailable",
+      "details": "The geocoding service is currently unavailable. Please try again later.",
+      "code": "GEOCODE_SERVICE_DOWN",
+      "timestamp": "2023-05-15T10:24:12Z"
+    },
+    {
+      "type": "RATE_LIMIT_EXCEEDED",
+      "status": 429,
+      "message": "Rate limit exceeded",
+      "details": "You have exceeded the allowed number of requests. Please try again later or upgrade your plan.",
+      "code": "GEOCODE_RATE_LIMIT",
+      "timestamp": "2023-05-15T10:25:30Z",
+      "resetTime": "2023-05-15T11:00:00Z",
+      "limitPeriod": "1 hour"
+    },
+    {
+      "type": "AUTHORIZATION_ERROR",
+      "status": 401,
+      "message": "Invalid API key or unauthorized access",
+      "details": "The provided API key is invalid or has insufficient permissions for this operation.",
+      "code": "GEOCODE_AUTH_ERROR",
+      "timestamp": "2023-05-15T10:26:15Z"
+    },
+    {
+      "type": "NO_RESULTS",
+      "status": 404,
+      "message": "No results found",
+      "details": "The geocoding service could not find any results for the provided query.",
+      "code": "GEOCODE_NO_RESULTS",
+      "timestamp": "2023-05-15T10:27:00Z"
+    },
+    {
+      "type": "INTERNAL_ERROR",
+      "status": 500,
+      "message": "Internal server error",
+      "details": "An unexpected error occurred while processing your request. Our team has been notified.",
+      "code": "GEOCODE_INTERNAL_ERROR",
+      "timestamp": "2023-05-15T10:28:45Z",
+      "requestId": "geo-req-12345"
+    },
+    {
+      "type": "TIMEOUT",
+      "status": 504,
+      "message": "Request timeout",
+      "details": "The request to the geocoding service timed out. Please try again later.",
+      "code": "GEOCODE_TIMEOUT",
+      "timestamp": "2023-05-15T10:29:30Z"
+    },
+    {
+      "type": "INVALID_COORDINATES",
+      "status": 400,
+      "message": "Invalid coordinates",
+      "details": "The provided coordinates are outside the valid range. Latitude must be between -90 and 90, and longitude must be between -180 and 180.",
+      "code": "GEOCODE_INVALID_COORDS",
+      "timestamp": "2023-05-15T10:30:15Z",
+      "invalidParams": ["latitude", "longitude"]
+    }
+  ],
+  "documentation": "https://example.com/geocoding-api/errors",
+  "requestId": "req-67890",
+  "serverTime": "2023-05-15T10:30:45Z"
+}
