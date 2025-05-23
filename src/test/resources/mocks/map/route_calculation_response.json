@@ -1,0 +1,172 @@
+{
+  "code": "Ok",
+  "waypoints": [
+    {
+      "hint": "KSoKADRYroqUBAEAEAAAABkAAAAGAAAAAAAAABhnCQCLtwAA_0vMAKlYIQM8TMwArVghAwEAAQH1a66g",
+      "distance": 4.152629,
+      "name": "Main Street",
+      "location": [13.388799, 52.517033]
+    },
+    {
+      "hint": "LCoKADRYroqUBAEAEAAAABkAAAAGAAAAAAAAABhnCQCLtwAA_0vMAKlYIQM8TMwArVghAwEAAQH1a66g",
+      "distance": 3.847201,
+      "name": "Central Avenue",
+      "location": [13.428555, 52.523219]
+    }
+  ],
+  "routes": [
+    {
+      "geometry": "irgkH|hqnVcAsA}@q@s@c@m@Wi@OkBk@eD_AuIkCmDeAgDgA[K[QYQWUWWW[U[S_@S_@Qc@mAoDkAuDe@}AEc@",
+      "legs": [
+        {
+          "steps": [
+            {
+              "geometry": "irgkH|hqnVcAsA}@q@s@c@m@Wi@OkBk@eD_A",
+              "maneuver": {
+                "bearing_after": 37,
+                "bearing_before": 0,
+                "location": [13.388799, 52.517033],
+                "modifier": "left",
+                "type": "depart"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Main Street",
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [true],
+                  "bearings": [37],
+                  "location": [13.388799, 52.517033]
+                },
+                {
+                  "out": 1,
+                  "in": 2,
+                  "entry": [true, true, false],
+                  "bearings": [30, 120, 210],
+                  "location": [13.391772, 52.519937]
+                }
+              ],
+              "weight": 45.8,
+              "duration": 45.8,
+              "distance": 458.0
+            },
+            {
+              "geometry": "uIkH~aqnVuIkCmDeAgDgA[K[QYQWUWWW[",
+              "maneuver": {
+                "bearing_after": 45,
+                "bearing_before": 40,
+                "location": [13.391772, 52.519937],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Park Road",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, true, false],
+                  "bearings": [45, 135, 220],
+                  "location": [13.391772, 52.519937]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false, true],
+                  "bearings": [45, 225, 315],
+                  "location": [13.397634, 52.521407]
+                }
+              ],
+              "weight": 83.2,
+              "duration": 83.2,
+              "distance": 832.0
+            },
+            {
+              "geometry": "cTmHtdpnVU[S_@S_@Qc@mAoDkAuDe@}AEc@",
+              "maneuver": {
+                "bearing_after": 60,
+                "bearing_before": 45,
+                "location": [13.397634, 52.521407],
+                "modifier": "slight right",
+                "type": "turn"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Central Avenue",
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [true, false, true],
+                  "bearings": [60, 225, 315],
+                  "location": [13.397634, 52.521407]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [true, true, false],
+                  "bearings": [60, 150, 240],
+                  "location": [13.415852, 52.522191]
+                }
+              ],
+              "weight": 71.0,
+              "duration": 71.0,
+              "distance": 710.0
+            },
+            {
+              "geometry": "cTmHtdpnV",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 60,
+                "location": [13.428555, 52.523219],
+                "modifier": "right",
+                "type": "arrive"
+              },
+              "mode": "driving",
+              "driving_side": "right",
+              "name": "Central Avenue",
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [true],
+                  "bearings": [240],
+                  "location": [13.428555, 52.523219]
+                }
+              ],
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "summary": "Main Street, Park Road, Central Avenue",
+          "weight": 200.0,
+          "duration": 200.0,
+          "distance": 2000.0
+        }
+      ],
+      "weight_name": "routability",
+      "weight": 200.0,
+      "duration": 200.0,
+      "distance": 2000.0
+    }
+  ],
+  "metadata": {
+    "service": "routing",
+    "timestamp": 1621345678,
+    "query": {
+      "coordinates": [
+        [13.388799, 52.517033],
+        [13.428555, 52.523219]
+      ],
+      "profile": "car",
+      "format": "json"
+    },
+    "engine": {
+      "version": "5.22.0",
+      "build_date": "2020-05-18T12:34:56Z",
+      "graph_date": "2020-05-15"
+    }
+  }
+}
