@@ -1,0 +1,827 @@
+[
+  {
+    "scenarioId": "teltonika-device-online",
+    "description": "Teltonika device coming online triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "CONNECT",
+      "rawData": "000F333536333037303432343431303133",
+      "remoteAddress": "203.0.113.45:5027"
+    },
+    "expectedEvent": {
+      "type": "DEVICE_ONLINE",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "protocolVersion": "1.5"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "groupAdmins"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "protocol": "teltonika",
+        "ipAddress": "203.0.113.45"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-device-offline",
+    "description": "Teltonika device going offline triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DISCONNECT",
+      "disconnectReason": "TIMEOUT",
+      "sessionDuration": 3600
+    },
+    "expectedEvent": {
+      "type": "DEVICE_OFFLINE",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "disconnectReason": "TIMEOUT",
+        "lastCommunicationTime": "${lastCommunicationTime}"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "sms"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "groupAdmins", "technicians"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "lastCommunicationTime": "${lastCommunicationTime}",
+        "disconnectReason": "Connection timeout"
+      }
+    }
+  },
+  {
+    "scenarioId": "tk103-protocol-error",
+    "description": "TK103 protocol error triggers a notification",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "$$A138,862170013556541,AAA,35,7.092076,79.960473,140412132808,A,10,9,0,275,1,14,0,0,1,0##",
+      "errorType": "INVALID_CHECKSUM"
+    },
+    "expectedEvent": {
+      "type": "PROTOCOL_ERROR",
+      "attributes": {
+        "protocol": "tk103",
+        "deviceId": "987654321",
+        "errorCode": "INVALID_CHECKSUM",
+        "rawMessage": "$$A138,862170013556541,AAA,35,7.092076,79.960473,140412132808,A,10,9,0,275,1,14,0,0,1,0##"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "HIGH",
+      "recipients": ["systemAdmins", "technicians"],
+      "templateVariables": {
+        "deviceName": "Fleet Vehicle 7",
+        "eventTime": "${eventTime}",
+        "errorCode": "INVALID_CHECKSUM",
+        "errorDetails": "Message checksum validation failed"
+      }
+    }
+  },
+  {
+    "scenarioId": "meitrack-command-result",
+    "description": "Meitrack command result triggers a notification",
+    "protocol": "meitrack",
+    "deviceId": "567890123",
+    "input": {
+      "messageType": "COMMAND_RESULT",
+      "rawData": "$$p28,867688027758136,B99,0,0.0,0,190813122628,A,22.641122,114.023880,0,0,0,0,0,0,00000000##",
+      "commandId": "cmd-12345",
+      "commandType": "ENGINE_STOP",
+      "result": "SUCCESS"
+    },
+    "expectedEvent": {
+      "type": "PROTOCOL_COMMAND_RESULT",
+      "attributes": {
+        "protocol": "meitrack",
+        "deviceId": "567890123",
+        "commandType": "ENGINE_STOP",
+        "commandId": "cmd-12345",
+        "result": "SUCCESS"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "push"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "commandInitiator"],
+      "templateVariables": {
+        "deviceName": "Security Vehicle 3",
+        "eventTime": "${eventTime}",
+        "commandType": "Engine Stop",
+        "commandResult": "Successfully executed",
+        "latitude": "22.641122",
+        "longitude": "114.023880"
+      }
+    }
+  },
+  {
+    "scenarioId": "atrack-unknown-device",
+    "description": "Unknown ATrack device connection attempt triggers a notification",
+    "protocol": "atrack",
+    "deviceId": "UNKNOWN",
+    "input": {
+      "messageType": "CONNECT",
+      "rawData": "@P,123456,AX5-9876543,1,0,0,190813122628,A,22.641122,114.023880,0,0,0,0,0,0,00000000#",
+      "remoteAddress": "198.51.100.75:5013"
+    },
+    "expectedEvent": {
+      "type": "DEVICE_UNKNOWN",
+      "attributes": {
+        "protocol": "atrack",
+        "deviceIdentifier": "AX5-9876543",
+        "ipAddress": "198.51.100.75",
+        "port": 5013
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "HIGH",
+      "recipients": ["systemAdmins"],
+      "templateVariables": {
+        "eventTime": "${eventTime}",
+        "protocol": "atrack",
+        "deviceIdentifier": "AX5-9876543",
+        "ipAddress": "198.51.100.75",
+        "reason": "Device not registered in the system"
+      }
+    }
+  },
+  {
+    "scenarioId": "totem-device-inactive",
+    "description": "Totem device inactivity triggers a notification",
+    "protocol": "totem",
+    "deviceId": "234567890",
+    "input": {
+      "messageType": "INACTIVITY_CHECK",
+      "lastActivityTime": "2023-08-14T18:20:45.456Z",
+      "inactivityThreshold": 86400,
+      "batteryLevel": 15
+    },
+    "expectedEvent": {
+      "type": "DEVICE_INACTIVE",
+      "attributes": {
+        "protocol": "totem",
+        "deviceId": "234567890",
+        "lastActivityTime": "2023-08-14T18:20:45.456Z",
+        "inactivityDuration": 86400,
+        "batteryLevel": 15
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "sms"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "groupAdmins"],
+      "templateVariables": {
+        "deviceName": "Asset Tracker 5",
+        "eventTime": "${eventTime}",
+        "lastActivityTime": "2023-08-14T18:20:45.456Z",
+        "inactivityDuration": "24 hours",
+        "batteryLevel": "15%"
+      }
+    }
+  },
+  {
+    "scenarioId": "meiligao-device-moving",
+    "description": "Meiligao device starts moving triggers a notification",
+    "protocol": "meiligao",
+    "deviceId": "456789012",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "$$A138,456789012,AAA,35,37.7749,-122.4194,230815190512,A,10,9,45.7,90,1,14,0,0,1,0##",
+      "previousSpeed": 0.0,
+      "currentSpeed": 45.7
+    },
+    "expectedEvent": {
+      "type": "DEVICE_MOVING",
+      "attributes": {
+        "protocol": "meiligao",
+        "deviceId": "456789012",
+        "speed": 45.7,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "heading": 90,
+        "ignitionStatus": "ON"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "push"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner"],
+      "templateVariables": {
+        "deviceName": "Delivery Van 3",
+        "eventTime": "${eventTime}",
+        "speed": "45.7 km/h",
+        "heading": "East",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "meiligao-device-stopped",
+    "description": "Meiligao device stops moving triggers a notification",
+    "protocol": "meiligao",
+    "deviceId": "456789012",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "$$A138,456789012,AAA,35,37.7749,-122.4194,230815194533,A,10,9,0.0,0,0,14,0,0,1,0##",
+      "previousSpeed": 45.7,
+      "currentSpeed": 0.0,
+      "ignitionStatus": "OFF"
+    },
+    "expectedEvent": {
+      "type": "DEVICE_STOPPED",
+      "attributes": {
+        "protocol": "meiligao",
+        "deviceId": "456789012",
+        "speed": 0.0,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "stopDuration": 0,
+        "ignitionStatus": "OFF"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "push"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner"],
+      "templateVariables": {
+        "deviceName": "Delivery Van 3",
+        "eventTime": "${eventTime}",
+        "location": "San Francisco, CA",
+        "ignitionStatus": "OFF",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-sos-button",
+    "description": "Teltonika SOS button press triggers an emergency notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000004308020000016B40D8EA30010000000000000000000000000000000105021503010101425E0F01F10000601A014E0000000000000000010000C7CF",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "239": 1
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "SOS_BUTTON_PRESSED",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "buttonId": 1,
+        "pressType": "LONG_PRESS"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "sms", "push"],
+      "priority": "CRITICAL",
+      "recipients": ["deviceOwner", "emergencyContacts", "securityTeam"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194",
+        "emergencyType": "SOS Button Activated"
+      }
+    }
+  },
+  {
+    "scenarioId": "tk103-low-battery",
+    "description": "TK103 low battery alert triggers a notification",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "$$B012,987654321,AAA,35,40.7128,-74.0060,230815233022,A,10,9,0,0,1.2,10,0,0,0,0##",
+      "batteryLevel": 10,
+      "batteryVoltage": 3.2,
+      "externalPower": false
+    },
+    "expectedEvent": {
+      "type": "LOW_BATTERY",
+      "attributes": {
+        "protocol": "tk103",
+        "deviceId": "987654321",
+        "batteryLevel": 10,
+        "batteryVoltage": 3.2,
+        "externalPower": false,
+        "latitude": 40.7128,
+        "longitude": -74.0060
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "push"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "technicians"],
+      "templateVariables": {
+        "deviceName": "Fleet Vehicle 7",
+        "eventTime": "${eventTime}",
+        "batteryLevel": "10%",
+        "batteryVoltage": "3.2V",
+        "estimatedRuntime": "2 hours",
+        "location": "New York, NY"
+      }
+    }
+  },
+  {
+    "scenarioId": "meitrack-auth-failure",
+    "description": "Meitrack authentication failure triggers a security notification",
+    "protocol": "meitrack",
+    "deviceId": "567890123",
+    "input": {
+      "messageType": "AUTH",
+      "rawData": "$$A138,567890123,AAA,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0##",
+      "remoteAddress": "203.0.113.90:5020",
+      "attemptCount": 3,
+      "failureReason": "INVALID_CREDENTIALS"
+    },
+    "expectedEvent": {
+      "type": "DEVICE_AUTH_FAILURE",
+      "attributes": {
+        "protocol": "meitrack",
+        "deviceId": "567890123",
+        "ipAddress": "203.0.113.90",
+        "port": 5020,
+        "authMethod": "IMEI",
+        "failureReason": "INVALID_CREDENTIALS",
+        "attemptCount": 3
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "systemAdmins", "securityTeam"],
+      "templateVariables": {
+        "deviceName": "Security Vehicle 3",
+        "eventTime": "${eventTime}",
+        "ipAddress": "203.0.113.90",
+        "attemptCount": 3,
+        "failureReason": "Invalid device credentials",
+        "securityRecommendation": "Verify device configuration and credentials"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-geofence-entry",
+    "description": "Teltonika device entering a geofence triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "gpsData": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "altitude": 89.0,
+        "speed": 35.0,
+        "satellites": 9,
+        "hdop": 1.0
+      },
+      "geofenceId": "geo-12345",
+      "geofenceName": "Downtown LA"
+    },
+    "expectedEvent": {
+      "type": "GEOFENCE_ENTER",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "geofenceId": "geo-12345",
+        "geofenceName": "Downtown LA",
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "speed": 35.0
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "push"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "fleetManager"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "geofenceName": "Downtown LA",
+        "speed": "35.0 km/h",
+        "estimatedArrival": "On time",
+        "mapUrl": "https://maps.example.com/?lat=34.0522&lon=-118.2437"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-geofence-exit",
+    "description": "Teltonika device exiting a geofence triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "gpsData": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "altitude": 89.0,
+        "speed": 42.0,
+        "satellites": 9,
+        "hdop": 1.0
+      },
+      "geofenceId": "geo-12345",
+      "geofenceName": "Downtown LA"
+    },
+    "expectedEvent": {
+      "type": "GEOFENCE_EXIT",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "geofenceId": "geo-12345",
+        "geofenceName": "Downtown LA",
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "speed": 42.0
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "push"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "fleetManager"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "geofenceName": "Downtown LA",
+        "speed": "42.0 km/h",
+        "timeInGeofence": "45 minutes",
+        "mapUrl": "https://maps.example.com/?lat=34.0522&lon=-118.2437"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-overspeed",
+    "description": "Teltonika device exceeding speed limit triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 95.0,
+        "satellites": 8,
+        "hdop": 1.2
+      },
+      "speedLimit": 80.0
+    },
+    "expectedEvent": {
+      "type": "OVERSPEED",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "speed": 95.0,
+        "speedLimit": 80.0,
+        "overSpeedPercentage": 18.75
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "push"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "fleetManager", "safetyOfficer"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "speed": "95.0 km/h",
+        "speedLimit": "80.0 km/h",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-harsh-braking",
+    "description": "Teltonika device harsh braking event triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "72": 1
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 25.0,
+        "satellites": 8,
+        "hdop": 1.2
+      },
+      "accelerationData": {
+        "x": 0.1,
+        "y": -1.2,
+        "z": 0.3
+      }
+    },
+    "expectedEvent": {
+      "type": "HARSH_BRAKING",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "speed": 25.0,
+        "deceleration": 1.2,
+        "previousSpeed": 65.0
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "fleetManager", "safetyOfficer"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "deceleration": "1.2 g",
+        "speedBefore": "65.0 km/h",
+        "speedAfter": "25.0 km/h",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-ignition-on",
+    "description": "Teltonika device ignition turned on triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 1,
+        "239": 0
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "IGNITION_ON",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "ignitionStatus": "ON"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "push"],
+      "priority": "LOW",
+      "recipients": ["deviceOwner"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-ignition-off",
+    "description": "Teltonika device ignition turned off triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "239": 0
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "IGNITION_OFF",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "ignitionStatus": "OFF",
+        "engineHours": 8.5
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "push"],
+      "priority": "LOW",
+      "recipients": ["deviceOwner"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "driverName": "John Smith",
+        "engineHours": "8.5 hours",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-device-reboot",
+    "description": "Teltonika device reboot triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "250": 1
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "DEVICE_REBOOT",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "rebootReason": "POWER_CYCLE"
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "technicians"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "rebootReason": "Power cycle",
+        "previousUptime": "15 days, 7 hours",
+        "firmwareVersion": "03.27.07.Rev.00",
+        "location": "San Francisco, CA"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-external-power-lost",
+    "description": "Teltonika device external power lost triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "66": 0,
+        "67": 3.8
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "POWER_LOST",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "batteryLevel": 85,
+        "batteryVoltage": 3.8,
+        "externalPower": false
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email", "sms"],
+      "priority": "HIGH",
+      "recipients": ["deviceOwner", "technicians"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "batteryLevel": "85%",
+        "estimatedRuntime": "24 hours",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  },
+  {
+    "scenarioId": "teltonika-external-power-restored",
+    "description": "Teltonika device external power restored triggers a notification",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "input": {
+      "messageType": "DATA",
+      "rawData": "000000000000003608010000016B40D57B480100000000000000000000000000000001010101000000000000016B40D57B480100000000000000000000000000000001010101000000000000",
+      "codecId": 8,
+      "ioElement": {
+        "1": 0,
+        "66": 1,
+        "67": 4.1
+      },
+      "gpsData": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 0.0,
+        "satellites": 8,
+        "hdop": 1.2
+      }
+    },
+    "expectedEvent": {
+      "type": "POWER_RESTORED",
+      "attributes": {
+        "protocol": "teltonika",
+        "deviceId": "123456789",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "batteryLevel": 90,
+        "batteryVoltage": 4.1,
+        "externalPower": true,
+        "powerOutageDuration": 7200
+      }
+    },
+    "expectedNotification": {
+      "channels": ["web", "email"],
+      "priority": "MEDIUM",
+      "recipients": ["deviceOwner", "technicians"],
+      "templateVariables": {
+        "deviceName": "Delivery Truck 1",
+        "eventTime": "${eventTime}",
+        "batteryLevel": "90%",
+        "powerOutageDuration": "2 hours",
+        "location": "San Francisco, CA",
+        "mapUrl": "https://maps.example.com/?lat=37.7749&lon=-122.4194"
+      }
+    }
+  }
+]
