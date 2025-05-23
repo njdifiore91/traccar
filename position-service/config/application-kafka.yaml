@@ -1,0 +1,108 @@
+# Kafka Configuration for Position Processing Service
+
+# Broker connection settings
+spring:
+  kafka:
+    # Kafka broker addresses
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    # Common properties for both producer and consumer
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      ssl.endpoint.identification.algorithm: ${KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM:}
+      # Enable SSL if configured
+      ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+      ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      ssl.keystore.location: ${KAFKA_SSL_KEYSTORE_LOCATION:}
+      ssl.keystore.password: ${KAFKA_SSL_KEYSTORE_PASSWORD:}
+      ssl.key.password: ${KAFKA_SSL_KEY_PASSWORD:}
+
+    # Consumer configuration
+    consumer:
+      # Consumer group ID for the Position Service
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:position-service}
+      # Auto offset reset strategy (what to do when there is no initial offset)
+      auto-offset-reset: earliest
+      # Enable manual acknowledgment mode
+      enable-auto-commit: false
+      # Key and value deserializers
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # JSON deserializer properties
+      properties:
+        spring.json.trusted.packages: org.traccar.proto,org.traccar.model
+        spring.json.use.type.headers: true
+        # Maximum poll records per consumer poll operation
+        max.poll.records: 500
+        # Maximum time between polls
+        max.poll.interval.ms: 300000
+        # Session timeout
+        session.timeout.ms: 60000
+        # Heartbeat interval
+        heartbeat.interval.ms: 20000
+        # Isolation level for reading transactional messages
+        isolation.level: read_committed
+
+    # Producer configuration
+    producer:
+      # Key and value serializers
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # Producer acknowledgment level (all = leader and replicas)
+      acks: all
+      # Number of retries if sending fails
+      retries: 3
+      # Retry backoff time
+      properties:
+        retry.backoff.ms: 1000
+        # Enable idempotent producer for exactly-once semantics
+        enable.idempotence: true
+        # Linger time to allow batching
+        linger.ms: 10
+        # Batch size
+        batch.size: 16384
+        # Buffer memory
+        buffer.memory: 33554432
+        # Compression type
+        compression.type: lz4
+        # Request timeout
+        request.timeout.ms: 30000
+        # Maximum in-flight requests per connection
+        max.in.flight.requests.per.connection: 5
+        # Transaction timeout
+        transaction.timeout.ms: 60000
+
+    # Listener configuration
+    listener:
+      # Concurrency level (number of threads)
+      concurrency: ${KAFKA_LISTENER_CONCURRENCY:3}
+      # Acknowledgment mode (manual, manual_immediate, record, batch, time, count, count_time)
+      ack-mode: MANUAL_IMMEDIATE
+      # Listener type (single or batch)
+      type: SINGLE
+      # Missing records recovery interval
+      missing-topics-fatal: false
+      # Poll timeout
+      poll-timeout: 5000
+      # Monitor interval
+      monitor-interval: 30000
+      # Log errors for failed records
+      log-container-config: true
+      # Error handler
+      error-handler: defaultErrorHandler
+
+# Topic configuration
+position-service:
+  kafka:
+    topics:
+      # Topic for consuming raw position data from Protocol Service
+      raw-positions: ${KAFKA_TOPIC_RAW_POSITIONS:raw-positions}
+      # Topic for publishing enriched position data to Event Service
+      enriched-positions: ${KAFKA_TOPIC_ENRICHED_POSITIONS:enriched-positions}
+      # Dead letter queue topic for failed messages
+      dlq: ${KAFKA_TOPIC_DLQ:position-service-dlq}
+    # Retry configuration
+    retry:
+      max-attempts: 3
+      initial-interval: 1000
+      multiplier: 2.0
+      max-interval: 10000
