@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "protocol.fullname" . }}-config
+  labels:
+    {{- include "protocol.labels" . | nindent 4 }}
+data:
+  traccar.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+    <properties>
+
+      <!-- Server Configuration -->
+      <entry key="server.port">{{ .Values.service.managementPort | default 8082 }}</entry>
+      <entry key="server.address">{{ .Values.server.address | default "0.0.0.0" }}</entry>
+      <entry key="server.timeout">{{ .Values.server.timeout | default 600 }}</entry>
+      <entry key="server.bossThreads">{{ .Values.server.bossThreads | default 1 }}</entry>
+      <entry key="server.workerThreads">{{ .Values.server.workerThreads | default 0 }}</entry>
+      <entry key="server.healthCheck.path">{{ .Values.server.healthCheck.path | default "/health" }}</entry>
+      <entry key="server.healthCheck.readiness">{{ .Values.server.healthCheck.readiness | default "/health/readiness" }}</entry>
+      <entry key="server.healthCheck.liveness">{{ .Values.server.healthCheck.liveness | default "/health/liveness" }}</entry>
+
+      <!-- Logging Configuration -->
+      <entry key="logger.level">{{ .Values.logging.level | default "INFO" }}</entry>
+      <entry key="logger.console">{{ .Values.logging.console | default "true" }}</entry>
+      <entry key="logger.file.enable">{{ .Values.logging.file.enable | default "false" }}</entry>
+      <entry key="logger.file.path">{{ .Values.logging.file.path | default "logs/traccar.log" }}</entry>
+      <entry key="logger.file.rotate">{{ .Values.logging.file.rotate | default "true" }}</entry>
+      <entry key="logger.file.maxSize">{{ .Values.logging.file.maxSize | default "10" }}</entry>
+      <entry key="logger.file.maxFiles">{{ .Values.logging.file.maxFiles | default "5" }}</entry>
+      <entry key="logger.netty.level">{{ .Values.logging.netty.level | default "WARN" }}</entry>
+      <entry key="logger.protocol.level">{{ .Values.logging.protocol.level | default "INFO" }}</entry>
+
+      <!-- Message Broker Configuration -->
+      <entry key="message.broker.type">{{ .Values.messageBroker.type | default "kafka" }}</entry>
+      <entry key="message.broker.url">{{ .Values.messageBroker.url }}</entry>
+      <entry key="message.broker.topic.positions">{{ .Values.messageBroker.topics.positions | default "raw.positions" }}</entry>
+      <entry key="message.broker.topic.connections">{{ .Values.messageBroker.topics.connections | default "device.connections" }}</entry>
+      <entry key="message.broker.clientId">{{ .Values.messageBroker.clientId | default "protocol-service" }}</entry>
+      <entry key="message.broker.acks">{{ .Values.messageBroker.acks | default "all" }}</entry>
+      <entry key="message.broker.retries">{{ .Values.messageBroker.retries | default 3 }}</entry>
+      <entry key="message.broker.batchSize">{{ .Values.messageBroker.batchSize | default 16384 }}</entry>
+      <entry key="message.broker.linger.ms">{{ .Values.messageBroker.linger | default 1 }}</entry>
+      <entry key="message.broker.buffer.memory">{{ .Values.messageBroker.bufferMemory | default 33554432 }}</entry>
+      <entry key="message.broker.compression.type">{{ .Values.messageBroker.compression | default "none" }}</entry>
+      {{- if .Values.messageBroker.security.enabled }}
+      <entry key="message.broker.security.protocol">{{ .Values.messageBroker.security.protocol | default "SASL_SSL" }}</entry>
+      <entry key="message.broker.sasl.mechanism">{{ .Values.messageBroker.security.saslMechanism | default "PLAIN" }}</entry>
+      {{- end }}
+
+      <!-- Service Discovery Configuration -->
+      <entry key="service.discovery.enabled">{{ .Values.serviceDiscovery.enabled | default "true" }}</entry>
+      <entry key="service.discovery.type">{{ .Values.serviceDiscovery.type | default "kubernetes" }}</entry>
+      <entry key="service.discovery.registerOnStartup">{{ .Values.serviceDiscovery.registerOnStartup | default "true" }}</entry>
+      <entry key="service.discovery.serviceName">{{ include "protocol.fullname" . }}</entry>
+      <entry key="service.discovery.serviceId">{{ include "protocol.fullname" . }}-${POD_NAME}</entry>
+      <entry key="service.discovery.healthCheckInterval">{{ .Values.serviceDiscovery.healthCheckInterval | default 30 }}</entry>
+
+      <!-- Protocol Configuration -->
+      {{- range $protocol := .Values.protocols }}
+      {{- if $protocol.enabled }}
+      <entry key="{{ $protocol.name }}.enable">true</entry>
+      <entry key="{{ $protocol.name }}.port">{{ $protocol.port }}</entry>
+      {{- if $protocol.protocol }}
+      <entry key="{{ $protocol.name }}.protocol">{{ $protocol.protocol }}</entry>
+      {{- end }}
+      {{- if $protocol.timeout }}
+      <entry key="{{ $protocol.name }}.timeout">{{ $protocol.timeout }}</entry>
+      {{- end }}
+      {{- if $protocol.messageLength }}
+      <entry key="{{ $protocol.name }}.messageLength">{{ $protocol.messageLength }}</entry>
+      {{- end }}
+      {{- if $protocol.connectionTimeout }}
+      <entry key="{{ $protocol.name }}.connectionTimeout">{{ $protocol.connectionTimeout }}</entry>
+      {{- end }}
+      {{- if $protocol.devicePassword }}
+      <entry key="{{ $protocol.name }}.devicePassword">{{ $protocol.devicePassword }}</entry>
+      {{- end }}
+      {{- if $protocol.custom }}
+      {{- range $key, $value := $protocol.custom }}
+      <entry key="{{ $protocol.name }}.{{ $key }}">{{ $value }}</entry>
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
+      <!-- Connection Parameters -->
+      <entry key="connection.keepAlive">{{ .Values.connection.keepAlive | default "true" }}</entry>
+      <entry key="connection.tcpNoDelay">{{ .Values.connection.tcpNoDelay | default "true" }}</entry>
+      <entry key="connection.maxIdleTime">{{ .Values.connection.maxIdleTime | default 600 }}</entry>
+      <entry key="connection.receiveBufferSize">{{ .Values.connection.receiveBufferSize | default 1048576 }}</entry>
+      <entry key="connection.sendBufferSize">{{ .Values.connection.sendBufferSize | default 1048576 }}</entry>
+      <entry key="connection.reuseAddress">{{ .Values.connection.reuseAddress | default "true" }}</entry>
+      <entry key="connection.backlog">{{ .Values.connection.backlog | default 1024 }}</entry>
+
+      <!-- Session Management -->
+      <entry key="session.cache.size">{{ .Values.session.cacheSize | default 1000 }}</entry>
+      <entry key="session.cache.expiration">{{ .Values.session.cacheExpiration | default 600 }}</entry>
+      <entry key="session.broadcast.enabled">{{ .Values.session.broadcast.enabled | default "true" }}</entry>
+      <entry key="session.broadcast.interval">{{ .Values.session.broadcast.interval | default 60 }}</entry>
+      <entry key="session.persistent.enabled">{{ .Values.session.persistent.enabled | default "true" }}</entry>
+      {{- if .Values.session.redis.enabled }}
+      <entry key="session.redis.enabled">true</entry>
+      <entry key="session.redis.url">{{ .Values.session.redis.url }}</entry>
+      <entry key="session.redis.timeout">{{ .Values.session.redis.timeout | default 2000 }}</entry>
+      <entry key="session.redis.ttl">{{ .Values.session.redis.ttl | default 3600 }}</entry>
+      {{- end }}
+
+      <!-- Metrics and Monitoring -->
+      <entry key="metrics.enabled">{{ .Values.metrics.enabled | default "true" }}</entry>
+      <entry key="metrics.prometheus.enabled">{{ .Values.metrics.prometheus.enabled | default "true" }}</entry>
+      <entry key="metrics.prometheus.path">{{ .Values.metrics.prometheus.path | default "/metrics" }}</entry>
+      <entry key="metrics.jmx.enabled">{{ .Values.metrics.jmx.enabled | default "false" }}</entry>
+      <entry key="metrics.collection.interval">{{ .Values.metrics.collectionInterval | default 15 }}</entry>
+
+      <!-- Distributed Tracing -->
+      <entry key="tracing.enabled">{{ .Values.tracing.enabled | default "false" }}</entry>
+      <entry key="tracing.type">{{ .Values.tracing.type | default "opentelemetry" }}</entry>
+      <entry key="tracing.sampler.type">{{ .Values.tracing.sampler.type | default "probabilistic" }}</entry>
+      <entry key="tracing.sampler.param">{{ .Values.tracing.sampler.param | default 0.1 }}</entry>
+      <entry key="tracing.exporter.endpoint">{{ .Values.tracing.exporter.endpoint | default "" }}</entry>
+
+      <!-- Advanced Configuration -->
+      <entry key="processing.remoteAddress.enable">{{ .Values.advanced.processing.remoteAddress.enable | default "true" }}</entry>
+      <entry key="processing.remoteAddress.header">{{ .Values.advanced.processing.remoteAddress.header | default "X-Forwarded-For" }}</entry>
+      <entry key="processing.copyAttributes.enable">{{ .Values.advanced.processing.copyAttributes.enable | default "true" }}</entry>
+      <entry key="processing.engineHours.enable">{{ .Values.advanced.processing.engineHours.enable | default "true" }}</entry>
+      <entry key="processing.filter.enable">{{ .Values.advanced.processing.filter.enable | default "true" }}</entry>
+      <entry key="processing.filter.invalid">{{ .Values.advanced.processing.filter.invalid | default "true" }}</entry>
+      <entry key="processing.filter.zero">{{ .Values.advanced.processing.filter.zero | default "true" }}</entry>
+      <entry key="processing.filter.duplicate">{{ .Values.advanced.processing.filter.duplicate | default "true" }}</entry>
+      <entry key="processing.filter.outdated">{{ .Values.advanced.processing.filter.outdated | default "true" }}</entry>
+      <entry key="processing.filter.future">{{ .Values.advanced.processing.filter.future | default 5 }}</entry>
+      <entry key="processing.filter.accuracy">{{ .Values.advanced.processing.filter.accuracy | default 0 }}</entry>
+      <entry key="processing.filter.static">{{ .Values.advanced.processing.filter.static | default 0 }}</entry>
+      <entry key="processing.filter.distance">{{ .Values.advanced.processing.filter.distance | default 0 }}</entry>
+      <entry key="processing.filter.maxSpeed">{{ .Values.advanced.processing.filter.maxSpeed | default 0 }}</entry>
+
+    </properties>
