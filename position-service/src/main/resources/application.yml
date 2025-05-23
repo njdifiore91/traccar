@@ -1,0 +1,216 @@
+# Position Processing Service Configuration
+
+spring:
+  application:
+    name: position-service
+  
+  # Kafka Configuration for message broker
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: position-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.json.trusted.packages: org.traccar.model,org.traccar.proto
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.kafka.consumer.properties.isolation.level: read_committed
+        max.poll.records: 500
+        max.poll.interval.ms: 300000
+        session.timeout.ms: 60000
+        heartbeat.interval.ms: 20000
+        enable.auto.commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+        retries: 3
+        retry.backoff.ms: 1000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+      concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+      type: BATCH
+    topics:
+      raw-positions: raw-positions
+      enriched-positions: enriched-positions
+
+  # Alternative RabbitMQ Configuration (commented out by default)
+  # rabbitmq:
+  #   host: ${RABBITMQ_HOST:localhost}
+  #   port: ${RABBITMQ_PORT:5672}
+  #   username: ${RABBITMQ_USERNAME:guest}
+  #   password: ${RABBITMQ_PASSWORD:guest}
+  #   virtual-host: ${RABBITMQ_VHOST:/}
+
+  # Service discovery configuration
+  cloud:
+    consul:
+      enabled: ${CONSUL_ENABLED:false}
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        enabled: ${CONSUL_DISCOVERY_ENABLED:false}
+        instanceId: ${spring.application.name}:${random.uuid}
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 15s
+        tags:
+          - position-service
+          - microservice
+    kubernetes:
+      enabled: ${KUBERNETES_ENABLED:true}
+      discovery:
+        enabled: ${KUBERNETES_DISCOVERY_ENABLED:true}
+        all-namespaces: false
+        service-name: ${spring.application.name}
+        
+  # Database configuration
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/traccar}
+    username: ${DATASOURCE_USERNAME:traccar}
+    password: ${DATASOURCE_PASSWORD:traccar}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 2000000
+      connection-timeout: 30000
+      pool-name: HikariPool-PositionService
+
+  # Cache configuration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=60s
+    cache-names:
+      - positions
+      - devices
+      - geocoding
+      - geofences
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8081}
+  shutdown: graceful
+
+# Position processing configuration
+position:
+  processing:
+    geocoding:
+      enabled: ${GEOCODING_ENABLED:true}
+      provider: ${GEOCODING_PROVIDER:nominatim}
+      url: ${GEOCODING_URL:https://nominatim.openstreetmap.org/reverse}
+      apiKey: ${GEOCODING_API_KEY:}
+      cache-ttl: ${GEOCODING_CACHE_TTL:3600}
+    geolocation:
+      enabled: ${GEOLOCATION_ENABLED:true}
+      provider: ${GEOLOCATION_PROVIDER:google}
+      url: ${GEOLOCATION_URL:}
+      apiKey: ${GEOLOCATION_API_KEY:}
+    distance-calculation:
+      enabled: ${DISTANCE_CALCULATION_ENABLED:true}
+      algorithm: ${DISTANCE_CALCULATION_ALGORITHM:haversine}
+    motion-detection:
+      enabled: ${MOTION_DETECTION_ENABLED:true}
+      threshold: ${MOTION_DETECTION_THRESHOLD:0.1}
+    speed-limit:
+      enabled: ${SPEED_LIMIT_ENABLED:true}
+      provider: ${SPEED_LIMIT_PROVIDER:osm}
+      url: ${SPEED_LIMIT_URL:}
+      apiKey: ${SPEED_LIMIT_API_KEY:}
+    forward:
+      enabled: ${FORWARD_ENABLED:false}
+      url: ${FORWARD_URL:}
+      headers: ${FORWARD_HEADERS:}
+
+# Actuator configuration for health checks and metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,kafka,diskSpace
+        liveness:
+          include: livenessState,kafka
+  health:
+    kafka:
+      enabled: true
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://zipkin:9411/api/v2/spans}
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n'
+
+# OpenTelemetry configuration
+opentelemetry:
+  enabled: ${OPENTELEMETRY_ENABLED:true}
+  endpoint: ${OPENTELEMETRY_ENDPOINT:http://jaeger:4317}
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      geocodingService:
+        baseConfig: default
+      forwardingService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      geocodingService:
+        baseConfig: default
+      forwardingService:
+        baseConfig: default
+  bulkhead:
+    instances:
+      geocodingService:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 1s
+      forwardingService:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
