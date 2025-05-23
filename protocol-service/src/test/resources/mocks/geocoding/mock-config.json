@@ -1,0 +1,294 @@
+{
+  "version": "1.0",
+  "description": "Mock configuration for geocoding services used in protocol service tests",
+  "global": {
+    "enabled": true,
+    "defaultResponseDelayMs": 100,
+    "cacheEnabled": true,
+    "cacheTtlSeconds": 3600,
+    "cacheMaxSize": 1000,
+    "defaultAddress": "Mock Address, Mock City, Mock Country",
+    "errorProbability": 0.05,
+    "timeoutProbability": 0.02,
+    "timeoutMs": 5000
+  },
+  "providers": {
+    "google": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/maps/api/geocode/json",
+      "apiKey": "mock-google-api-key",
+      "responseDelayMs": 120,
+      "errorProbability": 0.03,
+      "mockResponses": [
+        {
+          "latitude": 31.776797,
+          "longitude": 35.211489,
+          "address": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL"
+        },
+        {
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "address": "New York City, NY, US"
+        }
+      ]
+    },
+    "nominatim": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/nominatim/reverse",
+      "userAgent": "TraccarTest",
+      "responseDelayMs": 150,
+      "errorProbability": 0.04,
+      "mockResponses": [
+        {
+          "latitude": 40.7337807,
+          "longitude": -73.9974401,
+          "address": "35 West 9th Street, NYC, New York, US"
+        },
+        {
+          "latitude": 51.5074,
+          "longitude": -0.1278,
+          "address": "London, Greater London, UK"
+        }
+      ]
+    },
+    "gisgraphy": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/gisgraphy/reversegeocoding/search",
+      "responseDelayMs": 200,
+      "mockResponses": [
+        {
+          "latitude": 48.8530000,
+          "longitude": 2.3400000,
+          "address": "Rue du Jardinet, Paris, Île-de-France, FR"
+        }
+      ]
+    },
+    "opencage": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/opencage/geocode/v1",
+      "apiKey": "mock-opencage-api-key",
+      "responseDelayMs": 180,
+      "mockResponses": [
+        {
+          "latitude": 34.116302,
+          "longitude": -118.051519,
+          "address": "Charleston Road, California, US"
+        }
+      ]
+    },
+    "geocodefarm": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/geocodefarm/v3/json/reverse",
+      "apiKey": "mock-geocodefarm-api-key",
+      "responseDelayMs": 250,
+      "mockResponses": [
+        {
+          "latitude": 34.116302,
+          "longitude": -118.051519,
+          "address": "604 Estrella Ave, Arcadia, CA, United States"
+        }
+      ]
+    },
+    "geocodexyz": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/geocode.xyz",
+      "apiKey": "mock-geocodexyz-api-key",
+      "responseDelayMs": 220,
+      "mockResponses": [
+        {
+          "latitude": 34.116302,
+          "longitude": -118.051519,
+          "address": "605 ESTRELLA AVE, ARCADIA, California United States of America, US"
+        }
+      ]
+    },
+    "ban": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/ban/reverse",
+      "responseDelayMs": 130,
+      "mockResponses": [
+        {
+          "latitude": 48.8575,
+          "longitude": 2.2944,
+          "address": "8 Avenue Gustave Eiffel, Paris, FR"
+        }
+      ]
+    },
+    "here": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/here/v1/revgeocode",
+      "apiKey": "mock-here-api-key",
+      "responseDelayMs": 160,
+      "mockResponses": [
+        {
+          "latitude": 48.8575,
+          "longitude": 2.2944,
+          "address": "1 Tour Eiffel, Paris, Île-de-France, FRA"
+        }
+      ]
+    },
+    "mapmyindia": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/mapmyindia/apis/rev_geocode",
+      "clientId": "mock-mapmyindia-client-id",
+      "clientSecret": "mock-mapmyindia-client-secret",
+      "responseDelayMs": 190,
+      "mockResponses": [
+        {
+          "latitude": 28.6129602407977,
+          "longitude": 77.2294557094574,
+          "address": "New Delhi, Delhi. 1 m from India Gate pin-110001 (India)"
+        }
+      ]
+    },
+    "positionstack": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/positionstack/v1/reverse",
+      "apiKey": "mock-positionstack-api-key",
+      "responseDelayMs": 170,
+      "mockResponses": [
+        {
+          "latitude": 28.6129602407977,
+          "longitude": 77.2294557094574,
+          "address": "India Gate, New Delhi, India"
+        }
+      ]
+    },
+    "mapbox": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/mapbox/geocoding/v5/mapbox.places",
+      "apiKey": "mock-mapbox-api-key",
+      "responseDelayMs": 140,
+      "mockResponses": [
+        {
+          "latitude": 40.733,
+          "longitude": -73.989,
+          "address": "120 East 13th Street, New York, New York 10003, United States"
+        }
+      ]
+    },
+    "maptiler": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/maptiler/geocoding",
+      "apiKey": "mock-maptiler-api-key",
+      "responseDelayMs": 150,
+      "mockResponses": [
+        {
+          "latitude": 40.733,
+          "longitude": -73.989,
+          "address": "East 13th Street, New York City, New York, United States"
+        }
+      ]
+    },
+    "geoapify": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/geoapify/v1/geocode/reverse",
+      "apiKey": "mock-geoapify-api-key",
+      "responseDelayMs": 180,
+      "mockResponses": [
+        {
+          "latitude": 40.733,
+          "longitude": -73.989,
+          "address": "114 East 13th Street, New York, New York, US"
+        }
+      ]
+    },
+    "geocodejson": {
+      "enabled": true,
+      "endpoint": "http://localhost:8089/geocodejson/reverse",
+      "responseDelayMs": 160,
+      "mockResponses": [
+        {
+          "latitude": 40.7337807,
+          "longitude": -73.9974401,
+          "address": "35 West 9th Street, New York, New York, US"
+        }
+      ]
+    }
+  },
+  "protocolSpecific": {
+    "tk103": {
+      "preferredProvider": "google",
+      "fallbackProvider": "nominatim"
+    },
+    "meitrack": {
+      "preferredProvider": "opencage",
+      "fallbackProvider": "here"
+    },
+    "teltonika": {
+      "preferredProvider": "here",
+      "fallbackProvider": "google"
+    },
+    "atrack": {
+      "preferredProvider": "nominatim",
+      "fallbackProvider": "mapbox"
+    },
+    "totem": {
+      "preferredProvider": "mapbox",
+      "fallbackProvider": "maptiler"
+    },
+    "meiligao": {
+      "preferredProvider": "maptiler",
+      "fallbackProvider": "geoapify"
+    }
+  },
+  "errorScenarios": {
+    "connectionRefused": {
+      "enabled": true,
+      "probability": 0.01,
+      "providers": ["google", "nominatim", "here"]
+    },
+    "timeout": {
+      "enabled": true,
+      "probability": 0.02,
+      "timeoutMs": 5000,
+      "providers": ["opencage", "geocodefarm", "mapbox"]
+    },
+    "rateLimited": {
+      "enabled": true,
+      "probability": 0.03,
+      "providers": ["google", "here", "mapbox", "maptiler"]
+    },
+    "invalidResponse": {
+      "enabled": true,
+      "probability": 0.02,
+      "providers": ["nominatim", "gisgraphy", "geocodexyz"]
+    },
+    "emptyResult": {
+      "enabled": true,
+      "probability": 0.05,
+      "providers": ["all"]
+    }
+  },
+  "cacheSimulation": {
+    "enabled": true,
+    "hitRatio": 0.7,
+    "preloadedEntries": [
+      {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "address": "San Francisco, CA, USA"
+      },
+      {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "address": "Los Angeles, CA, USA"
+      },
+      {
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "address": "London, UK"
+      },
+      {
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "address": "Paris, France"
+      },
+      {
+        "latitude": 55.7558,
+        "longitude": 37.6173,
+        "address": "Moscow, Russia"
+      }
+    ]
+  }
+}
