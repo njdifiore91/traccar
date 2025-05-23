@@ -1,0 +1,134 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: position-service-network-policy
+  namespace: position-service
+  labels:
+    app: position-service
+  annotations:
+    description: "Network policy for Position Service implementing the principle of least privilege"
+spec:
+  podSelector:
+    matchLabels:
+      app: position-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from API Gateway for REST API requests
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: api-gateway
+      podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8080      # Main application port
+    - protocol: TCP
+      port: 8443      # HTTPS port if TLS is terminated at the service
+  
+  # Allow traffic from Protocol Service for position data processing
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: protocol-service
+      podSelector:
+        matchLabels:
+          app: protocol-service
+    ports:
+    - protocol: TCP
+      port: 8080      # Main application port
+    - protocol: TCP 
+      port: 9090      # gRPC port for service-to-service communication
+  
+  # Allow traffic from Event Service for position data queries
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: event-service
+      podSelector:
+        matchLabels:
+          app: event-service
+    ports:
+    - protocol: TCP
+      port: 8080      # Main application port
+    - protocol: TCP 
+      port: 9090      # gRPC port for service-to-service communication
+  
+  # Allow traffic for management API access from authorized services
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+      podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 8081      # Management/metrics port
+  
+  egress:
+  # Allow outgoing traffic to Message Broker (Kafka/RabbitMQ)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: message-broker
+      podSelector:
+        matchLabels:
+          app: kafka
+    ports:
+    - protocol: TCP
+      port: 9092      # Kafka broker port
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: message-broker
+      podSelector:
+        matchLabels:
+          app: rabbitmq
+    ports:
+    - protocol: TCP
+      port: 5672      # RabbitMQ port
+      
+  # Allow outgoing traffic to Database
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    ports:
+    - protocol: TCP
+      port: 3306      # MySQL/MariaDB port
+    - protocol: TCP
+      port: 5432      # PostgreSQL port (if used)
+      
+  # Allow outgoing traffic to Service Discovery
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: service-discovery
+      podSelector:
+        matchLabels:
+          app: consul
+    ports:
+    - protocol: TCP
+      port: 8500      # Consul HTTP API port
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: service-discovery
+      podSelector:
+        matchLabels:
+          app: eureka
+    ports:
+    - protocol: TCP
+      port: 8761      # Eureka port (if used)
+      
+  # Allow DNS resolution (required for service discovery)
+  - to:
+    ports:
+    - protocol: UDP
+      port: 53        # DNS UDP port
+    - protocol: TCP
+      port: 53        # DNS TCP port
