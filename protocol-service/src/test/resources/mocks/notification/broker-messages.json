@@ -1,0 +1,335 @@
+[
+  {
+    "messageId": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T14:30:25.123Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "DEVICE_ONLINE",
+    "metadata": {
+      "protocolVersion": "1.5",
+      "ipAddress": "203.0.113.45",
+      "port": 5027,
+      "deviceModel": "FMB920",
+      "firmwareVersion": "03.27.07.Rev.00"
+    },
+    "correlationId": "a7e8f9b1-c2d3-4e5f-6g7h-8i9j0k1l2m3n",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "7b925e5c-bb3d-4a1f-ae8c-6b7a8c9d0e1f",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T14:35:12.456Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "DEVICE_OFFLINE",
+    "metadata": {
+      "protocolVersion": "1.5",
+      "lastCommunicationTime": "2023-08-15T14:34:55.789Z",
+      "disconnectReason": "TIMEOUT"
+    },
+    "correlationId": "b8f9c0d1-e2f3-4g5h-6i7j-8k9l0m1n2o3p",
+    "priority": "HIGH"
+  },
+  {
+    "messageId": "c3d4e5f6-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T15:10:33.789Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "CONNECTION_RESTORED",
+    "metadata": {
+      "protocolVersion": "1.5",
+      "ipAddress": "203.0.113.45",
+      "port": 5027,
+      "downtime": 2145,
+      "previousDisconnectReason": "TIMEOUT"
+    },
+    "correlationId": "c9d0e1f2-g3h4-5i6j-7k8l-9m0n1o2p3q4r",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "d4e5f6g7-h8i9-j0k1-l2m3-n4o5p6q7r8s9",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T15:22:45.123Z",
+    "source": "protocol-service",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "eventType": "PROTOCOL_ERROR",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "errorCode": "INVALID_CHECKSUM",
+      "rawMessage": "$$A138,862170013556541,AAA,35,7.092076,79.960473,140412132808,A,10,9,0,275,1,14,0,0,1,0##",
+      "errorDetails": "Message checksum validation failed"
+    },
+    "correlationId": "d0e1f2g3-h4i5-j6k7-l8m9-n0o1p2q3r4s5",
+    "priority": "HIGH"
+  },
+  {
+    "messageId": "e5f6g7h8-i9j0-k1l2-m3n4-o5p6q7r8s9t0",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T16:05:12.456Z",
+    "source": "protocol-service",
+    "protocol": "meitrack",
+    "deviceId": "567890123",
+    "eventType": "PROTOCOL_COMMAND_RESULT",
+    "metadata": {
+      "protocolVersion": "1.0",
+      "commandType": "ENGINE_STOP",
+      "commandId": "cmd-12345",
+      "result": "SUCCESS",
+      "responseTime": 1250,
+      "rawResponse": "$$p28,867688027758136,B99,0,0.0,0,190813122628,A,22.641122,114.023880,0,0,0,0,0,0,00000000##"
+    },
+    "correlationId": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+    "priority": "HIGH"
+  },
+  {
+    "messageId": "f6g7h8i9-j0k1-l2m3-n4o5-p6q7r8s9t0u1",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T16:30:45.789Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "PROTOCOL_VERSION_CHANGE",
+    "metadata": {
+      "oldProtocolVersion": "1.5",
+      "newProtocolVersion": "2.0",
+      "changeReason": "DEVICE_FIRMWARE_UPDATE",
+      "ipAddress": "203.0.113.45",
+      "port": 5027
+    },
+    "correlationId": "f2g3h4i5-j6k7-l8m9-n0o1-p2q3r4s5t6u7",
+    "priority": "LOW"
+  },
+  {
+    "messageId": "g7h8i9j0-k1l2-m3n4-o5p6-q7r8s9t0u1v2",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T17:15:33.123Z",
+    "source": "protocol-service",
+    "protocol": "atrack",
+    "deviceId": "345678901",
+    "eventType": "DEVICE_UNKNOWN",
+    "metadata": {
+      "protocolVersion": "3.0",
+      "ipAddress": "198.51.100.75",
+      "port": 5013,
+      "deviceIdentifier": "AX5-9876543",
+      "reason": "DEVICE_NOT_REGISTERED"
+    },
+    "correlationId": "g3h4i5j6-k7l8-m9n0-o1p2-q3r4s5t6u7v8",
+    "priority": "HIGH"
+  },
+  {
+    "messageId": "h8i9j0k1-l2m3-n4o5-p6q7-r8s9t0u1v2w3",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T18:20:45.456Z",
+    "source": "protocol-service",
+    "protocol": "totem",
+    "deviceId": "234567890",
+    "eventType": "DEVICE_INACTIVE",
+    "metadata": {
+      "protocolVersion": "1.0",
+      "lastActivityTime": "2023-08-14T18:20:45.456Z",
+      "inactivityDuration": 86400,
+      "batteryLevel": 15
+    },
+    "correlationId": "h4i5j6k7-l8m9-n0o1-p2q3-r4s5t6u7v8w9",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "i9j0k1l2-m3n4-o5p6-q7r8-s9t0u1v2w3x4",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T19:05:12.789Z",
+    "source": "protocol-service",
+    "protocol": "meiligao",
+    "deviceId": "456789012",
+    "eventType": "DEVICE_MOVING",
+    "metadata": {
+      "protocolVersion": "2.1",
+      "speed": 45.7,
+      "speedUnit": "km/h",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "heading": 90,
+      "ignitionStatus": "ON"
+    },
+    "correlationId": "i5j6k7l8-m9n0-o1p2-q3r4-s5t6u7v8w9x0",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "j0k1l2m3-n4o5-p6q7-r8s9-t0u1v2w3x4y5",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T19:45:33.123Z",
+    "source": "protocol-service",
+    "protocol": "meiligao",
+    "deviceId": "456789012",
+    "eventType": "DEVICE_STOPPED",
+    "metadata": {
+      "protocolVersion": "2.1",
+      "speed": 0.0,
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "stopDuration": 0,
+      "ignitionStatus": "OFF"
+    },
+    "correlationId": "j6k7l8m9-n0o1-p2q3-r4s5-t6u7v8w9x0y1",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "k1l2m3n4-o5p6-q7r8-s9t0-u1v2w3x4y5z6",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T20:10:45.456Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "MESSAGE_RECEIVED",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "messageType": "DATA",
+      "messageSize": 128,
+      "messageId": "msg-67890",
+      "receivedTimestamp": "2023-08-15T20:10:45.123Z"
+    },
+    "correlationId": "k7l8m9n0-o1p2-q3r4-s5t6-u7v8w9x0y1z2",
+    "priority": "LOW"
+  },
+  {
+    "messageId": "l2m3n4o5-p6q7-r8s9-t0u1-v2w3x4y5z6a7",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T20:15:12.789Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "MESSAGE_SENT",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "messageType": "COMMAND",
+      "messageSize": 64,
+      "messageId": "msg-67891",
+      "sentTimestamp": "2023-08-15T20:15:12.456Z"
+    },
+    "correlationId": "l8m9n0o1-p2q3-r4s5-t6u7-v8w9x0y1z2a3",
+    "priority": "LOW"
+  },
+  {
+    "messageId": "m3n4o5p6-q7r8-s9t0-u1v2-w3x4y5z6a7b8",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T21:30:45.123Z",
+    "source": "protocol-service",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "eventType": "COMMAND_SENT",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "commandType": "POSITION_SINGLE",
+      "commandId": "cmd-67892",
+      "sentTimestamp": "2023-08-15T21:30:44.789Z",
+      "rawCommand": "**,imei:987654321,A"
+    },
+    "correlationId": "m9n0o1p2-q3r4-s5t6-u7v8-w9x0y1z2a3b4",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "n4o5p6q7-r8s9-t0u1-v2w3-x4y5z6a7b8c9",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T21:31:15.456Z",
+    "source": "protocol-service",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "eventType": "COMMAND_RESULT_RECEIVED",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "commandType": "POSITION_SINGLE",
+      "commandId": "cmd-67892",
+      "result": "SUCCESS",
+      "responseTime": 30333,
+      "rawResponse": "$$B012,987654321,AAA,35,7.092076,79.960473,230815213115,A,10,9,0,275,1.2,14,0,0,1,0##"
+    },
+    "correlationId": "m9n0o1p2-q3r4-s5t6-u7v8-w9x0y1z2a3b4",
+    "priority": "MEDIUM"
+  },
+  {
+    "messageId": "o5p6q7r8-s9t0-u1v2-w3x4-y5z6a7b8c9d0",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T22:05:33.789Z",
+    "source": "protocol-service",
+    "protocol": "atrack",
+    "deviceId": "345678901",
+    "eventType": "DEVICE_AUTH_SUCCESS",
+    "metadata": {
+      "protocolVersion": "3.0",
+      "ipAddress": "198.51.100.75",
+      "port": 5013,
+      "deviceIdentifier": "AX5-9876543",
+      "authMethod": "IMEI"
+    },
+    "correlationId": "o1p2q3r4-s5t6-u7v8-w9x0-y1z2a3b4c5d6",
+    "priority": "LOW"
+  },
+  {
+    "messageId": "p6q7r8s9-t0u1-v2w3-x4y5-z6a7b8c9d0e1",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T22:10:45.123Z",
+    "source": "protocol-service",
+    "protocol": "meitrack",
+    "deviceId": "567890123",
+    "eventType": "DEVICE_AUTH_FAILURE",
+    "metadata": {
+      "protocolVersion": "1.0",
+      "ipAddress": "203.0.113.90",
+      "port": 5020,
+      "deviceIdentifier": "567890123",
+      "authMethod": "IMEI",
+      "failureReason": "INVALID_CREDENTIALS",
+      "attemptCount": 3
+    },
+    "correlationId": "p2q3r4s5-t6u7-v8w9-x0y1-z2a3b4c5d6e7",
+    "priority": "HIGH"
+  },
+  {
+    "messageId": "q7r8s9t0-u1v2-w3x4-y5z6-a7b8c9d0e1f2",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T23:05:15.789Z",
+    "source": "protocol-service",
+    "protocol": "teltonika",
+    "deviceId": "123456789",
+    "eventType": "SOS_BUTTON_PRESSED",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 15.5,
+      "speed": 0.0,
+      "heading": 0,
+      "satelliteCount": 8,
+      "hdop": 1.2,
+      "buttonId": 1,
+      "pressType": "LONG_PRESS"
+    },
+    "correlationId": "q3r4s5t6-u7v8-w9x0-y1z2-a3b4c5d6e7f8",
+    "priority": "CRITICAL"
+  },
+  {
+    "messageId": "r8s9t0u1-v2w3-x4y5-z6a7-b8c9d0e1f2g3",
+    "messageType": "PROTOCOL_EVENT",
+    "timestamp": "2023-08-15T23:30:22.456Z",
+    "source": "protocol-service",
+    "protocol": "tk103",
+    "deviceId": "987654321",
+    "eventType": "LOW_BATTERY",
+    "metadata": {
+      "protocolVersion": "2.0",
+      "batteryLevel": 10,
+      "batteryVoltage": 3.2,
+      "externalPower": false,
+      "latitude": 40.7128,
+      "longitude": -74.0060
+    },
+    "correlationId": "r4s5t6u7-v8w9-x0y1-z2a3-b4c5d6e7f8g9",
+    "priority": "HIGH"
+  }
+]
