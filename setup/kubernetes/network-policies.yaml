@@ -1,0 +1,1092 @@
+# Network Policies for Traccar Microservices Architecture
+# These policies implement the principle of least privilege by restricting
+# communication paths to only those that are necessary for the system to function.
+
+apiVersion: v1
+kind: List
+items:
+# Default deny all ingress and egress traffic in each namespace
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: default-deny
+    namespace: traccar
+  spec:
+    podSelector: {}
+    policyTypes:
+    - Ingress
+    - Egress
+
+# API Gateway Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: api-gateway-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: api-gateway
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from external load balancer
+    - from:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      ports:
+      - protocol: TCP
+        port: 8080
+      - protocol: TCP
+        port: 8443
+    # Allow ingress from internal services for health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+      - protocol: TCP
+        port: 8443
+    egress:
+    # Allow egress to all backend services
+    - to:
+      - podSelector:
+          matchLabels:
+            app: protocol-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    - to:
+      - podSelector:
+          matchLabels:
+            app: position-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    - to:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    - to:
+      - podSelector:
+          matchLabels:
+            app: notification-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    - to:
+      - podSelector:
+          matchLabels:
+            app: reporting-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    - to:
+      - podSelector:
+          matchLabels:
+            app: state-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS for service discovery
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+      - protocol: TCP
+        port: 15672
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Protocol Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: protocol-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: protocol-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from external GPS devices
+    - from:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      ports:
+      # Common protocol ports
+      - protocol: TCP
+        port: 5001  # Default Traccar port
+      - protocol: TCP
+        port: 5003  # Osmand port
+      - protocol: TCP
+        port: 5004  # Traccar Client port
+      - protocol: TCP
+        port: 5005  # Meitrack port
+      - protocol: TCP
+        port: 5006  # TK103 port
+      - protocol: TCP
+        port: 5007  # Atrack port
+      - protocol: TCP
+        port: 5008  # Totem port
+      - protocol: TCP
+        port: 5009  # Teltonika port
+      - protocol: UDP
+        port: 5001  # Default Traccar UDP port
+      - protocol: UDP
+        port: 5003  # Osmand UDP port
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to Position Service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: position-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to State Service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: state-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Position Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: position-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: position-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from Protocol Service
+    - from:
+      - podSelector:
+          matchLabels:
+            app: protocol-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to Event Service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to database
+    - to:
+      - podSelector:
+          matchLabels:
+            app: database
+      ports:
+      - protocol: TCP
+        port: 3306
+    # Allow egress to geocoding service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: geocoder
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to speed limit service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: speedlimit
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Event Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: event-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: event-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from Position Service
+    - from:
+      - podSelector:
+          matchLabels:
+            app: position-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to Notification Service
+    - to:
+      - podSelector:
+          matchLabels:
+            app: notification-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to database
+    - to:
+      - podSelector:
+          matchLabels:
+            app: database
+      ports:
+      - protocol: TCP
+        port: 3306
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Notification Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: notification-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: notification-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from Event Service
+    - from:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to database
+    - to:
+      - podSelector:
+          matchLabels:
+            app: database
+      ports:
+      - protocol: TCP
+        port: 3306
+    # Allow egress to SMTP server
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+      ports:
+      - protocol: TCP
+        port: 25
+      - protocol: TCP
+        port: 465
+      - protocol: TCP
+        port: 587
+    # Allow egress to SMS gateway
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+      ports:
+      - protocol: TCP
+        port: 443
+    # Allow egress to Firebase Cloud Messaging
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+      ports:
+      - protocol: TCP
+        port: 443
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Reporting Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: reporting-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: reporting-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to database
+    - to:
+      - podSelector:
+          matchLabels:
+            app: database
+      ports:
+      - protocol: TCP
+        port: 3306
+    # Allow egress to object storage
+    - to:
+      - podSelector:
+          matchLabels:
+            app: minio
+      ports:
+      - protocol: TCP
+        port: 9000
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# State Service Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: state-service-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: state-service
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from Protocol Service
+    - from:
+      - podSelector:
+          matchLabels:
+            app: protocol-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    # Allow ingress from health checks
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-proxy
+      ports:
+      - protocol: TCP
+        port: 8080
+    egress:
+    # Allow egress to message broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+      - protocol: TCP
+        port: 9092
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+      - protocol: TCP
+        port: 5672
+    # Allow egress to service discovery
+    - to:
+      - podSelector:
+          matchLabels:
+            app: service-discovery
+      ports:
+      - protocol: TCP
+        port: 8500
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to Redis
+    - to:
+      - podSelector:
+          matchLabels:
+            app: redis
+      ports:
+      - protocol: TCP
+        port: 6379
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Database Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: database-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: database
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from all microservices that need database access
+    - from:
+      - podSelector:
+          matchLabels:
+            app: position-service
+      - podSelector:
+          matchLabels:
+            app: event-service
+      - podSelector:
+          matchLabels:
+            app: notification-service
+      - podSelector:
+          matchLabels:
+            app: reporting-service
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 3306
+    egress:
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Message Broker Network Policy (Kafka/RabbitMQ)
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: message-broker-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchExpressions:
+      - key: app
+        operator: In
+        values: ["kafka", "rabbitmq"]
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from all microservices that need message broker access
+    - from:
+      - podSelector:
+          matchLabels:
+            app: protocol-service
+      - podSelector:
+          matchLabels:
+            app: position-service
+      - podSelector:
+          matchLabels:
+            app: event-service
+      - podSelector:
+          matchLabels:
+            app: notification-service
+      - podSelector:
+          matchLabels:
+            app: reporting-service
+      - podSelector:
+          matchLabels:
+            app: state-service
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 9092  # Kafka
+      - protocol: TCP
+        port: 5672  # RabbitMQ AMQP
+      - protocol: TCP
+        port: 15672 # RabbitMQ Management
+    egress:
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to ZooKeeper (for Kafka)
+    - to:
+      - podSelector:
+          matchLabels:
+            app: zookeeper
+      ports:
+      - protocol: TCP
+        port: 2181
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Service Discovery Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: service-discovery-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: service-discovery
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from all microservices that need service discovery
+    - from:
+      - podSelector:
+          matchLabels:
+            app: protocol-service
+      - podSelector:
+          matchLabels:
+            app: position-service
+      - podSelector:
+          matchLabels:
+            app: event-service
+      - podSelector:
+          matchLabels:
+            app: notification-service
+      - podSelector:
+          matchLabels:
+            app: reporting-service
+      - podSelector:
+          matchLabels:
+            app: state-service
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 8500  # Consul
+    egress:
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Redis Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: redis-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: redis
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from services that need Redis
+    - from:
+      - podSelector:
+          matchLabels:
+            app: state-service
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+      - protocol: TCP
+        port: 6379
+    egress:
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # Allow egress to metrics server
+    - to:
+      - podSelector:
+          matchLabels:
+            app: prometheus
+      ports:
+      - protocol: TCP
+        port: 9090
+
+# Monitoring Network Policy
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: monitoring-policy
+    namespace: traccar
+  spec:
+    podSelector:
+      matchLabels:
+        app: prometheus
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    # Allow ingress from all microservices for metrics collection
+    - from:
+      - podSelector: {}
+      ports:
+      - protocol: TCP
+        port: 9090
+    egress:
+    # Allow egress to all microservices for scraping metrics
+    - to:
+      - podSelector: {}
+      ports:
+      - protocol: TCP
+        port: 8080  # Common metrics port
+    # Allow egress to DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
