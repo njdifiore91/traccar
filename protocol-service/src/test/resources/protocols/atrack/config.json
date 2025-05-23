@@ -1,0 +1,79 @@
+{
+  "default": {
+    "longDate": false,
+    "decimalFuel": false,
+    "custom": false,
+    "frameMask": 0,
+    "form": null
+  },
+  "testScenarios": {
+    "longDateMode": {
+      "longDate": true,
+      "decimalFuel": false,
+      "custom": false,
+      "frameMask": 0,
+      "form": null
+    },
+    "customFormat": {
+      "longDate": false,
+      "decimalFuel": false,
+      "custom": true,
+      "frameMask": 0,
+      "form": null
+    },
+    "customFormatWithForm": {
+      "longDate": false,
+      "decimalFuel": false,
+      "custom": true,
+      "frameMask": 0,
+      "form": "%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT"
+    },
+    "beaconMode": {
+      "longDate": false,
+      "decimalFuel": false,
+      "custom": true,
+      "frameMask": 1,
+      "form": "%BC"
+    },
+    "decimalFuelMode": {
+      "longDate": false,
+      "decimalFuel": true,
+      "custom": false,
+      "frameMask": 0,
+      "form": null
+    },
+    "combinedMode": {
+      "longDate": true,
+      "decimalFuel": true,
+      "custom": true,
+      "frameMask": 0,
+      "form": "%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF"
+    }
+  },
+  "protocolSettings": {
+    "alarmMap": {
+      "1": "sos",
+      "2": "powerCut",
+      "3": "vibration",
+      "4": "lowBattery",
+      "5": "overspeed",
+      "6": "geofenceEnter",
+      "7": "geofenceExit",
+      "8": "powerOn",
+      "9": "powerOff",
+      "10": "powerRestored"
+    },
+    "customFormats": [
+      "%AT%BV%MV%SA%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%DL%EG%HA%HB%HC%IP%MT",
+      "%AT%BV%CD%CE%CM%CN%DT%GN%GQ%GS%GV%LC%ME%MV%RL%SA%SM%CS%HT%VN%PD%IA%MP%EL%ET%FC%FL%RP%ML%MF%TR%EH%CR%DL%EG%HA%HB%HC%IP%MT%PF",
+      "%CI%BC",
+      "%CI%FL%ML%VN%PD%FC%EL%ET%AT%MF%MV%BV%DT%GN%GV%ME%RL%RP%SA%SM%TR%IA%MP",
+      "%CI%TR%MV%BV%AT%SA%ET%GQ%GS%PC%RP%OD%AV1%XS%VS",
+      "%CI%GQ%GS%CN%CE%MV%SA",
+      "%CI%CE%CN%GQ%GS%FL%ML%VN%PD%FC%EL%ET%CD%AT%MF%MV",
+      "%CI%MV%BV",
+      "%CI%SA%MV%BV%GQ%AT",
+      "%BC"
+    ]
+  }
+}
