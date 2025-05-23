@@ -1,0 +1,312 @@
+{{- /*
+Template for creating Kubernetes NetworkPolicies for Traccar microservices.
+
+This template standardizes network security rules, ensuring consistent and secure communication patterns
+between Traccar microservices. It implements a default-deny policy with explicit allows for required
+communication paths.
+
+Parameters:
+  - name: Name of the NetworkPolicy (required)
+  - component: Component/service name (required)
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+  - podSelector: Pod selector for the policy (required)
+  - ingressRules: List of ingress rules (optional)
+  - egressRules: List of egress rules (optional)
+  - policyTypes: List of policy types (default: ["Ingress", "Egress"])
+
+Example usage:
+
+```yaml
+{{- include "traccar.networkPolicy" (dict 
+  "name" "protocol-service-network-policy"
+  "component" "protocol-service"
+  "namespace" .Release.Namespace
+  "labels" .Values.labels
+  "podSelector" (dict "matchLabels" (dict "app.kubernetes.io/name" "protocol-service"))
+  "ingressRules" (list 
+    (dict 
+      "from" (list 
+        (dict "namespaceSelector" (dict "matchLabels" (dict "name" "api-gateway")))
+        (dict "podSelector" (dict "matchLabels" (dict "app.kubernetes.io/name" "api-gateway")))
+      )
+      "ports" (list 
+        (dict "protocol" "TCP" "port" 8090)
+      )
+    )
+  )
+  "egressRules" (list 
+    (dict 
+      "to" (list 
+        (dict "namespaceSelector" (dict "matchLabels" (dict "name" "infrastructure")))
+        (dict "podSelector" (dict "matchLabels" (dict "app" "kafka")))
+      )
+      "ports" (list 
+        (dict "protocol" "TCP" "port" 9092)
+      )
+    )
+  )
+) -}}
+```
+*/}}
+
+{{- define "traccar.networkPolicy" -}}
+{{- $name := required "NetworkPolicy name is required" .name -}}
+{{- $component := required "Component name is required" .component -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+{{- $podSelector := required "Pod selector is required" .podSelector -}}
+{{- $ingressRules := .ingressRules | default list -}}
+{{- $egressRules := .egressRules | default list -}}
+{{- $policyTypes := .policyTypes | default (list "Ingress" "Egress") -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" $component) | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  podSelector:
+    {{- toYaml $podSelector | nindent 4 }}
+  policyTypes:
+    {{- range $policyTypes }}
+    - {{ . }}
+    {{- end }}
+  {{- if $ingressRules }}
+  ingress:
+    {{- toYaml $ingressRules | nindent 4 }}
+  {{- end }}
+  {{- if $egressRules }}
+  egress:
+    {{- toYaml $egressRules | nindent 4 }}
+  {{- end }}
+{{- end -}}
+
+{{- /*
+Helper template to generate standard Traccar labels
+
+Parameters:
+  - labels: Additional labels to include
+  - component: Component name
+*/}}
+
+{{- define "traccar.labels" -}}
+{{- $labels := .labels | default dict -}}
+{{- $component := .component | default "" -}}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if $component }}
+app.kubernetes.io/name: {{ $component }}
+{{- end }}
+{{- range $key, $value := $labels }}
+{{ $key }}: {{ $value }}
+{{- end }}
+{{- end -}}
+
+{{- /*
+Template for creating a default deny all ingress NetworkPolicy
+
+Parameters:
+  - name: Name of the NetworkPolicy (default: "default-deny-ingress")
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+*/}}
+
+{{- define "traccar.defaultDenyIngress" -}}
+{{- $name := .name | default "default-deny-ingress" -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" "security") | nindent 4 }}
+    app.kubernetes.io/component: security
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+{{- end -}}
+
+{{- /*
+Template for creating a default deny all egress NetworkPolicy
+
+Parameters:
+  - name: Name of the NetworkPolicy (default: "default-deny-egress")
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+*/}}
+
+{{- define "traccar.defaultDenyEgress" -}}
+{{- $name := .name | default "default-deny-egress" -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" "security") | nindent 4 }}
+    app.kubernetes.io/component: security
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+{{- end -}}
+
+{{- /*
+Template for creating a NetworkPolicy that allows communication with the message broker
+
+Parameters:
+  - name: Name of the NetworkPolicy (default: "allow-message-broker")
+  - component: Component/service name (required)
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+  - podSelector: Pod selector for the policy (required)
+  - brokerNamespace: Namespace where the message broker is deployed (default: "infrastructure")
+  - brokerSelector: Pod selector for the message broker (default: {"app": "kafka"})
+  - brokerPort: Port of the message broker (default: 9092)
+  - brokerProtocol: Protocol used by the message broker (default: "TCP")
+*/}}
+
+{{- define "traccar.allowMessageBroker" -}}
+{{- $name := .name | default "allow-message-broker" -}}
+{{- $component := required "Component name is required" .component -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+{{- $podSelector := required "Pod selector is required" .podSelector -}}
+{{- $brokerNamespace := .brokerNamespace | default "infrastructure" -}}
+{{- $brokerSelector := .brokerSelector | default (dict "app" "kafka") -}}
+{{- $brokerPort := .brokerPort | default 9092 -}}
+{{- $brokerProtocol := .brokerProtocol | default "TCP" -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" $component) | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  podSelector:
+    {{- toYaml $podSelector | nindent 4 }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ $brokerNamespace }}
+      podSelector:
+        matchLabels:
+          {{- toYaml $brokerSelector | nindent 10 }}
+    ports:
+    - protocol: {{ $brokerProtocol }}
+      port: {{ $brokerPort }}
+{{- end -}}
+
+{{- /*
+Template for creating a NetworkPolicy that allows communication with the service discovery
+
+Parameters:
+  - name: Name of the NetworkPolicy (default: "allow-service-discovery")
+  - component: Component/service name (required)
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+  - podSelector: Pod selector for the policy (required)
+  - discoveryNamespace: Namespace where the service discovery is deployed (default: "infrastructure")
+  - discoverySelector: Pod selector for the service discovery (default: {"app": "consul"})
+  - discoveryPort: Port of the service discovery (default: 8500)
+  - discoveryProtocol: Protocol used by the service discovery (default: "TCP")
+*/}}
+
+{{- define "traccar.allowServiceDiscovery" -}}
+{{- $name := .name | default "allow-service-discovery" -}}
+{{- $component := required "Component name is required" .component -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+{{- $podSelector := required "Pod selector is required" .podSelector -}}
+{{- $discoveryNamespace := .discoveryNamespace | default "infrastructure" -}}
+{{- $discoverySelector := .discoverySelector | default (dict "app" "consul") -}}
+{{- $discoveryPort := .discoveryPort | default 8500 -}}
+{{- $discoveryProtocol := .discoveryProtocol | default "TCP" -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" $component) | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  podSelector:
+    {{- toYaml $podSelector | nindent 4 }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ $discoveryNamespace }}
+      podSelector:
+        matchLabels:
+          {{- toYaml $discoverySelector | nindent 10 }}
+    ports:
+    - protocol: {{ $discoveryProtocol }}
+      port: {{ $discoveryPort }}
+{{- end -}}
+
+{{- /*
+Template for creating a NetworkPolicy that allows DNS resolution
+
+Parameters:
+  - name: Name of the NetworkPolicy (default: "allow-dns")
+  - component: Component/service name (required)
+  - namespace: Namespace where the policy is applied (required)
+  - labels: Labels to apply to the NetworkPolicy (optional)
+  - podSelector: Pod selector for the policy (required)
+*/}}
+
+{{- define "traccar.allowDNS" -}}
+{{- $name := .name | default "allow-dns" -}}
+{{- $component := required "Component name is required" .component -}}
+{{- $namespace := required "Namespace is required" .namespace -}}
+{{- $labels := .labels | default dict -}}
+{{- $podSelector := required "Pod selector is required" .podSelector -}}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "traccar.labels" (dict "labels" $labels "component" $component) | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  podSelector:
+    {{- toYaml $podSelector | nindent 4 }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+{{- end -}}
