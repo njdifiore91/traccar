@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,109 @@
  */
 package org.traccar.messaging;
 
-import org.traccar.model.Position;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for message broker producers.
- * This abstraction allows for different message broker implementations (Kafka, RabbitMQ, etc.)
+ * Interface for sending messages to a message broker.
+ * Abstracts the functionality of publishing messages to topics or queues,
+ * allowing the Protocol Service to communicate asynchronously without being coupled to
+ * a specific message broker implementation.
+ *
+ * This interface is used by the Protocol Service to publish position data and device
+ * connection events to the message broker for consumption by other microservices.
  */
 public interface MessageProducer {
 
     /**
-     * Send a position to the message broker.
+     * Checks if the producer is connected to the message broker.
      *
-     * @param position Position object to send
-     * @throws Exception If there is an error sending the message
+     * @return true if connected, false otherwise
      */
-    void sendPosition(Position position) throws Exception;
+    boolean isConnected();
 
     /**
-     * Send a device connection status update to the message broker.
+     * Publishes a message to the specified topic or queue with default headers.
      *
-     * @param deviceId Device identifier
-     * @param connected Connection status
-     * @throws Exception If there is an error sending the message
+     * @param destination the topic or queue name
+     * @param message the message payload
+     * @return a CompletableFuture that completes when the message is acknowledged by the broker
      */
-    void sendDeviceConnectionStatus(long deviceId, boolean connected) throws Exception;
+    CompletableFuture<Void> publish(String destination, Object message);
 
     /**
-     * Close the producer and release resources.
+     * Publishes a message to the specified topic or queue with custom headers.
+     *
+     * @param destination the topic or queue name
+     * @param message the message payload
+     * @param headers additional message headers
+     * @return a CompletableFuture that completes when the message is acknowledged by the broker
+     */
+    CompletableFuture<Void> publish(String destination, Object message, Map<String, Object> headers);
+
+    /**
+     * Publishes a message to the specified topic or queue with a specific key for partitioning.
+     * The key is used by the broker to determine which partition the message should be sent to,
+     * ensuring that messages with the same key are processed in order by the same consumer.
+     *
+     * @param destination the topic or queue name
+     * @param key the partitioning key (typically device ID)
+     * @param message the message payload
+     * @return a CompletableFuture that completes when the message is acknowledged by the broker
+     */
+    CompletableFuture<Void> publish(String destination, String key, Object message);
+
+    /**
+     * Publishes a message to the specified topic or queue with a specific key for partitioning
+     * and custom headers.
+     *
+     * @param destination the topic or queue name
+     * @param key the partitioning key (typically device ID)
+     * @param message the message payload
+     * @param headers additional message headers
+     * @return a CompletableFuture that completes when the message is acknowledged by the broker
+     */
+    CompletableFuture<Void> publish(String destination, String key, Object message, Map<String, Object> headers);
+
+    /**
+     * Publishes a batch of messages to the specified topic or queue.
+     * This method is optimized for high throughput scenarios where multiple messages
+     * need to be sent efficiently.
+     *
+     * @param destination the topic or queue name
+     * @param messages the message payloads
+     * @return a CompletableFuture that completes when all messages are acknowledged by the broker
+     */
+    CompletableFuture<Void> publishBatch(String destination, Iterable<?> messages);
+
+    /**
+     * Publishes a batch of messages to the specified topic or queue with keys for partitioning.
+     * Each message is associated with a key that determines its partition.
+     *
+     * @param destination the topic or queue name
+     * @param messagesWithKeys map of messages with their corresponding keys
+     * @return a CompletableFuture that completes when all messages are acknowledged by the broker
+     */
+    CompletableFuture<Void> publishBatchWithKeys(String destination, Map<String, Object> messagesWithKeys);
+
+    /**
+     * Configures the retry policy for failed publish operations.
+     *
+     * @param maxRetries maximum number of retry attempts
+     * @param initialBackoffMs initial backoff time in milliseconds
+     * @param maxBackoffMs maximum backoff time in milliseconds
+     */
+    void setRetryPolicy(int maxRetries, long initialBackoffMs, long maxBackoffMs);
+
+    /**
+     * Performs a health check on the message broker connection.
+     *
+     * @return a CompletableFuture that completes with the health status
+     */
+    CompletableFuture<Boolean> checkHealth();
+
+    /**
+     * Closes the producer and releases any resources.
      */
     void close();
 }
