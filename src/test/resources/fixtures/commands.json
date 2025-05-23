@@ -1,0 +1,172 @@
+[
+  {
+    "id": 1,
+    "deviceId": 1,
+    "type": "custom",
+    "description": "Custom command with text data",
+    "attributes": {
+      "data": "setdigout 11"
+    }
+  },
+  {
+    "id": 2,
+    "deviceId": 1,
+    "type": "custom",
+    "description": "Custom command with hex data",
+    "attributes": {
+      "data": "03030000000185E8"
+    }
+  },
+  {
+    "id": 3,
+    "deviceId": 2,
+    "type": "positionSingle",
+    "description": "Request single position update",
+    "attributes": {}
+  },
+  {
+    "id": 4,
+    "deviceId": 2,
+    "type": "positionPeriodic",
+    "description": "Configure periodic reporting",
+    "attributes": {
+      "frequency": 300
+    }
+  },
+  {
+    "id": 5,
+    "deviceId": 3,
+    "type": "engineStop",
+    "description": "Stop vehicle engine",
+    "attributes": {}
+  },
+  {
+    "id": 6,
+    "deviceId": 3,
+    "type": "engineResume",
+    "description": "Resume vehicle engine",
+    "attributes": {}
+  },
+  {
+    "id": 7,
+    "deviceId": 4,
+    "type": "alarmArm",
+    "description": "Arm vehicle alarm",
+    "attributes": {}
+  },
+  {
+    "id": 8,
+    "deviceId": 4,
+    "type": "alarmDisarm",
+    "description": "Disarm vehicle alarm",
+    "attributes": {}
+  },
+  {
+    "id": 9,
+    "deviceId": 5,
+    "type": "setTimezone",
+    "description": "Set device timezone",
+    "attributes": {
+      "timezone": "Europe/Amsterdam"
+    }
+  },
+  {
+    "id": 10,
+    "deviceId": 5,
+    "type": "rebootDevice",
+    "description": "Reboot tracking device",
+    "attributes": {}
+  },
+  {
+    "id": 11,
+    "deviceId": 6,
+    "type": "sendSms",
+    "description": "Send SMS through device",
+    "attributes": {
+      "phone": "+1234567890",
+      "message": "Test message content"
+    }
+  },
+  {
+    "id": 12,
+    "deviceId": 6,
+    "type": "custom",
+    "description": "Custom AT command",
+    "attributes": {
+      "data": "AT+GSMBUSY=1"
+    }
+  },
+  {
+    "id": 13,
+    "deviceId": 7,
+    "type": "custom",
+    "description": "Binary command with hex data",
+    "attributes": {
+      "data": "2929ADD00100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  {
+    "id": 14,
+    "deviceId": 7,
+    "type": "movementAlarm",
+    "description": "Enable movement alarm",
+    "attributes": {
+      "radius": 100
+    }
+  },
+  {
+    "id": 15,
+    "deviceId": 8,
+    "type": "setConnection",
+    "description": "Configure server connection",
+    "attributes": {
+      "server": "tracking.example.com",
+      "port": 5055
+    }
+  },
+  {
+    "id": 16,
+    "deviceId": 8,
+    "type": "setOdometer",
+    "description": "Set device odometer value",
+    "attributes": {
+      "value": 12500
+    }
+  },
+  {
+    "id": 17,
+    "deviceId": 9,
+    "type": "custom",
+    "description": "Teltonika codec 12 command",
+    "attributes": {
+      "data": "000F313233343536373839303132333435"
+    }
+  },
+  {
+    "id": 18,
+    "deviceId": 9,
+    "type": "custom",
+    "description": "Teltonika codec 14 command",
+    "attributes": {
+      "data": "000000000000000F313233343536373839303132333435"
+    }
+  },
+  {
+    "id": 19,
+    "deviceId": 10,
+    "type": "custom",
+    "description": "Meitrack command",
+    "attributes": {
+      "data": "@@Q25,123456789012345,A10*68\r\n"
+    }
+  },
+  {
+    "id": 20,
+    "deviceId": 10,
+    "type": "custom",
+    "description": "TK103 command",
+    "attributes": {
+      "data": "(123456789012BP05)"
+    }
+  }
+]
