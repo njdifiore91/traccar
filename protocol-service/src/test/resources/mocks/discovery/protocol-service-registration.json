@@ -1,0 +1,160 @@
+{
+  "service": {
+    "id": "protocol-service-1",
+    "name": "protocol-service",
+    "tags": [
+      "traccar",
+      "protocol",
+      "device-communication",
+      "microservice"
+    ],
+    "address": "protocol-service.traccar.svc.cluster.local",
+    "port": 8080,
+    "meta": {
+      "version": "1.0.0",
+      "environment": "test",
+      "description": "Handles device connections and protocol implementations, decoding raw messages from supported device protocols",
+      "api-version": "v1",
+      "dependencies": "position-service,message-broker",
+      "owner": "traccar-team"
+    },
+    "checks": [
+      {
+        "id": "protocol-service-health-check",
+        "name": "Protocol Service Health Check",
+        "http": "http://protocol-service:8080/actuator/health/liveness",
+        "method": "GET",
+        "interval": "15s",
+        "timeout": "5s",
+        "success_before_passing": 1,
+        "failures_before_critical": 3
+      },
+      {
+        "id": "protocol-service-readiness-check",
+        "name": "Protocol Service Readiness Check",
+        "http": "http://protocol-service:8080/actuator/health/readiness",
+        "method": "GET",
+        "interval": "30s",
+        "timeout": "5s",
+        "success_before_passing": 1,
+        "failures_before_critical": 2
+      }
+    ],
+    "connect": {
+      "sidecar_service": {
+        "proxy": {
+          "upstreams": [
+            {
+              "destination_name": "position-service",
+              "local_bind_port": 9090
+            },
+            {
+              "destination_name": "message-broker",
+              "local_bind_port": 9091
+            }
+          ]
+        }
+      }
+    },
+    "weights": {
+      "passing": 10,
+      "warning": 1
+    }
+  },
+  "kubernetes": {
+    "metadata": {
+      "name": "protocol-service",
+      "namespace": "traccar",
+      "labels": {
+        "app": "protocol-service",
+        "tier": "backend",
+        "part-of": "traccar",
+        "version": "1.0.0"
+      },
+      "annotations": {
+        "prometheus.io/scrape": "true",
+        "prometheus.io/port": "8080",
+        "prometheus.io/path": "/actuator/prometheus"
+      }
+    },
+    "spec": {
+      "selector": {
+        "app": "protocol-service"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "targetPort": 8080,
+          "protocol": "TCP"
+        },
+        {
+          "name": "osmand",
+          "port": 5055,
+          "targetPort": 5055,
+          "protocol": "TCP"
+        },
+        {
+          "name": "teltonika",
+          "port": 5027,
+          "targetPort": 5027,
+          "protocol": "TCP"
+        },
+        {
+          "name": "tk103",
+          "port": 5006,
+          "targetPort": 5006,
+          "protocol": "TCP"
+        }
+      ],
+      "type": "ClusterIP",
+      "sessionAffinity": "None"
+    },
+    "status": {
+      "loadBalancer": {}
+    }
+  },
+  "health": {
+    "status": "UP",
+    "components": {
+      "diskSpace": {
+        "status": "UP",
+        "details": {
+          "total": 10737418240,
+          "free": 8795394048,
+          "threshold": 10485760
+        }
+      },
+      "ping": {
+        "status": "UP"
+      },
+      "livenessState": {
+        "status": "UP"
+      },
+      "readinessState": {
+        "status": "UP"
+      }
+    },
+    "groups": ["liveness", "readiness"]
+  },
+  "protocols": {
+    "supported": [
+      "osmand",
+      "teltonika",
+      "tk103",
+      "meitrack",
+      "atrack",
+      "totem",
+      "meiligao"
+    ],
+    "ports": {
+      "osmand": 5055,
+      "teltonika": 5027,
+      "tk103": 5006,
+      "meitrack": 5020,
+      "atrack": 5013,
+      "totem": 5007,
+      "meiligao": 5020
+    }
+  }
+}
