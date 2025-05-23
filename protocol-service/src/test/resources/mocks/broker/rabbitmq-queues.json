@@ -1,0 +1,250 @@
+{
+  "exchanges": [
+    {
+      "name": "traccar.position",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false
+    },
+    {
+      "name": "traccar.command",
+      "type": "direct",
+      "durable": true,
+      "autoDelete": false
+    },
+    {
+      "name": "traccar.device",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false
+    },
+    {
+      "name": "traccar.dlx",
+      "type": "fanout",
+      "durable": true,
+      "autoDelete": false
+    }
+  ],
+  "queues": [
+    {
+      "name": "position.raw",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "position.raw.dlq"
+      }
+    },
+    {
+      "name": "position.processed",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "position.processed.dlq"
+      }
+    },
+    {
+      "name": "position.test",
+      "durable": false,
+      "exclusive": false,
+      "autoDelete": true,
+      "arguments": {
+        "x-message-ttl": 3600000
+      }
+    },
+    {
+      "name": "command.device",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "command.device.dlq"
+      }
+    },
+    {
+      "name": "command.response",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "command.response.dlq"
+      }
+    },
+    {
+      "name": "device.status",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "device.status.dlq"
+      }
+    },
+    {
+      "name": "device.connection",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "traccar.dlx",
+        "x-dead-letter-routing-key": "device.connection.dlq"
+      }
+    },
+    {
+      "name": "position.raw.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "position.processed.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "command.device.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "command.response.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "device.status.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "device.connection.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "traccar.position",
+      "destination": "position.raw",
+      "destinationType": "queue",
+      "routingKey": "position.raw"
+    },
+    {
+      "source": "traccar.position",
+      "destination": "position.processed",
+      "destinationType": "queue",
+      "routingKey": "position.processed"
+    },
+    {
+      "source": "traccar.position",
+      "destination": "position.test",
+      "destinationType": "queue",
+      "routingKey": "position.test"
+    },
+    {
+      "source": "traccar.command",
+      "destination": "command.device",
+      "destinationType": "queue",
+      "routingKey": "command.device"
+    },
+    {
+      "source": "traccar.command",
+      "destination": "command.response",
+      "destinationType": "queue",
+      "routingKey": "command.response"
+    },
+    {
+      "source": "traccar.device",
+      "destination": "device.status",
+      "destinationType": "queue",
+      "routingKey": "device.status"
+    },
+    {
+      "source": "traccar.device",
+      "destination": "device.connection",
+      "destinationType": "queue",
+      "routingKey": "device.connection"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "position.raw.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.raw.dlq"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "position.processed.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.processed.dlq"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "command.device.dlq",
+      "destinationType": "queue",
+      "routingKey": "command.device.dlq"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "command.response.dlq",
+      "destinationType": "queue",
+      "routingKey": "command.response.dlq"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "device.status.dlq",
+      "destinationType": "queue",
+      "routingKey": "device.status.dlq"
+    },
+    {
+      "source": "traccar.dlx",
+      "destination": "device.connection.dlq",
+      "destinationType": "queue",
+      "routingKey": "device.connection.dlq"
+    }
+  ],
+  "testSettings": {
+    "defaultExchange": "traccar.position",
+    "defaultRoutingKey": "position.raw",
+    "defaultQueue": "position.raw",
+    "messageExpiration": 300000,
+    "deliveryMode": 2,
+    "priority": 0,
+    "publisherConfirms": true,
+    "consumerAck": true,
+    "prefetchCount": 10
+  }
+}
