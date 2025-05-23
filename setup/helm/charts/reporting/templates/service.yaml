@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "reporting.fullname" . }}
+  labels:
+    {{- include "reporting.labels" . | nindent 4 }}
+    app.kubernetes.io/component: reporting-service
+  annotations:
+    # Custom annotations from values.yaml
+    {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # Service discovery annotations
+    {{- if .Values.serviceDiscovery.enabled }}
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    {{- if eq .Values.serviceDiscovery.type "consul" }}
+    consul.hashicorp.com/service-name: {{ include "reporting.fullname" . }}
+    consul.hashicorp.com/service-tags: "reporting,traccar,{{ .Release.Namespace }}"
+    {{- end }}
+    {{- if eq .Values.serviceDiscovery.type "kubernetes" }}
+    # Standard Kubernetes service discovery is enabled by default
+    kubernetes.io/service-name: {{ include "reporting.fullname" . }}
+    {{- end }}
+    {{- end }}
+    # Prometheus monitoring annotations
+    {{- if .Values.prometheus.enabled }}
+    prometheus.io/scrape: "{{ .Values.prometheus.scrape | default "true" }}"
+    prometheus.io/port: "{{ .Values.prometheus.port | default "8085" }}"
+    prometheus.io/path: "{{ .Values.prometheus.path | default "/metrics" }}"
+    {{- end }}
+spec:
+  # Service type: ClusterIP (default), NodePort, or LoadBalancer
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  # Optional session affinity configuration
+  {{- if .Values.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  {{- if .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml .Values.service.sessionAffinityConfig | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  ports:
+    # Main HTTP API port for report generation and management
+    - port: {{ .Values.service.port | default 8084 }}
+      targetPort: {{ .Values.service.targetPort | default "http" }}
+      protocol: {{ .Values.service.protocol | default "TCP" }}
+      name: http
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+    # Metrics port for Prometheus monitoring
+    {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.metrics.port | default 8085 }}
+      targetPort: {{ .Values.metrics.targetPort | default "metrics" }}
+      protocol: {{ .Values.metrics.protocol | default "TCP" }}
+      name: metrics
+    {{- end }}
+    # Health check port for liveness and readiness probes
+    {{- if .Values.healthCheck.enabled }}
+    - port: {{ .Values.healthCheck.port | default 8086 }}
+      targetPort: {{ .Values.healthCheck.targetPort | default "health" }}
+      protocol: {{ .Values.healthCheck.protocol | default "TCP" }}
+      name: health
+    {{- end }}
+    # Debug port for remote debugging (development only)
+    {{- if .Values.debug.enabled }}
+    - port: {{ .Values.debug.port | default 5005 }}
+      targetPort: {{ .Values.debug.targetPort | default "debug" }}
+      protocol: {{ .Values.debug.protocol | default "TCP" }}
+      name: debug
+    {{- end }}
+  # Selector to match pods created by the Reporting Service deployment
+  selector:
+    {{- include "reporting.selectorLabels" . | nindent 4 }}
