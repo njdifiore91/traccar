@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "position.fullname" . }}-config
+  labels:
+    {{- include "position.labels" . | nindent 4 }}
+data:
+  position-service.conf: |
+    # Position Service Configuration
+    
+    # General Settings
+    service.name={{ include "position.fullname" . }}
+    service.version={{ .Chart.AppVersion }}
+    service.port={{ .Values.service.port }}
+    
+    # Handler Chain Configuration
+    handler.enable={{ .Values.handler.enable | default true }}
+    handler.chain={{ .Values.handler.chain | default "geocoder,geofence,motion,distance,trip" }}
+    
+    # Geocoder Handler Configuration
+    geocoder.enable={{ .Values.geocoder.enable | default true }}
+    geocoder.type={{ .Values.geocoder.type | default "nominatim" }}
+    geocoder.url={{ .Values.geocoder.url | default "https://nominatim.openstreetmap.org/reverse" }}
+    geocoder.format={{ .Values.geocoder.format | default "json" }}
+    geocoder.cacheSize={{ .Values.geocoder.cacheSize | default 1000 }}
+    geocoder.cacheExpire={{ .Values.geocoder.cacheExpire | default 86400 }}
+    geocoder.processInvalidPositions={{ .Values.geocoder.processInvalidPositions | default false }}
+    geocoder.processZeroCoordinates={{ .Values.geocoder.processZeroCoordinates | default false }}
+    
+    # Geofence Handler Configuration
+    geofence.enable={{ .Values.geofence.enable | default true }}
+    geofence.processInvalidPositions={{ .Values.geofence.processInvalidPositions | default false }}
+    geofence.processZeroCoordinates={{ .Values.geofence.processZeroCoordinates | default false }}
+    
+    # Motion Handler Configuration
+    motion.enable={{ .Values.motion.enable | default true }}
+    motion.processInvalidPositions={{ .Values.motion.processInvalidPositions | default false }}
+    motion.speedThreshold={{ .Values.motion.speedThreshold | default 0.01 }}
+    
+    # Distance Handler Configuration
+    distance.enable={{ .Values.distance.enable | default true }}
+    distance.processInvalidPositions={{ .Values.distance.processInvalidPositions | default false }}
+    
+    # Trip Handler Configuration
+    trip.enable={{ .Values.trip.enable | default true }}
+    trip.minimalTripDistance={{ .Values.trip.minimalTripDistance | default 500 }}
+    trip.minimalTripDuration={{ .Values.trip.minimalTripDuration | default 300 }}
+    trip.minimalParkingDuration={{ .Values.trip.minimalParkingDuration | default 300 }}
+    trip.minimalNoDataDuration={{ .Values.trip.minimalNoDataDuration | default 3600 }}
+    
+    # Message Broker Configuration
+    broker.type={{ .Values.broker.type | default "kafka" }}
+    
+    # Kafka Configuration
+    kafka.bootstrap.servers={{ .Values.kafka.bootstrapServers | default "kafka:9092" }}
+    kafka.consumer.group.id={{ .Values.kafka.consumer.groupId | default "position-processors" }}
+    kafka.consumer.auto.offset.reset={{ .Values.kafka.consumer.autoOffsetReset | default "earliest" }}
+    kafka.consumer.enable.auto.commit={{ .Values.kafka.consumer.enableAutoCommit | default "false" }}
+    kafka.consumer.max.poll.records={{ .Values.kafka.consumer.maxPollRecords | default 500 }}
+    kafka.consumer.concurrency={{ .Values.kafka.consumer.concurrency | default 3 }}
+    kafka.topic.raw.positions={{ .Values.kafka.topic.rawPositions | default "raw.positions" }}
+    kafka.topic.enriched.positions={{ .Values.kafka.topic.enrichedPositions | default "enriched.positions" }}
+    
+    # RabbitMQ Configuration
+    rabbitmq.host={{ .Values.rabbitmq.host | default "rabbitmq" }}
+    rabbitmq.port={{ .Values.rabbitmq.port | default 5672 }}
+    rabbitmq.username={{ .Values.rabbitmq.username | default "guest" }}
+    rabbitmq.password={{ .Values.rabbitmq.password | default "guest" }}
+    rabbitmq.virtualHost={{ .Values.rabbitmq.virtualHost | default "/" }}
+    rabbitmq.queue.raw.positions={{ .Values.rabbitmq.queue.rawPositions | default "raw.positions" }}
+    rabbitmq.queue.enriched.positions={{ .Values.rabbitmq.queue.enrichedPositions | default "enriched.positions" }}
+    rabbitmq.exchange={{ .Values.rabbitmq.exchange | default "traccar" }}
+    rabbitmq.concurrency={{ .Values.rabbitmq.concurrency | default 3 }}
+    
+    # Database Configuration
+    database.driver={{ .Values.database.driver | default "org.postgresql.Driver" }}
+    database.url={{ .Values.database.url | default "jdbc:postgresql://postgresql:5432/traccar" }}
+    database.username={{ .Values.database.username | default "traccar" }}
+    database.password={{ .Values.database.password | default "traccar" }}
+    database.maxPoolSize={{ .Values.database.maxPoolSize | default 10 }}
+    database.connectionTimeout={{ .Values.database.connectionTimeout | default 30000 }}
+    
+    # Logging Configuration
+    logger.console={{ .Values.logger.console | default true }}
+    logger.file={{ .Values.logger.file | default false }}
+    logger.level={{ .Values.logger.level | default "INFO" }}
+    logger.file.path={{ .Values.logger.filePath | default "/var/log/traccar/position-service.log" }}
+    logger.file.maxSize={{ .Values.logger.fileMaxSize | default "10MB" }}
+    logger.file.maxHistory={{ .Values.logger.fileMaxHistory | default 10 }}
+    logger.file.totalSizeCap={{ .Values.logger.fileTotalSizeCap | default "1GB" }}
+    
+    # Distributed Tracing Configuration
+    tracing.enable={{ .Values.tracing.enable | default true }}
+    tracing.serviceName={{ include "position.fullname" . }}
+    tracing.endpoint={{ .Values.tracing.endpoint | default "http://jaeger-collector:14268/api/traces" }}
+    tracing.samplingRate={{ .Values.tracing.samplingRate | default 1.0 }}
+    
+    # Health Check Configuration
+    health.check.interval={{ .Values.health.checkInterval | default 30 }}
+    health.check.timeout={{ .Values.health.checkTimeout | default 5 }}
+    
+    # Circuit Breaker Configuration
+    circuitbreaker.enable={{ .Values.circuitbreaker.enable | default true }}
+    circuitbreaker.timeout={{ .Values.circuitbreaker.timeout | default 5000 }}
+    circuitbreaker.failureThreshold={{ .Values.circuitbreaker.failureThreshold | default 50 }}
+    circuitbreaker.resetTimeout={{ .Values.circuitbreaker.resetTimeout | default 30000 }}
+    
+    # Resilience Configuration
+    resilience.retry.maxAttempts={{ .Values.resilience.retry.maxAttempts | default 3 }}
+    resilience.retry.initialInterval={{ .Values.resilience.retry.initialInterval | default 1000 }}
+    resilience.retry.multiplier={{ .Values.resilience.retry.multiplier | default 2.0 }}
+    resilience.retry.maxInterval={{ .Values.resilience.retry.maxInterval | default 10000 }}
+    
+    # Cache Configuration
+    cache.enable={{ .Values.cache.enable | default true }}
+    cache.type={{ .Values.cache.type | default "caffeine" }}
+    cache.expireAfterWrite={{ .Values.cache.expireAfterWrite | default 300 }}
+    cache.maximumSize={{ .Values.cache.maximumSize | default 1000 }}
+    
+    # Redis Configuration (for distributed caching)
+    redis.enable={{ .Values.redis.enable | default false }}
+    redis.host={{ .Values.redis.host | default "redis" }}
+    redis.port={{ .Values.redis.port | default 6379 }}
+    redis.password={{ .Values.redis.password | default "" }}
+    redis.database={{ .Values.redis.database | default 0 }}
+    redis.timeout={{ .Values.redis.timeout | default 2000 }}
+    
+    # Service Discovery Configuration
+    discovery.enable={{ .Values.discovery.enable | default true }}
+    discovery.type={{ .Values.discovery.type | default "kubernetes" }}
+    discovery.kubernetes.namespace={{ .Values.discovery.kubernetes.namespace | default .Release.Namespace }}
+    discovery.kubernetes.labelSelector={{ .Values.discovery.kubernetes.labelSelector | default "app.kubernetes.io/part-of=traccar" }}
+    
+    # Additional Custom Configuration
+    {{- if .Values.extraConfig }}
+    {{- .Values.extraConfig | nindent 4 }}
+    {{- end }}
