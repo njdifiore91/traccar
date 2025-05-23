@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Properties for logging configuration -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name" defaultValue="position-service"/>
+    <springProperty scope="context" name="logLevel" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="logPath" source="logging.path" defaultValue="logs"/>
+    <springProperty scope="context" name="logMaxFileSize" source="logging.file.max-size" defaultValue="100MB"/>
+    <springProperty scope="context" name="logMaxHistory" source="logging.file.max-history" defaultValue="30"/>
+
+    <!-- Common pattern for logs -->
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [${springAppName},%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"/>
+
+    <!-- Appenders -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Include correlation IDs for distributed tracing -->            
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentId</includeMdcKeyName>
+            <customFields>{"service":"${springAppName}","type":"position-service"}</customFields>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/${springAppName}.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Include correlation IDs for distributed tracing -->            
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentId</includeMdcKeyName>
+            <!-- Add service metadata to each log entry -->
+            <customFields>{"service":"${springAppName}","type":"position-service"}</customFields>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/${springAppName}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>${logMaxFileSize}</maxFileSize>
+            <maxHistory>${logMaxHistory}</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Async appenders for improved performance -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>false</neverBlock>
+    </appender>
+
+    <!-- Environment specific configurations -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        
+        <!-- Position service specific loggers with detailed debug information for development -->
+        <logger name="org.traccar.geofence" level="DEBUG"/>
+        <logger name="org.traccar.geocoder" level="DEBUG"/>
+        <logger name="org.traccar.handler" level="DEBUG"/>
+        <logger name="org.traccar.metrics" level="INFO"/>
+        <logger name="org.traccar.health" level="INFO"/>
+        <logger name="org.traccar.config" level="INFO"/>
+        <logger name="org.traccar.messaging" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="staging">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        
+        <!-- Position service specific loggers -->
+        <logger name="org.traccar.geofence" level="INFO"/>
+        <logger name="org.traccar.geocoder" level="INFO"/>
+        <logger name="org.traccar.handler" level="INFO"/>
+        <logger name="org.traccar.metrics" level="INFO"/>
+        <logger name="org.traccar.health" level="INFO"/>
+        <logger name="org.traccar.config" level="INFO"/>
+        <logger name="org.traccar.messaging" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="${logLevel}">
+            <appender-ref ref="ASYNC_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        
+        <!-- Position service specific loggers -->
+        <logger name="org.traccar.geofence" level="WARN"/>
+        <logger name="org.traccar.geocoder" level="WARN"/>
+        <logger name="org.traccar.handler" level="WARN"/>
+        <logger name="org.traccar.metrics" level="INFO"/>
+        <logger name="org.traccar.health" level="WARN"/>
+        <logger name="org.traccar.config" level="WARN"/>
+        <logger name="org.traccar.messaging" level="INFO"/>
+    </springProfile>
+
+    <!-- Default profile if none specified -->
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        
+        <!-- Position service specific loggers -->
+        <logger name="org.traccar.geofence" level="INFO"/>
+        <logger name="org.traccar.geocoder" level="INFO"/>
+        <logger name="org.traccar.handler" level="INFO"/>
+        <logger name="org.traccar.metrics" level="INFO"/>
+        <logger name="org.traccar.health" level="INFO"/>
+        <logger name="org.traccar.config" level="INFO"/>
+        <logger name="org.traccar.messaging" level="INFO"/>
+    </springProfile>
+
+    <!-- Third-party library logging levels - reduce noise from dependencies -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.apache" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    
+    <!-- OpenTelemetry integration for distributed tracing -->
+    <logger name="io.opentelemetry" level="INFO"/>
+</configuration>
