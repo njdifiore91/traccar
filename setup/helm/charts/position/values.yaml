@@ -1,0 +1,187 @@
+# Default values for Position Service Helm chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## Image settings
+image:
+  repository: traccar/position-service  # Container image repository
+  tag: latest                          # Container image tag
+  pullPolicy: IfNotPresent             # Image pull policy (IfNotPresent, Always, or Never)
+
+## Number of replicas to deploy
+replicaCount: 2
+
+## Pod resource requests and limits
+resources:
+  requests:
+    cpu: 1000m        # 1 core as per technical specification
+    memory: 1Gi       # 1GB as per technical specification
+  limits:
+    cpu: 2000m        # 2 cores as per technical specification
+    memory: 2Gi       # 2GB as per technical specification
+
+## Service configuration
+service:
+  type: ClusterIP     # Service type (ClusterIP, NodePort, LoadBalancer)
+  port: 8081          # Service port
+  grpcPort: 9090      # gRPC port for service-to-service communication
+
+## Health check configuration
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8081
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8081
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+## Autoscaling configuration
+autoscaling:
+  enabled: true                     # Enable autoscaling
+  minReplicas: 2                    # Minimum number of replicas
+  maxReplicas: 10                   # Maximum number of replicas
+  targetCPUUtilizationPercentage: 70  # Target CPU utilization
+  targetMemoryUtilizationPercentage: 80  # Target memory utilization
+  # Custom metrics for scaling
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: messages_per_second
+        target:
+          type: AverageValue
+          averageValue: 500
+
+## Message broker configuration
+messageBroker:
+  type: kafka  # Options: kafka, rabbitmq
+  
+  # Kafka configuration
+  kafka:
+    enabled: true
+    bootstrapServers: "kafka-headless:9092"
+    securityProtocol: "PLAINTEXT"  # PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+    topics:
+      rawPositions: "raw-positions"
+      enrichedPositions: "enriched-positions"
+    consumer:
+      groupId: "position-service"
+      autoOffsetReset: "earliest"
+      maxPollRecords: 500
+      concurrency: 3
+    producer:
+      acks: "all"
+      retries: 3
+      batchSize: 16384
+      lingerMs: 1
+      bufferMemory: 33554432
+  
+  # RabbitMQ configuration
+  rabbitmq:
+    enabled: false
+    host: "rabbitmq"
+    port: 5672
+    username: "guest"
+    password: "guest"
+    virtualHost: "/"
+    ssl: false
+    queues:
+      rawPositions: "raw-positions"
+      enrichedPositions: "enriched-positions"
+    consumer:
+      prefetchCount: 10
+      concurrency: 3
+    publisher:
+      confirms: true
+      returnedMessages: true
+
+## Database configuration
+database:
+  url: "jdbc:postgresql://postgresql:5432/traccar"
+  username: "traccar"
+  password: "traccar"
+  driverClassName: "org.postgresql.Driver"
+  maxPoolSize: 20
+  minIdle: 5
+  idleTimeout: 30000
+  maxLifetime: 1800000
+
+## External service integrations
+integrations:
+  # Geocoding service configuration
+  geocoder:
+    enabled: true
+    type: "google"  # Options: google, nominatim, mapquest, etc.
+    url: "https://maps.googleapis.com/maps/api/geocode/json"
+    apiKey: ""
+    cacheSize: 100000
+    cacheExpire: 86400  # 24 hours in seconds
+  
+  # Speed limit provider configuration
+  speedLimit:
+    enabled: false
+    type: "overpass"  # Options: overpass, tomtom, here, etc.
+    url: "https://overpass-api.de/api/interpreter"
+    apiKey: ""
+
+## Circuit breaker configuration
+resilience:
+  circuitBreaker:
+    enabled: true
+    slidingWindowSize: 100
+    failureRateThreshold: 50
+    waitDurationInOpenState: 10000  # 10 seconds
+    permittedNumberOfCallsInHalfOpenState: 10
+  retry:
+    enabled: true
+    maxAttempts: 3
+    waitDuration: 1000  # 1 second
+    enableExponentialBackoff: true
+    exponentialBackoffMultiplier: 2
+
+## Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: INFO
+    org.springframework: INFO
+  json: true  # Enable JSON-formatted logs
+
+## Pod annotations
+podAnnotations: {}
+
+## Pod security context
+podSecurityContext: {}
+
+## Container security context
+securityContext: {}
+
+## Node selector
+nodeSelector: {}
+
+## Tolerations
+tolerations: []
+
+## Affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - position-service
+        topologyKey: kubernetes.io/hostname
