@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: position-service
+  namespace: traccar
+  labels:
+    app: position-service
+    service: position-service
+  annotations:
+    # Service discovery annotations
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8081"
+    prometheus.io/path: "/actuator/prometheus"
+    # Add additional service discovery annotations if using Consul or other service mesh
+    # consul.hashicorp.com/service-name: "position-service"
+    # consul.hashicorp.com/service-tags: "traccar,position,processing"
+    # Traffic management annotations if using service mesh
+    # linkerd.io/inject: "enabled"
+    # istio.io/rev: "default"
+spec:
+  type: ClusterIP
+  selector:
+    app: position-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+    # Health check endpoints are exposed through the http port
+    # Message broker communication happens directly from the pods to the broker
+    # No need to expose broker communication ports in the service
