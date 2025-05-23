@@ -1,0 +1,70 @@
+Thank you for installing the {{ .Chart.Name }} Helm chart.
+Your release is named {{ .Release.Name }}.
+
+=====================================================================
+
+  Event Processing Service - Traccar Microservices Architecture
+
+=====================================================================
+
+The Event Processing Service analyzes position data to detect significant events such as:
+- Geofence transitions (entry/exit)
+- Speed violations
+- Device status changes
+- Maintenance alerts
+- Custom rule-based events
+
+---------------------------------------------------------------------
+VERIFICATION STEPS:
+---------------------------------------------------------------------
+
+1. Check if the Event Service pods are running:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=event-service
+
+2. Verify the service is healthy:
+   kubectl describe service {{ .Release.Name }}-event-service -n {{ .Release.Namespace }}
+
+3. Check the logs for event processing activity:
+   kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name=event-service
+
+4. Verify the service is consuming messages from the broker:
+   kubectl exec -it -n {{ .Release.Namespace }} $(kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=event-service -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8080/actuator/health | grep -i kafka
+
+---------------------------------------------------------------------
+TROUBLESHOOTING:
+---------------------------------------------------------------------
+
+If events are not being detected:
+
+1. Ensure the Position Service is correctly publishing enriched positions to the message broker
+   kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name=position-service
+
+2. Verify event rules are properly configured in the database
+   kubectl exec -it -n {{ .Release.Namespace }} $(kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=event-service -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8080/actuator/info
+
+3. Check for any errors in the Event Service logs
+   kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name=event-service | grep -i error
+
+4. Ensure the service has proper permissions to access the database and message broker
+   kubectl describe serviceaccount -n {{ .Release.Namespace }} event-service
+
+---------------------------------------------------------------------
+MONITORING:
+---------------------------------------------------------------------
+
+The Event Service exposes metrics at:
+http://{{ .Release.Name }}-event-service.{{ .Release.Namespace }}:8080/actuator/prometheus
+
+Key metrics to monitor:
+- event_processing_time_seconds: Time taken to process each event
+- events_detected_total: Total number of events detected
+- rule_evaluation_count: Number of rules evaluated
+
+---------------------------------------------------------------------
+FOR MORE INFORMATION:
+---------------------------------------------------------------------
+
+For more details, please refer to:
+- Event Service Documentation: https://www.traccar.org/documentation/event-service/
+- Traccar Microservices Architecture: https://www.traccar.org/documentation/microservices/
+- Support: https://www.traccar.org/support/
