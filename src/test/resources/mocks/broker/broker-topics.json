@@ -1,0 +1,333 @@
+{
+  "kafka": {
+    "topics": [
+      {
+        "name": "raw-positions",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "position-service-group"
+        ]
+      },
+      {
+        "name": "enriched-positions",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "event-service-group",
+          "reporting-service-group",
+          "api-gateway-group"
+        ]
+      },
+      {
+        "name": "events",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "notification-service-group",
+          "reporting-service-group",
+          "api-gateway-group"
+        ]
+      },
+      {
+        "name": "notifications",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "api-gateway-group"
+        ]
+      },
+      {
+        "name": "commands",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "protocol-service-group"
+        ]
+      },
+      {
+        "name": "device-status",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "api-gateway-group",
+          "event-service-group"
+        ]
+      },
+      {
+        "name": "reports",
+        "partitions": 3,
+        "replicationFactor": 1,
+        "retentionMs": 86400000,
+        "consumerGroups": [
+          "reporting-service-group",
+          "api-gateway-group"
+        ]
+      }
+    ]
+  },
+  "rabbitmq": {
+    "exchanges": [
+      {
+        "name": "position.exchange",
+        "type": "topic",
+        "durable": true,
+        "autoDelete": false
+      },
+      {
+        "name": "event.exchange",
+        "type": "topic",
+        "durable": true,
+        "autoDelete": false
+      },
+      {
+        "name": "notification.exchange",
+        "type": "topic",
+        "durable": true,
+        "autoDelete": false
+      },
+      {
+        "name": "command.exchange",
+        "type": "direct",
+        "durable": true,
+        "autoDelete": false
+      },
+      {
+        "name": "report.exchange",
+        "type": "topic",
+        "durable": true,
+        "autoDelete": false
+      }
+    ],
+    "queues": [
+      {
+        "name": "raw-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "enriched-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "events.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "notifications.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "commands.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "device-status.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "reports.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "position-service.raw-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "event-service.enriched-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "notification-service.events.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "api-gateway.notifications.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "protocol-service.commands.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "api-gateway.device-status.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "event-service.device-status.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "reporting-service.enriched-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "reporting-service.events.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "api-gateway.enriched-positions.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "api-gateway.events.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "reporting-service.reports.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      },
+      {
+        "name": "api-gateway.reports.queue",
+        "durable": true,
+        "exclusive": false,
+        "autoDelete": false
+      }
+    ],
+    "bindings": [
+      {
+        "exchange": "position.exchange",
+        "queue": "raw-positions.queue",
+        "routingKey": "position.raw"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "enriched-positions.queue",
+        "routingKey": "position.enriched"
+      },
+      {
+        "exchange": "event.exchange",
+        "queue": "events.queue",
+        "routingKey": "event.#"
+      },
+      {
+        "exchange": "notification.exchange",
+        "queue": "notifications.queue",
+        "routingKey": "notification.#"
+      },
+      {
+        "exchange": "command.exchange",
+        "queue": "commands.queue",
+        "routingKey": "command"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "device-status.queue",
+        "routingKey": "device.status"
+      },
+      {
+        "exchange": "report.exchange",
+        "queue": "reports.queue",
+        "routingKey": "report.#"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "position-service.raw-positions.queue",
+        "routingKey": "position.raw"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "event-service.enriched-positions.queue",
+        "routingKey": "position.enriched"
+      },
+      {
+        "exchange": "event.exchange",
+        "queue": "notification-service.events.queue",
+        "routingKey": "event.#"
+      },
+      {
+        "exchange": "notification.exchange",
+        "queue": "api-gateway.notifications.queue",
+        "routingKey": "notification.#"
+      },
+      {
+        "exchange": "command.exchange",
+        "queue": "protocol-service.commands.queue",
+        "routingKey": "command"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "api-gateway.device-status.queue",
+        "routingKey": "device.status"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "event-service.device-status.queue",
+        "routingKey": "device.status"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "reporting-service.enriched-positions.queue",
+        "routingKey": "position.enriched"
+      },
+      {
+        "exchange": "event.exchange",
+        "queue": "reporting-service.events.queue",
+        "routingKey": "event.#"
+      },
+      {
+        "exchange": "position.exchange",
+        "queue": "api-gateway.enriched-positions.queue",
+        "routingKey": "position.enriched"
+      },
+      {
+        "exchange": "event.exchange",
+        "queue": "api-gateway.events.queue",
+        "routingKey": "event.#"
+      },
+      {
+        "exchange": "report.exchange",
+        "queue": "reporting-service.reports.queue",
+        "routingKey": "report.#"
+      },
+      {
+        "exchange": "report.exchange",
+        "queue": "api-gateway.reports.queue",
+        "routingKey": "report.#"
+      }
+    ]
+  }
+}
