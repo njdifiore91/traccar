@@ -1,0 +1,291 @@
+# NetworkPolicy for Protocol Service
+# This policy implements the principle of least privilege by restricting network communication
+# to only the paths necessary for the Protocol Service to function properly.
+#
+# The policy allows:
+# 1. Ingress from external devices on protocol-specific ports
+# 2. Ingress from API Gateway for command execution
+# 3. Ingress from monitoring tools for health checks
+# 4. Egress to message broker for publishing position data
+# 5. Egress to service discovery for registration
+# 6. Egress to Redis for session storage
+# 7. Egress for DNS resolution
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: protocol-service-network-policy
+  namespace: traccar
+  labels:
+    app: protocol-service
+    component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: protocol-service
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming connections from GPS devices on protocol-specific ports
+    # These ports must be exposed to the internet to allow devices to connect
+    - ports:
+        # Common protocol ports - add or remove as needed for your deployment
+        - port: 5000
+          protocol: TCP
+        - port: 5001
+          protocol: UDP
+        - port: 5004
+          protocol: TCP
+        - port: 5005
+          protocol: TCP
+        - port: 5006
+          protocol: TCP
+        - port: 5007
+          protocol: TCP
+        - port: 5008
+          protocol: TCP
+        - port: 5009
+          protocol: TCP
+        - port: 5010
+          protocol: TCP
+        - port: 5011
+          protocol: TCP
+        - port: 5012
+          protocol: TCP
+        - port: 5013
+          protocol: TCP
+        - port: 5014
+          protocol: TCP
+        - port: 5015
+          protocol: TCP
+        - port: 5016
+          protocol: TCP
+        - port: 5017
+          protocol: TCP
+        - port: 5018
+          protocol: TCP
+        - port: 5019
+          protocol: TCP
+        - port: 5020
+          protocol: TCP
+        - port: 5023
+          protocol: TCP
+        - port: 5024
+          protocol: TCP
+        - port: 5025
+          protocol: TCP
+        - port: 5026
+          protocol: TCP
+        - port: 5027
+          protocol: TCP
+        - port: 5028
+          protocol: TCP
+        - port: 5029
+          protocol: TCP
+        - port: 5030
+          protocol: TCP
+        - port: 5031
+          protocol: TCP
+        - port: 5032
+          protocol: TCP
+        - port: 5033
+          protocol: TCP
+        - port: 5034
+          protocol: TCP
+        - port: 5035
+          protocol: TCP
+        - port: 5036
+          protocol: TCP
+        - port: 5037
+          protocol: TCP
+        - port: 5038
+          protocol: TCP
+        - port: 5039
+          protocol: TCP
+        - port: 5040
+          protocol: TCP
+        - port: 5041
+          protocol: TCP
+        - port: 5042
+          protocol: TCP
+        - port: 5043
+          protocol: TCP
+        - port: 5044
+          protocol: TCP
+        - port: 5045
+          protocol: TCP
+        - port: 5046
+          protocol: TCP
+        - port: 5047
+          protocol: TCP
+        - port: 5048
+          protocol: TCP
+        - port: 5049
+          protocol: TCP
+        - port: 5050
+          protocol: TCP
+        - port: 5051
+          protocol: TCP
+        - port: 5052
+          protocol: TCP
+        - port: 5053
+          protocol: TCP
+        - port: 5054
+          protocol: TCP
+        - port: 5055
+          protocol: TCP
+        - port: 5056
+          protocol: TCP
+        - port: 5057
+          protocol: TCP
+        - port: 5058
+          protocol: TCP
+        - port: 5059
+          protocol: TCP
+        - port: 5060
+          protocol: TCP
+        - port: 5061
+          protocol: TCP
+        - port: 5062
+          protocol: TCP
+        - port: 5063
+          protocol: TCP
+        - port: 5064
+          protocol: TCP
+        - port: 5065
+          protocol: TCP
+        - port: 5066
+          protocol: TCP
+        - port: 5067
+          protocol: TCP
+        - port: 5068
+          protocol: TCP
+        - port: 5069
+          protocol: TCP
+        - port: 5070
+          protocol: TCP
+      from: []
+
+    # Allow ingress from API Gateway for command execution and management API access
+    - ports:
+        # HTTP API port for management operations
+        - port: 8080
+          protocol: TCP
+        # gRPC port for service-to-service communication
+        - port: 9090
+          protocol: TCP
+      from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+
+    # Allow ingress from monitoring tools for health checks and metrics collection
+    - ports:
+        # Health and metrics endpoints
+        - port: 8080
+          protocol: TCP
+      from:
+        # Allow Prometheus to scrape metrics
+        - podSelector:
+            matchLabels:
+              app: prometheus
+          namespaceSelector:
+            matchLabels:
+              name: monitoring
+        # Allow Kubernetes probes for liveness and readiness checks
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+
+  egress:
+    # Allow egress to message broker (Kafka/RabbitMQ) for publishing position data
+    - ports:
+        # Kafka broker port
+        - port: 9092
+          protocol: TCP
+        # Kafka broker TLS port
+        - port: 9093
+          protocol: TCP
+        # RabbitMQ port
+        - port: 5672
+          protocol: TCP
+        # RabbitMQ TLS port
+        - port: 5671
+          protocol: TCP
+        # Kafka Schema Registry port
+        - port: 8081
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+        - podSelector:
+            matchLabels:
+              app: rabbitmq
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+        - podSelector:
+            matchLabels:
+              app: schema-registry
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+
+    # Allow egress to service discovery (Consul/Kubernetes API) for service registration
+    - ports:
+        # Consul HTTP API
+        - port: 8500
+          protocol: TCP
+        # Kubernetes API server
+        - port: 443
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              app: consul
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+        # Allow access to Kubernetes API server for service discovery
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              component: kube-apiserver
+              tier: control-plane
+
+    # Allow egress to Redis for distributed session storage and caching
+    - ports:
+        # Redis server port
+        - port: 6379
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              app: redis
+          namespaceSelector:
+            matchLabels:
+              name: traccar
+
+    # Allow DNS resolution for service discovery and external communication
+    - ports:
+        # DNS UDP port
+        - port: 53
+          protocol: UDP
+        # DNS TCP port
+        - port: 53
+          protocol: TCP
+      to:
+        # Allow access to cluster DNS service
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
