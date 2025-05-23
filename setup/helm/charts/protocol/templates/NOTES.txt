@@ -1,0 +1,152 @@
+{{- /*
+NOTES.txt for Protocol Service Helm Chart
+Displayed after installation to provide guidance on accessing and verifying the service
+*/}}
+
+# Traccar Protocol Service
+
+Thank you for installing {{ .Chart.Name }} (version: {{ .Chart.Version }}).
+
+## About Protocol Service
+
+The Protocol Service handles device connections and protocol implementations for 200+ GPS device protocols. 
+It decodes raw messages from devices into a standardized format and publishes them to the message broker 
+for further processing by other Traccar microservices.
+
+## Accessing the Service
+
+{{- if contains "LoadBalancer" .Values.service.type }}
+The Protocol Service has been deployed with a LoadBalancer service type. It may take a few minutes for the external IP to be assigned.
+
+You can check the external IP status with:
+
+  kubectl get svc --namespace {{ .Release.Namespace }} {{ include "protocol.fullname" . }}
+
+Once the external IP is assigned, GPS devices can connect to the Protocol Service using the following endpoints:
+
+{{- range .Values.service.ports }}
+  * {{ .name }}: {{ .port }}/{{ .protocol }} - {{ .description }}
+{{- end }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+The Protocol Service has been deployed with a ClusterIP service type. It is only accessible within the Kubernetes cluster.
+
+To make it accessible to GPS devices, you may need to set up an Ingress resource or change the service type to LoadBalancer.
+
+Within the cluster, the service is available at:
+
+  {{ include "protocol.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+
+With the following ports:
+
+{{- range .Values.service.ports }}
+  * {{ .name }}: {{ .port }}/{{ .protocol }} - {{ .description }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+The Protocol Service has been deployed with a NodePort service type. GPS devices can connect to any node in your cluster using the assigned node ports.
+
+You can find the assigned node ports with:
+
+  kubectl get svc --namespace {{ .Release.Namespace }} {{ include "protocol.fullname" . }}
+
+The service exposes the following ports:
+
+{{- range .Values.service.ports }}
+  * {{ .name }}: {{ .port }}/{{ .protocol }} (node port: to be determined) - {{ .description }}
+{{- end }}
+{{- end }}
+
+## Verifying the Deployment
+
+1. Check if the Protocol Service pods are running:
+
+   kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "protocol.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+2. Check the health of the Protocol Service:
+
+   kubectl exec -it [POD_NAME] --namespace {{ .Release.Namespace }} -- curl http://localhost:8090/health/liveness
+   kubectl exec -it [POD_NAME] --namespace {{ .Release.Namespace }} -- curl http://localhost:8090/health/readiness
+
+3. View the Protocol Service logs:
+
+   kubectl logs -f [POD_NAME] --namespace {{ .Release.Namespace }}
+
+4. Check if the service is properly registered with service discovery:
+
+   kubectl exec -it [POD_NAME] --namespace {{ .Release.Namespace }} -- curl http://localhost:8090/actuator/info
+
+## Monitoring the Service
+
+The Protocol Service exposes metrics for monitoring at:
+
+  http://[POD_IP]:8090/actuator/prometheus
+
+You can view these metrics using:
+
+  kubectl port-forward svc/{{ include "protocol.fullname" . }} 8090:8090 --namespace {{ .Release.Namespace }}
+
+Then access http://localhost:8090/actuator/prometheus in your browser.
+
+## Common Troubleshooting
+
+### Connection Issues
+
+If devices cannot connect to the Protocol Service:
+
+1. Verify that the service is exposed correctly:
+   ```
+   kubectl get svc --namespace {{ .Release.Namespace }} {{ include "protocol.fullname" . }}
+   ```
+
+2. Check if the pods are running and ready:
+   ```
+   kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "protocol.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+   ```
+
+3. Ensure that network policies or firewalls allow traffic to the service ports.
+
+4. Check the Protocol Service logs for connection errors:
+   ```
+   kubectl logs -f [POD_NAME] --namespace {{ .Release.Namespace }}
+   ```
+
+### Protocol-Specific Issues
+
+If a specific device protocol is not working:
+
+1. Verify that the protocol is enabled in the configuration:
+   ```
+   kubectl describe configmap {{ include "protocol.fullname" . }}-config --namespace {{ .Release.Namespace }}
+   ```
+
+2. Check the logs for protocol-specific errors:
+   ```
+   kubectl logs -f [POD_NAME] --namespace {{ .Release.Namespace }} | grep -i "[PROTOCOL_NAME]"
+   ```
+
+3. Ensure the device is sending data in the correct format and to the correct port.
+
+### Resource Issues
+
+If the Protocol Service is experiencing performance problems:
+
+1. Check resource utilization:
+   ```
+   kubectl top pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "protocol.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+   ```
+
+2. Verify that the HorizontalPodAutoscaler is working correctly:
+   ```
+   kubectl get hpa {{ include "protocol.fullname" . }} --namespace {{ .Release.Namespace }}
+   ```
+
+3. Consider adjusting resource requests and limits in values.yaml if consistently under or over-provisioned.
+
+## Further Information
+
+For more detailed information about the Protocol Service and supported protocols, please refer to:
+
+- Traccar Documentation: https://www.traccar.org/documentation/
+- Protocol Service API Documentation: http://[POD_IP]:8090/swagger-ui.html
+- Supported Protocols: https://www.traccar.org/devices/
+
+For additional help, visit the Traccar community forums at https://www.traccar.org/forums/
