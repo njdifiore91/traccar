@@ -1,0 +1,100 @@
+# Traccar Reporting Service
+
+Thank you for installing the Traccar Reporting Service Helm chart!
+
+## Service Information
+
+The Reporting Service is responsible for generating reports and analytics based on historical position and event data. It supports multiple output formats and both on-demand and scheduled report generation.
+
+## Accessing the Service
+
+The Reporting Service is accessible internally within the Kubernetes cluster at:
+
+  http://{{ .Release.Name }}-reporting-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+If you've enabled the Ingress resource, you can access the service externally at:
+{{ if .Values.ingress.enabled }}
+  http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}/api/v1/reports
+{{ else }}
+  The Reporting Service is not exposed externally. To access it, you'll need to use port-forwarding or enable the Ingress resource.
+{{ end }}
+
+## Verifying Deployment
+
+To verify that the Reporting Service has been deployed successfully, run the following commands:
+
+1. Check the deployment status:
+   ```
+   kubectl get deployment {{ .Release.Name }}-reporting-service -n {{ .Release.Namespace }}
+   ```
+
+2. Verify that the pods are running:
+   ```
+   kubectl get pods -l app.kubernetes.io/name=reporting-service -n {{ .Release.Namespace }}
+   ```
+
+3. Check the service health endpoint:
+   ```
+   kubectl exec -it $(kubectl get pods -l app.kubernetes.io/name=reporting-service -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}') -n {{ .Release.Namespace }} -- curl -s http://localhost:8084/health/readiness
+   ```
+   You should see a response indicating the service is healthy.
+
+## Monitoring the Service
+
+1. View the service logs:
+   ```
+   kubectl logs -f deployment/{{ .Release.Name }}-reporting-service -n {{ .Release.Namespace }}
+   ```
+
+2. Check the Prometheus metrics endpoint (if enabled):
+   ```
+   kubectl port-forward svc/{{ .Release.Name }}-reporting-service -n {{ .Release.Namespace }} 8084:8084
+   curl http://localhost:8084/actuator/prometheus
+   ```
+
+3. Monitor report generation jobs:
+   ```
+   kubectl get pods -l job-name=report-generation -n {{ .Release.Namespace }}
+   ```
+
+## Common Troubleshooting
+
+1. If reports are not being generated:
+   - Verify the Reporting Service can connect to the database
+   - Check that the Message Broker (Kafka/RabbitMQ) is operational
+   - Ensure the service has appropriate permissions to access position and event data
+   - Examine the service logs for specific error messages
+
+2. If scheduled reports are not running:
+   - Verify the scheduler component is enabled in the configuration
+   - Check the cron expressions in the report schedules
+   - Ensure the service has sufficient resources for report generation
+
+3. If the service is not starting:
+   - Check for configuration errors in the ConfigMap
+   - Verify that all required dependencies are available
+   - Ensure there are no port conflicts with other services
+
+## Configuration
+
+The Reporting Service configuration can be customized by editing the ConfigMap:
+
+```
+kubectl edit configmap {{ .Release.Name }}-reporting-service-config -n {{ .Release.Namespace }}
+```
+
+After changing the configuration, restart the deployment:
+
+```
+kubectl rollout restart deployment {{ .Release.Name }}-reporting-service -n {{ .Release.Namespace }}
+```
+
+## Documentation
+
+For more information about the Traccar Reporting Service, please refer to:
+
+- Traccar Documentation: https://www.traccar.org/documentation/
+- Reporting Service API: https://www.traccar.org/api-reference/reporting/
+- Helm Chart Repository: https://github.com/traccar/helm-charts
+
+For support, please visit: https://www.traccar.org/support/
