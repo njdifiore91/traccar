@@ -1,0 +1,213 @@
+[
+  {
+    "description": "PATTERN_E2 - RFID data format",
+    "message": "$$0494E2123456789012345|150425223945,113.925525,22.55814,1122334455|38",
+    "expected": {
+      "deviceId": 123456789012345,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2015-04-25T22:39:45.000Z",
+      "latitude": 22.55814,
+      "longitude": 113.925525,
+      "attributes": {
+        "driverUniqueId": "1122334455"
+      }
+    }
+  },
+  {
+    "description": "PATTERN_E5 - OBD data format",
+    "message": "$$0112E5864606045334223|201112223514,-68.923106,-22.455926,$Cloud,1738,621,730,12100,0,0,255,0,40,40,0,0,255,|13",
+    "expected": {
+      "deviceId": 864606045334223,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2020-11-12T22:35:14.000Z",
+      "latitude": -22.455926,
+      "longitude": -68.923106,
+      "attributes": {
+        "odometer": 1738,
+        "fuelUsed": 621,
+        "fuelConsumption": 730,
+        "power": 12.1,
+        "rpm": 0,
+        "obdSpeed": 0,
+        "coolantTemp": 40,
+        "intakeTemp": 40,
+        "engineLoad": 0,
+        "throttle": 0,
+        "fuelLevel": 255
+      }
+    }
+  },
+  {
+    "description": "PATTERN1 - Format with $GPRMC",
+    "message": "$$B3359772032399074|AA$GPRMC,093911.000,A,3648.2146,N,01008.0977,E,0.00,,140312,,,A*7E|02.1|01.1|01.8|000000000000|20120314093910|04100057|00000000|0012D887|0000|0.0000|1128||C50E",
+    "expected": {
+      "deviceId": 359772032399074,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2012-03-14T09:39:11.000Z",
+      "latitude": 36.80358,
+      "longitude": 10.13496,
+      "speed": 0.0,
+      "course": 0.0,
+      "attributes": {
+        "pdop": 2.1,
+        "hdop": 1.1,
+        "vdop": 1.8,
+        "status": 0,
+        "battery": 0.0,
+        "power": 0.0,
+        "adc1": "0012D887",
+        "odometer": 0.0,
+        "temp1": "0000"
+      }
+    }
+  },
+  {
+    "description": "PATTERN2 - Format with date, time, coordinates",
+    "message": "$$8B862170017861566|AA180613080657|A|2237.1901|N|11402.1369|E|1.579|178|8.70|100000001000|13811|00000000|253162F5|00000000|0.0000|0014|2B16",
+    "expected": {
+      "deviceId": 862170017861566,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2013-06-18T08:06:57.000Z",
+      "latitude": 22.61984,
+      "longitude": 114.03562,
+      "speed": 1.579,
+      "course": 178.0,
+      "attributes": {
+        "hdop": 8.7,
+        "status": 4294967296,
+        "battery": 1.3811,
+        "power": 0.0,
+        "adc1": "253162F5",
+        "odometer": 0.0
+      }
+    }
+  },
+  {
+    "description": "PATTERN3 - Format with different field ordering",
+    "message": "$$72862170017856731|3913090911165280000370000000000000000019BD508A0400000003.400000093644.9817N01012.9944E00506F2E",
+    "expected": {
+      "deviceId": 862170017856731,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2013-09-09T11:16:52.000Z",
+      "latitude": 36.74970,
+      "longitude": 10.21657,
+      "speed": 0.0,
+      "course": 0.0,
+      "attributes": {
+        "io1": "5280",
+        "battery": 0.037,
+        "power": 0.0,
+        "adc1": "0000",
+        "adc2": "0000",
+        "temp1": "000",
+        "temp2": "000",
+        "lac": "19BD",
+        "cid": "508A",
+        "satellites": 4,
+        "pdop": 3.4,
+        "odometer": 9000.0
+      }
+    }
+  },
+  {
+    "description": "PATTERN4 - Format with different header structure",
+    "message": "$$0111AA353081090067318|0804400022070722520240400005B364ED5003107300001.700000002245.3919N10231.6952W000001860E",
+    "expected": {
+      "deviceId": 353081090067318,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2022-07-07T22:52:02.000Z",
+      "latitude": 22.75653,
+      "longitude": -102.52825,
+      "speed": 1.7,
+      "course": 0.0,
+      "attributes": {
+        "status": 1073741824,
+        "satellites": 5,
+        "rssi": 179,
+        "hdop": 1.0,
+        "odometer": 730000.0
+      }
+    }
+  },
+  {
+    "description": "PATTERN1 - Format with $GPRMC and alarm",
+    "message": "$$B2359772032984289|AA$GPRMC,104446.000,A,5011.3944,N,01439.6637,E,0.00,,290212,,,A*7D|01.8|00.9|01.5|000000100000|20120229104446|14151221|00050000|046D085E|0000|0.0000|1170|29A7",
+    "expected": {
+      "deviceId": 359772032984289,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2012-02-29T10:44:46.000Z",
+      "latitude": 50.18991,
+      "longitude": 14.66106,
+      "speed": 0.0,
+      "course": 0.0,
+      "attributes": {
+        "alarm": "sos",
+        "pdop": 1.8,
+        "hdop": 0.9,
+        "vdop": 1.5,
+        "status": 4096,
+        "battery": 1.4151221,
+        "power": 0.0005,
+        "adc1": "046D085E",
+        "odometer": 0.0,
+        "temp1": "0000"
+      }
+    }
+  },
+  {
+    "description": "PATTERN4 - Format with alarm",
+    "message": "$$0108AB863835028447675|5004C0001710250234064214059828A058AE121010604000.600000320304.7772N10134.8238E11625B",
+    "expected": {
+      "deviceId": 863835028447675,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2017-10-25T02:34:06.000Z",
+      "latitude": 30.79629,
+      "longitude": 101.58040,
+      "speed": 0.6,
+      "course": 0.0,
+      "attributes": {
+        "alarm": "geofenceExit",
+        "status": 1073741824,
+        "satellites": 14,
+        "rssi": 5,
+        "hdop": 1.0,
+        "odometer": 604000.0
+      }
+    }
+  },
+  {
+    "description": "PATTERN4 - Format with low battery alarm",
+    "message": "$$0113AA862010037348253|588040001901220851494212000000753AE901655121700100000.800000002632.6084S02803.3289E29497E",
+    "expected": {
+      "deviceId": 862010037348253,
+      "protocol": "totem",
+      "valid": true,
+      "time": "2019-01-22T08:51:49.000Z",
+      "latitude": -26.54347,
+      "longitude": 28.05548,
+      "speed": 0.8,
+      "course": 0.0,
+      "attributes": {
+        "alarm": "lowBattery",
+        "status": 1073741824,
+        "satellites": 12,
+        "rssi": 0,
+        "hdop": 1.0,
+        "odometer": 121700.0
+      }
+    }
+  },
+  {
+    "description": "Invalid message - No GPS fix",
+    "message": "$$BB862170017856731|AA$GPRMC,000000.00,V,0000.0000,N,00000.0000,E,000.0,000.0,000000,,,A*73|00.0|00.0|00.0|000000001000|20000000000000|13790000|00000000|00000000|00000000|0.0000|0007|8C23",
+    "expected": null
+  }
+]
