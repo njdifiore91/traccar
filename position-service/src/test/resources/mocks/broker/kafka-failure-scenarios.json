@@ -1,0 +1,249 @@
+{
+  "version": "1.0",
+  "description": "Kafka failure scenarios for Position Service resilience testing",
+  "scenarios": [
+    {
+      "id": "broker-unavailability-temporary",
+      "name": "Temporary Broker Unavailability",
+      "description": "Simulates a broker becoming temporarily unavailable and then recovering",
+      "parameters": {
+        "brokerIds": [0],
+        "downtime": 5000,
+        "recoveryBehavior": "automatic",
+        "affectedTopics": ["position-updates", "position-commands"],
+        "probability": 0.8
+      }
+    },
+    {
+      "id": "broker-unavailability-extended",
+      "name": "Extended Broker Unavailability",
+      "description": "Simulates a broker becoming unavailable for an extended period",
+      "parameters": {
+        "brokerIds": [1],
+        "downtime": 30000,
+        "recoveryBehavior": "automatic",
+        "affectedTopics": ["position-updates", "position-commands"],
+        "probability": 0.5
+      }
+    },
+    {
+      "id": "message-rejection-random",
+      "name": "Random Message Rejection",
+      "description": "Broker randomly rejects messages with a temporary error",
+      "parameters": {
+        "brokerIds": [0, 1, 2],
+        "errorCode": "NETWORK_EXCEPTION",
+        "errorMessage": "Simulated network exception",
+        "rejectionRate": 0.3,
+        "affectedTopics": ["position-updates"],
+        "duration": 10000,
+        "probability": 0.7
+      }
+    },
+    {
+      "id": "message-rejection-all",
+      "name": "Complete Message Rejection",
+      "description": "Broker rejects all messages for a specific topic",
+      "parameters": {
+        "brokerIds": [2],
+        "errorCode": "NOT_ENOUGH_REPLICAS",
+        "errorMessage": "Simulated replica failure",
+        "rejectionRate": 1.0,
+        "affectedTopics": ["position-commands"],
+        "duration": 8000,
+        "probability": 0.4
+      }
+    },
+    {
+      "id": "partition-leader-change",
+      "name": "Partition Leader Change",
+      "description": "Simulates a leader change for partitions",
+      "parameters": {
+        "topics": ["position-updates"],
+        "partitions": [0, 1, 2],
+        "initialLeaderBrokerId": 0,
+        "newLeaderBrokerId": 1,
+        "leaderChangeDelay": 2000,
+        "probability": 0.6
+      }
+    },
+    {
+      "id": "partition-leader-unavailable",
+      "name": "Partition Leader Unavailable",
+      "description": "Simulates a scenario where the leader for a partition is temporarily unavailable",
+      "parameters": {
+        "topics": ["position-commands"],
+        "partitions": [0, 1],
+        "leaderBrokerId": 1,
+        "downtime": 7000,
+        "errorCode": "LEADER_NOT_AVAILABLE",
+        "errorMessage": "Simulated leader unavailability",
+        "probability": 0.5
+      }
+    },
+    {
+      "id": "network-partition-broker-isolation",
+      "name": "Network Partition - Broker Isolation",
+      "description": "Simulates a network partition that isolates a broker from others",
+      "parameters": {
+        "isolatedBrokerIds": [2],
+        "duration": 15000,
+        "affectedTopics": ["position-updates", "position-commands"],
+        "errorCode": "NETWORK_EXCEPTION",
+        "errorMessage": "Simulated network partition",
+        "probability": 0.3
+      }
+    },
+    {
+      "id": "network-partition-client-isolation",
+      "name": "Network Partition - Client Isolation",
+      "description": "Simulates a network partition that isolates clients from specific brokers",
+      "parameters": {
+        "isolatedBrokerIds": [0, 1],
+        "clientGroups": ["position-service-producers", "position-service-consumers"],
+        "duration": 10000,
+        "errorCode": "NETWORK_EXCEPTION",
+        "errorMessage": "Simulated client isolation",
+        "probability": 0.4
+      }
+    },
+    {
+      "id": "broker-throttling",
+      "name": "Broker Throttling",
+      "description": "Simulates a broker throttling incoming messages due to resource constraints",
+      "parameters": {
+        "brokerIds": [0, 1],
+        "throttleRate": 0.5,
+        "latencyMs": 500,
+        "duration": 20000,
+        "affectedTopics": ["position-updates"],
+        "probability": 0.6
+      }
+    },
+    {
+      "id": "metadata-refresh-delay",
+      "name": "Metadata Refresh Delay",
+      "description": "Simulates a delay in metadata refresh operations",
+      "parameters": {
+        "brokerIds": [0, 1, 2],
+        "delayMs": 3000,
+        "affectedOperations": ["METADATA_FETCH", "TOPIC_CREATION"],
+        "probability": 0.7
+      }
+    },
+    {
+      "id": "broker-rebalance",
+      "name": "Broker Rebalance",
+      "description": "Simulates a controlled broker rebalance operation",
+      "parameters": {
+        "brokerIds": [0, 1, 2],
+        "rebalanceDuration": 10000,
+        "partitionMigrationDelay": 1000,
+        "affectedTopics": ["position-updates", "position-commands"],
+        "probability": 0.5
+      }
+    },
+    {
+      "id": "sequential-broker-failure",
+      "name": "Sequential Broker Failure",
+      "description": "Simulates multiple brokers failing in sequence",
+      "parameters": {
+        "brokerSequence": [0, 1, 2],
+        "failureIntervalMs": 5000,
+        "downtimePerBroker": 8000,
+        "recoveryBehavior": "sequential",
+        "affectedTopics": ["position-updates", "position-commands"],
+        "probability": 0.3
+      }
+    },
+    {
+      "id": "message-corruption",
+      "name": "Message Corruption",
+      "description": "Simulates message corruption during transmission",
+      "parameters": {
+        "brokerIds": [1],
+        "corruptionRate": 0.2,
+        "corruptionType": "RANDOM_BYTES",
+        "affectedTopics": ["position-updates"],
+        "duration": 5000,
+        "probability": 0.4
+      }
+    },
+    {
+      "id": "offset-commit-failure",
+      "name": "Offset Commit Failure",
+      "description": "Simulates failures when committing consumer offsets",
+      "parameters": {
+        "consumerGroups": ["position-service-consumers"],
+        "errorCode": "COORDINATOR_NOT_AVAILABLE",
+        "errorMessage": "Simulated coordinator unavailability",
+        "failureRate": 0.7,
+        "duration": 12000,
+        "probability": 0.5
+      }
+    },
+    {
+      "id": "transaction-coordinator-failure",
+      "name": "Transaction Coordinator Failure",
+      "description": "Simulates a failure of the transaction coordinator",
+      "parameters": {
+        "brokerIds": [2],
+        "transactionIds": ["position-service-tx"],
+        "errorCode": "COORDINATOR_NOT_AVAILABLE",
+        "errorMessage": "Simulated transaction coordinator failure",
+        "duration": 8000,
+        "probability": 0.4
+      }
+    }
+  ],
+  "errorCodes": {
+    "NETWORK_EXCEPTION": 6,
+    "LEADER_NOT_AVAILABLE": 5,
+    "NOT_ENOUGH_REPLICAS": 19,
+    "COORDINATOR_NOT_AVAILABLE": 15,
+    "REQUEST_TIMED_OUT": 7,
+    "NOT_LEADER_FOR_PARTITION": 6
+  },
+  "combinationScenarios": [
+    {
+      "id": "cascading-failure",
+      "name": "Cascading Broker Failure",
+      "description": "Simulates a cascading failure scenario with multiple failure types",
+      "scenarioSequence": [
+        {
+          "scenarioId": "broker-unavailability-temporary",
+          "delayBeforeNextMs": 2000
+        },
+        {
+          "scenarioId": "partition-leader-change",
+          "delayBeforeNextMs": 1000
+        },
+        {
+          "scenarioId": "message-rejection-random",
+          "delayBeforeNextMs": 0
+        }
+      ],
+      "probability": 0.2
+    },
+    {
+      "id": "network-degradation",
+      "name": "Network Degradation",
+      "description": "Simulates network degradation with increasing severity",
+      "scenarioSequence": [
+        {
+          "scenarioId": "broker-throttling",
+          "delayBeforeNextMs": 5000
+        },
+        {
+          "scenarioId": "message-rejection-random",
+          "delayBeforeNextMs": 3000
+        },
+        {
+          "scenarioId": "network-partition-broker-isolation",
+          "delayBeforeNextMs": 0
+        }
+      ],
+      "probability": 0.3
+    }
+  ]
+}
