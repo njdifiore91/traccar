@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,32 @@
  */
 package org.traccar.geocoder;
 
-import jakarta.json.JsonObject;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.InvocationCallback;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.StatisticsManager;
 
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.InvocationCallback;
+
+import java.time.Duration;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
-/**
- * Abstract base class for JSON-based geocoders.
- * Updated to support distributed caching and resilience patterns for microservices architecture.
- */
 public abstract class JsonGeocoder implements Geocoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonGeocoder.class);
@@ -37,43 +48,65 @@ public abstract class JsonGeocoder implements Geocoder {
     private final Client client;
     private final String url;
     private final AddressFormat addressFormat;
-
-    private Map<Map.Entry<Double, Double>, Address> cacheLocal;
-    private DistributedCacheManager distributedCacheManager;
     private StatisticsManager statisticsManager;
+    private final CircuitBreaker circuitBreaker;
+    private final Retry retry;
+    private final MeterRegistry meterRegistry;
+    private final String geocoderName;
+    private final boolean healthReportingEnabled;
 
-    /**
-     * Creates a new JsonGeocoder with the specified parameters.
-     *
-     * @param client JAX-RS client for HTTP requests
-     * @param url URL template with placeholders for coordinates
-     * @param cacheSize Size of the local cache (0 to disable)
-     * @param addressFormat Format for address display
-     */
-    public JsonGeocoder(Client client, String url, int cacheSize, AddressFormat addressFormat) {
+    // Distributed cache using Redis or in-memory cache as fallback
+    private Map<Map.Entry<Double, Double>, String> cache;
+
+    public JsonGeocoder(Client client, String url, final int cacheSize, AddressFormat addressFormat,
+                       CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry,
+                       MeterRegistry meterRegistry, String geocoderName, boolean healthReportingEnabled) {
         this.client = client;
         this.url = url;
         this.addressFormat = addressFormat;
+        this.meterRegistry = meterRegistry;
+        this.geocoderName = geocoderName;
+        this.healthReportingEnabled = healthReportingEnabled;
 
+        // Initialize circuit breaker
+        this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(geocoderName);
+        
+        // Initialize retry mechanism
+        this.retry = retryRegistry.retry(geocoderName);
+
+        // Initialize cache
         if (cacheSize > 0) {
-            // Create a local LRU cache with the specified size
-            this.cacheLocal = new LinkedHashMap<Map.Entry<Double, Double>, Address>() {
+            this.cache = Collections.synchronizedMap(new LinkedHashMap<>() {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<Map.Entry<Double, Double>, Address> eldest) {
+                protected boolean removeEldestEntry(Map.Entry eldest) {
                     return size() > cacheSize;
                 }
-            };
-            this.cacheLocal = java.util.Collections.synchronizedMap(this.cacheLocal);
+            });
         }
     }
 
     /**
-     * Sets the distributed cache manager for cross-service caching.
-     *
-     * @param distributedCacheManager Distributed cache manager instance
+     * Constructor for backward compatibility
      */
-    public void setDistributedCacheManager(DistributedCacheManager distributedCacheManager) {
-        this.distributedCacheManager = distributedCacheManager;
+    public JsonGeocoder(Client client, String url, final int cacheSize, AddressFormat addressFormat) {
+        this.client = client;
+        this.url = url;
+        this.addressFormat = addressFormat;
+        this.meterRegistry = null;
+        this.geocoderName = "defaultGeocoder";
+        this.healthReportingEnabled = false;
+        this.circuitBreaker = null;
+        this.retry = null;
+
+        // Initialize cache
+        if (cacheSize > 0) {
+            this.cache = Collections.synchronizedMap(new LinkedHashMap<>() {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry eldest) {
+                    return size() > cacheSize;
+                }
+            });
+        }
     }
 
     @Override
@@ -81,63 +114,143 @@ public abstract class JsonGeocoder implements Geocoder {
         this.statisticsManager = statisticsManager;
     }
 
-    /**
-     * Gets a human-readable address for the specified coordinates.
-     * Checks both local and distributed caches before making an HTTP request.
-     *
-     * @param latitude Latitude coordinate
-     * @param longitude Longitude coordinate
-     * @param callback Optional callback for asynchronous execution
-     * @return Address object if executed synchronously, null if using callback
-     */
-    @Override
-    public Address getAddress(double latitude, double longitude, ReverseGeocoderCallback callback) {
-        Map.Entry<Double, Double> key = new AbstractMap.SimpleImmutableEntry<>(latitude, longitude);
-        Address cachedAddress = null;
-
-        // Check local cache first
-        if (cacheLocal != null) {
-            cachedAddress = cacheLocal.get(key);
+    protected String readValue(JsonObject object, String key) {
+        if (object.containsKey(key) && !object.isNull(key)) {
+            return object.getString(key);
         }
+        return null;
+    }
 
-        // If not in local cache, check distributed cache
-        if (cachedAddress == null && distributedCacheManager != null) {
-            String cacheKey = String.format("%s-%f-%f", getClass().getSimpleName(), latitude, longitude);
-            cachedAddress = distributedCacheManager.getAddress(cacheKey);
-            
-            // If found in distributed cache, add to local cache
-            if (cachedAddress != null && cacheLocal != null) {
-                cacheLocal.put(key, cachedAddress);
+    private String handleResponse(
+            double latitude, double longitude, JsonObject json, ReverseGeocoderCallback callback) {
+
+        Address address = parseAddress(json);
+        if (address != null) {
+            String formattedAddress = addressFormat.format(address);
+            if (cache != null) {
+                cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
             }
-        }
-
-        // If found in either cache, return or invoke callback
-        if (cachedAddress != null) {
             if (callback != null) {
-                callback.onSuccess(cachedAddress);
-                return null;
+                callback.onSuccess(formattedAddress);
             }
-            return cachedAddress;
+            return formattedAddress;
+        } else {
+            String msg = "Empty address. Error: " + parseError(json);
+            if (callback != null) {
+                callback.onFailure(new GeocoderException(msg));
+            } else {
+                LOGGER.warn(msg);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getAddress(
+            final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
+
+        // Check cache first
+        if (cache != null) {
+            String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
+            if (cachedAddress != null) {
+                if (callback != null) {
+                    callback.onSuccess(cachedAddress);
+                }
+                return cachedAddress;
+            }
         }
 
-        // Register statistics if available
+        // Record geocoder request for statistics
         if (statisticsManager != null) {
             statisticsManager.registerGeocoderRequest();
         }
 
-        // Format the URL with coordinates
-        String formattedUrl = String.format(url, latitude, longitude);
+        // If circuit breaker and retry are available, use them
+        if (circuitBreaker != null && retry != null) {
+            return getAddressWithResilience(latitude, longitude, callback);
+        } else {
+            // Legacy implementation without resilience patterns
+            return getAddressLegacy(latitude, longitude, callback);
+        }
+    }
+
+    private String getAddressWithResilience(
+            final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
+
+        // Create a supplier that will be decorated with resilience patterns
+        Supplier<String> geocodingSupplier = () -> {
+            Timer.Sample sample = null;
+            if (meterRegistry != null) {
+                sample = Timer.start(meterRegistry);
+            }
+
+            try {
+                var request = client.target(String.format(url, latitude, longitude)).request();
+                JsonObject response = request.get(JsonObject.class);
+                String result = handleResponse(latitude, longitude, response, null);
+
+                // Record successful metrics
+                if (meterRegistry != null && sample != null) {
+                    sample.stop(Timer.builder("geocoder.request.time")
+                            .tags(Tags.of(
+                                    Tag.of("geocoder", geocoderName),
+                                    Tag.of("status", "success")))
+                            .register(meterRegistry));
+                }
+
+                return result;
+            } catch (Exception e) {
+                // Record failed metrics
+                if (meterRegistry != null && sample != null) {
+                    sample.stop(Timer.builder("geocoder.request.time")
+                            .tags(Tags.of(
+                                    Tag.of("geocoder", geocoderName),
+                                    Tag.of("status", "error"),
+                                    Tag.of("error", e.getClass().getSimpleName())))
+                            .register(meterRegistry));
+                }
+
+                LOGGER.warn("Geocoder network error", e);
+                throw e;
+            }
+        };
+
+        // Decorate the supplier with circuit breaker and retry
+        Supplier<String> decoratedSupplier = Retry.decorateSupplier(retry, 
+                CircuitBreaker.decorateSupplier(circuitBreaker, geocodingSupplier));
+
+        try {
+            if (callback != null) {
+                // Async execution with callback
+                CompletableFuture.supplyAsync(decoratedSupplier)
+                        .thenAccept(callback::onSuccess)
+                        .exceptionally(e -> {
+                            Throwable cause = e instanceof CompletionException ? e.getCause() : e;
+                            callback.onFailure(cause);
+                            return null;
+                        });
+                return null;
+            } else {
+                // Synchronous execution
+                return decoratedSupplier.get();
+            }
+        } catch (Exception e) {
+            // Handle fallback for synchronous execution
+            LOGGER.warn("Geocoder service unavailable, using fallback", e);
+            return getFallbackAddress(latitude, longitude);
+        }
+    }
+
+    private String getAddressLegacy(
+            final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
+
+        var request = client.target(String.format(url, latitude, longitude)).request();
 
         if (callback != null) {
-            // Asynchronous execution with callback
-            client.target(formattedUrl).request().async().get(new InvocationCallback<JsonObject>() {
+            request.async().get(new InvocationCallback<JsonObject>() {
                 @Override
                 public void completed(JsonObject json) {
-                    try {
-                        handleResponse(latitude, longitude, json, callback);
-                    } catch (Exception e) {
-                        failed(e);
-                    }
+                    handleResponse(latitude, longitude, json, callback);
                 }
 
                 @Override
@@ -145,106 +258,70 @@ public abstract class JsonGeocoder implements Geocoder {
                     callback.onFailure(throwable);
                 }
             });
-            return null;
         } else {
-            // Synchronous execution
             try {
-                JsonObject json = client.target(formattedUrl).request().get(JsonObject.class);
-                return handleResponse(latitude, longitude, json, null);
+                return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
             } catch (Exception e) {
                 LOGGER.warn("Geocoder network error", e);
-                return null;
             }
         }
+        return null;
     }
 
     /**
-     * Handles the JSON response from the geocoding service.
-     *
-     * @param latitude Latitude coordinate
-     * @param longitude Longitude coordinate
-     * @param json JSON response from the service
-     * @param callback Optional callback for asynchronous execution
-     * @return Address object if executed synchronously, null if using callback
+     * Fallback method when geocoding service is unavailable
      */
-    private Address handleResponse(double latitude, double longitude, JsonObject json, ReverseGeocoderCallback callback) {
-        Address address = parseAddress(json);
-        Map.Entry<Double, Double> key = new AbstractMap.SimpleImmutableEntry<>(latitude, longitude);
-        
-        if (address != null) {
-            if (addressFormat != null) {
-                address.setFormattedAddress(addressFormat.format(address));
-            }
-            
-            // Cache the result locally
-            if (cacheLocal != null) {
-                cacheLocal.put(key, address);
-            }
-            
-            // Cache the result in distributed cache
-            if (distributedCacheManager != null) {
-                String cacheKey = String.format("%s-%f-%f", getClass().getSimpleName(), latitude, longitude);
-                distributedCacheManager.putAddress(cacheKey, address);
-            }
-            
-            if (callback != null) {
-                callback.onSuccess(address);
-            }
-        } else {
-            String error = parseError(json);
-            if (error != null) {
-                LOGGER.warn("Geocoder error: {}", error);
-            } else {
-                LOGGER.warn("Empty geocoder response");
-            }
-            if (callback != null) {
-                callback.onFailure(new GeocoderException(error));
-            }
-        }
-        
-        return address;
+    protected String getFallbackAddress(double latitude, double longitude) {
+        // Default implementation returns coordinates as a string
+        return String.format("%.6f, %.6f", latitude, longitude);
     }
 
     /**
-     * Parses the JSON response into an Address object.
-     * Must be implemented by subclasses for each specific geocoding service.
-     *
-     * @param json JSON response from the service
-     * @return Address object or null if parsing failed
+     * Check if the geocoder service is healthy
      */
+    public boolean isHealthy() {
+        if (!healthReportingEnabled) {
+            return true; // Health reporting disabled, assume healthy
+        }
+
+        if (circuitBreaker != null) {
+            // Check circuit breaker state
+            return !circuitBreaker.getState().equals(CircuitBreaker.State.OPEN) &&
+                   !circuitBreaker.getState().equals(CircuitBreaker.State.FORCED_OPEN);
+        }
+        return true; // No circuit breaker, assume healthy
+    }
+
+    /**
+     * Get the current state of the circuit breaker
+     */
+    public CircuitBreaker.State getCircuitBreakerState() {
+        if (circuitBreaker != null) {
+            return circuitBreaker.getState();
+        }
+        return null;
+    }
+
+    /**
+     * Get metrics for the geocoder service
+     */
+    public Map<String, Object> getMetrics() {
+        Map<String, Object> metrics = new LinkedHashMap<>();
+        if (circuitBreaker != null) {
+            CircuitBreaker.Metrics circuitMetrics = circuitBreaker.getMetrics();
+            metrics.put("failureRate", circuitMetrics.getFailureRate());
+            metrics.put("slowCallRate", circuitMetrics.getSlowCallRate());
+            metrics.put("numberOfBufferedCalls", circuitMetrics.getNumberOfBufferedCalls());
+            metrics.put("numberOfFailedCalls", circuitMetrics.getNumberOfFailedCalls());
+            metrics.put("numberOfSlowCalls", circuitMetrics.getNumberOfSlowCalls());
+            metrics.put("numberOfSuccessfulCalls", circuitMetrics.getNumberOfSuccessfulCalls());
+        }
+        return metrics;
+    }
+
     public abstract Address parseAddress(JsonObject json);
 
-    /**
-     * Parses error information from the JSON response.
-     * Can be overridden by subclasses for service-specific error handling.
-     *
-     * @param json JSON response from the service
-     * @return Error message or null if no error was found
-     */
     protected String parseError(JsonObject json) {
         return null;
-    }
-
-    /**
-     * Safely reads a string value from a JSON object.
-     *
-     * @param json JSON object to read from
-     * @param key Key to read
-     * @return String value or null if not found
-     */
-    protected String readValue(JsonObject json, String key) {
-        if (json.containsKey(key) && !json.isNull(key)) {
-            return json.getString(key);
-        }
-        return null;
-    }
-
-    /**
-     * Interface for distributed cache management.
-     * Implementations should provide Redis or other distributed cache integration.
-     */
-    public interface DistributedCacheManager {
-        Address getAddress(String key);
-        void putAddress(String key, Address address);
     }
 }
