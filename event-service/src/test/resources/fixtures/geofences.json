@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1,
+    "name": "Office Circle",
+    "description": "Circular geofence around office location",
+    "area": "CIRCLE (55.75414 37.6204, 100)",
+    "calendarId": 1,
+    "color": "#FF0000",
+    "attributes": {
+      "speedLimit": 20,
+      "type": "business",
+      "priority": "high"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Warehouse Polygon",
+    "description": "Polygon geofence around warehouse area",
+    "area": "POLYGON ((55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165))",
+    "calendarId": 2,
+    "color": "#00FF00",
+    "attributes": {
+      "speedLimit": 10,
+      "type": "storage",
+      "priority": "medium"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Delivery Route",
+    "description": "Polyline geofence for delivery route",
+    "area": "LINESTRING (56.83777 60.59833, 56.83766 60.5968, 56.83787 60.59587, 56.83802 60.59495)",
+    "calendarId": 3,
+    "color": "#0000FF",
+    "attributes": {
+      "speedLimit": 50,
+      "type": "route",
+      "priority": "low",
+      "distanceThreshold": 15
+    }
+  },
+  {
+    "id": 4,
+    "name": "Customer Site",
+    "description": "Large circular geofence for customer location",
+    "area": "CIRCLE (51.5074 -0.1278, 500)",
+    "calendarId": null,
+    "color": "#FFFF00",
+    "attributes": {
+      "speedLimit": 30,
+      "type": "customer",
+      "priority": "high"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Restricted Area",
+    "description": "Complex polygon for restricted area",
+    "area": "POLYGON ((-23.559204099194772 148.8653145299711, -23.6000443437826 148.85956016213583, -23.600411843430095 148.89462111436828, -23.5626384786532 148.90278297873897, -23.5574863232753 148.88137329347367, -23.559204099194772 148.8653145299711))",
+    "calendarId": 4,
+    "color": "#FF00FF",
+    "attributes": {
+      "speedLimit": 5,
+      "type": "restricted",
+      "priority": "critical",
+      "accessLevel": "authorized-only"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Highway Route",
+    "description": "Polyline for highway monitoring",
+    "area": "LINESTRING (56.836 60.6126, 56.8393 60.6114, 56.83887 60.60811, 56.83782 60.5988)",
+    "calendarId": null,
+    "color": "#00FFFF",
+    "attributes": {
+      "speedLimit": 120,
+      "type": "highway",
+      "priority": "medium",
+      "distanceThreshold": 25
+    }
+  },
+  {
+    "id": 7,
+    "name": "International Date Line Test",
+    "description": "Polygon crossing the international date line",
+    "area": "POLYGON ((66.9494 179.838, 66.9508 -179.8496, 66.8406 -180.0014))",
+    "calendarId": null,
+    "color": "#FFA500",
+    "attributes": {
+      "type": "test",
+      "priority": "low",
+      "purpose": "date-line-testing"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Prime Meridian Test",
+    "description": "Polygon crossing the prime meridian",
+    "area": "POLYGON ((51.1966 -0.6207, 51.1897 0.4147, 50.9377 0.5136, 50.8675 -0.6082))",
+    "calendarId": null,
+    "color": "#800080",
+    "attributes": {
+      "type": "test",
+      "priority": "low",
+      "purpose": "meridian-testing"
+    }
+  },
+  {
+    "id": 9,
+    "name": "Small Circle",
+    "description": "Small circular geofence for precision testing",
+    "area": "CIRCLE (40.7128 -74.0060, 50)",
+    "calendarId": 5,
+    "color": "#008000",
+    "attributes": {
+      "speedLimit": 5,
+      "type": "test",
+      "priority": "medium",
+      "purpose": "precision-testing"
+    }
+  },
+  {
+    "id": 10,
+    "name": "Near-Zero Polyline",
+    "description": "Polyline near zero coordinates for edge case testing",
+    "area": "LINESTRING (0.0050 0.0050, 0.0050 -0.0050, -0.0050 -0.0050, -0.0050 0.0050)",
+    "calendarId": null,
+    "color": "#A52A2A",
+    "attributes": {
+      "type": "test",
+      "priority": "low",
+      "purpose": "edge-case-testing",
+      "distanceThreshold": 10
+    }
+  }
+]
