@@ -1,0 +1,80 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/REST/v1/Locations/[\\d.-]+,[\\d.-]+",
+    "queryParameters": {
+      "key": {
+        "matches": ".*"
+      },
+      "include": {
+        "equalTo": "ciso2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "authenticationResultCode": "ValidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "resourceSets": [
+        {
+          "estimatedTotal": 1,
+          "resources": [
+            {
+              "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+              "bbox": [
+                47.6381,
+                -122.1246,
+                47.6481,
+                -122.1146
+              ],
+              "name": "1 Microsoft Way, Redmond, WA 98052",
+              "point": {
+                "type": "Point",
+                "coordinates": [
+                  47.6431,
+                  -122.1196
+                ]
+              },
+              "address": {
+                "addressLine": "1 Microsoft Way",
+                "adminDistrict": "WA",
+                "adminDistrict2": "King County",
+                "countryRegion": "United States",
+                "countryRegionIso2": "US",
+                "formattedAddress": "1 Microsoft Way, Redmond, WA 98052",
+                "locality": "Redmond",
+                "postalCode": "98052"
+              },
+              "confidence": "High",
+              "entityType": "Address",
+              "geocodePoints": [
+                {
+                  "type": "Point",
+                  "coordinates": [
+                    47.6431,
+                    -122.1196
+                  ],
+                  "calculationMethod": "Rooftop",
+                  "usageTypes": [
+                    "Display"
+                  ]
+                }
+              ],
+              "matchCodes": [
+                "Good"
+              ]
+            }
+          ]
+        }
+      ],
+      "statusCode": 200,
+      "statusDescription": "OK",
+      "traceId": "7c8b8c41a7d94b9d9d208f8a320b5a6c"
+    }
+  }
+}
