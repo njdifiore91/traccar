@@ -1,0 +1,597 @@
+syntax = "proto3";
+
+package org.traccar.api.gateway;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.api.gateway.proto";
+option java_outer_classname = "ApiGatewayProto";
+
+// Common message for request metadata that should be included in all requests
+message RequestMetadata {
+  // Unique identifier for the request for tracing and correlation
+  string correlation_id = 1;
+  
+  // Timestamp when the request was initiated (milliseconds since epoch)
+  int64 timestamp = 2;
+  
+  // User ID making the request (if authenticated)
+  string user_id = 3;
+  
+  // Client IP address
+  string client_ip = 4;
+  
+  // User agent information
+  string user_agent = 5;
+  
+  // API version requested
+  string api_version = 6;
+}
+
+// Standard error response format
+message ErrorResponse {
+  // HTTP-like status code
+  int32 status_code = 1;
+  
+  // Error code for programmatic handling
+  string error_code = 2;
+  
+  // Human-readable error message
+  string message = 3;
+  
+  // Detailed error information for debugging (not exposed to end users)
+  string details = 4;
+  
+  // Request ID for tracing
+  string request_id = 5;
+  
+  // Service that generated the error
+  string source = 6;
+}
+
+// Device-related messages
+message Device {
+  int64 id = 1;
+  string name = 2;
+  string unique_id = 3;
+  string status = 4;
+  int64 last_update = 5;
+  string position_id = 6;
+  string group_id = 7;
+  string phone = 8;
+  string model = 9;
+  string contact = 10;
+  string category = 11;
+  bool disabled = 12;
+  map<string, string> attributes = 13;
+}
+
+message DeviceRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetDeviceRequest get_device = 2;
+    ListDevicesRequest list_devices = 3;
+    CreateDeviceRequest create_device = 4;
+    UpdateDeviceRequest update_device = 5;
+    DeleteDeviceRequest delete_device = 6;
+  }
+}
+
+message DeviceResponse {
+  oneof response {
+    GetDeviceResponse get_device = 1;
+    ListDevicesResponse list_devices = 2;
+    CreateDeviceResponse create_device = 3;
+    UpdateDeviceResponse update_device = 4;
+    DeleteDeviceResponse delete_device = 5;
+    ErrorResponse error = 6;
+  }
+}
+
+message GetDeviceRequest {
+  int64 id = 1;
+}
+
+message GetDeviceResponse {
+  Device device = 1;
+}
+
+message ListDevicesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string sort_by = 3;
+  bool ascending = 4;
+  string filter = 5;
+}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+  int32 total_count = 2;
+}
+
+message CreateDeviceRequest {
+  Device device = 1;
+}
+
+message CreateDeviceResponse {
+  Device device = 1;
+}
+
+message UpdateDeviceRequest {
+  int64 id = 1;
+  Device device = 2;
+}
+
+message UpdateDeviceResponse {
+  Device device = 1;
+}
+
+message DeleteDeviceRequest {
+  int64 id = 1;
+}
+
+message DeleteDeviceResponse {
+  bool success = 1;
+}
+
+// Position-related messages
+message Position {
+  int64 id = 1;
+  int64 device_id = 2;
+  int64 timestamp = 3;
+  bool valid = 4;
+  double latitude = 5;
+  double longitude = 6;
+  double altitude = 7;
+  double speed = 8;
+  double course = 9;
+  string address = 10;
+  map<string, string> attributes = 11;
+  double accuracy = 12;
+  string network = 13;
+}
+
+message PositionRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetPositionRequest get_position = 2;
+    ListPositionsRequest list_positions = 3;
+  }
+}
+
+message PositionResponse {
+  oneof response {
+    GetPositionResponse get_position = 1;
+    ListPositionsResponse list_positions = 2;
+    ErrorResponse error = 3;
+  }
+}
+
+message GetPositionRequest {
+  int64 id = 1;
+}
+
+message GetPositionResponse {
+  Position position = 1;
+}
+
+message ListPositionsRequest {
+  int64 device_id = 1;
+  int64 from = 2;
+  int64 to = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message ListPositionsResponse {
+  repeated Position positions = 1;
+  int32 total_count = 2;
+}
+
+// Event-related messages
+message Event {
+  int64 id = 1;
+  string type = 2;
+  int64 server_time = 3;
+  int64 device_time = 4;
+  int64 device_id = 5;
+  int64 position_id = 6;
+  int64 geofence_id = 7;
+  map<string, string> attributes = 8;
+}
+
+message EventRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetEventRequest get_event = 2;
+    ListEventsRequest list_events = 3;
+  }
+}
+
+message EventResponse {
+  oneof response {
+    GetEventResponse get_event = 1;
+    ListEventsResponse list_events = 2;
+    ErrorResponse error = 3;
+  }
+}
+
+message GetEventRequest {
+  int64 id = 1;
+}
+
+message GetEventResponse {
+  Event event = 1;
+}
+
+message ListEventsRequest {
+  int64 device_id = 1;
+  string type = 2;
+  int64 from = 3;
+  int64 to = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message ListEventsResponse {
+  repeated Event events = 1;
+  int32 total_count = 2;
+}
+
+// Geofence-related messages
+message Geofence {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string area = 4;
+  repeated int64 device_ids = 5;
+  repeated int64 group_ids = 6;
+  string color = 7;
+  map<string, string> attributes = 8;
+}
+
+message GeofenceRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetGeofenceRequest get_geofence = 2;
+    ListGeofencesRequest list_geofences = 3;
+    CreateGeofenceRequest create_geofence = 4;
+    UpdateGeofenceRequest update_geofence = 5;
+    DeleteGeofenceRequest delete_geofence = 6;
+  }
+}
+
+message GeofenceResponse {
+  oneof response {
+    GetGeofenceResponse get_geofence = 1;
+    ListGeofencesResponse list_geofences = 2;
+    CreateGeofenceResponse create_geofence = 3;
+    UpdateGeofenceResponse update_geofence = 4;
+    DeleteGeofenceResponse delete_geofence = 5;
+    ErrorResponse error = 6;
+  }
+}
+
+message GetGeofenceRequest {
+  int64 id = 1;
+}
+
+message GetGeofenceResponse {
+  Geofence geofence = 1;
+}
+
+message ListGeofencesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string sort_by = 3;
+  bool ascending = 4;
+  string filter = 5;
+}
+
+message ListGeofencesResponse {
+  repeated Geofence geofences = 1;
+  int32 total_count = 2;
+}
+
+message CreateGeofenceRequest {
+  Geofence geofence = 1;
+}
+
+message CreateGeofenceResponse {
+  Geofence geofence = 1;
+}
+
+message UpdateGeofenceRequest {
+  int64 id = 1;
+  Geofence geofence = 2;
+}
+
+message UpdateGeofenceResponse {
+  Geofence geofence = 1;
+}
+
+message DeleteGeofenceRequest {
+  int64 id = 1;
+}
+
+message DeleteGeofenceResponse {
+  bool success = 1;
+}
+
+// User-related messages
+message User {
+  int64 id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  bool administrator = 5;
+  map<string, bool> permissions = 6;
+  map<string, string> attributes = 7;
+}
+
+message UserRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetUserRequest get_user = 2;
+    ListUsersRequest list_users = 3;
+    CreateUserRequest create_user = 4;
+    UpdateUserRequest update_user = 5;
+    DeleteUserRequest delete_user = 6;
+  }
+}
+
+message UserResponse {
+  oneof response {
+    GetUserResponse get_user = 1;
+    ListUsersResponse list_users = 2;
+    CreateUserResponse create_user = 3;
+    UpdateUserResponse update_user = 4;
+    DeleteUserResponse delete_user = 5;
+    ErrorResponse error = 6;
+  }
+}
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message ListUsersRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string sort_by = 3;
+  bool ascending = 4;
+  string filter = 5;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  int32 total_count = 2;
+}
+
+message CreateUserRequest {
+  User user = 1;
+  string password = 2;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  int64 id = 1;
+  User user = 2;
+  string password = 3;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  int64 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+// Authentication-related messages
+message LoginRequest {
+  RequestMetadata metadata = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message LoginResponse {
+  oneof response {
+    TokenResponse token = 1;
+    ErrorResponse error = 2;
+  }
+}
+
+message TokenResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+  User user = 4;
+}
+
+message RefreshTokenRequest {
+  RequestMetadata metadata = 1;
+  string refresh_token = 2;
+}
+
+message RefreshTokenResponse {
+  oneof response {
+    TokenResponse token = 1;
+    ErrorResponse error = 2;
+  }
+}
+
+message LogoutRequest {
+  RequestMetadata metadata = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+// WebSocket-related messages
+message WebSocketMessage {
+  string type = 1;
+  bytes payload = 2;
+  string correlation_id = 3;
+  int64 timestamp = 4;
+}
+
+message WebSocketSubscription {
+  string topic = 1;
+  map<string, string> filters = 2;
+}
+
+message WebSocketSubscribeRequest {
+  RequestMetadata metadata = 1;
+  repeated WebSocketSubscription subscriptions = 2;
+}
+
+message WebSocketSubscribeResponse {
+  oneof response {
+    WebSocketSubscriptionResult result = 1;
+    ErrorResponse error = 2;
+  }
+}
+
+message WebSocketSubscriptionResult {
+  repeated string accepted_topics = 1;
+  repeated string rejected_topics = 2;
+  map<string, string> rejection_reasons = 3;
+}
+
+// Command-related messages
+message Command {
+  int64 id = 1;
+  string type = 2;
+  int64 device_id = 3;
+  string description = 4;
+  map<string, string> attributes = 5;
+}
+
+message CommandRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetCommandTypesRequest get_command_types = 2;
+    SendCommandRequest send_command = 3;
+  }
+}
+
+message CommandResponse {
+  oneof response {
+    GetCommandTypesResponse get_command_types = 1;
+    SendCommandResponse send_command = 2;
+    ErrorResponse error = 3;
+  }
+}
+
+message GetCommandTypesRequest {
+  int64 device_id = 1;
+}
+
+message GetCommandTypesResponse {
+  repeated string command_types = 1;
+}
+
+message SendCommandRequest {
+  Command command = 1;
+}
+
+message SendCommandResponse {
+  Command command = 1;
+  string status = 2;
+}
+
+// Report-related messages
+message Report {
+  string type = 1;
+  int64 device_id = 2;
+  int64 group_id = 3;
+  int64 from = 4;
+  int64 to = 5;
+  map<string, string> attributes = 6;
+}
+
+message ReportRequest {
+  RequestMetadata metadata = 1;
+  oneof request {
+    GetReportTypesRequest get_report_types = 2;
+    GenerateReportRequest generate_report = 3;
+  }
+}
+
+message ReportResponse {
+  oneof response {
+    GetReportTypesResponse get_report_types = 1;
+    GenerateReportResponse generate_report = 2;
+    ErrorResponse error = 3;
+  }
+}
+
+message GetReportTypesRequest {}
+
+message GetReportTypesResponse {
+  repeated string report_types = 1;
+}
+
+message GenerateReportRequest {
+  Report report = 1;
+  string format = 2; // "json", "csv", "xlsx"
+}
+
+message GenerateReportResponse {
+  string report_id = 1;
+  string status = 2;
+  string download_url = 3;
+  bytes data = 4; // Inline report data (for small reports)
+}
+
+// Service definitions
+service DeviceService {
+  rpc ProcessDeviceRequest(DeviceRequest) returns (DeviceResponse);
+}
+
+service PositionService {
+  rpc ProcessPositionRequest(PositionRequest) returns (PositionResponse);
+}
+
+service EventService {
+  rpc ProcessEventRequest(EventRequest) returns (EventResponse);
+}
+
+service GeofenceService {
+  rpc ProcessGeofenceRequest(GeofenceRequest) returns (GeofenceResponse);
+}
+
+service UserService {
+  rpc ProcessUserRequest(UserRequest) returns (UserResponse);
+}
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+service WebSocketService {
+  rpc Subscribe(WebSocketSubscribeRequest) returns (WebSocketSubscribeResponse);
+  rpc StreamUpdates(WebSocketSubscription) returns (stream WebSocketMessage);
+}
+
+service CommandService {
+  rpc ProcessCommandRequest(CommandRequest) returns (CommandResponse);
+}
+
+service ReportService {
+  rpc ProcessReportRequest(ReportRequest) returns (ReportResponse);
+}
