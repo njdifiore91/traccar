@@ -1,0 +1,213 @@
+# API Gateway Routes Configuration
+# This file defines the routing configuration for the API Gateway, mapping external API endpoints to internal microservices.
+
+# Global configuration
+global:
+  # Default timeout for all service requests (in milliseconds)
+  default_timeout: 10000
+  # Default number of retries for failed requests
+  default_retries: 3
+  # Default backoff strategy for retries (exponential, linear, or fixed)
+  retry_backoff: exponential
+  # Service discovery mechanism (consul, kubernetes, or static)
+  service_discovery: kubernetes
+  # Enable circuit breaker for all routes
+  circuit_breaker_enabled: true
+  # Circuit breaker failure threshold percentage
+  circuit_breaker_threshold: 50
+  # Circuit breaker recovery time in milliseconds
+  circuit_breaker_recovery: 30000
+
+# Route definitions
+routes:
+  # Protocol Service routes
+  - name: protocol-service
+    # Service discovery name
+    service: protocol-service
+    # Base path for the service
+    base_path: /api/protocols
+    # Path patterns that should be routed to this service
+    paths:
+      - /api/protocols/**
+      - /api/commands/**
+      - /api/devices/*/command
+    # Service-specific timeout (overrides global default)
+    timeout: 15000
+    # Retry configuration
+    retries: 2
+    # Load balancing strategy (round-robin, least-connections, ip-hash)
+    load_balancing: round-robin
+    # Health check path
+    health_check_path: /health/liveness
+    # Version support
+    versions:
+      - v1
+      - v2
+    # Headers to pass to the service
+    forward_headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      
+  # Position Service routes
+  - name: position-service
+    service: position-service
+    base_path: /api/positions
+    paths:
+      - /api/positions/**
+      - /api/devices/*/positions
+      - /api/reports/route/**
+      - /api/reports/trips/**
+      - /api/reports/stops/**
+    timeout: 20000  # Longer timeout for position queries that might involve large datasets
+    retries: 3
+    load_balancing: round-robin
+    health_check_path: /health/liveness
+    versions:
+      - v1
+      - v2
+    forward_headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      
+  # Event Service routes
+  - name: event-service
+    service: event-service
+    base_path: /api/events
+    paths:
+      - /api/events/**
+      - /api/devices/*/events
+      - /api/notifications/types/**
+      - /api/geofences/**
+      - /api/calendars/**
+    timeout: 10000
+    retries: 3
+    load_balancing: round-robin
+    health_check_path: /health/liveness
+    versions:
+      - v1
+      - v2
+    forward_headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      
+  # Notification Service routes
+  - name: notification-service
+    service: notification-service
+    base_path: /api/notifications
+    paths:
+      - /api/notifications/**
+      - /api/users/*/notifications
+    timeout: 30000  # Longer timeout for notification delivery
+    retries: 5      # More retries for notification delivery
+    load_balancing: round-robin
+    health_check_path: /health/liveness
+    versions:
+      - v1
+      - v2
+    forward_headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      
+  # Reporting Service routes
+  - name: reporting-service
+    service: reporting-service
+    base_path: /api/reports
+    paths:
+      - /api/reports/**
+      - /api/reports/summary/**
+      - /api/reports/chart/**
+      - /api/reports/events/**
+      - /api/export/**
+    # Exclude paths that are handled by position-service
+    exclude_paths:
+      - /api/reports/route/**
+      - /api/reports/trips/**
+      - /api/reports/stops/**
+    timeout: 60000  # Long timeout for report generation
+    retries: 2
+    load_balancing: round-robin
+    health_check_path: /health/liveness
+    versions:
+      - v1
+      - v2
+    forward_headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - X-Requested-With
+      
+  # User and Account Management routes
+  - name: api-gateway
+    # These endpoints are handled directly by the API Gateway
+    service: internal
+    base_path: /api
+    paths:
+      - /api/session/**
+      - /api/users/**
+      - /api/groups/**
+      - /api/permissions/**
+      - /api/servers/**
+      - /api/attributes/**
+      - /api/statistics/**
+      - /api/devices/**  # Basic device management is handled by API Gateway
+    # Exclude paths that are handled by other services
+    exclude_paths:
+      - /api/users/*/notifications
+      - /api/devices/*/positions
+      - /api/devices/*/events
+      - /api/devices/*/command
+    timeout: 10000
+    retries: 3
+    versions:
+      - v1
+      - v2
+      
+# WebSocket configuration
+websocket:
+  # Path for WebSocket connections
+  path: /api/socket
+  # Maximum frame size in bytes
+  max_frame_size: 65536
+  # Idle timeout in milliseconds
+  idle_timeout: 60000
+  # Message broker topic subscriptions for real-time updates
+  subscriptions:
+    - topic: position-updates
+      permission: device:read
+    - topic: event-updates
+      permission: device:read
+    - topic: notification-updates
+      permission: notification:read
+      
+# Service discovery configuration
+service_discovery:
+  # Refresh interval for service discovery in milliseconds
+  refresh_interval: 30000
+  # Kubernetes namespace for services
+  kubernetes:
+    namespace: default
+    label_selector: app=traccar
+  # Consul configuration
+  consul:
+    host: consul.service.consul
+    port: 8500
+    acl_token: ${CONSUL_ACL_TOKEN:}
+    
+# Circuit breaker configuration
+circuit_breaker:
+  # Failure threshold percentage
+  failure_threshold: 50
+  # Request volume threshold
+  request_volume_threshold: 20
+  # Sleep window in milliseconds
+  sleep_window: 5000
+  # Error threshold percentage
+  error_threshold_percentage: 50
