@@ -1,0 +1,215 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-service-config
+  labels:
+    app: event-service
+    component: configuration
+data:
+  # Event Service Configuration
+  application.yml: |
+    # Server Configuration
+    server:
+      port: 8080
+      shutdown: graceful
+      compression:
+        enabled: true
+      tomcat:
+        threads:
+          max: 200
+          min-spare: 20
+
+    # Spring Configuration
+    spring:
+      application:
+        name: event-service
+      main:
+        banner-mode: off
+      lifecycle:
+        timeout-per-shutdown-phase: 30s
+
+    # Logging Configuration
+    logging:
+      level:
+        root: INFO
+        org.traccar: INFO
+        org.traccar.handler.events: DEBUG
+        org.springframework.web: INFO
+        org.springframework.data: INFO
+        org.springframework.kafka: INFO
+        org.springframework.amqp: INFO
+
+    # Message Broker Configuration
+    messaging:
+      broker:
+        type: kafka  # Options: kafka, rabbitmq
+        # Kafka Configuration
+        kafka:
+          bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+          consumer:
+            group-id: event-service
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            properties:
+              spring.json.trusted.packages: org.traccar.model,org.traccar.proto
+          producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          topics:
+            position-input: enriched-positions
+            event-output: events
+        # RabbitMQ Configuration
+        rabbitmq:
+          host: ${RABBITMQ_HOST:rabbitmq}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USERNAME:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
+          virtual-host: ${RABBITMQ_VHOST:/}
+          queues:
+            position-input: enriched-positions
+            event-output: events
+
+    # Database Configuration
+    database:
+      url: ${DB_URL:jdbc:postgresql://postgres:5432/traccar}
+      username: ${DB_USERNAME:traccar}
+      password: ${DB_PASSWORD:traccar}
+      driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+      max-pool-size: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+      validation-timeout: 5000
+      minimum-idle: 5
+
+    # Service Discovery Configuration
+    service-discovery:
+      enabled: true
+      type: kubernetes  # Options: kubernetes, consul
+      kubernetes:
+        namespace: default
+        service-name: event-service
+      consul:
+        host: ${CONSUL_HOST:consul}
+        port: ${CONSUL_PORT:8500}
+        service-name: event-service
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+
+  # Event Detection Configuration
+  event-detection.yml: |
+    # Event Detection Configuration
+    event:
+      # Geofence Event Configuration
+      geofence:
+        enabled: true
+        # Additional geofence configuration parameters can be added here
+
+      # Overspeed Event Configuration
+      overspeed:
+        enabled: true
+        minimal-duration: 30  # Duration in seconds before triggering overspeed event
+        prefer-lowest: true   # Use lowest applicable speed limit when multiple limits apply
+        threshold-multiplier: 1.0  # Multiplier applied to speed limits
+        limit: 0  # Default speed limit (0 means use device attribute or geofence value)
+
+      # Motion Event Configuration
+      motion:
+        enabled: true
+        speed-threshold: 1.0  # Speed threshold in knots to determine motion state
+
+      # Device Status Event Configuration
+      device-status:
+        enabled: true
+        online-threshold: 300  # Seconds before considering a device offline
+        offline-update: true   # Generate events on offline status
+
+      # Device Idle Event Configuration
+      idle:
+        enabled: true
+        idle-duration: 180  # Seconds before considering a device idle
+
+      # Ignition Event Configuration
+      ignition:
+        enabled: true
+        detect-from-attributes: true  # Detect ignition state from position attributes
+
+      # Fuel Level Event Configuration
+      fuel:
+        enabled: true
+        level-threshold: 10.0  # Percentage change to trigger fuel level event
+
+      # Maintenance Event Configuration
+      maintenance:
+        enabled: true
+        # Additional maintenance configuration parameters can be added here
+
+  # Health Check Configuration
+  health.yml: |
+    # Health Check Configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+        db:
+          enabled: true
+        kafka:
+          enabled: true
+        rabbit:
+          enabled: true
+
+  # Resilience Configuration
+  resilience.yml: |
+    # Resilience4j Configuration
+    resilience4j:
+      circuitbreaker:
+        configs:
+          default:
+            slidingWindowType: COUNT_BASED
+            slidingWindowSize: 100
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 10
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+        instances:
+          databaseService:
+            baseConfig: default
+          messageBroker:
+            baseConfig: default
+      retry:
+        configs:
+          default:
+            maxAttempts: 3
+            waitDuration: 1s
+            enableExponentialBackoff: true
+            exponentialBackoffMultiplier: 2
+            enableRandomizedWait: true
+            randomizedWaitFactor: 0.5
+        instances:
+          databaseService:
+            baseConfig: default
+          messageBroker:
+            baseConfig: default
+      bulkhead:
+        configs:
+          default:
+            maxConcurrentCalls: 25
+            maxWaitDuration: 0
+        instances:
+          databaseService:
+            baseConfig: default
+          messageBroker:
+            baseConfig: default
