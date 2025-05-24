@@ -15,103 +15,204 @@
  */
 package org.traccar.geocoder;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import com.google.inject.Inject;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Implements a health indicator for geocoding services that exposes health metrics for monitoring
- * and integrates with service discovery for health checks. This component is critical for the
- * microservices architecture as it provides visibility into the health and availability of external
- * geocoding services, enabling automated failover and alerting when services degrade.
+ * Health indicator for geocoding services that exposes health metrics for monitoring
+ * and integrates with service discovery for health checks.
+ * <p>
+ * This component provides visibility into the health and availability of external geocoding services,
+ * enabling automated failover and alerting when services degrade.
  */
-@Singleton
-public class GeocoderHealthIndicator {
+public class GeocoderHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHealthIndicator.class);
 
-    private final List<JsonGeocoder> geocoders = new ArrayList<>();
+    private static final double DEFAULT_TEST_LATITUDE = 40.7128; // New York City
+    private static final double DEFAULT_TEST_LONGITUDE = -74.0060;
+    private static final long DEFAULT_TIMEOUT_MS = 5000; // 5 seconds
+
+    private final Geocoder geocoder;
     private final MeterRegistry meterRegistry;
+    private final AtomicReference<Status> currentStatus = new AtomicReference<>(Status.UNKNOWN);
+    private final AtomicReference<String> lastError = new AtomicReference<>("");
+
+    private double testLatitude = DEFAULT_TEST_LATITUDE;
+    private double testLongitude = DEFAULT_TEST_LONGITUDE;
+    private long timeoutMs = DEFAULT_TIMEOUT_MS;
 
     /**
      * Creates a new GeocoderHealthIndicator.
      *
-     * @param meterRegistry The meter registry for metrics collection
+     * @param geocoder The geocoder service to monitor
+     * @param meterRegistry The meter registry for exposing metrics
      */
     @Inject
-    public GeocoderHealthIndicator(MeterRegistry meterRegistry) {
+    public GeocoderHealthIndicator(Geocoder geocoder, MeterRegistry meterRegistry) {
+        this.geocoder = geocoder;
         this.meterRegistry = meterRegistry;
-        LOGGER.info("GeocoderHealthIndicator initialized");
+        initializeMetrics();
     }
 
     /**
-     * Registers a geocoder for health monitoring.
-     *
-     * @param geocoder The geocoder to register
-     * @param name The name of the geocoder
+     * Initializes metrics for monitoring geocoder health.
      */
-    public void registerGeocoder(JsonGeocoder geocoder, String name) {
-        geocoders.add(geocoder);
-        LOGGER.info("Registered geocoder for health monitoring: {}", name);
-
-        // Register health gauge metric
-        if (meterRegistry != null) {
-            meterRegistry.gauge("geocoder.health", 
-                    Tags.of(Tag.of("name", name)), 
-                    geocoder, 
-                    g -> g.isHealthy() ? 1.0 : 0.0);
-            LOGGER.debug("Registered health gauge for geocoder: {}", name);
-        }
+    private void initializeMetrics() {
+        meterRegistry.gauge("geocoder.health.status", 
+                Arrays.asList(Tag.of("provider", getGeocoderProviderName())),
+                currentStatus, 
+                status -> status.get() == Status.UP ? 1.0 : 0.0);
     }
 
     /**
-     * Checks the health of all registered geocoders.
+     * Gets the name of the geocoder provider for metrics and health reporting.
      *
-     * @return A map containing the health status of each geocoder
+     * @return The provider name
      */
-    public Map<String, Object> checkHealth() {
-        Map<String, Object> health = new HashMap<>();
-        boolean overallHealth = true;
+    private String getGeocoderProviderName() {
+        String className = geocoder.getClass().getSimpleName();
+        return className.endsWith("Geocoder") 
+                ? className.substring(0, className.length() - "Geocoder".length()).toLowerCase() 
+                : className.toLowerCase();
+    }
 
-        for (JsonGeocoder geocoder : geocoders) {
-            boolean geocoderHealth = geocoder.isHealthy();
-            overallHealth = overallHealth && geocoderHealth;
+    /**
+     * Sets custom coordinates for geocoder health check.
+     *
+     * @param latitude Test latitude
+     * @param longitude Test longitude
+     * @return This health indicator instance for method chaining
+     */
+    public GeocoderHealthIndicator withTestCoordinates(double latitude, double longitude) {
+        this.testLatitude = latitude;
+        this.testLongitude = longitude;
+        return this;
+    }
 
-            // Add circuit breaker state if available
-            CircuitBreaker.State state = geocoder.getCircuitBreakerState();
-            if (state != null) {
-                health.put("circuitBreakerState", state.name());
+    /**
+     * Sets custom timeout for geocoder health check.
+     *
+     * @param timeoutMs Timeout in milliseconds
+     * @return This health indicator instance for method chaining
+     */
+    public GeocoderHealthIndicator withTimeout(long timeoutMs) {
+        this.timeoutMs = timeoutMs;
+        return this;
+    }
+
+    /**
+     * Performs a health check on the geocoder service.
+     *
+     * @return Health status with details
+     */
+    @Override
+    public Health health() {
+        try {
+            CompletableFuture<String> future = new CompletableFuture<>();
+            
+            geocoder.getAddress(testLatitude, testLongitude, new Geocoder.ReverseGeocoderCallback() {
+                @Override
+                public void onSuccess(String address) {
+                    future.complete(address);
+                }
+
+                @Override
+                public void onFailure(Throwable e) {
+                    future.completeExceptionally(e);
+                }
+            });
+
+            String address = future.get(timeoutMs, TimeUnit.MILLISECONDS);
+            
+            if (address != null && !address.isEmpty()) {
+                updateStatus(Status.UP, "");
+                return Health.up()
+                        .withDetail("provider", getGeocoderProviderName())
+                        .withDetail("testCoordinates", testLatitude + "," + testLongitude)
+                        .withDetail("responseTime", "< " + timeoutMs + "ms")
+                        .build();
+            } else {
+                String error = "Empty address returned from geocoder";
+                updateStatus(Status.DOWN, error);
+                return Health.down()
+                        .withDetail("provider", getGeocoderProviderName())
+                        .withDetail("testCoordinates", testLatitude + "," + testLongitude)
+                        .withDetail("error", error)
+                        .build();
             }
-
-            // Add metrics if available
-            health.put("metrics", geocoder.getMetrics());
+        } catch (Exception e) {
+            String error = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            updateStatus(Status.DOWN, error);
+            LOGGER.warn("Geocoder health check failed: {}", error);
+            return Health.down(e)
+                    .withDetail("provider", getGeocoderProviderName())
+                    .withDetail("testCoordinates", testLatitude + "," + testLongitude)
+                    .withDetail("error", error)
+                    .build();
         }
-
-        health.put("status", overallHealth ? "UP" : "DOWN");
-        return health;
     }
 
     /**
-     * Gets the overall health status of all geocoders.
+     * Updates the current status and records metrics.
      *
-     * @return true if all geocoders are healthy, false otherwise
+     * @param status The new status
+     * @param error Error message if status is DOWN
      */
-    public boolean isHealthy() {
-        for (JsonGeocoder geocoder : geocoders) {
-            if (!geocoder.isHealthy()) {
-                return false;
+    private void updateStatus(Status status, String error) {
+        Status previousStatus = currentStatus.getAndSet(status);
+        lastError.set(error);
+        
+        if (previousStatus != status) {
+            if (status == Status.DOWN) {
+                LOGGER.warn("Geocoder service {} is DOWN: {}", getGeocoderProviderName(), error);
+                // Record failure event for alerting
+                meterRegistry.counter("geocoder.health.status.change", 
+                        Arrays.asList(
+                            Tag.of("provider", getGeocoderProviderName()),
+                            Tag.of("status", "down"),
+                            Tag.of("previous", previousStatus.getCode())
+                        )).increment();
+            } else if (status == Status.UP && previousStatus == Status.DOWN) {
+                LOGGER.info("Geocoder service {} is back UP", getGeocoderProviderName());
+                // Record recovery event
+                meterRegistry.counter("geocoder.health.status.change", 
+                        Arrays.asList(
+                            Tag.of("provider", getGeocoderProviderName()),
+                            Tag.of("status", "up"),
+                            Tag.of("previous", previousStatus.getCode())
+                        )).increment();
             }
         }
-        return true;
+    }
+
+    /**
+     * Gets the current health status.
+     *
+     * @return Current status
+     */
+    public Status getCurrentStatus() {
+        return currentStatus.get();
+    }
+
+    /**
+     * Gets the last error message.
+     *
+     * @return Last error message or empty string if no error
+     */
+    public String getLastError() {
+        return lastError.get();
     }
 }
