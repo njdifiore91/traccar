@@ -1,0 +1,163 @@
+# Resilience4j Configuration for Notification Service
+# This file defines circuit breaker, retry, bulkhead, and rate limiter settings
+# for external notification service calls (email, SMS, push, etc.)
+
+resilience4j:
+  # Circuit Breaker configurations
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - jakarta.mail.MessagingException
+          - org.traccar.notification.MessageException
+    instances:
+      emailNotificator:
+        baseConfig: default
+        waitDurationInOpenState: 60s
+      smsNotificator:
+        baseConfig: default
+        failureRateThreshold: 40
+      firebaseNotificator:
+        baseConfig: default
+        slidingWindowSize: 50
+      telegramNotificator:
+        baseConfig: default
+        waitDurationInOpenState: 45s
+      pushoverNotificator:
+        baseConfig: default
+        waitDurationInOpenState: 45s
+
+  # Retry configurations with exponential backoff
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - jakarta.mail.MessagingException
+          - org.traccar.notification.MessageException
+    instances:
+      emailNotificator:
+        baseConfig: default
+        maxAttempts: 5
+      smsNotificator:
+        baseConfig: default
+        waitDuration: 2s
+      firebaseNotificator:
+        baseConfig: default
+        maxAttempts: 2
+      telegramNotificator:
+        baseConfig: default
+        waitDuration: 1500ms
+      pushoverNotificator:
+        baseConfig: default
+        waitDuration: 1500ms
+
+  # Bulkhead configurations to isolate failures
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 1s
+    instances:
+      emailNotificator:
+        baseConfig: default
+        maxConcurrentCalls: 50
+      smsNotificator:
+        baseConfig: default
+        maxConcurrentCalls: 20
+      firebaseNotificator:
+        baseConfig: default
+        maxConcurrentCalls: 100
+      telegramNotificator:
+        baseConfig: default
+        maxConcurrentCalls: 10
+      pushoverNotificator:
+        baseConfig: default
+        maxConcurrentCalls: 10
+
+  # Rate limiter configurations for external APIs
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 50
+        limitRefreshPeriod: 1s
+        timeoutDuration: 3s
+        registerHealthIndicator: true
+    instances:
+      emailNotificator:
+        baseConfig: default
+        limitForPeriod: 100
+      smsNotificator:
+        baseConfig: default
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+      firebaseNotificator:
+        baseConfig: default
+        limitForPeriod: 500
+        limitRefreshPeriod: 1s
+      telegramNotificator:
+        baseConfig: default
+        limitForPeriod: 30
+        limitRefreshPeriod: 1m
+      pushoverNotificator:
+        baseConfig: default
+        limitForPeriod: 30
+        limitRefreshPeriod: 1m
+
+  # Thread pool bulkhead configurations for async operations
+  thread-pool-bulkhead:
+    configs:
+      default:
+        maxThreadPoolSize: 10
+        coreThreadPoolSize: 5
+        queueCapacity: 100
+        keepAliveDuration: 20ms
+    instances:
+      notificationProcessing:
+        baseConfig: default
+        maxThreadPoolSize: 20
+        coreThreadPoolSize: 10
+      channelDelivery:
+        baseConfig: default
+        maxThreadPoolSize: 30
+        coreThreadPoolSize: 15
+
+  # Time limiter configurations to prevent long-running calls
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+    instances:
+      emailNotificator:
+        baseConfig: default
+        timeoutDuration: 10s
+      smsNotificator:
+        baseConfig: default
+        timeoutDuration: 5s
+      firebaseNotificator:
+        baseConfig: default
+        timeoutDuration: 5s
+      telegramNotificator:
+        baseConfig: default
+        timeoutDuration: 5s
+      pushoverNotificator:
+        baseConfig: default
+        timeoutDuration: 5s
