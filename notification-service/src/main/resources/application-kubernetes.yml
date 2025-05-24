@@ -1,0 +1,50 @@
+# Kubernetes service discovery configuration
+
+service:
+  registration:
+    enabled: true
+    type: kubernetes
+    tags: notification,traccar,microservice
+    healthCheckPath: /actuator/health/liveness
+    healthCheckInterval: 10s
+    renewalInterval: 60000
+    metadata: version=${info.app.version},environment=${spring.profiles.active:default}
+
+kubernetes:
+  namespace: ${KUBERNETES_NAMESPACE:default}
+
+spring:
+  cloud:
+    kubernetes:
+      enabled: true
+      config:
+        enabled: true
+        namespace: ${KUBERNETES_NAMESPACE:default}
+        sources:
+          - name: notification-service-config
+            namespace: ${KUBERNETES_NAMESPACE:default}
+      reload:
+        enabled: true
+        mode: polling
+        period: 60000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState,diskSpace
+        readiness:
+          include: readinessState,db,kubernetes
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
