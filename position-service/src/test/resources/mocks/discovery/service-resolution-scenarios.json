@@ -1,0 +1,521 @@
+{
+  "version": "1.0.0",
+  "description": "Test scenarios for service resolution in Position Service, covering discovery of various dependencies and communication patterns",
+  "scenarios": [
+    {
+      "id": "protocol-service-basic-resolution",
+      "name": "Protocol Service Basic Resolution",
+      "description": "Basic scenario for resolving Protocol Service instances for position data reception",
+      "service": "protocol-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "protocol-service-1",
+          "host": "protocol-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "protocols": ["tk103", "teltonika", "meitrack", "atrack"]
+          }
+        },
+        {
+          "id": "protocol-service-2",
+          "host": "protocol-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "protocols": ["tk103", "teltonika", "meitrack", "atrack"]
+          }
+        },
+        {
+          "id": "protocol-service-3",
+          "host": "protocol-service-3.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c",
+            "protocols": ["tk103", "teltonika", "meitrack", "atrack"]
+          }
+        }
+      ],
+      "testParameters": {
+        "messageType": "position",
+        "deviceId": 123,
+        "topicName": "raw-positions",
+        "testDescription": "Verifies that Position Service can discover all available Protocol Service instances for receiving position data"
+      }
+    },
+    {
+      "id": "protocol-service-health-aware-resolution",
+      "name": "Protocol Service Health-Aware Resolution",
+      "description": "Scenario for resolving Protocol Service instances with health status consideration",
+      "service": "protocol-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "protocol-service-1",
+          "host": "protocol-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "protocol-service-2",
+          "host": "protocol-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "DOWN",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b"
+          }
+        },
+        {
+          "id": "protocol-service-3",
+          "host": "protocol-service-3.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c"
+          }
+        }
+      ],
+      "testParameters": {
+        "messageType": "position",
+        "deviceId": 123,
+        "topicName": "raw-positions",
+        "expectedHealthyInstanceCount": 2,
+        "testDescription": "Verifies that Position Service only resolves healthy Protocol Service instances and skips unhealthy ones",
+        "circuitBreakerEnabled": true,
+        "retryEnabled": true
+      }
+    },
+    {
+      "id": "event-service-basic-resolution",
+      "name": "Event Service Basic Resolution",
+      "description": "Basic scenario for resolving Event Service instances for event publishing",
+      "service": "event-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "event-service-1",
+          "host": "event-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "event-service-2",
+          "host": "event-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b"
+          }
+        }
+      ],
+      "testParameters": {
+        "eventType": "deviceOverspeed",
+        "deviceId": 123,
+        "topicName": "events",
+        "testDescription": "Verifies that Position Service can discover Event Service instances for publishing events",
+        "messageFormat": "protobuf",
+        "compressionEnabled": true
+      }
+    },
+    {
+      "id": "notification-service-resolution",
+      "name": "Notification Service Resolution",
+      "description": "Scenario for resolving Notification Service instances for alert delivery",
+      "service": "notification-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "notification-service-1",
+          "host": "notification-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a",
+            "capabilities": ["email", "sms", "push"]
+          }
+        },
+        {
+          "id": "notification-service-2",
+          "host": "notification-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b",
+            "capabilities": ["email", "sms", "push"]
+          }
+        }
+      ],
+      "testParameters": {
+        "notificationType": "deviceOverspeed",
+        "deviceId": 123,
+        "userId": 456,
+        "topicName": "notifications",
+        "testDescription": "Verifies that Position Service can discover Notification Service instances for alert delivery",
+        "notificationChannels": ["email", "sms", "push"],
+        "priority": "high"
+      }
+    },
+    {
+      "id": "api-gateway-resolution",
+      "name": "API Gateway Resolution",
+      "description": "Scenario for resolving API Gateway instances for client request handling",
+      "service": "api-gateway",
+      "communicationPattern": "sync",
+      "expectedInstances": [
+        {
+          "id": "api-gateway-1",
+          "host": "api-gateway-1.traccar.svc.cluster.local",
+          "port": 8082,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "api-gateway-2",
+          "host": "api-gateway-2.traccar.svc.cluster.local",
+          "port": 8082,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b"
+          }
+        }
+      ],
+      "testParameters": {
+        "requestType": "REST",
+        "endpoint": "/api/positions",
+        "method": "GET",
+        "timeout": 5000,
+        "testDescription": "Verifies that Position Service can discover API Gateway instances for client request handling",
+        "authRequired": true,
+        "loadBalancingStrategy": "round-robin",
+        "fallbackEnabled": true
+      }
+    },
+    {
+      "id": "message-broker-kafka-resolution",
+      "name": "Kafka Message Broker Resolution",
+      "description": "Scenario for resolving Kafka broker instances for asynchronous communication",
+      "service": "kafka",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "kafka-0",
+          "host": "kafka-0.kafka-headless.traccar.svc.cluster.local",
+          "port": 9092,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.3.1",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "kafka-1",
+          "host": "kafka-1.kafka-headless.traccar.svc.cluster.local",
+          "port": 9092,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.3.1",
+            "zone": "us-east-1b"
+          }
+        },
+        {
+          "id": "kafka-2",
+          "host": "kafka-2.kafka-headless.traccar.svc.cluster.local",
+          "port": 9092,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.3.1",
+            "zone": "us-east-1c"
+          }
+        }
+      ],
+      "testParameters": {
+        "topicName": "enriched-positions",
+        "partitions": 3,
+        "replicationFactor": 3,
+        "producerAcks": "all",
+        "testDescription": "Verifies that Position Service can discover Kafka broker instances for asynchronous communication",
+        "compressionType": "lz4",
+        "batchSize": 16384,
+        "lingerMs": 5,
+        "retryBackoffMs": 100,
+        "deliveryTimeout": 30000
+      }
+    },
+    {
+      "id": "message-broker-rabbitmq-resolution",
+      "name": "RabbitMQ Message Broker Resolution",
+      "description": "Scenario for resolving RabbitMQ broker instances for asynchronous communication",
+      "service": "rabbitmq",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "rabbitmq-0",
+          "host": "rabbitmq-0.rabbitmq-headless.traccar.svc.cluster.local",
+          "port": 5672,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.9.13",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "rabbitmq-1",
+          "host": "rabbitmq-1.rabbitmq-headless.traccar.svc.cluster.local",
+          "port": 5672,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.9.13",
+            "zone": "us-east-1b"
+          }
+        },
+        {
+          "id": "rabbitmq-2",
+          "host": "rabbitmq-2.rabbitmq-headless.traccar.svc.cluster.local",
+          "port": 5672,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "3.9.13",
+            "zone": "us-east-1c"
+          }
+        }
+      ],
+      "testParameters": {
+        "exchangeName": "traccar.positions",
+        "queueName": "position-service.enriched-positions",
+        "routingKey": "position.enriched",
+        "durableExchange": true,
+        "durableQueue": true,
+        "testDescription": "Verifies that Position Service can discover RabbitMQ broker instances for asynchronous communication",
+        "exchangeType": "topic",
+        "prefetchCount": 10,
+        "autoAck": false,
+        "deadLetterExchange": "traccar.positions.dlx",
+        "messageTimeToLive": 86400000
+      }
+    },
+    {
+      "id": "protocol-service-version-aware-resolution",
+      "name": "Protocol Service Version-Aware Resolution",
+      "description": "Scenario for resolving Protocol Service instances with version consideration",
+      "service": "protocol-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "protocol-service-1",
+          "host": "protocol-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "protocol-service-2",
+          "host": "protocol-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.1.0",
+            "zone": "us-east-1b"
+          }
+        },
+        {
+          "id": "protocol-service-3",
+          "host": "protocol-service-3.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1c"
+          }
+        }
+      ],
+      "testParameters": {
+        "messageType": "position",
+        "deviceId": 123,
+        "topicName": "raw-positions",
+        "targetVersion": "1.0.0",
+        "expectedInstanceCount": 2,
+        "testDescription": "Verifies that Position Service can filter Protocol Service instances by version metadata",
+        "versionSelector": "exact",
+        "fallbackToNewerVersion": false,
+        "metadataFiltering": true
+      }
+    },
+    {
+      "id": "event-service-degraded-resolution",
+      "name": "Event Service Degraded Resolution",
+      "description": "Scenario for resolving Event Service instances with degraded health status",
+      "service": "event-service",
+      "communicationPattern": "async",
+      "expectedInstances": [
+        {
+          "id": "event-service-1",
+          "host": "event-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "DEGRADED",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        },
+        {
+          "id": "event-service-2",
+          "host": "event-service-2.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1b"
+          }
+        }
+      ],
+      "testParameters": {
+        "eventType": "deviceOverspeed",
+        "deviceId": 123,
+        "topicName": "events",
+        "preferHealthyInstances": true,
+        "testDescription": "Verifies that Position Service can handle degraded Event Service instances with appropriate fallback behavior",
+        "degradedFeatures": ["complexEventProcessing"],
+        "circuitBreakerThreshold": 50,
+        "circuitBreakerTimeout": 30000,
+        "fallbackBehavior": "useHealthyOnly"
+      }
+    },
+    {
+      "id": "position-service-self-registration",
+      "name": "Position Service Self-Registration",
+      "description": "Scenario for testing Position Service's own registration with service discovery",
+      "service": "position-service",
+      "communicationPattern": "sync",
+      "expectedInstances": [
+        {
+          "id": "position-service-1",
+          "host": "position-service-1.traccar.svc.cluster.local",
+          "port": 8080,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.0.0",
+            "zone": "us-east-1a"
+          }
+        }
+      ],
+      "testParameters": {
+        "registrationEndpoint": "/v1/agent/service/register",
+        "deregistrationEndpoint": "/v1/agent/service/deregister",
+        "healthCheckPath": "/actuator/health",
+        "healthCheckInterval": "10s",
+        "healthCheckTimeout": "1s",
+        "testDescription": "Verifies that Position Service correctly registers itself with service discovery",
+        "serviceId": "position-service-1",
+        "serviceName": "position-service",
+        "servicePort": 8080,
+        "serviceTags": ["position", "processing", "enrichment"],
+        "deregisterCriticalServiceAfter": "30m"
+      }
+    },
+    {
+      "id": "consul-service-discovery",
+      "name": "Consul Service Discovery Integration",
+      "description": "Scenario for testing Position Service integration with Consul service discovery",
+      "service": "consul",
+      "communicationPattern": "sync",
+      "expectedInstances": [
+        {
+          "id": "consul-server-0",
+          "host": "consul-server-0.consul-server.traccar.svc.cluster.local",
+          "port": 8500,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.11.4",
+            "datacenter": "dc1",
+            "role": "server"
+          }
+        },
+        {
+          "id": "consul-server-1",
+          "host": "consul-server-1.consul-server.traccar.svc.cluster.local",
+          "port": 8500,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.11.4",
+            "datacenter": "dc1",
+            "role": "server"
+          }
+        },
+        {
+          "id": "consul-server-2",
+          "host": "consul-server-2.consul-server.traccar.svc.cluster.local",
+          "port": 8500,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "1.11.4",
+            "datacenter": "dc1",
+            "role": "server"
+          }
+        }
+      ],
+      "testParameters": {
+        "testDescription": "Verifies that Position Service can interact with Consul for service discovery",
+        "catalogEndpoint": "/v1/catalog/service",
+        "healthEndpoint": "/v1/health/service",
+        "kvEndpoint": "/v1/kv",
+        "aclToken": "${CONSUL_ACL_TOKEN}",
+        "datacenter": "dc1",
+        "consistencyMode": "default"
+      }
+    },
+    {
+      "id": "kubernetes-service-discovery",
+      "name": "Kubernetes Service Discovery Integration",
+      "description": "Scenario for testing Position Service integration with Kubernetes service discovery",
+      "service": "kubernetes",
+      "communicationPattern": "sync",
+      "expectedInstances": [
+        {
+          "id": "kubernetes-api",
+          "host": "kubernetes.default.svc.cluster.local",
+          "port": 443,
+          "healthStatus": "UP",
+          "metadata": {
+            "version": "v1.24.0"
+          }
+        }
+      ],
+      "testParameters": {
+        "testDescription": "Verifies that Position Service can interact with Kubernetes API for service discovery",
+        "namespace": "traccar",
+        "serviceAccountToken": "/var/run/secrets/kubernetes.io/serviceaccount/token",
+        "endpointsApiPath": "/api/v1/namespaces/traccar/endpoints",
+        "servicesApiPath": "/api/v1/namespaces/traccar/services",
+        "dnsResolution": true,
+        "labelSelector": "app.kubernetes.io/part-of=traccar"
+      }
+    }
+  ]
+}
