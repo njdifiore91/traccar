@@ -1,0 +1,107 @@
+# Cross-Origin Resource Sharing (CORS) Configuration for API Gateway
+
+# Global CORS settings applied to all endpoints unless overridden
+global:
+  # Origins that are allowed to access the API
+  # Use specific domains in production environments for better security
+  allowed_origins:
+    - "*"  # Allow all origins (for development only)
+    # Uncomment and modify for production use:
+    # - "https://app.traccar.org"
+    # - "https://admin.traccar.org"
+  
+  # HTTP methods allowed for CORS requests
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "PATCH"
+    - "OPTIONS"
+  
+  # Headers that are allowed in requests
+  allowed_headers:
+    - "Content-Type"
+    - "Authorization"
+    - "X-Requested-With"
+    - "X-Api-Key"
+    - "X-Amz-Date"
+    - "X-Amz-Security-Token"
+    - "X-CSRF-Token"
+    - "Accept"
+    - "Origin"
+    - "Cache-Control"
+  
+  # Headers exposed to the browser
+  exposed_headers:
+    - "Content-Length"
+    - "Content-Type"
+    - "X-Total-Count"
+    - "X-Pagination-Total"
+  
+  # Whether credentials (cookies, authorization headers) are allowed
+  allow_credentials: true
+  
+  # How long the preflight request can be cached (in seconds)
+  max_age: 3600
+
+# Path-specific CORS configurations that override global settings
+paths:
+  # Example: More restrictive settings for authentication endpoints
+  "/api/session":
+    allowed_origins:
+      - "https://app.traccar.org"
+      - "https://admin.traccar.org"
+    allowed_methods:
+      - "POST"
+      - "DELETE"
+      - "OPTIONS"
+    allow_credentials: true
+
+  # Example: Settings for device management endpoints
+  "/api/devices":
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allow_credentials: true
+
+  # Example: Public API endpoints with more permissive settings
+  "/api/public":
+    allowed_origins:
+      - "*"
+    allowed_methods:
+      - "GET"
+      - "OPTIONS"
+    allow_credentials: false
+
+# Error handling configuration for CORS
+errors:
+  # Ensure CORS headers are included in error responses
+  include_cors_headers: true
+  
+  # Custom error responses with CORS headers
+  responses:
+    unauthorized:
+      status_code: 401
+      include_cors_headers: true
+    forbidden:
+      status_code: 403
+      include_cors_headers: true
+    not_found:
+      status_code: 404
+      include_cors_headers: true
+
+# CORS preflight request handling
+preflight:
+  # Whether to automatically respond to OPTIONS requests
+  auto_respond: true
+  
+  # Response status code for preflight requests
+  status_code: 200
+  
+  # Custom headers for preflight responses
+  custom_headers:
+    Vary: "Origin"
