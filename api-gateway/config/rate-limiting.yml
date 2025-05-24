@@ -1,0 +1,378 @@
+# API Gateway Rate Limiting Configuration
+# This configuration defines throttling policies to prevent abuse and ensure fair usage of the API
+#
+# OVERVIEW:
+# - This file configures rate limiting for the Traccar API Gateway
+# - Rate limits are applied based on user tiers, endpoints, and request patterns
+# - The sliding window algorithm is used for accurate and fair rate limiting
+# - Response headers provide clients with rate limit status information
+# - Detailed error responses help clients understand and handle rate limiting
+#
+# USAGE EXAMPLES:
+#
+# 1. A free tier user making GET requests to /api/v1/devices will be limited to:
+#    - 20 requests per minute (base rate) * 1.0 (tier multiplier) = 20 req/min
+#    - Daily quota of 1,000 requests
+#    - Monthly quota of 10,000 requests
+#
+# 2. An enterprise tier user making GET requests to /api/v1/positions will be limited to:
+#    - 100 requests per minute (base rate) * 10.0 (tier multiplier) = 1,000 req/min
+#    - Daily quota of 50,000 requests
+#    - Monthly quota of 500,000 requests
+
+# Global rate limiting settings
+global:
+  enabled: true
+  # Default rate limit for all endpoints if not specified
+  default_rate: 100
+  # Default burst capacity for all endpoints if not specified
+  default_burst: 50
+  # Algorithm to use for rate limiting
+  algorithm: sliding_window
+  # Response status code when rate limit is exceeded
+  rate_limit_status_code: 429
+  # Response message when rate limit is exceeded
+  rate_limit_message: "Rate limit exceeded. Please try again later."
+
+# Algorithm-specific configuration
+algorithm_config:
+  sliding_window:
+    # Window size in seconds - defines the time period for rate limiting
+    window_size: 60
+    # Precision factor for the sliding window algorithm (higher means more accurate but more resource intensive)
+    precision: 10
+    # Whether to distribute counters across nodes in a cluster for high availability
+    distributed: true
+    # Storage implementation for rate limit counters
+    storage: redis
+    # Whether to synchronize rate limit counters across multiple API Gateway instances
+    sync_across_instances: true
+    # Synchronization interval in milliseconds
+    sync_interval: 1000
+    # Weight of the previous time window (0.0-1.0) for smooth transitions between windows
+    previous_window_weight: 0.5
+  
+  # Redis configuration for distributed rate limiting
+  redis:
+    # Connection timeout in milliseconds
+    timeout: 1000
+    # Maximum number of connections in the pool
+    max_connections: 10
+    # Key prefix for rate limit counters
+    key_prefix: "ratelimit:"
+    # TTL for rate limit keys in seconds (should be greater than window_size)
+    key_ttl: 120
+
+# User tier-based rate limits
+tiers:
+  # Free tier with basic access
+  free:
+    rate: 20
+    burst: 10
+    quota_daily: 1000
+    quota_monthly: 10000
+  
+  # Basic tier with moderate access
+  basic:
+    rate: 50
+    burst: 25
+    quota_daily: 5000
+    quota_monthly: 50000
+  
+  # Professional tier with higher access
+  professional:
+    rate: 200
+    burst: 100
+    quota_daily: 20000
+    quota_monthly: 200000
+  
+  # Enterprise tier with premium access
+  enterprise:
+    rate: 500
+    burst: 250
+    quota_daily: 50000
+    quota_monthly: 500000
+  
+  # Special tier for internal services
+  internal:
+    rate: 1000
+    burst: 500
+    quota_daily: 100000
+    quota_monthly: 1000000
+
+# Endpoint-specific rate limits
+endpoints:
+  # Authentication endpoints - more restrictive to prevent brute force attacks
+  - pattern: "/api/v1/session/**"
+    methods: ["POST", "DELETE"]
+    rate: 10
+    burst: 5
+    description: "Login and logout endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 1.0
+      professional: 1.5
+      enterprise: 2.0
+      internal: 5.0
+    # Apply IP-based rate limiting for these endpoints regardless of authentication
+    enforce_ip_limits: true
+  
+  # Device management endpoints - read operations
+  - pattern: "/api/v1/devices/**"
+    methods: ["GET"]
+    rate: 50
+    burst: 20
+    description: "Device data retrieval endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 4.0
+      enterprise: 8.0
+      internal: 10.0
+  
+  # Device management endpoints - write operations
+  - pattern: "/api/v1/devices/**"
+    methods: ["POST", "PUT", "DELETE"]
+    rate: 20
+    burst: 10
+    description: "Device modification endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 3.0
+      enterprise: 5.0
+      internal: 10.0
+  
+  # Position data endpoints - high volume but read-only
+  - pattern: "/api/v1/positions/**"
+    methods: ["GET"]
+    rate: 100
+    burst: 50
+    description: "Position data retrieval endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 5.0
+      enterprise: 10.0
+      internal: 20.0
+  
+  # Report generation endpoints - resource intensive
+  - pattern: "/api/v1/reports/**"
+    methods: ["GET", "POST"]
+    rate: 5
+    burst: 3
+    description: "Report generation endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 4.0
+      enterprise: 8.0
+      internal: 10.0
+  
+  # User management endpoints - sensitive operations
+  - pattern: "/api/v1/users/**"
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    rate: 10
+    burst: 5
+    description: "User management endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 1.5
+      professional: 2.0
+      enterprise: 3.0
+      internal: 10.0
+  
+  # WebSocket connections - limited to prevent resource exhaustion
+  - pattern: "/api/v1/socket"
+    methods: ["GET"]
+    rate: 5
+    burst: 2
+    description: "WebSocket connection endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 3.0
+      enterprise: 5.0
+      internal: 10.0
+  
+  # Command endpoints - for sending commands to devices
+  - pattern: "/api/v1/commands/**"
+    methods: ["POST"]
+    rate: 15
+    burst: 8
+    description: "Device command endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 3.0
+      enterprise: 5.0
+      internal: 10.0
+  
+  # Events endpoints - for retrieving event data
+  - pattern: "/api/v1/events/**"
+    methods: ["GET"]
+    rate: 30
+    burst: 15
+    description: "Event retrieval endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 4.0
+      enterprise: 8.0
+      internal: 10.0
+  
+  # Geofence endpoints
+  - pattern: "/api/v1/geofences/**"
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    rate: 20
+    burst: 10
+    description: "Geofence management endpoints"
+    tier_multipliers:
+      free: 1.0
+      basic: 2.0
+      professional: 3.0
+      enterprise: 5.0
+      internal: 10.0
+
+# Response headers configuration
+response_headers:
+  # Whether to include rate limit headers in responses
+  enabled: true
+  # Include headers in all responses, not just when rate limited
+  include_in_all_responses: true
+  # Header for remaining requests in current window
+  remaining: "X-RateLimit-Remaining"
+  # Header for total limit
+  limit: "X-RateLimit-Limit"
+  # Header for when the limit resets (Unix timestamp)
+  reset: "X-RateLimit-Reset"
+  # Header for retry after time in seconds
+  retry_after: "Retry-After"
+  # Header for current rate limit window
+  window: "X-RateLimit-Window"
+  # Header for user's current tier
+  tier: "X-RateLimit-Tier"
+  # Header for daily quota remaining
+  quota_remaining_daily: "X-Quota-Remaining-Daily"
+  # Header for monthly quota remaining
+  quota_remaining_monthly: "X-Quota-Remaining-Monthly"
+
+# Error handling configuration
+error_handling:
+  # Whether to include detailed error information
+  detailed_errors: true
+  # Whether to log rate limit violations
+  log_violations: true
+  # Log level for rate limit violations
+  log_level: "WARN"
+  # Whether to notify admins on excessive violations
+  notify_on_excessive: true
+  # Threshold for excessive violations (per minute)
+  excessive_threshold: 100
+  # Cooldown period after notification (in minutes)
+  notification_cooldown: 15
+  # Custom error response template
+  error_response_template: |
+    {
+      "status": 429,
+      "title": "Rate Limit Exceeded",
+      "detail": "You have exceeded the rate limit of {{limit}} requests per {{window}} seconds. Please wait {{retry_after}} seconds before trying again.",
+      "type": "https://api.traccar.org/errors/rate-limit-exceeded",
+      "instance": "{{request_id}}",
+      "remaining": {{remaining}},
+      "reset": {{reset}},
+      "tier": "{{tier}}"
+    }
+  # Whether to include the current tier in error responses
+  include_tier_in_errors: true
+  # Whether to include quota information in error responses
+  include_quota_in_errors: true
+  # Whether to track repeated violations
+  track_repeated_violations: true
+  # Actions for repeated violations
+  repeated_violations:
+    # Number of violations before temporary ban
+    threshold: 10
+    # Time window for counting violations (in minutes)
+    window: 5
+    # Temporary ban duration (in minutes)
+    ban_duration: 30
+
+# Exemptions from rate limiting
+exemptions:
+  # IPs that are exempt from rate limiting (e.g., internal services)
+  ips:
+    - "127.0.0.1"
+    - "10.0.0.0/8"
+  
+  # User IDs that are exempt from rate limiting (e.g., system accounts)
+  users:
+    - "system"
+    - "admin"
+  
+  # API keys that are exempt from rate limiting
+  api_keys:
+    - "internal-service-key"
+
+# Advanced configuration
+advanced:
+  # Whether to apply rate limiting based on the authenticated user
+  user_based: true
+  # Whether to apply rate limiting based on the client IP
+  ip_based: true
+  # Whether to apply rate limiting based on the API key
+  api_key_based: true
+  # Priority order for rate limiting (highest to lowest)
+  priority:
+    - "api_key"
+    - "user"
+    - "ip"
+  # Whether to cache rate limit decisions
+  cache_decisions: true
+  # Cache TTL in seconds
+  cache_ttl: 10
+  # Whether to use a distributed cache for rate limit decisions
+  distributed_cache: true
+  # Whether to apply rate limiting to internal service-to-service calls
+  limit_internal_calls: false
+  # Whether to apply rate limiting to health check endpoints
+  limit_health_checks: false
+  # Whether to apply gradual throttling before hard limiting
+  gradual_throttling: true
+  # Percentage of the limit at which to start throttling
+  throttling_threshold: 80
+
+# Monitoring and metrics configuration
+monitoring:
+  # Whether to collect metrics about rate limiting
+  enabled: true
+  # Prefix for metric names
+  metric_prefix: "api.ratelimit"
+  # Whether to tag metrics with endpoint information
+  tag_by_endpoint: true
+  # Whether to tag metrics with user tier information
+  tag_by_tier: true
+  # Whether to tag metrics with HTTP method
+  tag_by_method: true
+  # Metrics to collect
+  metrics:
+    # Track total number of rate limited requests
+    rate_limited_requests: true
+    # Track rate limited requests by endpoint
+    rate_limited_by_endpoint: true
+    # Track rate limited requests by tier
+    rate_limited_by_tier: true
+    # Track rate limited requests by IP
+    rate_limited_by_ip: true
+    # Track current rate limit utilization percentage
+    utilization_percentage: true
+    # Track quota consumption
+    quota_consumption: true
+  # Alerting thresholds
+  alerts:
+    # Alert when rate limit utilization exceeds this percentage
+    high_utilization_threshold: 90
+    # Alert when rate limit violations exceed this count per minute
+    high_violation_rate: 50
+    # Alert when quota consumption exceeds this percentage
+    high_quota_consumption: 80
