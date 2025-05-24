@@ -1,0 +1,154 @@
+{
+  "responses": {
+    "valid": {
+      "status": 200,
+      "body": {
+        "active": true,
+        "exp": 1716662400,
+        "iat": 1716576000,
+        "sub": "user123",
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "roles": ["user", "admin"],
+        "permissions": [
+          "position:read",
+          "position:write",
+          "device:read",
+          "geofence:read"
+        ],
+        "deviceIds": [1, 2, 3, 4, 5],
+        "groupIds": [1, 2],
+        "userId": 1,
+        "sessionId": "sess_12345abcde"
+      }
+    },
+    "expired": {
+      "status": 401,
+      "body": {
+        "active": false,
+        "error": "invalid_token",
+        "error_description": "Token has expired",
+        "exp": 1716489600,
+        "iat": 1716403200
+      }
+    },
+    "invalid": {
+      "status": 401,
+      "body": {
+        "active": false,
+        "error": "invalid_token",
+        "error_description": "Token signature validation failed"
+      }
+    },
+    "malformed": {
+      "status": 400,
+      "body": {
+        "active": false,
+        "error": "invalid_request",
+        "error_description": "Malformed token format"
+      }
+    },
+    "insufficient_permissions": {
+      "status": 403,
+      "body": {
+        "active": true,
+        "exp": 1716662400,
+        "iat": 1716576000,
+        "sub": "user456",
+        "name": "Limited User",
+        "email": "limiteduser@example.com",
+        "roles": ["user"],
+        "permissions": [
+          "device:read"
+        ],
+        "deviceIds": [6, 7],
+        "groupIds": [3],
+        "userId": 2,
+        "sessionId": "sess_67890fghij",
+        "error": "insufficient_scope",
+        "error_description": "Token does not have the required permissions for this resource"
+      }
+    },
+    "missing_token": {
+      "status": 401,
+      "body": {
+        "active": false,
+        "error": "invalid_request",
+        "error_description": "Authorization token is missing"
+      }
+    },
+    "revoked": {
+      "status": 401,
+      "body": {
+        "active": false,
+        "error": "invalid_token",
+        "error_description": "Token has been revoked",
+        "exp": 1716662400,
+        "iat": 1716576000
+      }
+    },
+    "service_unavailable": {
+      "status": 503,
+      "body": {
+        "error": "service_unavailable",
+        "error_description": "Authentication service is temporarily unavailable"
+      }
+    },
+    "position_specific_valid": {
+      "status": 200,
+      "body": {
+        "active": true,
+        "exp": 1716662400,
+        "iat": 1716576000,
+        "sub": "position_service_user",
+        "name": "Position Service Test User",
+        "email": "position_test@example.com",
+        "roles": ["user", "position_admin"],
+        "permissions": [
+          "position:read",
+          "position:write",
+          "position:delete",
+          "position:share",
+          "device:read",
+          "geofence:read",
+          "geofence:write"
+        ],
+        "deviceIds": [1, 2, 3, 4, 5, 10, 15],
+        "groupIds": [1, 2, 5],
+        "userId": 3,
+        "sessionId": "sess_position_test",
+        "positionAccess": {
+          "maxHistoryDays": 90,
+          "realTimeAccess": true,
+          "exportAllowed": true
+        }
+      }
+    },
+    "read_only_user": {
+      "status": 200,
+      "body": {
+        "active": true,
+        "exp": 1716662400,
+        "iat": 1716576000,
+        "sub": "readonly_user",
+        "name": "Read Only User",
+        "email": "readonly@example.com",
+        "roles": ["user"],
+        "permissions": [
+          "position:read",
+          "device:read",
+          "geofence:read"
+        ],
+        "deviceIds": [8, 9],
+        "groupIds": [4],
+        "userId": 4,
+        "sessionId": "sess_readonly",
+        "positionAccess": {
+          "maxHistoryDays": 30,
+          "realTimeAccess": true,
+          "exportAllowed": false
+        }
+      }
+    }
+  }
+}
