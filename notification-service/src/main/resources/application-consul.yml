@@ -1,0 +1,51 @@
+# Consul service discovery configuration
+
+service:
+  registration:
+    enabled: true
+    type: consul
+    tags: notification,traccar,microservice
+    healthCheckPath: /actuator/health/liveness
+    healthCheckInterval: 10s
+    renewalInterval: 30000
+    metadata: version=${info.app.version},environment=${spring.profiles.active:default}
+
+consul:
+  host: ${CONSUL_HOST:localhost}
+  port: ${CONSUL_PORT:8500}
+
+spring:
+  cloud:
+    consul:
+      enabled: true
+      discovery:
+        enabled: false  # We use our custom registration instead of Spring Cloud Consul
+        register: false
+        deregister: false
+      config:
+        enabled: true
+        format: YAML
+        prefix: config
+        defaultContext: notification-service
+        profileSeparator: ':'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState,diskSpace
+        readiness:
+          include: readinessState,db,consul
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
