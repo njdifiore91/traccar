@@ -1,0 +1,178 @@
+# Resilience4j Configuration for Event Processing Service
+# This file configures circuit breakers, retry mechanisms, bulkheads, and rate limiters
+# to improve fault tolerance and prevent cascading failures
+
+resilience4j:
+  # Circuit Breaker configurations
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException
+    instances:
+      positionService:
+        baseConfig: default
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15s
+      notificationService:
+        baseConfig: default
+        failureRateThreshold: 50
+        waitDurationInOpenState: 20s
+      geocodingService:
+        baseConfig: default
+        failureRateThreshold: 30
+        waitDurationInOpenState: 30s
+      databaseService:
+        baseConfig: default
+        failureRateThreshold: 25
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 5
+
+  # Retry configurations
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        enableRandomizedWait: true
+        randomizedWaitFactor: 0.5
+        retryExceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException
+    instances:
+      positionService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+        maxAttempts: 5
+      geocodingService:
+        baseConfig: default
+        maxAttempts: 3
+        waitDuration: 2s
+      databaseService:
+        baseConfig: default
+        maxAttempts: 3
+        waitDuration: 500ms
+
+  # Bulkhead configurations
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 0ms
+    instances:
+      positionService:
+        maxConcurrentCalls: 50
+      notificationService:
+        maxConcurrentCalls: 20
+      geocodingService:
+        maxConcurrentCalls: 10
+      databaseService:
+        maxConcurrentCalls: 30
+
+  # Thread Pool Bulkhead configurations
+  thread-pool-bulkhead:
+    configs:
+      default:
+        maxThreadPoolSize: 20
+        coreThreadPoolSize: 10
+        queueCapacity: 100
+        keepAliveDuration: 20ms
+    instances:
+      eventProcessing:
+        maxThreadPoolSize: 30
+        coreThreadPoolSize: 15
+        queueCapacity: 150
+      ruleEvaluation:
+        maxThreadPoolSize: 25
+        coreThreadPoolSize: 10
+        queueCapacity: 100
+      geofenceCalculation:
+        maxThreadPoolSize: 15
+        coreThreadPoolSize: 5
+        queueCapacity: 50
+
+  # Rate Limiter configurations
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 50
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+    instances:
+      positionService:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+      notificationService:
+        limitForPeriod: 50
+        limitRefreshPeriod: 1s
+      geocodingService:
+        limitForPeriod: 20
+        limitRefreshPeriod: 1s
+      externalApiCalls:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 1s
+
+  # Time Limiter configurations
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+    instances:
+      positionService:
+        timeoutDuration: 3s
+      notificationService:
+        timeoutDuration: 5s
+      geocodingService:
+        timeoutDuration: 10s
+      eventProcessing:
+        timeoutDuration: 15s
+      ruleEvaluation:
+        timeoutDuration: 5s
+
+# Actuator endpoints for monitoring Resilience4j components
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,retries,bulkheads,ratelimiters,timelimiters
+  health:
+    circuitbreakers:
+      enabled: true
+    retries:
+      enabled: true
+    bulkheads:
+      enabled: true
+    ratelimiters:
+      enabled: true
+    timelimiters:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+      status:
+        http-mapping:
+          DEGRADED: 200
+  metrics:
+    tags:
+      application: event-service
+    export:
+      prometheus:
+        enabled: true
