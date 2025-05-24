@@ -1,0 +1,270 @@
+{
+  "scenarios": [
+    {
+      "id": "broker-unavailable",
+      "name": "Broker Unavailable",
+      "description": "Simulates a complete RabbitMQ broker outage where the service is unreachable",
+      "parameters": {
+        "failureType": "CONNECTION_REFUSED",
+        "duration": 30000,
+        "affectedComponents": ["all"],
+        "errorCode": "ECONNREFUSED"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 5000,
+        "maxRetries": 10
+      }
+    },
+    {
+      "id": "connection-dropped",
+      "name": "Connection Dropped",
+      "description": "Simulates an established connection being abruptly terminated",
+      "parameters": {
+        "failureType": "CONNECTION_CLOSED",
+        "duration": 15000,
+        "affectedComponents": ["publishers", "consumers"],
+        "errorCode": "ECONNRESET"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 2000,
+        "maxRetries": 5
+      }
+    },
+    {
+      "id": "channel-closed-by-broker",
+      "name": "Channel Closed By Broker",
+      "description": "Simulates the broker closing a channel due to protocol errors or resource constraints",
+      "parameters": {
+        "failureType": "CHANNEL_CLOSED",
+        "duration": 10000,
+        "affectedComponents": ["publishers"],
+        "errorCode": 406,
+        "errorMessage": "PRECONDITION_FAILED - inequivalent arg 'x-message-ttl' for queue 'position.updates' in vhost '/': received '60000' but current is '30000'"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 1000,
+        "maxRetries": 3
+      }
+    },
+    {
+      "id": "publish-confirms-timeout",
+      "name": "Publish Confirms Timeout",
+      "description": "Simulates a scenario where the broker doesn't send publish confirmations within the expected timeframe",
+      "parameters": {
+        "failureType": "PUBLISH_CONFIRMS_TIMEOUT",
+        "duration": 20000,
+        "affectedComponents": ["publishers"],
+        "confirmTimeout": 5000
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 3000,
+        "maxRetries": 5
+      }
+    },
+    {
+      "id": "consumer-cancel",
+      "name": "Consumer Cancelled",
+      "description": "Simulates the broker cancelling a consumer, which can happen when a queue is deleted or becomes unavailable",
+      "parameters": {
+        "failureType": "CONSUMER_CANCEL",
+        "duration": 10000,
+        "affectedComponents": ["consumers"],
+        "queueName": "position.updates",
+        "reason": "queue deleted"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 2000,
+        "maxRetries": 5,
+        "recreateQueue": true
+      }
+    },
+    {
+      "id": "high-latency",
+      "name": "High Network Latency",
+      "description": "Simulates high network latency between the Position Service and the RabbitMQ broker",
+      "parameters": {
+        "failureType": "HIGH_LATENCY",
+        "duration": 60000,
+        "affectedComponents": ["all"],
+        "latencyMs": 2000,
+        "jitterMs": 500
+      },
+      "recovery": {
+        "automatic": true,
+        "gradualRecovery": true,
+        "recoverySteps": [
+          {"latencyMs": 1000, "duration": 10000},
+          {"latencyMs": 500, "duration": 10000},
+          {"latencyMs": 100, "duration": 10000}
+        ]
+      }
+    },
+    {
+      "id": "memory-alarm",
+      "name": "Broker Memory Alarm",
+      "description": "Simulates a RabbitMQ memory alarm condition where publishers are blocked",
+      "parameters": {
+        "failureType": "MEMORY_ALARM",
+        "duration": 45000,
+        "affectedComponents": ["publishers"],
+        "blockPublishing": true,
+        "memoryThreshold": 0.8
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 10000,
+        "maxRetries": 5
+      }
+    },
+    {
+      "id": "queue-full",
+      "name": "Queue Full",
+      "description": "Simulates a queue reaching its maximum length, causing publishers to be blocked",
+      "parameters": {
+        "failureType": "QUEUE_FULL",
+        "duration": 30000,
+        "affectedComponents": ["publishers"],
+        "queueName": "position.updates",
+        "maxLength": 1000,
+        "overflow": "reject-publish"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 5000,
+        "maxRetries": 6
+      }
+    },
+    {
+      "id": "intermittent-connection",
+      "name": "Intermittent Connection",
+      "description": "Simulates an unstable network connection that repeatedly disconnects and reconnects",
+      "parameters": {
+        "failureType": "INTERMITTENT_CONNECTION",
+        "duration": 120000,
+        "affectedComponents": ["all"],
+        "disconnectInterval": 10000,
+        "connectInterval": 5000,
+        "cycles": 8
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 1000,
+        "maxRetries": 10
+      }
+    },
+    {
+      "id": "partial-network-partition",
+      "name": "Partial Network Partition",
+      "description": "Simulates a partial network partition where some messages get through but others are lost",
+      "parameters": {
+        "failureType": "PARTIAL_PARTITION",
+        "duration": 60000,
+        "affectedComponents": ["publishers", "consumers"],
+        "packetLossPercentage": 40,
+        "affectedQueues": ["position.updates", "position.events"]
+      },
+      "recovery": {
+        "automatic": true,
+        "gradualRecovery": true,
+        "recoverySteps": [
+          {"packetLossPercentage": 20, "duration": 15000},
+          {"packetLossPercentage": 5, "duration": 15000}
+        ]
+      }
+    },
+    {
+      "id": "broker-shutdown",
+      "name": "Graceful Broker Shutdown",
+      "description": "Simulates a graceful shutdown of the RabbitMQ broker with proper connection closure",
+      "parameters": {
+        "failureType": "BROKER_SHUTDOWN",
+        "duration": 30000,
+        "affectedComponents": ["all"],
+        "shutdownMessage": "Server is shutting down",
+        "connectionCloseCode": 320
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 5000,
+        "maxRetries": 10
+      }
+    },
+    {
+      "id": "authentication-failure",
+      "name": "Authentication Failure",
+      "description": "Simulates authentication credentials becoming invalid during operation",
+      "parameters": {
+        "failureType": "AUTH_FAILURE",
+        "duration": 45000,
+        "affectedComponents": ["all"],
+        "errorCode": 403,
+        "errorMessage": "ACCESS_REFUSED - Login was refused using authentication mechanism PLAIN"
+      },
+      "recovery": {
+        "automatic": true,
+        "retryInterval": 10000,
+        "maxRetries": 5,
+        "credentialRefresh": true
+      }
+    },
+    {
+      "id": "slow-consumer",
+      "name": "Slow Consumer",
+      "description": "Simulates a consumer that processes messages very slowly, causing potential backlog",
+      "parameters": {
+        "failureType": "SLOW_CONSUMER",
+        "duration": 60000,
+        "affectedComponents": ["consumers"],
+        "processingDelayMs": 5000,
+        "queueName": "position.updates"
+      },
+      "recovery": {
+        "automatic": true,
+        "gradualRecovery": true,
+        "recoverySteps": [
+          {"processingDelayMs": 2000, "duration": 20000},
+          {"processingDelayMs": 500, "duration": 20000}
+        ]
+      }
+    }
+  ],
+  "combinedScenarios": [
+    {
+      "id": "network-partition-with-recovery",
+      "name": "Network Partition with Recovery",
+      "description": "Simulates a complete network partition followed by slow recovery",
+      "scenarios": ["broker-unavailable", "high-latency"],
+      "sequentialExecution": true
+    },
+    {
+      "id": "degraded-broker-performance",
+      "name": "Degraded Broker Performance",
+      "description": "Simulates a broker under heavy load with memory pressure and slow consumers",
+      "scenarios": ["memory-alarm", "slow-consumer", "high-latency"],
+      "sequentialExecution": false
+    },
+    {
+      "id": "connection-flapping",
+      "name": "Connection Flapping",
+      "description": "Simulates connections repeatedly being established and dropped",
+      "scenarios": ["intermittent-connection", "partial-network-partition"],
+      "sequentialExecution": false
+    }
+  ],
+  "configuration": {
+    "defaultRecoveryTimeout": 60000,
+    "maxScenarioDuration": 300000,
+    "logFailures": true,
+    "metricCollection": true,
+    "scenarioTags": {
+      "severity": ["critical", "major", "minor"],
+      "component": ["connection", "channel", "queue", "exchange", "consumer", "publisher"],
+      "category": ["network", "resource", "protocol", "authentication"]
+    }
+  }
+}
