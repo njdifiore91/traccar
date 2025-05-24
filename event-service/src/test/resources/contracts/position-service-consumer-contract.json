@@ -1,0 +1,232 @@
+{
+  "consumer": {
+    "name": "event-service"
+  },
+  "provider": {
+    "name": "position-service"
+  },
+  "interactions": [
+    {
+      "description": "a position update message from the position service",
+      "providerState": "a valid position update is available",
+      "request": {
+        "method": "POST",
+        "path": "/api/positions",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "time": "2023-01-01T12:00:00.000Z",
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "altitude": 100.0,
+          "speed": 50.0,
+          "course": 90.0,
+          "accuracy": 10.0,
+          "attributes": {
+            "motion": true,
+            "totalDistance": 500.0,
+            "ignition": true
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "description": "a motion event message from the position service",
+      "providerState": "a device has started moving",
+      "request": {
+        "method": "POST",
+        "path": "/api/events",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "type": "deviceMoving",
+          "deviceId": 123,
+          "positionId": 456,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "motion": true,
+            "totalDistance": 700.0
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "description": "a stopped event message from the position service",
+      "providerState": "a device has stopped moving",
+      "request": {
+        "method": "POST",
+        "path": "/api/events",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "type": "deviceStopped",
+          "deviceId": 123,
+          "positionId": 789,
+          "time": "2023-01-01T12:10:00.000Z",
+          "attributes": {
+            "motion": false,
+            "totalDistance": 700.0,
+            "stoppedTime": 300000
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "description": "a position message with ignition change",
+      "providerState": "a device has changed ignition state",
+      "request": {
+        "method": "POST",
+        "path": "/api/positions",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "time": "2023-01-01T12:15:00.000Z",
+          "latitude": 60.1,
+          "longitude": 30.1,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 90.0,
+          "accuracy": 10.0,
+          "attributes": {
+            "motion": false,
+            "totalDistance": 700.0,
+            "ignition": false
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "description": "a message broker position update",
+      "providerState": "a position update is published to the message broker",
+      "message": {
+        "metaData": {
+          "contentType": "application/json"
+        },
+        "contents": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "time": "2023-01-01T12:20:00.000Z",
+          "latitude": 60.2,
+          "longitude": 30.2,
+          "altitude": 100.0,
+          "speed": 60.0,
+          "course": 180.0,
+          "accuracy": 10.0,
+          "attributes": {
+            "motion": true,
+            "totalDistance": 800.0,
+            "ignition": true
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.deviceId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.time": {
+              "matchers": [
+                {
+                  "match": "timestamp",
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                }
+              ]
+            },
+            "$.attributes.motion": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a message broker event update",
+      "providerState": "an event is published to the message broker",
+      "message": {
+        "metaData": {
+          "contentType": "application/json"
+        },
+        "contents": {
+          "type": "deviceMoving",
+          "deviceId": 123,
+          "positionId": 456,
+          "time": "2023-01-01T12:25:00.000Z",
+          "attributes": {
+            "motion": true,
+            "totalDistance": 900.0,
+            "ignition": true
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "device(Moving|Stopped)"
+                }
+              ]
+            },
+            "$.deviceId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.time": {
+              "matchers": [
+                {
+                  "match": "timestamp",
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.0.10"
+    }
+  }
+}
