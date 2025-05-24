@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Stop output INFO at start -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- MDC support for tracking test execution context -->
+    <appender name="CONSOLE_WITH_MDC" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) [%X{testClass}:%X{testMethod}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set default log level for all loggers -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+    
+    <!-- Use MDC-aware appender for test classes -->
+    <logger name="org.traccar.test" additivity="false">
+        <level value="DEBUG" />
+        <appender-ref ref="CONSOLE_WITH_MDC" />
+    </logger>
+
+    <!-- Event Service specific logging configuration -->
+    <logger name="org.traccar.handler.events" level="DEBUG" />
+    <logger name="org.traccar.messaging" level="DEBUG" />
+    <logger name="org.traccar.handler" level="DEBUG" />
+    <logger name="org.traccar.discovery" level="INFO" />
+    
+    <!-- Test-specific loggers -->
+    <logger name="org.traccar.rules" level="DEBUG" />
+    
+    <!-- Reduce noise from common test dependencies -->
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.apache.kafka" level="WARN" />
+    <logger name="org.apache.zookeeper" level="WARN" />
+    <logger name="org.testcontainers" level="WARN" />
+    <logger name="com.github.dockerjava" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    
+    <!-- Enable trace logging for specific test scenarios by setting system property -->
+    <!-- Example: -Dtest.debug=true -->
+    <!-- To use this feature, add Janino library to your test dependencies -->
+    <!--
+    <if condition='isDefined("test.debug") &amp;&amp; property("test.debug").equals("true")'>
+        <then>
+            <logger name="org.traccar" level="TRACE" />
+        </then>
+    </if>
+    -->
+    
+    <!-- Alternative approach using property substitution -->
+    <logger name="org.traccar" level="${TEST_DEBUG_LEVEL:-INFO}" />
+</configuration>
