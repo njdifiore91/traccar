@@ -1,0 +1,65 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/revgeocode",
+    "queryParameters": {
+      "at": {
+        "matches": "[0-9.-]+,[0-9.-]+"
+      },
+      "apiKey": {
+        "matches": ".*"
+      },
+      "types": {
+        "equalTo": "address"
+      },
+      "limit": {
+        "equalTo": "1"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "max-age=86400"
+    },
+    "jsonBody": {
+      "items": [
+        {
+          "title": "123 Main St, Springfield, IL 62701, USA",
+          "id": "here:af:streetsection:1234567890abcdef",
+          "resultType": "streetAddress",
+          "address": {
+            "label": "123 Main St, Springfield, IL 62701, USA",
+            "countryCode": "usa",
+            "countryName": "United States",
+            "state": "Illinois",
+            "county": "Sangamon",
+            "city": "Springfield",
+            "district": "Downtown",
+            "street": "Main St",
+            "postalCode": "62701",
+            "houseNumber": "123"
+          },
+          "position": {
+            "lat": 39.801505,
+            "lng": -89.644211
+          },
+          "access": [
+            {
+              "lat": 39.801505,
+              "lng": -89.644211
+            }
+          ],
+          "distance": 15,
+          "mapView": {
+            "west": -89.646211,
+            "south": 39.799505,
+            "east": -89.642211,
+            "north": 39.803505
+          }
+        }
+      ]
+    }
+  }
+}
