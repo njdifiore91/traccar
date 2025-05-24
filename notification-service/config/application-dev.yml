@@ -1,0 +1,196 @@
+# ===================================================================
+# Development-specific configuration for Notification Service
+# ===================================================================
+
+# Server configuration
+server:
+  port: 8084
+  tomcat:
+    max-threads: 50  # Reduced thread count for development
+    accesslog:
+      enabled: true
+      directory: logs
+      pattern: '%h %l %u %t "%r" %s %b %D'
+
+# Spring configuration
+spring:
+  application:
+    name: notification-service
+  
+  # Development database configuration - using H2 in-memory database
+  datasource:
+    url: jdbc:h2:mem:notificationdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+  
+  # Enable H2 console for development
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # In-memory message broker for local development
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # Enable to use a mock implementation instead of actual RabbitMQ
+    mock: true
+
+# Management endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always  # Show detailed health information in dev
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db,messageBroker
+  server:
+    port: 8085  # Separate port for management endpoints
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: DEBUG  # Enable debug logging for our code
+    org.springframework: INFO
+    org.springframework.web: DEBUG  # Debug for web requests
+    org.springframework.amqp: DEBUG  # Debug for RabbitMQ
+    org.hibernate.SQL: DEBUG  # Show SQL queries
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: logs/notification-service-dev.log
+    max-size: 10MB
+    max-history: 3
+
+# OpenTelemetry configuration
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4317
+  service:
+    name: notification-service
+  traces:
+    sampler: parentbased_traceidratio
+    sampler-arg: 1.0  # Sample all traces in development
+
+# Service discovery configuration
+discovery:
+  enabled: true
+  type: consul  # Options: consul, kubernetes
+  consul:
+    host: localhost
+    port: 8500
+    register: true
+    deregister: true
+    service-name: ${spring.application.name}
+    instance-id: ${spring.application.name}-${random.uuid}
+    health-check-path: /actuator/health/live
+    health-check-interval: 10s
+
+# Notification service specific configuration
+notification:
+  # Mock notification services for development
+  mail:
+    enabled: true
+    mock: true  # Use mock mail service instead of actual SMTP
+    host: localhost
+    port: 3025  # GreenMail test port
+    username: test
+    password: test
+    from: test@traccar.org
+    ssl: false
+    debug: true
+  sms:
+    enabled: true
+    mock: true  # Use mock SMS service
+  push:
+    enabled: true
+    mock: true  # Use mock push notification service
+    firebase:
+      service-account-path: classpath:firebase-service-account-dev.json
+  telegram:
+    enabled: true
+    mock: true  # Use mock Telegram service
+    bot-token: dev-token
+  webhook:
+    enabled: true
+    mock: true  # Use mock webhook service
+
+# Template configuration
+template:
+  path: classpath:templates
+  cache: false  # Disable template caching in development
+
+# Development-specific timeouts and retry policies
+resilience4j:
+  retry:
+    instances:
+      notification:
+        max-attempts: 3
+        wait-duration: 1s
+        retry-exceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+  circuitbreaker:
+    instances:
+      notification:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+  ratelimiter:
+    instances:
+      notification:
+        limit-for-period: 50
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+  bulkhead:
+    instances:
+      notification:
+        max-concurrent-calls: 20
+        max-wait-duration: 0
+
+# API client configurations with mock endpoints
+api:
+  position-service:
+    url: http://localhost:8082
+    mock: true
+  event-service:
+    url: http://localhost:8083
+    mock: true
+  user-service:
+    url: http://localhost:8081
+    mock: true
+
+# Security configuration - relaxed for development
+security:
+  basic:
+    enabled: false
+  jwt:
+    secret: dev-secret-key-for-local-testing-only
+    expiration: 86400  # 24 hours in seconds
+
+# Feature flags for development
+feature:
+  experimental-notifiers: true  # Enable experimental notification channels
+  batch-processing: true  # Enable batch notification processing
