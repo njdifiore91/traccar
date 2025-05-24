@@ -1,0 +1,349 @@
+{
+  "mappings": [
+    {
+      "name": "OpenStreetMap Standard Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/osm/standard/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400, must-revalidate",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/osm-standard-tile.png"
+      }
+    },
+    {
+      "name": "OpenStreetMap Standard Tile - Original URL Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/tile\.openstreetmap\.org/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400, must-revalidate",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/osm-standard-tile.png"
+      }
+    },
+    {
+      "name": "OpenStreetMap Satellite Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/osm/satellite/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400, must-revalidate",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/osm-satellite-tile.png"
+      }
+    },
+    {
+      "name": "OpenStreetMap Terrain Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/osm/terrain/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "max-age=86400, must-revalidate",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/osm-terrain-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Road Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/google/roadmap/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-road-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Road Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/js/GeoPhotoService\.GetMetadata",
+        "queryParameters": {
+          "lyrs": {
+            "equalTo": "m"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-road-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Satellite Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/google/satellite/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-satellite-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Satellite Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/js/GeoPhotoService\.GetMetadata",
+        "queryParameters": {
+          "lyrs": {
+            "equalTo": "s"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-satellite-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Terrain Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/google/terrain/([0-9]+)/([0-9]+)/([0-9]+)\.png"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-terrain-tile.png"
+      }
+    },
+    {
+      "name": "Google Maps Terrain Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/js/GeoPhotoService\.GetMetadata",
+        "queryParameters": {
+          "lyrs": {
+            "equalTo": "p"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+          "Expires": "{{now offset='1 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/google-terrain-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Streets Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/streets/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-streets-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Streets Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v4/mapbox\.streets/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)",
+        "queryParameters": {
+          "access_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-streets-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Satellite Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/satellite/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-satellite-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Satellite Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v4/mapbox\.satellite/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)",
+        "queryParameters": {
+          "access_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-satellite-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Outdoors Tile",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/outdoors/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-outdoors-tile.png"
+      }
+    },
+    {
+      "name": "Mapbox Outdoors Tile - API Format",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v4/mapbox\.outdoors/([0-9]+)/([0-9]+)/([0-9]+)(?:\.png|\.jpg|\.webp)",
+        "queryParameters": {
+          "access_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-outdoors-tile.png"
+      }
+    },
+    {
+      "name": "Vector Tile Format - Mapbox",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v4/mapbox\.[a-z]+/([0-9]+)/([0-9]+)/([0-9]+)\.mvt",
+        "queryParameters": {
+          "access_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/vnd.mapbox-vector-tile",
+          "Cache-Control": "public, max-age=604800",
+          "Expires": "{{now offset='7 days' format='EEE, dd MMM yyyy HH:mm:ss z'}}",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "bodyFileName": "map/tiles/mapbox-vector-tile.mvt"
+      }
+    },
+    {
+      "name": "Tile Error Response - 404",
+      "priority": 10,
+      "request": {
+        "method": "GET",
+        "urlPathPattern": ".*/999/999/999\..+"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error": "Tile not found",
+          "message": "The requested tile is outside the available bounds"
+        }
+      }
+    }
+  ]
+}
+  ]
+}
