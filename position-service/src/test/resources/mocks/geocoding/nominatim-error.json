@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/reverse",
+    "queryParameters": {
+      "format": {
+        "equalTo": "json"
+      },
+      "lat": {
+        "matches": "-?\\d+(\\.\\d+)?"
+      },
+      "lon": {
+        "matches": "-?\\d+(\\.\\d+)?"
+      },
+      "zoom": {
+        "equalTo": "18"
+      },
+      "addressdetails": {
+        "equalTo": "1"
+      }
+    }
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "60",
+      "X-Rate-Limit-Limit": "1",
+      "X-Rate-Limit-Remaining": "0",
+      "X-Rate-Limit-Reset": "60"
+    },
+    "jsonBody": {
+      "error": {
+        "code": 429,
+        "message": "Too Many Requests",
+        "details": "You have exceeded the request rate limit for this API. Please wait before making further requests."
+      }
+    },
+    "fixedDelayMilliseconds": 500
+  },
+  "priority": 1,
+  "scenarioName": "Nominatim Rate Limiting",
+  "requiredScenarioState": "Started"
+}
