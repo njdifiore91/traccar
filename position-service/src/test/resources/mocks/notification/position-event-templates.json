@@ -1,0 +1,66 @@
+{
+  "geofenceEnter": {
+    "subject": "Device {device.name} has entered geofence {geofence.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nGeofence: {geofence.name}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nSpeed: {position.speed} km/h\nCourse: {position.course}°"
+  },
+  "geofenceExit": {
+    "subject": "Device {device.name} has exited geofence {geofence.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nGeofence: {geofence.name}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nSpeed: {position.speed} km/h\nCourse: {position.course}°"
+  },
+  "deviceOverspeed": {
+    "subject": "Device {device.name} exceeds the speed limit",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nSpeed: {position.speed} km/h\nSpeed Limit: {speedLimit} km/h\nExcess: {position.speed - speedLimit} km/h"
+  },
+  "deviceFuelDrop": {
+    "subject": "Fuel drop detected on {device.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nFuel Level: {position.fuel}%\nDrop Amount: {fuelDrop}%"
+  },
+  "deviceMoving": {
+    "subject": "Device {device.name} started moving",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nSpeed: {position.speed} km/h"
+  },
+  "deviceStopped": {
+    "subject": "Device {device.name} has stopped",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nStop Duration: {position.stopDuration}"
+  },
+  "deviceOffline": {
+    "subject": "Device {device.name} is offline",
+    "body": "Device: {device.name}\nLast Reported: {event.serverTime}\nLast Position: {position.latitude}, {position.longitude}\nLast Address: {position.address}"
+  },
+  "deviceOnline": {
+    "subject": "Device {device.name} is back online",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nOffline Duration: {position.offlineDuration}"
+  },
+  "deviceUnknown": {
+    "subject": "Device {device.name} status is unknown",
+    "body": "Device: {device.name}\nLast Reported: {event.serverTime}\nLast Position: {position.latitude}, {position.longitude}\nLast Address: {position.address}"
+  },
+  "maintenance": {
+    "subject": "Maintenance required for {device.name}: {maintenance.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nMaintenance: {maintenance.name}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nCurrent: {maintenance.current} {maintenance.unit}\nThreshold: {maintenance.threshold} {maintenance.unit}"
+  },
+  "alarm": {
+    "subject": "Alarm: {alarm.type} on device {device.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nAlarm Type: {alarm.type}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}"
+  },
+  "ignitionOn": {
+    "subject": "Ignition ON for device {device.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}"
+  },
+  "ignitionOff": {
+    "subject": "Ignition OFF for device {device.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nDuration: {position.ignitionDuration}"
+  },
+  "deviceIdling": {
+    "subject": "Device {device.name} is idling",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nIdling Duration: {position.idlingDuration}"
+  },
+  "positionPeriodic": {
+    "subject": "Periodic report from {device.name}",
+    "body": "Device: {device.name}\nTime: {event.serverTime}\nPosition: {position.latitude}, {position.longitude}\nAddress: {position.address}\nSpeed: {position.speed} km/h\nCourse: {position.course}°\nAltitude: {position.altitude} m"
+  },
+  "deviceInactive": {
+    "subject": "Device {device.name} is inactive",
+    "body": "Device: {device.name}\nLast Reported: {event.serverTime}\nLast Position: {position.latitude}, {position.longitude}\nLast Address: {position.address}\nInactive Duration: {position.inactiveDuration}"
+  }
+}
