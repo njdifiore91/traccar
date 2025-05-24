@@ -1,0 +1,309 @@
+# Notification Service Configuration
+# This file contains environment-specific configuration for the Notification Service
+
+# Server configuration
+server:
+  port: 8083
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 20
+    max-connections: 10000
+    connection-timeout: 5000
+
+# Spring configuration
+spring:
+  application:
+    name: notification-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    default-property-inclusion: non_null
+  main:
+    banner-mode: off
+
+# Service discovery configuration
+discovery:
+  enabled: true
+  type: ${DISCOVERY_TYPE:consul}  # Options: consul, kubernetes
+  consul:
+    host: ${CONSUL_HOST:localhost}
+    port: ${CONSUL_PORT:8500}
+    service-name: ${spring.application.name}
+    instance-id: ${spring.application.name}:${random.uuid}
+    health-check-path: /actuator/health
+    health-check-interval: 15s
+    tags: notification,traccar
+  kubernetes:
+    namespace: ${K8S_NAMESPACE:default}
+    enabled: ${K8S_DISCOVERY_ENABLED:false}
+
+# Message broker configuration
+messaging:
+  type: ${MESSAGING_TYPE:kafka}  # Options: kafka, rabbitmq
+  consumer:
+    enabled: true
+    concurrency: 3
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      fetch-max-wait-ms: 500
+      heartbeat-interval-ms: 3000
+      session-timeout-ms: 30000
+    topics:
+      notifications: traccar.notifications
+      email-out: traccar.notifications.email
+      sms-out: traccar.notifications.sms
+      push-out: traccar.notifications.push
+      web-out: traccar.notifications.web
+      dead-letter-queue: traccar.notifications.dlq
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 10
+        default-requeue-rejected: false
+    queues:
+      notifications: traccar.notifications
+      email-out: traccar.notifications.email
+      sms-out: traccar.notifications.sms
+      push-out: traccar.notifications.push
+      web-out: traccar.notifications.web
+      dead-letter-queue: traccar.notifications.dlq
+
+# Notification channels configuration
+notification:
+  # Enabled notification types
+  types: ${NOTIFICATION_TYPES:mail,sms,firebase,web,telegram,pushover,traccar,command}
+  
+  # Email configuration
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:no-reply@example.com}
+    ssl.enabled: ${MAIL_SSL_ENABLED:false}
+    tls.enabled: ${MAIL_TLS_ENABLED:true}
+    tls.required: ${MAIL_TLS_REQUIRED:true}
+    connection-timeout: 5000
+    timeout: 5000
+    auth: ${MAIL_AUTH:true}
+    debug: ${MAIL_DEBUG:false}
+    templates:
+      path: classpath:templates/mail
+      subject-prefix: ${MAIL_SUBJECT_PREFIX:[Traccar] }
+  
+  # SMS configuration
+  sms:
+    enabled: ${SMS_ENABLED:false}
+    provider: ${SMS_PROVIDER:http}  # Options: http, aws_sns
+    http:
+      url: ${SMS_HTTP_URL:https://example.com/sms}
+      authorization: ${SMS_HTTP_AUTHORIZATION:}
+      template: ${SMS_HTTP_TEMPLATE:text={message}&phone={phone}}
+      method: ${SMS_HTTP_METHOD:POST}
+    aws:
+      access-key: ${SMS_AWS_ACCESS_KEY:}
+      secret-key: ${SMS_AWS_SECRET_KEY:}
+      region: ${SMS_AWS_REGION:us-east-1}
+    templates:
+      path: classpath:templates/sms
+  
+  # Firebase (FCM) configuration
+  firebase:
+    enabled: ${FIREBASE_ENABLED:false}
+    service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:}
+    database-url: ${FIREBASE_DATABASE_URL:}
+    device-token-key: ${FIREBASE_DEVICE_TOKEN_KEY:fcmToken}
+    templates:
+      path: classpath:templates/firebase
+  
+  # Web notification configuration
+  web:
+    enabled: ${WEB_NOTIFICATION_ENABLED:true}
+    templates:
+      path: classpath:templates/web
+  
+  # Telegram configuration
+  telegram:
+    enabled: ${TELEGRAM_ENABLED:false}
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+    chat-id: ${TELEGRAM_CHAT_ID:}
+    templates:
+      path: classpath:templates/telegram
+  
+  # Pushover configuration
+  pushover:
+    enabled: ${PUSHOVER_ENABLED:false}
+    user-key: ${PUSHOVER_USER_KEY:}
+    app-token: ${PUSHOVER_APP_TOKEN:}
+    templates:
+      path: classpath:templates/pushover
+  
+  # Traccar mobile app notification configuration
+  traccar:
+    enabled: ${TRACCAR_NOTIFICATION_ENABLED:false}
+    key: ${TRACCAR_NOTIFICATION_KEY:}
+    templates:
+      path: classpath:templates/traccar
+  
+  # Command notification configuration
+  command:
+    enabled: ${COMMAND_NOTIFICATION_ENABLED:false}
+    templates:
+      path: classpath:templates/command
+
+  # Notification formatting
+  formatter:
+    velocity:
+      resource-loader-path: classpath:/templates/
+      prefer-file-system-access: false
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: UTC
+    coordinate-format: %.6f
+    short-template-suffix: short
+    full-template-suffix: full
+
+  # Retry configuration
+  retry:
+    max-attempts: ${NOTIFICATION_RETRY_MAX_ATTEMPTS:3}
+    initial-interval: ${NOTIFICATION_RETRY_INITIAL_INTERVAL:1000}
+    multiplier: ${NOTIFICATION_RETRY_MULTIPLIER:2.0}
+    max-interval: ${NOTIFICATION_RETRY_MAX_INTERVAL:10000}
+
+# Resilience configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      notificationService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  retry:
+    instances:
+      notificationService:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+  ratelimiter:
+    instances:
+      notificationService:
+        registerHealthIndicator: true
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 3s
+  bulkhead:
+    instances:
+      notificationService:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+
+# Distributed tracing configuration
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# Logging configuration
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [%X{traceId},%X{spanId}] - %msg%n'
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+# Application-specific settings
+app:
+  # Event age threshold in seconds (events older than this will be ignored)
+  event-max-age-seconds: ${EVENT_MAX_AGE_SECONDS:300}
+  
+  # Calendar check settings
+  calendar-check-enabled: ${CALENDAR_CHECK_ENABLED:true}
+  
+  # Notification throttling
+  throttling:
+    enabled: ${NOTIFICATION_THROTTLING_ENABLED:true}
+    max-per-hour: ${NOTIFICATION_THROTTLING_MAX_PER_HOUR:100}
+    max-per-device-hour: ${NOTIFICATION_THROTTLING_MAX_PER_DEVICE_HOUR:10}
+
+---
+# Development profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    org.traccar: DEBUG
+
+---
+# Production profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: ${SERVER_PORT:8083}
+
+logging:
+  level:
+    org.traccar: WARN
+
+---
+# Test profile
+spring:
+  config:
+    activate:
+      on-profile: test
+
+messaging:
+  consumer:
+    enabled: false
+
+discovery:
+  enabled: false
