@@ -1,0 +1,862 @@
+{
+  "provider": {
+    "name": "position-service"
+  },
+  "consumer": {
+    "name": "event-service"
+  },
+  "interactions": [
+    {
+      "description": "a request to retrieve position data for event processing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/positions/latest",
+        "query": {
+          "deviceId": "123",
+          "limit": "1"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer {{token}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": "{{matchInteger}}",
+          "deviceId": 123,
+          "protocol": "{{matchRegex('\\\\w+')}}", 
+          "deviceTime": "{{matchTimestamp}}",
+          "fixTime": "{{matchTimestamp}}",
+          "serverTime": "{{matchTimestamp}}",
+          "outdated": false,
+          "valid": true,
+          "latitude": "{{matchDecimal}}",
+          "longitude": "{{matchDecimal}}",
+          "altitude": "{{matchDecimal}}",
+          "speed": "{{matchDecimal}}",
+          "course": "{{matchDecimal}}",
+          "address": "{{matchRegex('.{0,255}')}}",
+          "accuracy": "{{matchDecimal}}",
+          "attributes": {
+            "motion": "{{matchBoolean}}",
+            "totalDistance": "{{matchDecimal}}",
+            "ignition": "{{matchBoolean}}",
+            "batteryLevel": "{{matchInteger}}",
+            "rpm": "{{matchInteger}}",
+            "fuel": "{{matchDecimal}}"
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.deviceId": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.protocol": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\w+"
+                }
+              ]
+            },
+            "$.deviceTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.fixTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.serverTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.latitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.longitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.altitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.course": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.address": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".{0,255}"
+                }
+              ]
+            },
+            "$.accuracy": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.attributes.motion": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.attributes.ignition": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.attributes.batteryLevel": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.attributes.rpm": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.attributes.fuel": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a request to retrieve position data for a specific device for event processing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/positions/device/123",
+        "query": {
+          "from": "2023-01-01T00:00:00Z",
+          "to": "2023-01-02T00:00:00Z"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer {{token}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": "{{matchInteger}}",
+            "deviceId": 123,
+            "protocol": "{{matchRegex('\\\\w+')}}",
+            "deviceTime": "{{matchTimestamp}}",
+            "fixTime": "{{matchTimestamp}}",
+            "serverTime": "{{matchTimestamp}}",
+            "outdated": false,
+            "valid": true,
+            "latitude": "{{matchDecimal}}",
+            "longitude": "{{matchDecimal}}",
+            "altitude": "{{matchDecimal}}",
+            "speed": "{{matchDecimal}}",
+            "course": "{{matchDecimal}}",
+            "address": "{{matchRegex('.{0,255}')}}",
+            "accuracy": "{{matchDecimal}}",
+            "attributes": {
+              "motion": "{{matchBoolean}}",
+              "totalDistance": "{{matchDecimal}}",
+              "ignition": "{{matchBoolean}}"
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].protocol": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\w+"
+                }
+              ]
+            },
+            "$[*].deviceTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].fixTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].serverTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].latitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].longitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].altitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].course": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].address": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".{0,255}"
+                }
+              ]
+            },
+            "$[*].accuracy": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.motion": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.ignition": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a request to retrieve position data for motion event detection",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/positions/events/motion",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00Z",
+          "to": "2023-01-02T00:00:00Z"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer {{token}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": "{{matchInteger}}",
+            "deviceId": 123,
+            "deviceTime": "{{matchTimestamp}}",
+            "serverTime": "{{matchTimestamp}}",
+            "latitude": "{{matchDecimal}}",
+            "longitude": "{{matchDecimal}}",
+            "speed": "{{matchDecimal}}",
+            "attributes": {
+              "motion": "{{matchBoolean}}",
+              "totalDistance": "{{matchDecimal}}",
+              "ignition": "{{matchBoolean}}"
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].deviceTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].serverTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].latitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].longitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.motion": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.ignition": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a notification of new position data for event processing",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions/notify",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "deviceId": 123,
+          "positionId": 456,
+          "timestamp": "2023-01-01T12:00:00Z"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "accepted",
+          "message": "Position notification received"
+        }
+      }
+    },
+    {
+      "description": "a request to retrieve position data for a specific position ID",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/positions/456",
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer {{token}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": 456,
+          "deviceId": 123,
+          "protocol": "{{matchRegex('\\\\w+')}}",
+          "deviceTime": "{{matchTimestamp}}",
+          "fixTime": "{{matchTimestamp}}",
+          "serverTime": "{{matchTimestamp}}",
+          "outdated": false,
+          "valid": true,
+          "latitude": "{{matchDecimal}}",
+          "longitude": "{{matchDecimal}}",
+          "altitude": "{{matchDecimal}}",
+          "speed": "{{matchDecimal}}",
+          "course": "{{matchDecimal}}",
+          "address": "{{matchRegex('.{0,255}')}}",
+          "accuracy": "{{matchDecimal}}",
+          "attributes": {
+            "motion": "{{matchBoolean}}",
+            "totalDistance": "{{matchDecimal}}",
+            "ignition": "{{matchBoolean}}",
+            "batteryLevel": "{{matchInteger}}",
+            "rpm": "{{matchInteger}}",
+            "fuel": "{{matchDecimal}}"
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.deviceId": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.protocol": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\w+"
+                }
+              ]
+            },
+            "$.deviceTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.fixTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.serverTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$.latitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.longitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.altitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.course": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.address": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".{0,255}"
+                }
+              ]
+            },
+            "$.accuracy": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.attributes.motion": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.attributes.ignition": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.attributes.batteryLevel": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.attributes.rpm": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.attributes.fuel": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "a batch request to retrieve multiple positions by IDs",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions/batch",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer {{token}}"
+        },
+        "body": {
+          "ids": [456, 457, 458]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": "{{matchInteger}}",
+            "deviceId": "{{matchInteger}}",
+            "protocol": "{{matchRegex('\\\\w+')}}",
+            "deviceTime": "{{matchTimestamp}}",
+            "fixTime": "{{matchTimestamp}}",
+            "serverTime": "{{matchTimestamp}}",
+            "outdated": "{{matchBoolean}}",
+            "valid": "{{matchBoolean}}",
+            "latitude": "{{matchDecimal}}",
+            "longitude": "{{matchDecimal}}",
+            "altitude": "{{matchDecimal}}",
+            "speed": "{{matchDecimal}}",
+            "course": "{{matchDecimal}}",
+            "address": "{{matchRegex('.{0,255}')}}",
+            "accuracy": "{{matchDecimal}}",
+            "attributes": {
+              "motion": "{{matchBoolean}}",
+              "totalDistance": "{{matchDecimal}}",
+              "ignition": "{{matchBoolean}}"
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].protocol": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\w+"
+                }
+              ]
+            },
+            "$[*].deviceTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].fixTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].serverTime": {
+              "matchers": [
+                {
+                  "match": "timestamp"
+                }
+              ]
+            },
+            "$[*].outdated": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].valid": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].latitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].longitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].altitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].course": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].address": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".{0,255}"
+                }
+              ]
+            },
+            "$[*].accuracy": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.motion": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].attributes.totalDistance": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].attributes.ignition": {
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.3.16"
+    }
+  }
+}
