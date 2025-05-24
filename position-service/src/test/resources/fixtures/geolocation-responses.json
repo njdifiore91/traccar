@@ -1,0 +1,350 @@
+{
+  "google": {
+    "successful": {
+      "high_accuracy": {
+        "location": {
+          "lat": 60.07254,
+          "lng": 30.30996
+        },
+        "accuracy": 10.5
+      },
+      "medium_accuracy": {
+        "location": {
+          "lat": 40.7128,
+          "lng": -74.0060
+        },
+        "accuracy": 500.0
+      },
+      "low_accuracy": {
+        "location": {
+          "lat": 51.5074,
+          "lng": -0.1278
+        },
+        "accuracy": 2000.0
+      }
+    },
+    "error": {
+      "invalid_key": {
+        "error": {
+          "code": 400,
+          "message": "API key not valid. Please pass a valid API key.",
+          "status": "INVALID_ARGUMENT",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "API_KEY_INVALID",
+              "domain": "googleapis.com",
+              "metadata": {
+                "service": "geolocation.googleapis.com"
+              }
+            }
+          ]
+        }
+      },
+      "daily_limit_exceeded": {
+        "error": {
+          "code": 403,
+          "message": "Geolocation API has exceeded its daily limit.",
+          "status": "RESOURCE_EXHAUSTED",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "RATE_LIMIT_EXCEEDED",
+              "domain": "googleapis.com",
+              "metadata": {
+                "service": "geolocation.googleapis.com"
+              }
+            }
+          ]
+        }
+      },
+      "insufficient_data": {
+        "error": {
+          "code": 400,
+          "message": "Not enough cell towers or WiFi access points provided to determine location.",
+          "status": "INVALID_ARGUMENT",
+          "details": [
+            {
+              "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+              "reason": "INSUFFICIENT_DATA",
+              "domain": "googleapis.com",
+              "metadata": {
+                "service": "geolocation.googleapis.com"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "opencellid": {
+    "successful": {
+      "high_accuracy": {
+        "lat": 60.07254,
+        "lon": 30.30996,
+        "accuracy": 50,
+        "address": "Saint Petersburg, Russia"
+      },
+      "medium_accuracy": {
+        "lat": 40.7128,
+        "lon": -74.0060,
+        "accuracy": 800,
+        "address": "New York, NY, USA"
+      },
+      "low_accuracy": {
+        "lat": 51.5074,
+        "lon": -0.1278,
+        "accuracy": 3000,
+        "address": "London, UK"
+      }
+    },
+    "error": {
+      "invalid_key": {
+        "error": "Invalid API key",
+        "code": 401
+      },
+      "rate_limit_exceeded": {
+        "error": "Rate limit exceeded",
+        "code": 429
+      },
+      "not_found": {
+        "error": "Cell not found in database",
+        "code": 404
+      },
+      "invalid_cell": {
+        "error": "Invalid cell tower data",
+        "code": 400
+      }
+    }
+  },
+  "unwired": {
+    "successful": {
+      "high_accuracy": {
+        "status": "ok",
+        "message": "Location found",
+        "balance": 995,
+        "balance_slots": 995,
+        "lat": 60.07254,
+        "lon": 30.30996,
+        "accuracy": 30,
+        "address": {
+          "country": "Russia",
+          "city": "Saint Petersburg",
+          "street": "Nevsky Prospekt"
+        },
+        "fallback": false
+      },
+      "medium_accuracy": {
+        "status": "ok",
+        "message": "Location found",
+        "balance": 994,
+        "balance_slots": 994,
+        "lat": 40.7128,
+        "lon": -74.0060,
+        "accuracy": 600,
+        "address": {
+          "country": "United States",
+          "state": "NY",
+          "city": "New York"
+        },
+        "fallback": false
+      },
+      "low_accuracy": {
+        "status": "ok",
+        "message": "Location found",
+        "balance": 993,
+        "balance_slots": 993,
+        "lat": 51.5074,
+        "lon": -0.1278,
+        "accuracy": 2500,
+        "address": {
+          "country": "United Kingdom",
+          "city": "London"
+        },
+        "fallback": true
+      },
+      "wifi_only": {
+        "status": "ok",
+        "message": "Location found using WiFi only",
+        "balance": 992,
+        "balance_slots": 992,
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "accuracy": 25,
+        "address": {
+          "country": "France",
+          "city": "Paris",
+          "street": "Champs-Élysées"
+        },
+        "fallback": false
+      }
+    },
+    "error": {
+      "invalid_key": {
+        "status": "error",
+        "message": "Invalid API token",
+        "code": 401
+      },
+      "rate_limit_exceeded": {
+        "status": "error",
+        "message": "Rate limit exceeded",
+        "code": 429
+      },
+      "insufficient_balance": {
+        "status": "error",
+        "message": "Insufficient balance",
+        "code": 402
+      },
+      "no_data": {
+        "status": "error",
+        "message": "No cell or WiFi data provided",
+        "code": 400
+      },
+      "not_found": {
+        "status": "error",
+        "message": "Location not found",
+        "code": 404
+      }
+    }
+  },
+  "mozilla": {
+    "successful": {
+      "high_accuracy": {
+        "location": {
+          "lat": 60.07254,
+          "lng": 30.30996
+        },
+        "accuracy": 15.0
+      },
+      "medium_accuracy": {
+        "location": {
+          "lat": 40.7128,
+          "lng": -74.0060
+        },
+        "accuracy": 450.0
+      },
+      "low_accuracy": {
+        "location": {
+          "lat": 51.5074,
+          "lng": -0.1278
+        },
+        "accuracy": 1800.0
+      }
+    },
+    "error": {
+      "invalid_key": {
+        "error": {
+          "code": 401,
+          "message": "Invalid API key"
+        }
+      },
+      "rate_limit_exceeded": {
+        "error": {
+          "code": 429,
+          "message": "Rate limit exceeded"
+        }
+      },
+      "insufficient_data": {
+        "error": {
+          "code": 400,
+          "message": "Insufficient data provided"
+        }
+      }
+    }
+  },
+  "mixed_providers": {
+    "cell_tower_only": {
+      "google": {
+        "location": {
+          "lat": 37.4219,
+          "lng": -122.0841
+        },
+        "accuracy": 1200.0
+      },
+      "opencellid": {
+        "lat": 37.4220,
+        "lon": -122.0843,
+        "accuracy": 1500,
+        "address": "Mountain View, CA, USA"
+      },
+      "unwired": {
+        "status": "ok",
+        "lat": 37.4218,
+        "lon": -122.0839,
+        "accuracy": 1300,
+        "fallback": false
+      }
+    },
+    "wifi_only": {
+      "google": {
+        "location": {
+          "lat": 34.0522,
+          "lng": -118.2437
+        },
+        "accuracy": 30.0
+      },
+      "unwired": {
+        "status": "ok",
+        "lat": 34.0523,
+        "lon": -118.2436,
+        "accuracy": 25,
+        "fallback": false
+      }
+    },
+    "combined_sources": {
+      "google": {
+        "location": {
+          "lat": 52.5200,
+          "lng": 13.4050
+        },
+        "accuracy": 22.5
+      },
+      "unwired": {
+        "status": "ok",
+        "lat": 52.5201,
+        "lon": 13.4052,
+        "accuracy": 20,
+        "fallback": false
+      }
+    }
+  },
+  "special_cases": {
+    "zero_coordinates": {
+      "location": {
+        "lat": 0.0,
+        "lng": 0.0
+      },
+      "accuracy": 5000.0
+    },
+    "extreme_coordinates": {
+      "location": {
+        "lat": 89.9999,
+        "lng": 179.9999
+      },
+      "accuracy": 10000.0
+    },
+    "negative_accuracy": {
+      "location": {
+        "lat": 35.6762,
+        "lng": 139.6503
+      },
+      "accuracy": -1.0
+    },
+    "very_high_accuracy": {
+      "location": {
+        "lat": 48.8566,
+        "lng": 2.3522
+      },
+      "accuracy": 1.5
+    },
+    "very_low_accuracy": {
+      "location": {
+        "lat": 55.7558,
+        "lng": 37.6173
+      },
+      "accuracy": 10000.0
+    },
+    "malformed_json": "This is not valid JSON and should trigger parsing errors",
+    "empty_response": {}
+  }
+}
