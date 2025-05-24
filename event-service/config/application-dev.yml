@@ -1,0 +1,179 @@
+# Development environment configuration for Event Processing Service
+# This file contains settings specific to development environments and is loaded
+# automatically when the 'dev' profile is active.
+
+# Server configuration
+server:
+  port: 8083
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+
+# Spring configuration
+spring:
+  application:
+    name: event-service
+  # Development-specific database configuration
+  datasource:
+    url: jdbc:h2:mem:eventdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # JPA configuration for development
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  # Message broker configuration for development (RabbitMQ)
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          multiplier: 1.5
+  # Kafka configuration (alternative message broker)
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: event-service-dev
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: DEBUG
+    org.traccar.event-service: DEBUG
+    org.traccar.handler.events: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Management endpoints for development
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    env:
+      show-values: always
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# Service discovery configuration for development
+service-discovery:
+  type: consul
+  enabled: true
+  consul:
+    host: localhost
+    port: 8500
+    discovery:
+      instanceId: ${spring.application.name}:${random.value}
+      healthCheckPath: /actuator/health
+      healthCheckInterval: 15s
+      prefer-ip-address: true
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      positionService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      positionService:
+        baseConfig: default
+
+# Event service specific configuration
+event-service:
+  # Event processing configuration
+  processing:
+    # Enable all event detectors in development
+    detectors:
+      geofence: true
+      overspeed: true
+      motion: true
+      deviceOnline: true
+      deviceOffline: true
+      maintenance: true
+      fuelDrop: true
+      fuelFill: true
+      engineHours: true
+      ignition: true
+    # Development-specific event processing settings
+    settings:
+      # Shorter intervals for testing in development
+      motionProcessingInterval: 5000
+      deviceStatusInterval: 30000
+      # Lower thresholds for easier testing
+      overspeedThresholdDefault: 50
+      fuelDropThresholdPercent: 5
+      fuelFillThresholdPercent: 5
+  # Mock external services for development
+  mock:
+    enabled: true
+    services:
+      position-service: http://localhost:8082
+      notification-service: http://localhost:8084
+  # Development-specific feature flags
+  features:
+    enableEventHistory: true
+    enableEventRuleDebugging: true
+    enableEventSimulation: true
+
+# OpenTelemetry configuration for development
+opentelemetry:
+  enabled: true
+  endpoint: http://localhost:4317
+  service-name: ${spring.application.name}
+
+# Development-specific security settings
+security:
+  # Disable security for development endpoints
+  basic:
+    enabled: false
+  # CORS configuration for development
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "*"
+    allowed-headers: "*"
