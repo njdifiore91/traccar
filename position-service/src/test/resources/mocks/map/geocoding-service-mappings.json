@@ -1,0 +1,733 @@
+{
+  "mappings": [
+    {
+      "name": "Google Maps Forward Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "matches": ".*"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "results": [
+            {
+              "place_id": "ChIJeRpOeF67j4AR9ydy_PIzPuM",
+              "formatted_address": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
+              "geometry": {
+                "location": {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                  "northeast": {
+                    "lat": 37.4238253802915,
+                    "lng": -122.0829009197085
+                  },
+                  "southwest": {
+                    "lat": 37.4211274197085,
+                    "lng": -122.0855988802915
+                  }
+                }
+              },
+              "address_components": [
+                {
+                  "long_name": "1600",
+                  "short_name": "1600",
+                  "types": ["street_number"]
+                },
+                {
+                  "long_name": "Amphitheatre Parkway",
+                  "short_name": "Amphitheatre Pkwy",
+                  "types": ["route"]
+                },
+                {
+                  "long_name": "Mountain View",
+                  "short_name": "Mountain View",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Santa Clara County",
+                  "short_name": "Santa Clara County",
+                  "types": ["administrative_area_level_2", "political"]
+                },
+                {
+                  "long_name": "California",
+                  "short_name": "CA",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "United States",
+                  "short_name": "US",
+                  "types": ["country", "political"]
+                },
+                {
+                  "long_name": "94043",
+                  "short_name": "94043",
+                  "types": ["postal_code"]
+                }
+              ],
+              "types": ["street_address"]
+            }
+          ]
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Google Maps Reverse Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "latlng": {
+            "matches": ".*"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "results": [
+            {
+              "place_id": "ChIJeRpOeF67j4AR9ydy_PIzPuM",
+              "formatted_address": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
+              "geometry": {
+                "location": {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                  "northeast": {
+                    "lat": 37.4238253802915,
+                    "lng": -122.0829009197085
+                  },
+                  "southwest": {
+                    "lat": 37.4211274197085,
+                    "lng": -122.0855988802915
+                  }
+                }
+              },
+              "address_components": [
+                {
+                  "long_name": "1600",
+                  "short_name": "1600",
+                  "types": ["street_number"]
+                },
+                {
+                  "long_name": "Amphitheatre Parkway",
+                  "short_name": "Amphitheatre Pkwy",
+                  "types": ["route"]
+                },
+                {
+                  "long_name": "Mountain View",
+                  "short_name": "Mountain View",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Santa Clara County",
+                  "short_name": "Santa Clara County",
+                  "types": ["administrative_area_level_2", "political"]
+                },
+                {
+                  "long_name": "California",
+                  "short_name": "CA",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "United States",
+                  "short_name": "US",
+                  "types": ["country", "political"]
+                },
+                {
+                  "long_name": "94043",
+                  "short_name": "94043",
+                  "types": ["postal_code"]
+                }
+              ],
+              "types": ["street_address"]
+            }
+          ]
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "equalTo": "invalid_address_for_error_testing"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "status": "ZERO_RESULTS",
+          "results": []
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - API Key Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "key": {
+            "equalTo": "invalid_api_key"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error_message": "The provided API key is invalid.",
+          "status": "REQUEST_DENIED",
+          "results": []
+        }
+      }
+    },
+    {
+      "name": "OpenStreetMap Forward Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/search",
+        "queryParameters": {
+          "q": {
+            "matches": ".*"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": [
+          {
+            "place_id": 235681385,
+            "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+            "osm_type": "way",
+            "osm_id": 411246269,
+            "boundingbox": ["37.4223318", "37.4226232", "-122.0843859", "-122.0841016"],
+            "lat": "37.4224764",
+            "lon": "-122.0842499",
+            "display_name": "1600, Amphitheatre Parkway, Mountain View, Santa Clara County, California, 94043, United States",
+            "class": "building",
+            "type": "yes",
+            "importance": 0.625
+          }
+        ]
+      }
+    },
+    {
+      "name": "OpenStreetMap Reverse Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": ".*"
+          },
+          "lon": {
+            "matches": ".*"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "place_id": 235681385,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 411246269,
+          "lat": "37.4224764",
+          "lon": "-122.0842499",
+          "display_name": "1600, Amphitheatre Parkway, Mountain View, Santa Clara County, California, 94043, United States",
+          "address": {
+            "house_number": "1600",
+            "road": "Amphitheatre Parkway",
+            "city": "Mountain View",
+            "county": "Santa Clara County",
+            "state": "California",
+            "postcode": "94043",
+            "country": "United States",
+            "country_code": "us"
+          },
+          "boundingbox": ["37.4223318", "37.4226232", "-122.0843859", "-122.0841016"]
+        }
+      }
+    },
+    {
+      "name": "OpenStreetMap Geocoding - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/search",
+        "queryParameters": {
+          "q": {
+            "equalTo": "invalid_address_for_error_testing"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": []
+      }
+    },
+    {
+      "name": "Here Maps Forward Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/geocode",
+        "queryParameters": {
+          "q": {
+            "matches": ".*"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "items": [
+            {
+              "title": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+              "id": "here:af:streetsection:kn2uG-OZ1CJyoMB1XxIKB:CggIBCDn7LHnAQ",
+              "resultType": "houseNumber",
+              "houseNumberType": "PA",
+              "address": {
+                "label": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+                "countryCode": "USA",
+                "countryName": "United States",
+                "stateCode": "CA",
+                "state": "California",
+                "county": "Santa Clara",
+                "city": "Mountain View",
+                "district": "North Bayshore",
+                "street": "Amphitheatre Pkwy",
+                "postalCode": "94043",
+                "houseNumber": "1600"
+              },
+              "position": {
+                "lat": 37.4224764,
+                "lng": -122.0842499
+              },
+              "access": [
+                {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                }
+              ],
+              "mapView": {
+                "west": -122.0857499,
+                "south": 37.4209764,
+                "east": -122.0827499,
+                "north": 37.4239764
+              },
+              "scoring": {
+                "queryScore": 1.0,
+                "fieldScore": {
+                  "country": 1.0,
+                  "city": 1.0,
+                  "streets": [1.0],
+                  "houseNumber": 1.0,
+                  "postalCode": 1.0
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Here Maps Reverse Geocoding - Success",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/revgeocode",
+        "queryParameters": {
+          "at": {
+            "matches": ".*"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "items": [
+            {
+              "title": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+              "id": "here:af:streetsection:kn2uG-OZ1CJyoMB1XxIKB:CggIBCDn7LHnAQ",
+              "resultType": "houseNumber",
+              "houseNumberType": "PA",
+              "address": {
+                "label": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+                "countryCode": "USA",
+                "countryName": "United States",
+                "stateCode": "CA",
+                "state": "California",
+                "county": "Santa Clara",
+                "city": "Mountain View",
+                "district": "North Bayshore",
+                "street": "Amphitheatre Pkwy",
+                "postalCode": "94043",
+                "houseNumber": "1600"
+              },
+              "position": {
+                "lat": 37.4224764,
+                "lng": -122.0842499
+              },
+              "access": [
+                {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                }
+              ],
+              "distance": 0,
+              "mapView": {
+                "west": -122.0857499,
+                "south": 37.4209764,
+                "east": -122.0827499,
+                "north": 37.4239764
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Here Maps Geocoding - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/geocode",
+        "queryParameters": {
+          "q": {
+            "equalTo": "invalid_address_for_error_testing"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "items": []
+        }
+      }
+    },
+    {
+      "name": "Here Maps Geocoding - API Key Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/geocode",
+        "queryParameters": {
+          "apiKey": {
+            "equalTo": "invalid_api_key"
+          }
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error": "Unauthorized",
+          "error_description": "API key is invalid"
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - International Address (Japanese)",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "contains": "Tokyo"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "results": [
+            {
+              "place_id": "ChIJ51cu8IcbXWARiRtXIothAS4",
+              "formatted_address": "1-1 Chiyoda, Chiyoda City, Tokyo 100-8111, Japan",
+              "geometry": {
+                "location": {
+                  "lat": 35.6812362,
+                  "lng": 139.7671248
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                  "northeast": {
+                    "lat": 35.6825851802915,
+                    "lng": 139.7684737802915
+                  },
+                  "southwest": {
+                    "lat": 35.6798872197085,
+                    "lng": 139.7657758197085
+                  }
+                }
+              },
+              "address_components": [
+                {
+                  "long_name": "1-1",
+                  "short_name": "1-1",
+                  "types": ["premise"]
+                },
+                {
+                  "long_name": "Chiyoda",
+                  "short_name": "Chiyoda",
+                  "types": ["political", "sublocality", "sublocality_level_1"]
+                },
+                {
+                  "long_name": "Chiyoda City",
+                  "short_name": "Chiyoda City",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Tokyo",
+                  "short_name": "Tokyo",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "Japan",
+                  "short_name": "JP",
+                  "types": ["country", "political"]
+                },
+                {
+                  "long_name": "100-8111",
+                  "short_name": "100-8111",
+                  "types": ["postal_code"]
+                }
+              ],
+              "types": ["establishment", "point_of_interest", "premise"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - International Address (German)",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "contains": "Berlin"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "results": [
+            {
+              "place_id": "ChIJiQnyVEJOqEcRdX1lvDpk7m4",
+              "formatted_address": "Pariser Platz, 10117 Berlin, Germany",
+              "geometry": {
+                "location": {
+                  "lat": 52.5163767,
+                  "lng": 13.3777025
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                  "northeast": {
+                    "lat": 52.5177256802915,
+                    "lng": 13.3790514802915
+                  },
+                  "southwest": {
+                    "lat": 52.5150277197085,
+                    "lng": 13.3763535197085
+                  }
+                }
+              },
+              "address_components": [
+                {
+                  "long_name": "Pariser Platz",
+                  "short_name": "Pariser Platz",
+                  "types": ["route"]
+                },
+                {
+                  "long_name": "Mitte",
+                  "short_name": "Mitte",
+                  "types": ["political", "sublocality", "sublocality_level_1"]
+                },
+                {
+                  "long_name": "Berlin",
+                  "short_name": "Berlin",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Berlin",
+                  "short_name": "Berlin",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "Germany",
+                  "short_name": "DE",
+                  "types": ["country", "political"]
+                },
+                {
+                  "long_name": "10117",
+                  "short_name": "10117",
+                  "types": ["postal_code"]
+                }
+              ],
+              "types": ["establishment", "point_of_interest"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - Server Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "equalTo": "server_error_test"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error_message": "Internal server error",
+          "status": "SERVER_ERROR"
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - Timeout Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "equalTo": "timeout_error_test"
+          }
+        }
+      },
+      "response": {
+        "status": 408,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error_message": "Request timeout",
+          "status": "TIMEOUT"
+        }
+      }
+    },
+    {
+      "name": "Google Maps Geocoding - Rate Limit Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "address": {
+            "equalTo": "rate_limit_test"
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "error_message": "You have exceeded your daily request quota for this API.",
+          "status": "OVER_QUERY_LIMIT"
+        }
+      }
+    }
+  ]
+}
