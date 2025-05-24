@@ -1,0 +1,1666 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Event Service REST API",
+    "description": "REST API contract for the Event Service, defining endpoints for event detection, processing, and retrieval.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Traccar Support",
+      "url": "https://www.traccar.org/support/",
+      "email": "support@traccar.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Event Service API base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "events",
+      "description": "Event management operations"
+    },
+    {
+      "name": "rules",
+      "description": "Event rule management operations"
+    },
+    {
+      "name": "detection",
+      "description": "Event detection operations"
+    }
+  ],
+  "paths": {
+    "/events": {
+      "get": {
+        "tags": ["events"],
+        "summary": "Get all events with optional filtering",
+        "description": "Retrieves a list of events with optional filtering by device, type, and time range",
+        "operationId": "getEvents",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Filter events by device ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter events by type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deviceOnline",
+                "deviceOffline",
+                "deviceMoving",
+                "deviceStopped",
+                "deviceOverspeed",
+                "deviceFuelDrop",
+                "commandResult",
+                "geofenceEnter",
+                "geofenceExit",
+                "alarm",
+                "ignitionOn",
+                "ignitionOff",
+                "maintenance",
+                "textMessage",
+                "driverChanged"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date/time for filtering events (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date/time for filtering events (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["events"],
+        "summary": "Create a new event",
+        "description": "Creates a new event in the system",
+        "operationId": "createEvent",
+        "requestBody": {
+          "description": "Event object to be created",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid event data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "tags": ["events"],
+        "summary": "Get event by ID",
+        "description": "Retrieves a specific event by its ID",
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Event ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/device/{deviceId}": {
+      "get": {
+        "tags": ["events"],
+        "summary": "Get events for a specific device",
+        "description": "Retrieves all events for a specific device with optional filtering",
+        "operationId": "getEventsByDeviceId",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter events by type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deviceOnline",
+                "deviceOffline",
+                "deviceMoving",
+                "deviceStopped",
+                "deviceOverspeed",
+                "deviceFuelDrop",
+                "commandResult",
+                "geofenceEnter",
+                "geofenceExit",
+                "alarm",
+                "ignitionOn",
+                "ignitionOff",
+                "maintenance",
+                "textMessage",
+                "driverChanged"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date/time for filtering events (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date/time for filtering events (ISO-8601 format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/detection/evaluate": {
+      "post": {
+        "tags": ["detection"],
+        "summary": "Evaluate position for events",
+        "description": "Evaluates a position against event detection rules and returns detected events",
+        "operationId": "evaluatePosition",
+        "requestBody": {
+          "description": "Position data to evaluate",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionEvaluationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid position data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules": {
+      "get": {
+        "tags": ["rules"],
+        "summary": "Get all event rules",
+        "description": "Retrieves a list of all event rules with optional filtering",
+        "operationId": "getEventRules",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Filter rules by device ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "Filter rules by group ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter rules by event type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deviceOnline",
+                "deviceOffline",
+                "deviceMoving",
+                "deviceStopped",
+                "deviceOverspeed",
+                "deviceFuelDrop",
+                "geofenceEnter",
+                "geofenceExit",
+                "alarm",
+                "ignitionOn",
+                "ignitionOff",
+                "maintenance"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rules": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EventRule"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["rules"],
+        "summary": "Create a new event rule",
+        "description": "Creates a new event rule in the system",
+        "operationId": "createEventRule",
+        "requestBody": {
+          "description": "Event rule object to be created",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event rule created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid rule data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules/{id}": {
+      "get": {
+        "tags": ["rules"],
+        "summary": "Get event rule by ID",
+        "description": "Retrieves a specific event rule by its ID",
+        "operationId": "getEventRuleById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Event rule ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["rules"],
+        "summary": "Update an event rule",
+        "description": "Updates an existing event rule",
+        "operationId": "updateEventRule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Event rule ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated event rule object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event rule updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid rule data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["rules"],
+        "summary": "Delete an event rule",
+        "description": "Deletes an existing event rule",
+        "operationId": "deleteEventRule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Event rule ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event rule deleted successfully"
+          },
+          "400": {
+            "description": "Bad request - invalid ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules/device/{deviceId}": {
+      "get": {
+        "tags": ["rules"],
+        "summary": "Get event rules for a specific device",
+        "description": "Retrieves all event rules for a specific device",
+        "operationId": "getEventRulesByDeviceId",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "description": "Device ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rules": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EventRule"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the event"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the event",
+            "enum": [
+              "deviceOnline",
+              "deviceOffline",
+              "deviceMoving",
+              "deviceStopped",
+              "deviceOverspeed",
+              "deviceFuelDrop",
+              "commandResult",
+              "geofenceEnter",
+              "geofenceExit",
+              "alarm",
+              "ignitionOn",
+              "ignitionOff",
+              "maintenance",
+              "textMessage",
+              "driverChanged"
+            ]
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server timestamp when the event was generated"
+          },
+          "deviceTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Device timestamp when the event occurred"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device associated with the event"
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the position associated with the event",
+            "nullable": true
+          },
+          "geofenceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the geofence associated with the event (for geofence events)",
+            "nullable": true
+          },
+          "maintenanceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the maintenance associated with the event (for maintenance events)",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes associated with the event"
+          }
+        },
+        "required": ["id", "type", "serverTime", "deviceId"]
+      },
+      "EventRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of the event",
+            "enum": [
+              "deviceOnline",
+              "deviceOffline",
+              "deviceMoving",
+              "deviceStopped",
+              "deviceOverspeed",
+              "deviceFuelDrop",
+              "commandResult",
+              "geofenceEnter",
+              "geofenceExit",
+              "alarm",
+              "ignitionOn",
+              "ignitionOff",
+              "maintenance",
+              "textMessage",
+              "driverChanged"
+            ]
+          },
+          "deviceTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Device timestamp when the event occurred"
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device associated with the event"
+          },
+          "positionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the position associated with the event",
+            "nullable": true
+          },
+          "geofenceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the geofence associated with the event (for geofence events)",
+            "nullable": true
+          },
+          "maintenanceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the maintenance associated with the event (for maintenance events)",
+            "nullable": true
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional attributes associated with the event"
+          }
+        },
+        "required": ["type", "deviceId"]
+      },
+      "EventRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the event rule"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the event rule"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the event rule",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of event this rule applies to",
+            "enum": [
+              "deviceOnline",
+              "deviceOffline",
+              "deviceMoving",
+              "deviceStopped",
+              "deviceOverspeed",
+              "deviceFuelDrop",
+              "geofenceEnter",
+              "geofenceExit",
+              "alarm",
+              "ignitionOn",
+              "ignitionOff",
+              "maintenance"
+            ]
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device this rule applies to (null for all devices)",
+            "nullable": true
+          },
+          "groupId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the group this rule applies to (null for all groups)",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this rule is enabled"
+          },
+          "notificationEnabled": {
+            "type": "boolean",
+            "description": "Whether notifications should be sent for events detected by this rule"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional parameters for the rule (e.g., speed threshold for overspeed)"
+          },
+          "calendarId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the calendar defining when this rule is active (null for always active)",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the rule was created"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the rule was last updated"
+          }
+        },
+        "required": ["id", "name", "type", "enabled", "notificationEnabled", "createdAt", "updatedAt"]
+      },
+      "EventRuleRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the event rule"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the event rule",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of event this rule applies to",
+            "enum": [
+              "deviceOnline",
+              "deviceOffline",
+              "deviceMoving",
+              "deviceStopped",
+              "deviceOverspeed",
+              "deviceFuelDrop",
+              "geofenceEnter",
+              "geofenceExit",
+              "alarm",
+              "ignitionOn",
+              "ignitionOff",
+              "maintenance"
+            ]
+          },
+          "deviceId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the device this rule applies to (null for all devices)",
+            "nullable": true
+          },
+          "groupId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the group this rule applies to (null for all groups)",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this rule is enabled"
+          },
+          "notificationEnabled": {
+            "type": "boolean",
+            "description": "Whether notifications should be sent for events detected by this rule"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional parameters for the rule (e.g., speed threshold for overspeed)"
+          },
+          "calendarId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the calendar defining when this rule is active (null for always active)",
+            "nullable": true
+          }
+        },
+        "required": ["name", "type", "enabled", "notificationEnabled"]
+      },
+      "PositionEvaluationRequest": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unique identifier for the position"
+              },
+              "deviceId": {
+                "type": "integer",
+                "format": "int64",
+                "description": "ID of the device associated with the position"
+              },
+              "protocol": {
+                "type": "string",
+                "description": "Protocol used to receive the position"
+              },
+              "deviceTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Device timestamp when the position was recorded"
+              },
+              "fixTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "GPS fix timestamp"
+              },
+              "serverTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Server timestamp when the position was received"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Latitude in degrees"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Longitude in degrees"
+              },
+              "altitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Altitude in meters",
+                "nullable": true
+              },
+              "speed": {
+                "type": "number",
+                "format": "double",
+                "description": "Speed in knots",
+                "nullable": true
+              },
+              "course": {
+                "type": "number",
+                "format": "double",
+                "description": "Course in degrees",
+                "nullable": true
+              },
+              "accuracy": {
+                "type": "number",
+                "format": "double",
+                "description": "Accuracy in meters",
+                "nullable": true
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                },
+                "description": "Additional attributes associated with the position"
+              }
+            },
+            "required": ["deviceId", "latitude", "longitude"]
+          },
+          "previousPosition": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unique identifier for the previous position"
+              },
+              "deviceId": {
+                "type": "integer",
+                "format": "int64",
+                "description": "ID of the device associated with the previous position"
+              },
+              "protocol": {
+                "type": "string",
+                "description": "Protocol used to receive the previous position"
+              },
+              "deviceTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Device timestamp when the previous position was recorded"
+              },
+              "fixTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "GPS fix timestamp for the previous position"
+              },
+              "serverTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Server timestamp when the previous position was received"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Latitude in degrees for the previous position"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Longitude in degrees for the previous position"
+              },
+              "altitude": {
+                "type": "number",
+                "format": "double",
+                "description": "Altitude in meters for the previous position",
+                "nullable": true
+              },
+              "speed": {
+                "type": "number",
+                "format": "double",
+                "description": "Speed in knots for the previous position",
+                "nullable": true
+              },
+              "course": {
+                "type": "number",
+                "format": "double",
+                "description": "Course in degrees for the previous position",
+                "nullable": true
+              },
+              "accuracy": {
+                "type": "number",
+                "format": "double",
+                "description": "Accuracy in meters for the previous position",
+                "nullable": true
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                },
+                "description": "Additional attributes associated with the previous position"
+              }
+            },
+            "nullable": true
+          },
+          "deviceState": {
+            "type": "object",
+            "description": "Current device state information",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "nullable": true
+          },
+          "ruleIds": {
+            "type": "array",
+            "description": "Optional list of rule IDs to evaluate (if not provided, all applicable rules will be evaluated)",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "nullable": true
+          }
+        },
+        "required": ["position"]
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Current page number"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Number of items per page"
+          },
+          "totalItems": {
+            "type": "integer",
+            "description": "Total number of items"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages"
+          }
+        },
+        "required": ["page", "pageSize", "totalItems", "totalPages"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "Additional error details",
+            "nullable": true
+          }
+        },
+        "required": ["code", "message"]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token authentication"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}
