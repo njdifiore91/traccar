@@ -1,0 +1,345 @@
+{
+  "exchanges": [
+    {
+      "name": "position.exchange",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "event.exchange",
+      "type": "topic",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "command.exchange",
+      "type": "direct",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "position.dlx",
+      "type": "fanout",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "event.dlx",
+      "type": "fanout",
+      "durable": true,
+      "autoDelete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "position.raw",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "position.dlx",
+        "x-dead-letter-routing-key": "position.raw.dlq"
+      }
+    },
+    {
+      "name": "position.enriched",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "position.dlx",
+        "x-dead-letter-routing-key": "position.enriched.dlq"
+      }
+    },
+    {
+      "name": "position.updates",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 60000,
+        "x-dead-letter-exchange": "position.dlx",
+        "x-dead-letter-routing-key": "position.updates.dlq"
+      }
+    },
+    {
+      "name": "position.commands",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "position.dlx",
+        "x-dead-letter-routing-key": "position.commands.dlq"
+      }
+    },
+    {
+      "name": "event.geofence",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "event.dlx",
+        "x-dead-letter-routing-key": "event.geofence.dlq"
+      }
+    },
+    {
+      "name": "event.overspeed",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "event.dlx",
+        "x-dead-letter-routing-key": "event.overspeed.dlq"
+      }
+    },
+    {
+      "name": "event.motion",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "event.dlx",
+        "x-dead-letter-routing-key": "event.motion.dlq"
+      }
+    },
+    {
+      "name": "event.device",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-dead-letter-exchange": "event.dlx",
+        "x-dead-letter-routing-key": "event.device.dlq"
+      }
+    },
+    {
+      "name": "position.raw.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "position.enriched.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "position.updates.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "position.commands.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "event.geofence.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "event.overspeed.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "event.motion.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    },
+    {
+      "name": "event.device.dlq",
+      "durable": true,
+      "exclusive": false,
+      "autoDelete": false,
+      "arguments": {
+        "x-message-ttl": 604800000,
+        "x-queue-mode": "lazy"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "position.exchange",
+      "destination": "position.raw",
+      "destinationType": "queue",
+      "routingKey": "position.raw.#"
+    },
+    {
+      "source": "position.exchange",
+      "destination": "position.enriched",
+      "destinationType": "queue",
+      "routingKey": "position.enriched.#"
+    },
+    {
+      "source": "position.exchange",
+      "destination": "position.updates",
+      "destinationType": "queue",
+      "routingKey": "position.updates.#"
+    },
+    {
+      "source": "command.exchange",
+      "destination": "position.commands",
+      "destinationType": "queue",
+      "routingKey": "position.command"
+    },
+    {
+      "source": "event.exchange",
+      "destination": "event.geofence",
+      "destinationType": "queue",
+      "routingKey": "event.geofence.#"
+    },
+    {
+      "source": "event.exchange",
+      "destination": "event.overspeed",
+      "destinationType": "queue",
+      "routingKey": "event.overspeed.#"
+    },
+    {
+      "source": "event.exchange",
+      "destination": "event.motion",
+      "destinationType": "queue",
+      "routingKey": "event.motion.#"
+    },
+    {
+      "source": "event.exchange",
+      "destination": "event.device",
+      "destinationType": "queue",
+      "routingKey": "event.device.#"
+    },
+    {
+      "source": "position.dlx",
+      "destination": "position.raw.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.raw.dlq"
+    },
+    {
+      "source": "position.dlx",
+      "destination": "position.enriched.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.enriched.dlq"
+    },
+    {
+      "source": "position.dlx",
+      "destination": "position.updates.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.updates.dlq"
+    },
+    {
+      "source": "position.dlx",
+      "destination": "position.commands.dlq",
+      "destinationType": "queue",
+      "routingKey": "position.commands.dlq"
+    },
+    {
+      "source": "event.dlx",
+      "destination": "event.geofence.dlq",
+      "destinationType": "queue",
+      "routingKey": "event.geofence.dlq"
+    },
+    {
+      "source": "event.dlx",
+      "destination": "event.overspeed.dlq",
+      "destinationType": "queue",
+      "routingKey": "event.overspeed.dlq"
+    },
+    {
+      "source": "event.dlx",
+      "destination": "event.motion.dlq",
+      "destinationType": "queue",
+      "routingKey": "event.motion.dlq"
+    },
+    {
+      "source": "event.dlx",
+      "destination": "event.device.dlq",
+      "destinationType": "queue",
+      "routingKey": "event.device.dlq"
+    }
+  ],
+  "testConfigurations": {
+    "positionServiceConsumer": {
+      "queues": ["position.raw"],
+      "prefetchCount": 100,
+      "acknowledgeMode": "manual",
+      "concurrentConsumers": 5,
+      "maxConcurrentConsumers": 10
+    },
+    "positionServiceProducer": {
+      "exchanges": ["position.exchange", "event.exchange"],
+      "routingKeyPatterns": {
+        "enrichedPositions": "position.enriched.{deviceId}",
+        "positionUpdates": "position.updates.{deviceId}",
+        "geofenceEvents": "event.geofence.{deviceId}",
+        "overspeedEvents": "event.overspeed.{deviceId}",
+        "motionEvents": "event.motion.{deviceId}",
+        "deviceEvents": "event.device.{deviceId}"
+      },
+      "confirmPublish": true,
+      "returnUnroutable": true,
+      "mandatory": true
+    },
+    "virtualHost": "/position-service-test",
+    "connectionPoolSize": 5,
+    "channelPoolSize": 25,
+    "networkRecoveryInterval": 5000,
+    "connectionTimeout": 30000,
+    "handshakeTimeout": 10000,
+    "shutdownTimeout": 10000,
+    "heartbeatInterval": 30,
+    "automaticRecovery": true,
+    "topologyRecovery": true
+  }
+}
