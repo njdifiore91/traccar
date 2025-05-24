@@ -1,0 +1,150 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notification-service-network-policy
+  namespace: notification-service
+spec:
+  podSelector:
+    matchLabels:
+      app: notification-service
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from API Gateway
+    - from:
+      - podSelector:
+          matchLabels:
+            app: api-gateway
+      namespaceSelector:
+        matchLabels:
+          name: api-gateway
+      ports:
+        - protocol: TCP
+          port: 8080  # Main API port
+        - protocol: TCP
+          port: 8081  # Management API port
+    
+    # Allow traffic from Event Service
+    - from:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      namespaceSelector:
+        matchLabels:
+          name: event-service
+      ports:
+        - protocol: TCP
+          port: 8080  # Main API port
+    
+    # Allow health checks from monitoring services
+    - from:
+      - podSelector:
+          matchLabels:
+            app: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080  # Health check endpoint
+        - protocol: TCP
+          port: 8081  # Metrics endpoint
+  
+  egress:
+    # Allow DNS resolution
+    - to:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Allow communication with Service Discovery (Consul/Kubernetes)
+    - to:
+      - podSelector:
+          matchLabels:
+            app: consul
+      namespaceSelector:
+        matchLabels:
+          name: service-discovery
+      ports:
+        - protocol: TCP
+          port: 8500  # Consul HTTP API
+        - protocol: TCP
+          port: 8301  # Consul LAN Serf
+    
+    # Allow communication with Position Service for position data
+    - to:
+      - podSelector:
+          matchLabels:
+            app: position-service
+      namespaceSelector:
+        matchLabels:
+          name: position-service
+      ports:
+        - protocol: TCP
+          port: 8080  # Position Service API
+    
+    # Allow communication with external email providers
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8     # Private network
+            - 172.16.0.0/12  # Private network
+            - 192.168.0.0/16 # Private network
+      ports:
+        - protocol: TCP
+          port: 25   # SMTP
+        - protocol: TCP
+          port: 465  # SMTPS
+        - protocol: TCP
+          port: 587  # SMTP with STARTTLS
+    
+    # Allow communication with external SMS providers
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8     # Private network
+            - 172.16.0.0/12  # Private network
+            - 192.168.0.0/16 # Private network
+      ports:
+        - protocol: TCP
+          port: 443  # HTTPS for SMS API calls
+    
+    # Allow communication with push notification services
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8     # Private network
+            - 172.16.0.0/12  # Private network
+            - 192.168.0.0/16 # Private network
+      ports:
+        - protocol: TCP
+          port: 443  # HTTPS for push notification API calls
+    
+    # Allow communication with Message Broker
+    - to:
+      - podSelector:
+          matchLabels:
+            app: kafka
+      namespaceSelector:
+        matchLabels:
+          name: message-broker
+      ports:
+        - protocol: TCP
+          port: 9092  # Kafka
+    - to:
+      - podSelector:
+          matchLabels:
+            app: rabbitmq
+      namespaceSelector:
+        matchLabels:
+          name: message-broker
+      ports:
+        - protocol: TCP
+          port: 5672  # RabbitMQ AMQP
