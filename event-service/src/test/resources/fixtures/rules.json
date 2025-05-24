@@ -1,0 +1,308 @@
+{
+  "rules": [
+    {
+      "id": 1,
+      "name": "Motion Rule",
+      "description": "Detects when a device starts moving",
+      "type": "deviceMoving",
+      "deviceId": 100,
+      "enabled": true,
+      "parameters": {
+        "minimalDistance": 500,
+        "minimalTime": 300000
+      },
+      "notificators": ["web", "email", "sms"],
+      "calendarId": null,
+      "notificationTemplateId": 1
+    },
+    {
+      "id": 2,
+      "name": "Stop Rule",
+      "description": "Detects when a device stops moving",
+      "type": "deviceStopped",
+      "deviceId": 100,
+      "enabled": true,
+      "parameters": {
+        "minimalTime": 300000,
+        "useIgnition": false
+      },
+      "notificators": ["web", "email"],
+      "calendarId": null,
+      "notificationTemplateId": 2
+    },
+    {
+      "id": 3,
+      "name": "Overspeed Rule",
+      "description": "Detects when a device exceeds speed limit",
+      "type": "deviceOverspeed",
+      "deviceId": 101,
+      "enabled": true,
+      "parameters": {
+        "speedLimit": 80.0,
+        "minimalDuration": 15000
+      },
+      "notificators": ["web", "email", "push"],
+      "calendarId": null,
+      "notificationTemplateId": 3
+    },
+    {
+      "id": 4,
+      "name": "Geofence Entry Rule",
+      "description": "Detects when a device enters a geofence",
+      "type": "geofenceEnter",
+      "deviceId": 102,
+      "enabled": true,
+      "parameters": {
+        "geofenceIds": [1, 2, 3]
+      },
+      "notificators": ["web", "email"],
+      "calendarId": 1,
+      "notificationTemplateId": 4
+    },
+    {
+      "id": 5,
+      "name": "Geofence Exit Rule",
+      "description": "Detects when a device exits a geofence",
+      "type": "geofenceExit",
+      "deviceId": 102,
+      "enabled": true,
+      "parameters": {
+        "geofenceIds": [1, 2, 3]
+      },
+      "notificators": ["web", "email"],
+      "calendarId": 1,
+      "notificationTemplateId": 5
+    },
+    {
+      "id": 6,
+      "name": "Ignition On Rule",
+      "description": "Detects when ignition is turned on",
+      "type": "ignitionOn",
+      "deviceId": 103,
+      "enabled": true,
+      "parameters": {},
+      "notificators": ["web"],
+      "calendarId": null,
+      "notificationTemplateId": 6
+    },
+    {
+      "id": 7,
+      "name": "Ignition Off Rule",
+      "description": "Detects when ignition is turned off",
+      "type": "ignitionOff",
+      "deviceId": 103,
+      "enabled": true,
+      "parameters": {},
+      "notificators": ["web"],
+      "calendarId": null,
+      "notificationTemplateId": 7
+    },
+    {
+      "id": 8,
+      "name": "Alarm Rule",
+      "description": "Detects when device sends an alarm",
+      "type": "alarm",
+      "deviceId": 104,
+      "enabled": true,
+      "parameters": {
+        "alarmTypes": ["sos", "hardAcceleration", "hardBraking"]
+      },
+      "notificators": ["web", "email", "sms", "push"],
+      "calendarId": null,
+      "notificationTemplateId": 8
+    },
+    {
+      "id": 9,
+      "name": "Device Offline Rule",
+      "description": "Detects when device goes offline",
+      "type": "deviceOffline",
+      "deviceId": 105,
+      "enabled": true,
+      "parameters": {
+        "minOfflineTime": 600000
+      },
+      "notificators": ["web", "email", "sms"],
+      "calendarId": 2,
+      "notificationTemplateId": 9
+    },
+    {
+      "id": 10,
+      "name": "Device Online Rule",
+      "description": "Detects when device comes online",
+      "type": "deviceOnline",
+      "deviceId": 105,
+      "enabled": true,
+      "parameters": {},
+      "notificators": ["web"],
+      "calendarId": null,
+      "notificationTemplateId": 10
+    },
+    {
+      "id": 11,
+      "name": "Maintenance Rule",
+      "description": "Detects when device needs maintenance",
+      "type": "maintenance",
+      "deviceId": 106,
+      "enabled": true,
+      "parameters": {
+        "type": "odometer",
+        "threshold": 10000,
+        "description": "Oil Change"
+      },
+      "notificators": ["web", "email"],
+      "calendarId": null,
+      "notificationTemplateId": 11
+    },
+    {
+      "id": 12,
+      "name": "Driver Behavior Rule",
+      "description": "Detects aggressive driving behavior",
+      "type": "driverBehavior",
+      "deviceId": 107,
+      "enabled": true,
+      "parameters": {
+        "accelerationThreshold": 0.3,
+        "brakingThreshold": 0.3,
+        "corneringThreshold": 0.2
+      },
+      "notificators": ["web", "email", "push"],
+      "calendarId": null,
+      "notificationTemplateId": 12
+    },
+    {
+      "id": 13,
+      "name": "Fuel Drop Rule",
+      "description": "Detects sudden fuel level drop",
+      "type": "fuelDrop",
+      "deviceId": 108,
+      "enabled": true,
+      "parameters": {
+        "threshold": 10.0,
+        "speedThreshold": 5.0
+      },
+      "notificators": ["web", "email", "sms"],
+      "calendarId": null,
+      "notificationTemplateId": 13
+    },
+    {
+      "id": 14,
+      "name": "Group Overspeed Rule",
+      "description": "Detects when any device in group exceeds speed limit",
+      "type": "deviceOverspeed",
+      "groupId": 1,
+      "enabled": true,
+      "parameters": {
+        "speedLimit": 90.0,
+        "minimalDuration": 20000
+      },
+      "notificators": ["web", "email"],
+      "calendarId": 3,
+      "notificationTemplateId": 14
+    },
+    {
+      "id": 15,
+      "name": "Disabled Rule",
+      "description": "This rule is disabled for testing",
+      "type": "deviceMoving",
+      "deviceId": 109,
+      "enabled": false,
+      "parameters": {
+        "minimalDistance": 500,
+        "minimalTime": 300000
+      },
+      "notificators": ["web"],
+      "calendarId": null,
+      "notificationTemplateId": 15
+    },
+    {
+      "id": 16,
+      "name": "Complex Condition Rule",
+      "description": "Rule with multiple conditions",
+      "type": "custom",
+      "deviceId": 110,
+      "enabled": true,
+      "parameters": {
+        "conditions": [
+          {
+            "type": "speed",
+            "operator": ">",
+            "value": 80.0
+          },
+          {
+            "type": "ignition",
+            "operator": "==",
+            "value": true
+          },
+          {
+            "type": "geofence",
+            "operator": "outside",
+            "value": 4
+          }
+        ],
+        "operator": "AND"
+      },
+      "notificators": ["web", "email"],
+      "calendarId": null,
+      "notificationTemplateId": 16
+    },
+    {
+      "id": 17,
+      "name": "Time-Based Rule",
+      "description": "Rule that only applies during specific hours",
+      "type": "deviceMoving",
+      "deviceId": 111,
+      "enabled": true,
+      "parameters": {
+        "minimalDistance": 500,
+        "minimalTime": 300000
+      },
+      "notificators": ["web", "email"],
+      "calendarId": 4,
+      "notificationTemplateId": 17
+    },
+    {
+      "id": 18,
+      "name": "Command Result Rule",
+      "description": "Detects when a command execution result is received",
+      "type": "commandResult",
+      "deviceId": 112,
+      "enabled": true,
+      "parameters": {
+        "commandTypes": ["engineStop", "engineResume", "positionSingle"]
+      },
+      "notificators": ["web"],
+      "calendarId": null,
+      "notificationTemplateId": 18
+    },
+    {
+      "id": 19,
+      "name": "Geofence Overspeed Rule",
+      "description": "Detects speeding within specific geofence",
+      "type": "geofenceOverspeed",
+      "deviceId": 113,
+      "enabled": true,
+      "parameters": {
+        "geofenceIds": [5],
+        "speedLimit": 30.0,
+        "minimalDuration": 10000
+      },
+      "notificators": ["web", "email", "push"],
+      "calendarId": null,
+      "notificationTemplateId": 19
+    },
+    {
+      "id": 20,
+      "name": "Battery Low Rule",
+      "description": "Detects when device battery is low",
+      "type": "deviceBatteryLow",
+      "deviceId": 114,
+      "enabled": true,
+      "parameters": {
+        "threshold": 15.0
+      },
+      "notificators": ["web", "email", "sms"],
+      "calendarId": null,
+      "notificationTemplateId": 20
+    }
+  ]
+}
