@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Properties for logging configuration -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name" defaultValue="notification-service"/>
+    <springProperty scope="context" name="logLevel" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="logFormat" source="logging.format" defaultValue="json"/>
+    <springProperty scope="context" name="logPath" source="logging.path" defaultValue="logs"/>
+    
+    <!-- Get instance ID from environment or generate one -->
+    <property name="INSTANCE_ID" value="${INSTANCE_ID:-${HOSTNAME}}"/>
+    
+    <!-- Common logging pattern with essential fields -->
+    <property name="CONSOLE_LOG_PATTERN" 
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [${springAppName}] [${INSTANCE_ID}] [%thread] [trace=%X{traceId:-},span=%X{spanId:-}] %-5level %logger{36} - %msg%n"/>
+    
+    <!-- Appenders -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    
+    <!-- JSON Console Appender for structured logging -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentSpanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>deviceId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>sessionId</includeMdcKeyName>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <level>level</level>
+                <message>message</message>
+            </fieldNames>
+            <customFields>{"service":"${springAppName}","instance":"${INSTANCE_ID}"}</customFields>
+        </encoder>
+    </appender>
+    
+    <!-- Rolling File Appender with size and time based rotation -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/${springAppName}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/${springAppName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>parentSpanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>deviceId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>sessionId</includeMdcKeyName>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <thread>thread</thread>
+                <logger>logger</logger>
+                <level>level</level>
+                <message>message</message>
+            </fieldNames>
+            <customFields>{"service":"${springAppName}","instance":"${INSTANCE_ID}"}</customFields>
+        </encoder>
+    </appender>
+    
+    <!-- Async appenders for improved performance -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+    
+    <!-- Environment-specific configurations -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        <logger name="org.traccar" level="DEBUG" />
+        <logger name="org.traccar.notification" level="DEBUG" />
+        <logger name="org.traccar.notificators" level="DEBUG" />
+    </springProfile>
+    
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        <logger name="org.traccar" level="INFO" />
+        <logger name="org.traccar.notification" level="DEBUG" />
+    </springProfile>
+    
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="JSON_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        <logger name="org.traccar" level="INFO" />
+        <logger name="org.traccar.notification" level="INFO" />
+        <logger name="org.traccar.notificators" level="INFO" />
+        <logger name="org.traccar.mail" level="INFO" />
+        <logger name="org.traccar.sms" level="INFO" />
+        <logger name="org.traccar.push" level="INFO" />
+    </springProfile>
+    
+    <!-- Default profile if none specified -->
+    <springProfile name="default">
+        <root level="${logLevel}">
+            <appender-ref ref="JSON_CONSOLE" />
+            <appender-ref ref="ASYNC_FILE" />
+        </root>
+        <logger name="org.traccar" level="INFO" />
+        <logger name="org.traccar.notification" level="INFO" />
+    </springProfile>
+    
+    <!-- Specific loggers configuration -->
+    <logger name="org.apache.kafka" level="WARN" />
+    <logger name="org.apache.velocity" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="io.grpc" level="WARN" />
+    
+    <!-- Notification channel specific loggers -->
+    <logger name="org.traccar.mail.MailManager" level="INFO" />
+    <logger name="org.traccar.sms.SmsManager" level="INFO" />
+    <logger name="org.traccar.push.PushManager" level="INFO" />
+    <logger name="org.traccar.notification.NotificationManager" level="INFO" />
+    
+    <!-- Shutdown hook to ensure all logs are flushed -->
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook" />
+</configuration>
