@@ -1,0 +1,237 @@
+syntax = "proto3";
+
+package org.traccar.proto;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto.notification";
+option java_outer_classname = "NotificationStatusProto";
+
+/**
+ * Represents the delivery status of a notification sent through the Notification Service.
+ * This message is published to the message broker for monitoring and auditing purposes.
+ */
+message NotificationStatus {
+  // Unique identifier for the notification
+  string notification_id = 1;
+  
+  // Correlation ID for distributed tracing across services
+  string correlation_id = 2;
+  
+  // The type of notification channel used (email, sms, push, web, etc.)
+  string channel = 3;
+  
+  // Timestamp when the notification was initially sent (in milliseconds since epoch)
+  int64 sent_timestamp = 4;
+  
+  // Timestamp when this status was reported (in milliseconds since epoch)
+  int64 status_timestamp = 5;
+  
+  // The user ID who was the recipient of this notification
+  int64 user_id = 6;
+  
+  // The device ID associated with this notification, if applicable
+  optional int64 device_id = 7;
+  
+  // The event ID that triggered this notification, if applicable
+  optional int64 event_id = 8;
+  
+  // Current delivery status
+  DeliveryStatus status = 9;
+  
+  // Detailed error information if status is FAILED
+  optional ErrorInfo error = 10;
+  
+  // Retry information if notification delivery will be retried
+  optional RetryInfo retry = 11;
+  
+  // Channel-specific delivery details
+  optional ChannelDetails channel_details = 12;
+}
+
+/**
+ * Enum representing the possible delivery statuses of a notification
+ */
+enum DeliveryStatus {
+  // Status is unknown
+  UNKNOWN = 0;
+  
+  // Notification was successfully delivered
+  DELIVERED = 1;
+  
+  // Notification delivery failed
+  FAILED = 2;
+  
+  // Notification is scheduled for retry
+  PENDING_RETRY = 3;
+  
+  // Notification was rejected by the delivery channel
+  REJECTED = 4;
+  
+  // Notification was throttled by the delivery channel
+  THROTTLED = 5;
+  
+  // Notification was dropped due to policy (e.g., rate limiting)
+  DROPPED = 6;
+}
+
+/**
+ * Detailed error information for failed deliveries
+ */
+message ErrorInfo {
+  // Error code from the delivery channel or internal system
+  string error_code = 1;
+  
+  // Human-readable error message
+  string error_message = 2;
+  
+  // Error category for classification
+  ErrorCategory error_category = 3;
+  
+  // Additional error details as key-value pairs
+  map<string, string> error_details = 4;
+}
+
+/**
+ * Categories of errors for classification and handling
+ */
+enum ErrorCategory {
+  // Error category is unknown
+  ERROR_UNKNOWN = 0;
+  
+  // Temporary network or connectivity issue
+  ERROR_NETWORK = 1;
+  
+  // Authentication or credential issue
+  ERROR_AUTHENTICATION = 2;
+  
+  // Rate limiting or throttling by the delivery service
+  ERROR_RATE_LIMIT = 3;
+  
+  // Service unavailable or down
+  ERROR_SERVICE = 4;
+  
+  // Invalid message format or content
+  ERROR_CONTENT = 5;
+  
+  // Recipient not found or invalid
+  ERROR_RECIPIENT = 6;
+  
+  // Configuration error in the notification system
+  ERROR_CONFIGURATION = 7;
+  
+  // Internal system error
+  ERROR_INTERNAL = 8;
+}
+
+/**
+ * Information about retry attempts for failed deliveries
+ */
+message RetryInfo {
+  // Current retry attempt number (1-based)
+  int32 attempt = 1;
+  
+  // Maximum number of retry attempts that will be made
+  int32 max_attempts = 2;
+  
+  // Timestamp when the next retry will be attempted (in milliseconds since epoch)
+  int64 next_retry_timestamp = 3;
+  
+  // Backoff strategy being used for retries
+  string backoff_strategy = 4;
+}
+
+/**
+ * Channel-specific delivery details
+ */
+message ChannelDetails {
+  // One of the following will be set based on the channel type
+  oneof details {
+    EmailDetails email = 1;
+    SmsDetails sms = 2;
+    PushDetails push = 3;
+    WebDetails web = 4;
+    ExternalDetails external = 5;
+  }
+}
+
+/**
+ * Email-specific delivery details
+ */
+message EmailDetails {
+  // Recipient email address
+  string recipient = 1;
+  
+  // Email subject
+  string subject = 2;
+  
+  // SMTP server used for delivery
+  string smtp_server = 3;
+  
+  // Message ID assigned by the email server
+  optional string message_id = 4;
+}
+
+/**
+ * SMS-specific delivery details
+ */
+message SmsDetails {
+  // Recipient phone number
+  string phone_number = 1;
+  
+  // SMS provider used (e.g., Twilio, AWS SNS)
+  string provider = 2;
+  
+  // Message ID assigned by the SMS provider
+  optional string message_id = 3;
+  
+  // Delivery receipt ID if available
+  optional string receipt_id = 4;
+}
+
+/**
+ * Push notification-specific delivery details
+ */
+message PushDetails {
+  // Push service used (e.g., Firebase, APNS)
+  string service = 1;
+  
+  // Number of devices the notification was sent to
+  int32 device_count = 2;
+  
+  // Number of successful deliveries
+  int32 success_count = 3;
+  
+  // Number of failed deliveries
+  int32 failure_count = 4;
+  
+  // List of device tokens that failed (may be truncated)
+  repeated string failed_tokens = 5;
+}
+
+/**
+ * Web notification-specific delivery details
+ */
+message WebDetails {
+  // Number of active web sessions notified
+  int32 session_count = 1;
+  
+  // WebSocket connection IDs (may be truncated)
+  repeated string connection_ids = 2;
+}
+
+/**
+ * External service notification details (Telegram, Pushover, etc.)
+ */
+message ExternalDetails {
+  // External service name
+  string service_name = 1;
+  
+  // External service endpoint used
+  string endpoint = 2;
+  
+  // External reference ID if provided
+  optional string external_id = 3;
+  
+  // HTTP status code returned by the external service
+  optional int32 status_code = 4;
+}
