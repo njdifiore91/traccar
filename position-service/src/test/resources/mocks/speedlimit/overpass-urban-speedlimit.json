@@ -1,0 +1,82 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/interpreter",
+    "queryParameters": {
+      "data": {
+        "matches": ".*way\\[maxspeed\\]\\(around:.*\\).*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache",
+      "X-Powered-By": "Overpass API"
+    },
+    "jsonBody": {
+      "version": 0.6,
+      "generator": "Overpass API 0.7.56.3 eb200aeb",
+      "osm3s": {
+        "timestamp_osm_base": "2023-05-24T12:34:56Z",
+        "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+      },
+      "elements": [
+        {
+          "type": "way",
+          "id": 123456789,
+          "bounds": {
+            "minlat": 34.74700,
+            "minlon": -82.48200,
+            "maxlat": 34.74800,
+            "maxlon": -82.48000
+          },
+          "nodes": [1234567, 1234568, 1234569, 1234570],
+          "tags": {
+            "highway": "residential",
+            "maxspeed": "52.1",
+            "name": "Urban Street",
+            "surface": "asphalt"
+          }
+        },
+        {
+          "type": "way",
+          "id": 123456790,
+          "bounds": {
+            "minlat": 34.74650,
+            "minlon": -82.48150,
+            "maxlat": 34.74750,
+            "maxlon": -82.48050
+          },
+          "nodes": [2234567, 2234568, 2234569, 2234570],
+          "tags": {
+            "highway": "tertiary",
+            "maxspeed": "50",
+            "name": "Main Avenue",
+            "surface": "asphalt"
+          }
+        },
+        {
+          "type": "way",
+          "id": 123456791,
+          "bounds": {
+            "minlat": 34.74600,
+            "minlon": -82.48100,
+            "maxlat": 34.74700,
+            "maxlon": -82.48000
+          },
+          "nodes": [3234567, 3234568, 3234569, 3234570],
+          "tags": {
+            "highway": "secondary",
+            "maxspeed": "60",
+            "name": "Central Boulevard",
+            "surface": "asphalt",
+            "lanes": "2"
+          }
+        }
+      ]
+    }
+  }
+}
