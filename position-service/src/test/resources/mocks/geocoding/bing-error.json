@@ -1,0 +1,32 @@
+{
+  "request": {
+    "urlPathPattern": "/REST/V1/Locations/[^/]+,[^/]+.*",
+    "method": "GET",
+    "queryParameters": {
+      "key": {
+        "matches": ".*"
+      },
+      "include": {
+        "equalTo": "ciso2"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "X-MS-BM-WS-INFO": "1"
+    },
+    "jsonBody": {
+      "authenticationResultCode": "InvalidCredentials",
+      "brandLogoUri": "http://dev.virtualearth.net/Branding/logo_powered_by.png",
+      "copyright": "Copyright © 2023 Microsoft and its suppliers. All rights reserved.",
+      "statusCode": 401,
+      "statusDescription": "Unauthorized",
+      "errorDetails": [
+        "Invalid Credentials. The API key provided is not valid or has expired."
+      ],
+      "traceId": "00000000000000000000000000000000"
+    }
+  }
+}
