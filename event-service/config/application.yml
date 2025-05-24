@@ -1,0 +1,163 @@
+# Event Processing Service Configuration
+# Main application configuration file
+
+# Core service properties
+spring:
+  application:
+    name: event-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  # Include specialized configuration files
+  config:
+    import:
+      - optional:classpath:/config/kafka.yml
+      - optional:classpath:/config/consul.yml
+      - optional:classpath:/config/database.yml
+      - optional:classpath:/config/resilience4j.yml
+  # Jackson JSON configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8083}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain
+    min-response-size: 2048
+  shutdown: graceful
+
+# Management endpoints for monitoring and operations
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8093}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,kafka,db
+        liveness:
+          include: livenessState,diskSpace
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.springframework: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_PATH:/var/log/traccar}/${spring.application.name}.log
+    max-size: 10MB
+    max-history: 10
+
+# Event service specific configuration
+event-service:
+  # Event processing configuration
+  processing:
+    # Maximum number of events to process in a batch
+    batch-size: ${EVENT_BATCH_SIZE:100}
+    # Maximum time to wait for a batch to fill (in milliseconds)
+    batch-timeout: ${EVENT_BATCH_TIMEOUT:500}
+    # Thread pool size for event processing
+    thread-pool-size: ${EVENT_THREAD_POOL_SIZE:10}
+  # Event rules configuration
+  rules:
+    # Enable/disable rule evaluation caching
+    cache-enabled: ${EVENT_RULES_CACHE_ENABLED:true}
+    # Maximum size of rule evaluation cache
+    cache-size: ${EVENT_RULES_CACHE_SIZE:1000}
+    # Time-to-live for cached rule evaluations (in seconds)
+    cache-ttl: ${EVENT_RULES_CACHE_TTL:60}
+  # Event retention configuration
+  retention:
+    # Enable/disable automatic event cleanup
+    cleanup-enabled: ${EVENT_CLEANUP_ENABLED:true}
+    # Maximum age of events to keep (in days)
+    max-age-days: ${EVENT_MAX_AGE_DAYS:90}
+    # Cleanup schedule (cron expression)
+    cleanup-schedule: ${EVENT_CLEANUP_SCHEDULE:0 0 1 * * ?}
+
+# Service discovery configuration
+consul:
+  host: ${CONSUL_HOST:localhost}
+  port: ${CONSUL_PORT:8500}
+  discovery:
+    enabled: true
+    instance-id: ${spring.application.name}:${random.uuid}
+    health-check-path: /actuator/health
+    health-check-interval: 15s
+    prefer-ip-address: true
+    tags:
+      - version=${VERSION:latest}
+      - environment=${spring.profiles.active}
+
+# Kafka configuration (brief overview, details in kafka.yml)
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  consumer:
+    group-id: ${spring.application.name}
+    auto-offset-reset: earliest
+  topics:
+    position-input: ${KAFKA_TOPIC_POSITION:enriched-positions}
+    event-output: ${KAFKA_TOPIC_EVENT:events}
+
+# Database configuration (brief overview, details in database.yml)
+database:
+  url: ${DB_URL:jdbc:postgresql://localhost:5432/traccar}
+  username: ${DB_USERNAME:traccar}
+  password: ${DB_PASSWORD:traccar}
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: ${DB_POOL_SIZE:10}
+    minimum-idle: ${DB_MIN_IDLE:5}
+    idle-timeout: 30000
+    connection-timeout: 20000
+
+# Resilience4j circuit breaker configuration (brief overview, details in resilience4j.yml)
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+# Environment-specific configurations are loaded from application-{profile}.yml
+# For example: application-dev.yml, application-prod.yml
