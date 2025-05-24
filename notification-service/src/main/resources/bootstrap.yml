@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: notification-service
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        initial-interval: 1000
+        max-interval: 10000
+        max-attempts: 6
+        multiplier: 1.5
+      discovery:
+        enabled: true
+        service-id: config-server
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 15s
+        preferIpAddress: true
+        tags:
+          - version=${APP_VERSION:0.0.1}
+          - profile=${spring.profiles.active:default}
+          - zone=${ZONE:default}
+
+# Enable Kubernetes discovery if running in Kubernetes environment
+# This is automatically activated when running in Kubernetes
+spring.cloud.kubernetes:
+  discovery:
+    enabled: ${KUBERNETES_ENABLED:false}
+    all-namespaces: false
+    service-labels:
+      app: notification-service
+  config:
+    enabled: ${KUBERNETES_ENABLED:false}
+    sources:
+      - name: notification-service-config
+
+# Bootstrap properties
+logging:
+  level:
+    org.springframework.cloud.bootstrap: INFO
+    org.springframework.cloud.config: INFO
+
+# Management endpoints for health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# Enable resilience for config server connection
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 10
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+      permittedNumberOfCallsInHalfOpenState: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+  instances:
+    configServer:
+      baseConfig: default
