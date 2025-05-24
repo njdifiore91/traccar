@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/geocoding/v5/mapbox\.places/[\\d\\.\\-]+,[\\d\\.\\-]+\.json\\?access_token=([^&]+)"
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*"
+    },
+    "jsonBody": {
+      "message": "Not Authorized - Invalid Token"
+    },
+    "fixedDelayMilliseconds": 100
+  }
+}
