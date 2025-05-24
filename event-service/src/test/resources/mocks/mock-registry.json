@@ -1,0 +1,247 @@
+{
+  "version": "1.0.0",
+  "description": "Registry of all available mock services for the Event Service",
+  "lastUpdated": "2023-11-15",
+  "mockServices": [
+    {
+      "id": "notification-service",
+      "name": "Notification Service Mock",
+      "configPath": "event-service/src/test/resources/mocks/mock-notification-service.json",
+      "type": "http",
+      "version": "1.0.0",
+      "capabilities": [
+        "notification-delivery-simulation",
+        "notification-validation",
+        "channel-specific-behaviors",
+        "failure-scenarios"
+      ],
+      "dependencies": [],
+      "realServiceMapping": {
+        "serviceName": "notification-service",
+        "serviceEndpoints": [
+          "/api/notifications",
+          "/api/notifications/status"
+        ]
+      },
+      "testScenarios": [
+        "event-notification-delivery",
+        "notification-failure-handling",
+        "multi-channel-notification"
+      ]
+    },
+    {
+      "id": "position-service",
+      "name": "Position Service Mock",
+      "configPath": "event-service/src/test/resources/mocks/mock-position-service.json",
+      "type": "http",
+      "version": "1.0.0",
+      "capabilities": [
+        "position-data-simulation",
+        "position-history-retrieval",
+        "position-enrichment",
+        "device-state-tracking"
+      ],
+      "dependencies": [],
+      "realServiceMapping": {
+        "serviceName": "position-service",
+        "serviceEndpoints": [
+          "/api/positions",
+          "/api/positions/latest",
+          "/api/positions/history"
+        ]
+      },
+      "testScenarios": [
+        "geofence-event-detection",
+        "motion-event-detection",
+        "overspeed-event-detection"
+      ]
+    },
+    {
+      "id": "message-broker",
+      "name": "Message Broker Mock",
+      "configPath": "event-service/src/test/resources/mocks/mock-broker-config.json",
+      "type": "embedded",
+      "version": "1.0.0",
+      "capabilities": [
+        "topic-simulation",
+        "message-validation",
+        "consumer-group-simulation",
+        "failure-scenarios",
+        "dead-letter-queue-support"
+      ],
+      "dependencies": [],
+      "realServiceMapping": {
+        "serviceName": "kafka",
+        "alternateServiceName": "rabbitmq",
+        "topics": [
+          "positions",
+          "events",
+          "notifications",
+          "dead-letter-queue"
+        ]
+      },
+      "testScenarios": [
+        "position-consumption",
+        "event-publishing",
+        "broker-failure-recovery",
+        "message-schema-validation"
+      ]
+    },
+    {
+      "id": "service-discovery",
+      "name": "Service Discovery Mock",
+      "configPath": "event-service/src/test/resources/mocks/mock-config.properties",
+      "type": "embedded",
+      "version": "1.0.0",
+      "capabilities": [
+        "service-registration",
+        "service-discovery",
+        "health-check-simulation",
+        "failure-scenarios"
+      ],
+      "dependencies": [],
+      "realServiceMapping": {
+        "serviceName": "consul",
+        "alternateServiceName": "kubernetes-api",
+        "serviceEndpoints": [
+          "/v1/catalog/service",
+          "/v1/health/service",
+          "/v1/agent/service/register"
+        ]
+      },
+      "testScenarios": [
+        "service-discovery-flow",
+        "service-registration-flow",
+        "discovery-failure-handling"
+      ]
+    },
+    {
+      "id": "external-http-services",
+      "name": "External HTTP Services Mock",
+      "configPath": "event-service/src/test/resources/mocks/wiremock-mappings.json",
+      "type": "wiremock",
+      "version": "1.0.0",
+      "capabilities": [
+        "http-request-matching",
+        "response-templating",
+        "network-delay-simulation",
+        "fault-injection"
+      ],
+      "dependencies": [],
+      "realServiceMapping": {
+        "services": [
+          {
+            "name": "geocoding-service",
+            "endpoints": ["/api/geocode"]
+          },
+          {
+            "name": "weather-service",
+            "endpoints": ["/api/weather"]
+          },
+          {
+            "name": "external-rules-service",
+            "endpoints": ["/api/rules"]
+          }
+        ]
+      },
+      "testScenarios": [
+        "external-service-integration",
+        "http-error-handling",
+        "circuit-breaker-testing"
+      ]
+    }
+  ],
+  "mockServiceRelationships": [
+    {
+      "sourceId": "event-service",
+      "targetId": "position-service",
+      "relationship": "consumes-data-from",
+      "description": "Event Service consumes position data from Position Service"
+    },
+    {
+      "sourceId": "event-service",
+      "targetId": "notification-service",
+      "relationship": "publishes-to",
+      "description": "Event Service publishes detected events to Notification Service"
+    },
+    {
+      "sourceId": "event-service",
+      "targetId": "message-broker",
+      "relationship": "uses",
+      "description": "Event Service uses Message Broker for asynchronous communication"
+    },
+    {
+      "sourceId": "event-service",
+      "targetId": "service-discovery",
+      "relationship": "registers-with",
+      "description": "Event Service registers with Service Discovery for service location"
+    },
+    {
+      "sourceId": "event-service",
+      "targetId": "external-http-services",
+      "relationship": "calls",
+      "description": "Event Service calls external HTTP services for additional data"
+    }
+  ],
+  "testDataSetup": {
+    "initializationOrder": [
+      "service-discovery",
+      "message-broker",
+      "position-service",
+      "notification-service",
+      "external-http-services"
+    ],
+    "commonTestData": {
+      "devices": "event-service/src/test/resources/fixtures/devices.json",
+      "positions": "event-service/src/test/resources/fixtures/positions.json",
+      "geofences": "event-service/src/test/resources/fixtures/geofences.json",
+      "events": "event-service/src/test/resources/fixtures/events.json",
+      "notifications": "event-service/src/test/resources/fixtures/notifications.json"
+    },
+    "testDataCleanupProcedures": [
+      "purge-message-queues",
+      "reset-mock-states",
+      "clear-test-databases",
+      "deregister-test-services"
+    ]
+  },
+  "mockServiceCapabilities": {
+    "notification-delivery-simulation": "Simulates the delivery of notifications through various channels",
+    "notification-validation": "Validates notification format and content",
+    "channel-specific-behaviors": "Simulates behavior specific to different notification channels",
+    "failure-scenarios": "Simulates various failure modes for testing error handling",
+    "position-data-simulation": "Generates simulated position data for testing",
+    "position-history-retrieval": "Simulates retrieval of historical position data",
+    "position-enrichment": "Simulates enrichment of position data with additional information",
+    "device-state-tracking": "Tracks device state for stateful event detection",
+    "topic-simulation": "Simulates message broker topics for publishing and subscribing",
+    "message-validation": "Validates message format and content against schemas",
+    "consumer-group-simulation": "Simulates consumer group behavior for message partitioning",
+    "dead-letter-queue-support": "Supports dead-letter queues for failed message handling",
+    "service-registration": "Simulates service registration with discovery service",
+    "service-discovery": "Simulates discovery of services by name or metadata",
+    "health-check-simulation": "Simulates health check responses for services",
+    "http-request-matching": "Matches HTTP requests based on patterns",
+    "response-templating": "Generates dynamic responses based on templates",
+    "network-delay-simulation": "Simulates network delays for realistic testing",
+    "fault-injection": "Injects faults to test error handling"
+  },
+  "testScenarios": {
+    "event-notification-delivery": "Tests the delivery of notifications triggered by events",
+    "notification-failure-handling": "Tests handling of notification delivery failures",
+    "multi-channel-notification": "Tests notification delivery through multiple channels",
+    "geofence-event-detection": "Tests detection of geofence entry/exit events",
+    "motion-event-detection": "Tests detection of motion start/stop events",
+    "overspeed-event-detection": "Tests detection of speed threshold violation events",
+    "position-consumption": "Tests consumption of position data from the message broker",
+    "event-publishing": "Tests publishing of detected events to the message broker",
+    "broker-failure-recovery": "Tests recovery from message broker failures",
+    "message-schema-validation": "Tests validation of message schemas",
+    "service-discovery-flow": "Tests the service discovery process",
+    "service-registration-flow": "Tests the service registration process",
+    "discovery-failure-handling": "Tests handling of service discovery failures",
+    "external-service-integration": "Tests integration with external HTTP services",
+    "http-error-handling": "Tests handling of HTTP errors from external services",
+    "circuit-breaker-testing": "Tests circuit breaker behavior for external service calls"
+  }
+}
