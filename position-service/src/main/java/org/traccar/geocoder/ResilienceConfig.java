@@ -18,13 +18,16 @@ package org.traccar.geocoder;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -32,114 +35,128 @@ import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Configuration class for resilience patterns used by geocoder implementations.
- * This class provides centralized configuration for circuit breakers and retry mechanisms.
+ * Provides centralized configuration for resilience patterns used by geocoder implementations.
+ * Configures circuit breakers, retry mechanisms with exponential backoff, and fallback strategies
+ * for external geocoding service calls.
  */
-@Configuration
+@Singleton
 public class ResilienceConfig {
 
-    @Value("${geocoder.circuitBreaker.failureRateThreshold:50}")
-    private float failureRateThreshold;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResilienceConfig.class);
 
-    @Value("${geocoder.circuitBreaker.waitDurationInOpenState:30000}")
-    private long waitDurationInOpenState;
-
-    @Value("${geocoder.circuitBreaker.permittedNumberOfCallsInHalfOpenState:10}")
-    private int permittedNumberOfCallsInHalfOpenState;
-
-    @Value("${geocoder.circuitBreaker.slidingWindowSize:100}")
-    private int slidingWindowSize;
-
-    @Value("${geocoder.retry.maxAttempts:3}")
-    private int maxRetryAttempts;
-
-    @Value("${geocoder.retry.waitDuration:1000}")
-    private long waitDuration;
-
-    @Value("${geocoder.retry.enableExponentialBackoff:true}")
-    private boolean enableExponentialBackoff;
-
-    @Value("${geocoder.retry.exponentialBackoffMultiplier:2}")
-    private double exponentialBackoffMultiplier;
-
-    @Value("${geocoder.retry.enableRandomizedWait:true}")
-    private boolean enableRandomizedWait;
-
-    @Value("${geocoder.retry.randomizedWaitFactor:0.5}")
-    private double randomizedWaitFactor;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final RetryRegistry retryRegistry;
+    private final MeterRegistry meterRegistry;
 
     /**
-     * Creates a CircuitBreakerRegistry with default configuration for geocoding services.
-     *
-     * @return The CircuitBreakerRegistry
+     * Creates a new ResilienceConfig with default settings.
      */
-    @Bean
-    public CircuitBreakerRegistry circuitBreakerRegistry() {
+    @Inject
+    public ResilienceConfig(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+
+        // Configure circuit breaker defaults
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-                .failureRateThreshold(failureRateThreshold)
-                .waitDurationInOpenState(Duration.ofMillis(waitDurationInOpenState))
-                .permittedNumberOfCallsInHalfOpenState(permittedNumberOfCallsInHalfOpenState)
+                .failureRateThreshold(50) // Open circuit when 50% of calls fail
+                .slowCallRateThreshold(50) // Consider a call as slow when 50% of calls take longer than slowCallDurationThreshold
+                .slowCallDurationThreshold(Duration.ofSeconds(5))
+                .waitDurationInOpenState(Duration.ofSeconds(30)) // Wait 30 seconds before transitioning to half-open
+                .permittedNumberOfCallsInHalfOpenState(10) // Allow 10 calls in half-open state
+                .minimumNumberOfCalls(10) // Minimum number of calls before calculating failure rate
                 .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                .slidingWindowSize(slidingWindowSize)
+                .slidingWindowSize(100) // Consider the last 100 calls
                 .recordExceptions(
                         IOException.class,
-                        ConnectException.class,
                         TimeoutException.class,
-                        SocketTimeoutException.class,
-                        GeocoderException.class
-                )
+                        ConnectException.class,
+                        SocketTimeoutException.class)
                 .build();
 
-        return CircuitBreakerRegistry.of(circuitBreakerConfig);
-    }
-
-    /**
-     * Creates a RetryRegistry with default configuration for geocoding services.
-     *
-     * @return The RetryRegistry
-     */
-    @Bean
-    public RetryRegistry retryRegistry() {
+        // Configure retry defaults
         RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(maxRetryAttempts)
-                .waitDuration(Duration.ofMillis(waitDuration))
+                .maxAttempts(3) // Maximum 3 attempts (1 initial + 2 retries)
+                .waitDuration(Duration.ofMillis(500)) // Initial wait duration
                 .retryExceptions(
                         IOException.class,
-                        ConnectException.class,
                         TimeoutException.class,
-                        SocketTimeoutException.class
-                )
-                .ignoreExceptions(
-                        GeocoderException.class
-                )
-                .enableExponentialBackoff(enableExponentialBackoff)
-                .exponentialBackoffMultiplier(exponentialBackoffMultiplier)
-                .enableRandomizedWait(enableRandomizedWait)
-                .randomizedWaitFactor(randomizedWaitFactor)
+                        ConnectException.class,
+                        SocketTimeoutException.class)
+                .enableExponentialBackoff(true) // Use exponential backoff
+                .exponentialBackoffMultiplier(2) // Double the wait time for each retry
+                .enableRandomizedWait(true) // Add jitter to prevent thundering herd
+                .randomizedWaitFactor(0.5) // Add up to 50% jitter
                 .build();
 
-        return RetryRegistry.of(retryConfig);
+        // Create registries with default configurations
+        this.circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        this.retryRegistry = RetryRegistry.of(retryConfig);
+
+        // Register metrics if MeterRegistry is available
+        if (meterRegistry != null) {
+            TaggedCircuitBreakerMetrics.ofCircuitBreakerRegistry(circuitBreakerRegistry)
+                    .bindTo(meterRegistry);
+            LOGGER.info("Circuit breaker metrics registered with MeterRegistry");
+        }
     }
 
     /**
-     * Creates a CircuitBreaker for the BingMapsGeocoder with custom configuration if needed.
+     * Gets the circuit breaker registry.
      *
-     * @param registry The CircuitBreakerRegistry
-     * @return The CircuitBreaker for BingMapsGeocoder
+     * @return The circuit breaker registry
      */
-    @Bean
-    public CircuitBreaker bingMapsGeocoderCircuitBreaker(CircuitBreakerRegistry registry) {
-        return registry.circuitBreaker("bingMapsGeocoder");
+    public CircuitBreakerRegistry getCircuitBreakerRegistry() {
+        return circuitBreakerRegistry;
     }
 
     /**
-     * Creates a Retry for the BingMapsGeocoder with custom configuration if needed.
+     * Gets the retry registry.
      *
-     * @param registry The RetryRegistry
-     * @return The Retry for BingMapsGeocoder
+     * @return The retry registry
      */
-    @Bean
-    public Retry bingMapsGeocoderRetry(RetryRegistry registry) {
-        return registry.retry("bingMapsGeocoder");
+    public RetryRegistry getRetryRegistry() {
+        return retryRegistry;
+    }
+
+    /**
+     * Gets the meter registry for metrics collection.
+     *
+     * @return The meter registry
+     */
+    public MeterRegistry getMeterRegistry() {
+        return meterRegistry;
+    }
+
+    /**
+     * Configures a circuit breaker for a specific geocoder with custom settings.
+     *
+     * @param name The name of the geocoder
+     * @param failureRateThreshold The failure rate threshold in percent
+     * @param waitDurationInOpenState The wait duration in open state
+     * @return The configured circuit breaker
+     */
+    public CircuitBreaker configureCircuitBreaker(String name, float failureRateThreshold, Duration waitDurationInOpenState) {
+        CircuitBreakerConfig config = CircuitBreakerConfig.custom()
+                .failureRateThreshold(failureRateThreshold)
+                .waitDurationInOpenState(waitDurationInOpenState)
+                .build();
+
+        return circuitBreakerRegistry.circuitBreaker(name, config);
+    }
+
+    /**
+     * Configures a retry mechanism for a specific geocoder with custom settings.
+     *
+     * @param name The name of the geocoder
+     * @param maxAttempts The maximum number of attempts
+     * @param waitDuration The initial wait duration
+     * @return The configured retry
+     */
+    public Retry configureRetry(String name, int maxAttempts, Duration waitDuration) {
+        RetryConfig config = RetryConfig.custom()
+                .maxAttempts(maxAttempts)
+                .waitDuration(waitDuration)
+                .build();
+
+        return retryRegistry.retry(name, config);
     }
 }
