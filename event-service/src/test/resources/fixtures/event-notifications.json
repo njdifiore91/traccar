@@ -1,0 +1,568 @@
+{
+  "notifications": [
+    {
+      "id": "1",
+      "type": "commandResult",
+      "template": {
+        "subject": "Command Result: {device.name}",
+        "body": "Command result for device {device.name}: {position.result}",
+        "shortBody": "Command: {position.result}"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": true,
+            "web": true
+          }
+        },
+        {
+          "type": "group",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": false,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "push", "web"],
+        "priority": "medium",
+        "retryCount": 3,
+        "retryInterval": 60
+      },
+      "correlationId": "cmd-result-123"
+    },
+    {
+      "id": "2",
+      "type": "geofenceEnter",
+      "template": {
+        "subject": "Geofence Enter Alert: {device.name}",
+        "body": "Device {device.name} has entered geofence {geofence.name} at {position.time}. Location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name} entered {geofence.name}"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "sms", "push", "web"],
+        "priority": "high",
+        "retryCount": 5,
+        "retryInterval": 30
+      },
+      "correlationId": "geo-enter-456"
+    },
+    {
+      "id": "3",
+      "type": "geofenceExit",
+      "template": {
+        "subject": "Geofence Exit Alert: {device.name}",
+        "body": "Device {device.name} has exited geofence {geofence.name} at {position.time}. Location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name} exited {geofence.name}"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "sms", "push", "web"],
+        "priority": "high",
+        "retryCount": 5,
+        "retryInterval": 30
+      },
+      "correlationId": "geo-exit-789"
+    },
+    {
+      "id": "4",
+      "type": "deviceOverspeed",
+      "template": {
+        "subject": "Overspeed Alert: {device.name}",
+        "body": "Device {device.name} exceeded speed limit. Speed: {position.speed} km/h, Limit: {speedLimit} km/h at {position.time}. Location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name}: {position.speed} km/h"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        },
+        {
+          "type": "user",
+          "id": "2",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": true,
+            "web": false
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "sms", "push", "web"],
+        "priority": "high",
+        "retryCount": 5,
+        "retryInterval": 30
+      },
+      "correlationId": "speed-alert-101112"
+    },
+    {
+      "id": "5",
+      "type": "deviceFuelDrop",
+      "template": {
+        "subject": "Fuel Drop Alert: {device.name}",
+        "body": "Fuel level drop detected for device {device.name} at {position.time}. Current level: {position.fuel}%, Drop: {event.fuelDrop}%. Location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name}: Fuel drop {event.fuelDrop}%"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": true,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "push", "web"],
+        "priority": "medium",
+        "retryCount": 3,
+        "retryInterval": 60
+      },
+      "correlationId": "fuel-drop-131415"
+    },
+    {
+      "id": "6",
+      "type": "deviceOffline",
+      "template": {
+        "subject": "Device Offline: {device.name}",
+        "body": "Device {device.name} has gone offline at {event.time}. Last known location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name} offline"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        },
+        {
+          "type": "group",
+          "id": "2",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": false,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "sms", "push", "web"],
+        "priority": "high",
+        "retryCount": 5,
+        "retryInterval": 30
+      },
+      "correlationId": "offline-161718"
+    },
+    {
+      "id": "7",
+      "type": "deviceOnline",
+      "template": {
+        "subject": "Device Online: {device.name}",
+        "body": "Device {device.name} is back online at {event.time}. Current location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name} online"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": true,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "push", "web"],
+        "priority": "medium",
+        "retryCount": 3,
+        "retryInterval": 60
+      },
+      "correlationId": "online-192021"
+    },
+    {
+      "id": "8",
+      "type": "deviceUnknown",
+      "template": {
+        "subject": "Unknown Device Alert",
+        "body": "Unknown device with identifier {event.deviceId} attempted to connect at {event.time}.",
+        "shortBody": "Unknown device: {event.deviceId}"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": false,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "web"],
+        "priority": "low",
+        "retryCount": 2,
+        "retryInterval": 120
+      },
+      "correlationId": "unknown-222324"
+    },
+    {
+      "id": "9",
+      "type": "maintenance",
+      "template": {
+        "subject": "Maintenance Required: {device.name}",
+        "body": "Maintenance required for device {device.name}. Type: {maintenance.type}, Current value: {maintenance.current}, Threshold: {maintenance.threshold}",
+        "shortBody": "{device.name}: Maintenance {maintenance.type}"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": true,
+            "web": true
+          }
+        },
+        {
+          "type": "user",
+          "id": "3",
+          "settings": {
+            "email": true,
+            "sms": false,
+            "push": false,
+            "web": false
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "push", "web"],
+        "priority": "medium",
+        "retryCount": 3,
+        "retryInterval": 60
+      },
+      "correlationId": "maintenance-252627"
+    },
+    {
+      "id": "10",
+      "type": "alarm",
+      "template": {
+        "subject": "Alarm Triggered: {device.name}",
+        "body": "Alarm triggered for device {device.name}. Type: {event.alarmType} at {position.time}. Location: {position.latitude}, {position.longitude}",
+        "shortBody": "{device.name}: {event.alarmType} alarm"
+      },
+      "recipients": [
+        {
+          "type": "user",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        },
+        {
+          "type": "group",
+          "id": "1",
+          "settings": {
+            "email": true,
+            "sms": true,
+            "push": true,
+            "web": true
+          }
+        }
+      ],
+      "delivery": {
+        "channels": ["email", "sms", "push", "web", "telegram"],
+        "priority": "critical",
+        "retryCount": 10,
+        "retryInterval": 15
+      },
+      "correlationId": "alarm-282930"
+    }
+  ],
+  "externalServices": [
+    {
+      "id": "1",
+      "type": "telegram",
+      "name": "Telegram Bot",
+      "configuration": {
+        "botToken": "test-bot-token",
+        "chatId": "test-chat-id"
+      }
+    },
+    {
+      "id": "2",
+      "type": "pushover",
+      "name": "Pushover Service",
+      "configuration": {
+        "userKey": "test-user-key",
+        "apiToken": "test-api-token"
+      }
+    }
+  ],
+  "notificationRules": [
+    {
+      "id": "1",
+      "type": "deviceOverspeed",
+      "deviceId": "1",
+      "notifyOnce": true,
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2025-12-31T23:59:59Z",
+      "calendarId": "1",
+      "description": "Test overspeed notification rule"
+    },
+    {
+      "id": "2",
+      "type": "geofenceEnter",
+      "deviceId": "1",
+      "geofenceId": "1",
+      "notifyOnce": false,
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2025-12-31T23:59:59Z",
+      "description": "Test geofence enter notification rule"
+    },
+    {
+      "id": "3",
+      "type": "geofenceExit",
+      "deviceId": "1",
+      "geofenceId": "1",
+      "notifyOnce": false,
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2025-12-31T23:59:59Z",
+      "description": "Test geofence exit notification rule"
+    },
+    {
+      "id": "4",
+      "type": "deviceOffline",
+      "deviceId": "2",
+      "notifyOnce": true,
+      "validFrom": "2023-01-01T00:00:00Z",
+      "validTo": "2025-12-31T23:59:59Z",
+      "description": "Test device offline notification rule"
+    }
+  ],
+  "calendars": [
+    {
+      "id": "1",
+      "name": "Business Hours",
+      "data": "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Traccar//EN\nBEGIN:VEVENT\nSUMMARY:Business Hours\nDTSTART:20230101T080000\nDTEND:20230101T170000\nRRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR\nEND:VEVENT\nEND:VCALENDAR"
+    }
+  ],
+  "userNotificationSettings": [
+    {
+      "userId": "1",
+      "settings": {
+        "email": "test@example.com",
+        "phone": "+1234567890",
+        "pushToken": "test-push-token",
+        "webEnabled": true,
+        "emailEnabled": true,
+        "smsEnabled": true,
+        "pushEnabled": true,
+        "telegramEnabled": true,
+        "telegramChatId": "test-telegram-chat-id"
+      }
+    },
+    {
+      "userId": "2",
+      "settings": {
+        "email": "user2@example.com",
+        "phone": "+1987654321",
+        "pushToken": "user2-push-token",
+        "webEnabled": true,
+        "emailEnabled": true,
+        "smsEnabled": false,
+        "pushEnabled": true,
+        "telegramEnabled": false
+      }
+    },
+    {
+      "userId": "3",
+      "settings": {
+        "email": "admin@example.com",
+        "phone": "+1122334455",
+        "webEnabled": true,
+        "emailEnabled": true,
+        "smsEnabled": false,
+        "pushEnabled": false,
+        "telegramEnabled": false
+      }
+    }
+  ],
+  "testEvents": [
+    {
+      "id": "1",
+      "type": "commandResult",
+      "deviceId": "1",
+      "positionId": "1",
+      "attributes": {
+        "result": "Success: Engine started"
+      },
+      "time": "2023-06-15T10:30:00Z"
+    },
+    {
+      "id": "2",
+      "type": "geofenceEnter",
+      "deviceId": "1",
+      "positionId": "2",
+      "geofenceId": "1",
+      "time": "2023-06-15T11:45:00Z"
+    },
+    {
+      "id": "3",
+      "type": "deviceOverspeed",
+      "deviceId": "1",
+      "positionId": "3",
+      "attributes": {
+        "speed": 95.5,
+        "speedLimit": 80.0
+      },
+      "time": "2023-06-15T12:15:00Z"
+    },
+    {
+      "id": "4",
+      "type": "alarm",
+      "deviceId": "2",
+      "positionId": "4",
+      "attributes": {
+        "alarmType": "sos"
+      },
+      "time": "2023-06-15T13:20:00Z"
+    }
+  ],
+  "testPositions": [
+    {
+      "id": "1",
+      "deviceId": "1",
+      "protocol": "tk103",
+      "time": "2023-06-15T10:30:00Z",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "altitude": 10.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 5.0,
+      "attributes": {
+        "result": "Success: Engine started"
+      }
+    },
+    {
+      "id": "2",
+      "deviceId": "1",
+      "protocol": "tk103",
+      "time": "2023-06-15T11:45:00Z",
+      "latitude": 40.7135,
+      "longitude": -74.0070,
+      "altitude": 12.0,
+      "speed": 25.5,
+      "course": 45.0,
+      "accuracy": 4.0,
+      "attributes": {}
+    },
+    {
+      "id": "3",
+      "deviceId": "1",
+      "protocol": "tk103",
+      "time": "2023-06-15T12:15:00Z",
+      "latitude": 40.7140,
+      "longitude": -74.0080,
+      "altitude": 15.0,
+      "speed": 95.5,
+      "course": 90.0,
+      "accuracy": 3.0,
+      "attributes": {}
+    },
+    {
+      "id": "4",
+      "deviceId": "2",
+      "protocol": "teltonika",
+      "time": "2023-06-15T13:20:00Z",
+      "latitude": 40.7150,
+      "longitude": -74.0090,
+      "altitude": 20.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 2.0,
+      "attributes": {
+        "alarm": "sos"
+      }
+    }
+  ],
+  "testDevices": [
+    {
+      "id": "1",
+      "name": "Test Vehicle 1",
+      "uniqueId": "123456789",
+      "status": "online",
+      "lastUpdate": "2023-06-15T12:15:00Z",
+      "positionId": "3"
+    },
+    {
+      "id": "2",
+      "name": "Test Vehicle 2",
+      "uniqueId": "987654321",
+      "status": "online",
+      "lastUpdate": "2023-06-15T13:20:00Z",
+      "positionId": "4"
+    }
+  ],
+  "testGeofences": [
+    {
+      "id": "1",
+      "name": "Test Office",
+      "description": "Office location for testing",
+      "area": "CIRCLE (40.7135 -74.0070, 100)"
+    }
+  ]
+}
