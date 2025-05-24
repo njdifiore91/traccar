@@ -1,0 +1,52 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/geocoding/v5/mapbox.places/[\\d.-]+,[\\d.-]+.json",
+    "queryParameters": {
+      "access_token": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "features": [
+        {
+          "place_name": "123 Main Street, Anytown, State 12345, United States",
+          "text": "123 Main Street",
+          "place_type": ["address"],
+          "address": "123"
+        },
+        {
+          "text": "Anytown",
+          "place_type": ["locality"]
+        },
+        {
+          "text": "Downtown",
+          "place_type": ["neighborhood"]
+        },
+        {
+          "text": "12345",
+          "place_type": ["postcode"]
+        },
+        {
+          "text": "County",
+          "place_type": ["district"]
+        },
+        {
+          "text": "State",
+          "place_type": ["region"]
+        },
+        {
+          "text": "United States",
+          "place_type": ["country"]
+        }
+      ],
+      "type": "FeatureCollection"
+    }
+  }
+}
