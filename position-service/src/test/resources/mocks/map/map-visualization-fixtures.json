@@ -1,0 +1,345 @@
+{
+  "version": "1.0",
+  "description": "Test fixtures for map visualization scenarios used in position service tests",
+  "fixtures": [
+    {
+      "name": "single_position",
+      "description": "Single position marker for basic visualization testing",
+      "positions": [
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.5,
+          "speed": 0,
+          "course": 0,
+          "accuracy": 5.0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "batteryLevel": 85,
+            "ignition": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "multiple_positions",
+      "description": "Multiple position markers for device list visualization",
+      "positions": [
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.5,
+          "speed": 0,
+          "course": 0,
+          "accuracy": 5.0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "batteryLevel": 85,
+            "ignition": false
+          }
+        },
+        {
+          "deviceId": 2,
+          "deviceName": "Test Device 2",
+          "latitude": 37.7833,
+          "longitude": -122.4167,
+          "altitude": 15.0,
+          "speed": 25,
+          "course": 90,
+          "accuracy": 3.0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "batteryLevel": 72,
+            "ignition": true
+          }
+        },
+        {
+          "deviceId": 3,
+          "deviceName": "Test Device 3",
+          "latitude": 37.7900,
+          "longitude": -122.4100,
+          "altitude": 12.0,
+          "speed": 15,
+          "course": 180,
+          "accuracy": 4.0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "batteryLevel": 93,
+            "ignition": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "route_visualization",
+      "description": "Route with multiple waypoints for track visualization",
+      "deviceId": 1,
+      "deviceName": "Test Device 1",
+      "startTime": "2023-01-01T12:00:00.000Z",
+      "endTime": "2023-01-01T12:30:00.000Z",
+      "waypoints": [
+        {
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.5,
+          "speed": 0,
+          "course": 0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "attributes": {
+            "event": "engineStart"
+          }
+        },
+        {
+          "latitude": 37.7800,
+          "longitude": -122.4180,
+          "altitude": 12.0,
+          "speed": 35,
+          "course": 45,
+          "time": "2023-01-01T12:05:00.000Z"
+        },
+        {
+          "latitude": 37.7850,
+          "longitude": -122.4150,
+          "altitude": 15.0,
+          "speed": 40,
+          "course": 30,
+          "time": "2023-01-01T12:10:00.000Z"
+        },
+        {
+          "latitude": 37.7900,
+          "longitude": -122.4100,
+          "altitude": 18.0,
+          "speed": 25,
+          "course": 60,
+          "time": "2023-01-01T12:15:00.000Z",
+          "attributes": {
+            "event": "hardAcceleration"
+          }
+        },
+        {
+          "latitude": 37.7950,
+          "longitude": -122.4050,
+          "altitude": 20.0,
+          "speed": 30,
+          "course": 90,
+          "time": "2023-01-01T12:20:00.000Z"
+        },
+        {
+          "latitude": 37.8000,
+          "longitude": -122.4000,
+          "altitude": 15.0,
+          "speed": 0,
+          "course": 0,
+          "time": "2023-01-01T12:30:00.000Z",
+          "attributes": {
+            "event": "engineStop"
+          }
+        }
+      ],
+      "statistics": {
+        "distance": 5.2,
+        "averageSpeed": 32.5,
+        "maxSpeed": 45.0,
+        "duration": 1800,
+        "movingDuration": 1500
+      }
+    },
+    {
+      "name": "geofence_visualization",
+      "description": "Different types of geofences for visualization testing",
+      "geofences": [
+        {
+          "id": 1,
+          "name": "Circle Geofence",
+          "description": "Circular geofence for testing",
+          "type": "circle",
+          "data": {
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "radius": 500
+          },
+          "attributes": {
+            "color": "#FF0000",
+            "opacity": 0.5
+          }
+        },
+        {
+          "id": 2,
+          "name": "Polygon Geofence",
+          "description": "Polygon geofence for testing",
+          "type": "polygon",
+          "data": {
+            "vertices": [
+              {"latitude": 37.7800, "longitude": -122.4200},
+              {"latitude": 37.7800, "longitude": -122.4100},
+              {"latitude": 37.7700, "longitude": -122.4100},
+              {"latitude": 37.7700, "longitude": -122.4200}
+            ]
+          },
+          "attributes": {
+            "color": "#00FF00",
+            "opacity": 0.5
+          }
+        },
+        {
+          "id": 3,
+          "name": "Polyline Geofence",
+          "description": "Polyline geofence for testing",
+          "type": "polyline",
+          "data": {
+            "vertices": [
+              {"latitude": 37.7850, "longitude": -122.4150},
+              {"latitude": 37.7900, "longitude": -122.4100},
+              {"latitude": 37.7950, "longitude": -122.4050}
+            ],
+            "width": 50
+          },
+          "attributes": {
+            "color": "#0000FF",
+            "opacity": 0.5
+          }
+        }
+      ],
+      "positions": [
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.5,
+          "speed": 0,
+          "course": 0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "geofenceIds": [1]
+        },
+        {
+          "deviceId": 2,
+          "deviceName": "Test Device 2",
+          "latitude": 37.7750,
+          "longitude": -122.4150,
+          "altitude": 15.0,
+          "speed": 25,
+          "course": 90,
+          "time": "2023-01-01T12:00:00.000Z",
+          "geofenceIds": [2]
+        },
+        {
+          "deviceId": 3,
+          "deviceName": "Test Device 3",
+          "latitude": 37.7900,
+          "longitude": -122.4100,
+          "altitude": 12.0,
+          "speed": 15,
+          "course": 180,
+          "time": "2023-01-01T12:00:00.000Z",
+          "geofenceIds": [3]
+        }
+      ]
+    },
+    {
+      "name": "clustering_visualization",
+      "description": "High-density position data for testing clustering visualization",
+      "center": {
+        "latitude": 37.7749,
+        "longitude": -122.4194
+      },
+      "zoom": 12,
+      "positions": [
+        {"deviceId": 1, "deviceName": "Device 1", "latitude": 37.7749, "longitude": -122.4194, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 2, "deviceName": "Device 2", "latitude": 37.7751, "longitude": -122.4196, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 3, "deviceName": "Device 3", "latitude": 37.7747, "longitude": -122.4192, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 4, "deviceName": "Device 4", "latitude": 37.7753, "longitude": -122.4198, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 5, "deviceName": "Device 5", "latitude": 37.7745, "longitude": -122.4190, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 6, "deviceName": "Device 6", "latitude": 37.7755, "longitude": -122.4200, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 7, "deviceName": "Device 7", "latitude": 37.7743, "longitude": -122.4188, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 8, "deviceName": "Device 8", "latitude": 37.7757, "longitude": -122.4202, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 9, "deviceName": "Device 9", "latitude": 37.7741, "longitude": -122.4186, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 10, "deviceName": "Device 10", "latitude": 37.7759, "longitude": -122.4204, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 11, "deviceName": "Device 11", "latitude": 37.7694, "longitude": -122.4862, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 12, "deviceName": "Device 12", "latitude": 37.7696, "longitude": -122.4864, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 13, "deviceName": "Device 13", "latitude": 37.7692, "longitude": -122.4860, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 14, "deviceName": "Device 14", "latitude": 37.7698, "longitude": -122.4866, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 15, "deviceName": "Device 15", "latitude": 37.7690, "longitude": -122.4858, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 16, "deviceName": "Device 16", "latitude": 37.7700, "longitude": -122.4868, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 17, "deviceName": "Device 17", "latitude": 37.7688, "longitude": -122.4856, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 18, "deviceName": "Device 18", "latitude": 37.7702, "longitude": -122.4870, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 19, "deviceName": "Device 19", "latitude": 37.8083, "longitude": -122.4156, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 20, "deviceName": "Device 20", "latitude": 37.8085, "longitude": -122.4158, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 21, "deviceName": "Device 21", "latitude": 37.8081, "longitude": -122.4154, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 22, "deviceName": "Device 22", "latitude": 37.8087, "longitude": -122.4160, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 23, "deviceName": "Device 23", "latitude": 37.8079, "longitude": -122.4152, "time": "2023-01-01T12:00:00.000Z"},
+        {"deviceId": 24, "deviceName": "Device 24", "latitude": 37.8089, "longitude": -122.4162, "time": "2023-01-01T12:00:00.000Z"}
+      ],
+      "clusteringOptions": {
+        "gridSize": 50,
+        "maxZoom": 15,
+        "minClusterSize": 2
+      }
+    },
+    {
+      "name": "event_visualization",
+      "description": "Position data with events for testing event visualization on map",
+      "positions": [
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "speed": 0,
+          "time": "2023-01-01T12:00:00.000Z",
+          "event": {
+            "type": "deviceOnline",
+            "description": "Device connected"
+          }
+        },
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7800,
+          "longitude": -122.4180,
+          "speed": 65,
+          "time": "2023-01-01T12:10:00.000Z",
+          "event": {
+            "type": "speedLimit",
+            "description": "Speed limit exceeded",
+            "attributes": {
+              "speedLimit": 50
+            }
+          }
+        },
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7850,
+          "longitude": -122.4150,
+          "speed": 30,
+          "time": "2023-01-01T12:20:00.000Z",
+          "event": {
+            "type": "geofenceEnter",
+            "description": "Entered geofence 'Work Zone'",
+            "attributes": {
+              "geofenceId": 2,
+              "geofenceName": "Work Zone"
+            }
+          }
+        },
+        {
+          "deviceId": 1,
+          "deviceName": "Test Device 1",
+          "latitude": 37.7900,
+          "longitude": -122.4100,
+          "speed": 0,
+          "time": "2023-01-01T12:30:00.000Z",
+          "event": {
+            "type": "engineStop",
+            "description": "Engine stopped"
+          }
+        }
+      ]
+    }
+  ]
+}
