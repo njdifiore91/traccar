@@ -1,0 +1,791 @@
+{
+  "mappings": [
+    {
+      "name": "Google Maps Geocoding API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "latlng": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "results": [
+            {
+              "formatted_address": "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
+              "place_id": "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
+              "geometry": {
+                "location": {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                }
+              },
+              "address_components": [
+                {
+                  "long_name": "1600",
+                  "short_name": "1600",
+                  "types": ["street_number"]
+                },
+                {
+                  "long_name": "Amphitheatre Parkway",
+                  "short_name": "Amphitheatre Pkwy",
+                  "types": ["route"]
+                },
+                {
+                  "long_name": "Mountain View",
+                  "short_name": "Mountain View",
+                  "types": ["locality", "political"]
+                },
+                {
+                  "long_name": "Santa Clara County",
+                  "short_name": "Santa Clara County",
+                  "types": ["administrative_area_level_2", "political"]
+                },
+                {
+                  "long_name": "California",
+                  "short_name": "CA",
+                  "types": ["administrative_area_level_1", "political"]
+                },
+                {
+                  "long_name": "United States",
+                  "short_name": "US",
+                  "types": ["country", "political"]
+                },
+                {
+                  "long_name": "94043",
+                  "short_name": "94043",
+                  "types": ["postal_code"]
+                }
+              ]
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Google Maps Geocoding API - No Results",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "latlng": {
+            "matches": "0\.0,0\.0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "status": "ZERO_RESULTS",
+          "results": []
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Google Maps Geocoding API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/geocode/json",
+        "queryParameters": {
+          "key": {
+            "equalTo": "invalid_key"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "status": "REQUEST_DENIED",
+          "error_message": "The provided API key is invalid."
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Google Maps Directions API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "routes": [
+            {
+              "summary": "US-101 N",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "30.5 mi",
+                    "value": 49097
+                  },
+                  "duration": {
+                    "text": "37 mins",
+                    "value": 2215
+                  },
+                  "steps": [
+                    {
+                      "html_instructions": "Head north on Amphitheatre Pkwy",
+                      "distance": {
+                        "text": "0.2 mi",
+                        "value": 322
+                      },
+                      "duration": {
+                        "text": "1 min",
+                        "value": 60
+                      }
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "a~lfFlwvbVnEnDdEjD~DvClD`C|CrB|CdBrCvA~BhA|BbA~B~@`Cz@bCv@`Cr@~Bn@`Cj@~Bf@`Cd@~Bb@`C^~B\\`CT~BR`CN~BL`CJ~BF`CD~BB`C@~B?`C?~BC`CE~BG`CI~BK`CM~BO`CQ~BS`CU~BW`CY~B[`C]~B_@`Ca@~Bc@`Ce@~Bg@`Ci@~Bk@`Cm@~Bo@`Cq@~Bs@`Cu@~Bw@`Cy@~B{@`C}@~B_A`CaA~BcA`CeA~BgA`CiA~BkA`CmA~BoA`CqA~BsA`CuA~BwA`CyA~B{A`C}A~B_B`CaB~BcB`CeB~BgB`CiB~BkB`CmB~BoB`CqB~BsB`CuB~BwB`CyB~B{B`C}B~B_C`CaC~BcC`CeC~BgC`CiC~BkC`CmC~BoC`CqC~BsC`CuC~BwC`CyC~B{C`C}C~B_D`CaD~BcD`CeD~BgD`CiD~BkD`CmD~BoD`CqD~BsD`CuD~BwD`CyD~B{D`C}D~B_E`CaE~BcE`CeE~BgE`CiE~BkE`CmE~BoE`CqE~BsE`CuE~BwE`CyE~B{E`C}E~B_F`CaF~BcF`CeF~BgF`CiF~BkF`CmF~BoF`CqF~BsF`CuF~BwF`CyF~B{F`C}F~B_G`CaG~BcG`CeG~BgG`CiG~BkG`CmG~BoG`CqG~BsG`CuG~BwG`CyG~B{G`C}G~B_H`CaH~BcH`CeH~BgH`CiH~BkH`CmH~BoH`CqH~BsH`CuH~BwH`CyH~B{H`C}H~B_I`CaI~BcI`CeI~BgI`CiI~BkI`CmI~BoI`CqI~BsI`CuI~BwI`CyI~B{I`C}I~B_J`CaJ~BcJ`CeJ~BgJ`CiJ~BkJ`CmJ~BoJ`CqJ~BsJ`CuJ~BwJ`CyJ~B{J`C}J~B_K`CaK~BcK`CeK~BgK`CiK~BkK`CmK~BoK`CqK~BsK`CuK~BwK`CyK~B{K`C}K~B_L`CaL~BcL`CeL~BgL`CiL~BkL`CmL~BoL`CqL~BsL`CuL~BwL`CyL~B{L`C}L~B_M`CaM~BcM`CeM~BgM`CiM~BkM`CmM~BoM`CqM~BsM`CuM~BwM`CyM~B{M`C}M~B_N`CaN~BcN`CeN~BgN`CiN~BkN`CmN~BoN`CqN~BsN`CuN~BwN`CyN~B{N`C}N~B_O`CaO~BcO`CeO~BgO`CiO~BkO`CmO~BoO`CqO~BsO`CuO~BwO`CyO~B{O`C}O~B_P`CaP~BcP`CeP~BgP`CiP~BkP`CmP~BoP`CqP~BsP`CuP~BwP`CyP~B{P`C}P~B_Q`CaQ~BcQ`CeQ~BgQ`CiQ~BkQ`CmQ~BoQ`CqQ~BsQ`CuQ~BwQ`CyQ~B{Q`C}Q~B_R`CaR~BcR`CeR~BgR`CiR~BkR`CmR~BoR`CqR~BsR`CuR~BwR`CyR~B{R`C}R~B_S`CaS~BcS`CeS~BgS`CiS~BkS`CmS~BoS`CqS~BsS`CuS~BwS`CyS~B{S`C}S~B_T`CaT~BcT`CeT~BgT`CiT~BkT`CmT~BoT`CqT~BsT`CuT~BwT`CyT~B{T`C}T~B_U`CaU~BcU`CeU~BgU`CiU~BkU`CmU~BoU`CqU~BsU`CuU~BwU`CyU~B{U`C}U~B_V`CaV~BcV`CeV~BgV`CiV~BkV`CmV~BoV`CqV~BsV`CuV~BwV`CyV~B{V`C}V~B_W`CaW~BcW`CeW~BgW`CiW~BkW`CmW~BoW`CqW~BsW`CuW~BwW`CyW~B{W`C}W~B_X`CaX~BcX`CeX~BgX`CiX~BkX`CmX~BoX`CqX~BsX`CuX~BwX`CyX~B{X`C}X~B_Y`CaY~BcY`CeY~BgY`CiY~BkY`CmY~BoY`CqY~BsY`CuY~BwY`CyY~B{Y`C}Y~B_Z`CaZ~BcZ`CeZ~BgZ`CiZ~BkZ`CmZ~BoZ`CqZ~BsZ`CuZ~BwZ`CyZ~B{Z`C}Z~B_[`Ca[~Bc[`Ce[~Bg[`Ci[~Bk[`Cm[~Bo[`Cq[~Bs[`Cu[~Bw[`Cy[~B{[`C}[~B_\\`Ca\\~Bc\\`Ce\\~Bg\\`Ci\\~Bk\\`Cm\\~Bo\\`Cq\\~Bs\\`Cu\\~Bw\\`Cy\\~B{\\`C}\\~B_]`Ca]~Bc]`Ce]~Bg]`Ci]~Bk]`Cm]~Bo]`Cq]~Bs]`Cu]~Bw]`Cy]~B{]`C}]~B_^`Ca^~Bc^`Ce^~Bg^`Ci^~Bk^`Cm^~Bo^`Cq^~Bs^`Cu^~Bw^`Cy^~B{^`C}^~B_"
+              }
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "Google Maps Directions API - No Route Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "equalTo": "0,0"
+          },
+          "destination": {
+            "equalTo": "0,0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "status": "ZERO_RESULTS",
+          "routes": []
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "OpenStreetMap Nominatim Reverse Geocoding - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/nominatim/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "place_id": 159811639,
+          "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+          "osm_type": "way",
+          "osm_id": 28574532,
+          "lat": "37.4224764",
+          "lon": "-122.0842499",
+          "display_name": "1600, Amphitheatre Parkway, Mountain View, Santa Clara County, California, 94043, United States",
+          "address": {
+            "house_number": "1600",
+            "road": "Amphitheatre Parkway",
+            "city": "Mountain View",
+            "county": "Santa Clara County",
+            "state": "California",
+            "postcode": "94043",
+            "country": "United States",
+            "country_code": "us"
+          },
+          "boundingbox": [
+            "37.4223764",
+            "37.4225764",
+            "-122.0843499",
+            "-122.0841499"
+          ]
+        },
+        "fixedDelayMilliseconds": 120
+      }
+    },
+    {
+      "name": "OpenStreetMap Nominatim Reverse Geocoding - No Results",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/nominatim/reverse",
+        "queryParameters": {
+          "lat": {
+            "equalTo": "0"
+          },
+          "lon": {
+            "equalTo": "0"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "error": "Unable to geocode"
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "OpenStreetMap Nominatim Reverse Geocoding - Server Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/nominatim/reverse",
+        "queryParameters": {
+          "lat": {
+            "equalTo": "999"
+          },
+          "lon": {
+            "equalTo": "999"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "error": "Internal Server Error"
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "OpenStreetMap OSRM Route Service - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/osrm/route/v1/driving/[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+;[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "code": "Ok",
+          "routes": [
+            {
+              "geometry": "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
+              "legs": [
+                {
+                  "steps": [],
+                  "distance": 49097.0,
+                  "duration": 2215.0,
+                  "summary": "US-101"
+                }
+              ],
+              "distance": 49097.0,
+              "duration": 2215.0,
+              "weight_name": "routability",
+              "weight": 2215.0
+            }
+          ],
+          "waypoints": [
+            {
+              "hint": "KSAfBKSAfAoAAAAIAAAAAAAAAAAAAAAoQAAAAAAAAOhAAAD_____AQAAAAAAAAAAAAAAlgEAAHdlAgCnYAIA",
+              "distance": 4.152629,
+              "name": "Amphitheatre Parkway",
+              "location": [-122.084078, 37.422375]
+            },
+            {
+              "hint": "KSAfBKSAfAoAAAAIAAAAAAAAAAAAAAAoQAAAAAAAAOhAAAD_____AQAAAAAAAAAAAAAAlgEAAHdlAgCnYAIA",
+              "distance": 4.152629,
+              "name": "Amphitheatre Parkway",
+              "location": [-122.084078, 37.422375]
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "OpenStreetMap OSRM Route Service - No Route Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/osrm/route/v1/driving/0\.0,0\.0;0\.0,0\.0"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "code": "NoRoute",
+          "message": "No route found between points",
+          "routes": []
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Mapbox Geocoding API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/geocoding/v5/mapbox.places/[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+\.json"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "type": "FeatureCollection",
+          "query": [-122.0842499, 37.4224764],
+          "features": [
+            {
+              "id": "address.1234567890",
+              "type": "Feature",
+              "place_type": ["address"],
+              "relevance": 1,
+              "properties": {
+                "accuracy": "rooftop"
+              },
+              "text": "Amphitheatre Parkway",
+              "place_name": "1600 Amphitheatre Parkway, Mountain View, California 94043, United States",
+              "center": [-122.0842499, 37.4224764],
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-122.0842499, 37.4224764]
+              },
+              "address": "1600",
+              "context": [
+                {
+                  "id": "neighborhood.12345",
+                  "text": "North Bayshore"
+                },
+                {
+                  "id": "postcode.12345",
+                  "text": "94043"
+                },
+                {
+                  "id": "place.12345",
+                  "wikidata": "Q486860",
+                  "text": "Mountain View"
+                },
+                {
+                  "id": "region.12345",
+                  "short_code": "US-CA",
+                  "wikidata": "Q99",
+                  "text": "California"
+                },
+                {
+                  "id": "country.12345",
+                  "short_code": "us",
+                  "wikidata": "Q30",
+                  "text": "United States"
+                }
+              ]
+            }
+          ],
+          "attribution": "© 2023 Mapbox and its suppliers. All rights reserved."
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "Mapbox Geocoding API - No Results",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/geocoding/v5/mapbox.places/0\.0,0\.0\.json"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "type": "FeatureCollection",
+          "query": [0.0, 0.0],
+          "features": [],
+          "attribution": "© 2023 Mapbox and its suppliers. All rights reserved."
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Mapbox Directions API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/directions/v5/mapbox/driving/[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+;[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "duration": 2215,
+              "distance": 49097,
+              "geometry": "_p~iF~ps|U_ulLnnqC_mqNvxq`@",
+              "weight": 2215,
+              "weight_name": "routability",
+              "legs": [
+                {
+                  "duration": 2215,
+                  "steps": [
+                    {
+                      "maneuver": {
+                        "bearing_after": 0,
+                        "bearing_before": 0,
+                        "location": [-122.084078, 37.422375],
+                        "type": "depart",
+                        "instruction": "Drive north on Amphitheatre Parkway"
+                      },
+                      "name": "Amphitheatre Parkway",
+                      "duration": 60,
+                      "distance": 322,
+                      "driving_side": "right",
+                      "weight": 60,
+                      "mode": "driving",
+                      "geometry": "_p~iF~ps|U_ulLnnqC_mqNvxq`@"
+                    }
+                  ],
+                  "distance": 49097,
+                  "summary": "US-101"
+                }
+              ]
+            }
+          ],
+          "waypoints": [
+            {
+              "name": "Amphitheatre Parkway",
+              "location": [-122.084078, 37.422375]
+            },
+            {
+              "name": "Amphitheatre Parkway",
+              "location": [-122.084078, 37.422375]
+            }
+          ],
+          "code": "Ok",
+          "uuid": "abcdef12345"
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "Mapbox Directions API - No Route Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/mapbox/directions/v5/mapbox/driving/0\.0,0\.0;0\.0,0\.0"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "code": "NoRoute",
+          "message": "No route found",
+          "routes": []
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "HERE Maps Geocoding API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/here/v1/geocode",
+        "queryParameters": {
+          "at": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "items": [
+            {
+              "title": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+              "id": "here:af:streetsection:abcdef12345",
+              "resultType": "houseNumber",
+              "houseNumberType": "PA",
+              "address": {
+                "label": "1600 Amphitheatre Pkwy, Mountain View, CA 94043, United States",
+                "countryCode": "USA",
+                "countryName": "United States",
+                "stateCode": "CA",
+                "state": "California",
+                "county": "Santa Clara",
+                "city": "Mountain View",
+                "district": "North Bayshore",
+                "street": "Amphitheatre Parkway",
+                "postalCode": "94043",
+                "houseNumber": "1600"
+              },
+              "position": {
+                "lat": 37.4224764,
+                "lng": -122.0842499
+              },
+              "access": [
+                {
+                  "lat": 37.4224764,
+                  "lng": -122.0842499
+                }
+              ],
+              "distance": 0
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "name": "HERE Maps Geocoding API - No Results",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/here/v1/geocode",
+        "queryParameters": {
+          "at": {
+            "equalTo": "0.0,0.0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "items": []
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "HERE Maps Routing API - Success Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/here/v8/routes",
+        "queryParameters": {
+          "origin": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+          },
+          "destination": {
+            "matches": "[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+"
+          },
+          "apiKey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "id": "abcdef12345",
+              "sections": [
+                {
+                  "id": "section-1",
+                  "type": "vehicle",
+                  "departure": {
+                    "time": "2023-01-01T12:00:00Z",
+                    "place": {
+                      "type": "place",
+                      "location": {
+                        "lat": 37.4224764,
+                        "lng": -122.0842499
+                      },
+                      "originalLocation": {
+                        "lat": 37.4224764,
+                        "lng": -122.0842499
+                      }
+                    }
+                  },
+                  "arrival": {
+                    "time": "2023-01-01T12:37:00Z",
+                    "place": {
+                      "type": "place",
+                      "location": {
+                        "lat": 37.7749,
+                        "lng": -122.4194
+                      },
+                      "originalLocation": {
+                        "lat": 37.7749,
+                        "lng": -122.4194
+                      }
+                    }
+                  },
+                  "summary": {
+                    "duration": 2215,
+                    "length": 49097,
+                    "baseDuration": 2215
+                  },
+                  "transport": {
+                    "mode": "car"
+                  },
+                  "polyline": "BFoz5AzUhF..."
+                }
+              ]
+            }
+          ]
+        },
+        "fixedDelayMilliseconds": 150
+      }
+    },
+    {
+      "name": "HERE Maps Routing API - No Route Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/here/v8/routes",
+        "queryParameters": {
+          "origin": {
+            "equalTo": "0.0,0.0"
+          },
+          "destination": {
+            "equalTo": "0.0,0.0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=0, private, must-revalidate"
+        },
+        "jsonBody": {
+          "title": "No route found",
+          "status": 404,
+          "cause": "No route found between origin and destination",
+          "action": "Try different origin or destination points"
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "name": "Timeout Simulation",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/timeout/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "This response was delayed to simulate a timeout"
+        },
+        "fixedDelayMilliseconds": 10000
+      }
+    },
+    {
+      "name": "Network Error Simulation",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/error/.*"
+      },
+      "response": {
+        "fault": "CONNECTION_RESET_BY_PEER"
+      }
+    },
+    {
+      "name": "Rate Limit Simulation",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/ratelimit/.*"
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "60"
+        },
+        "jsonBody": {
+          "error": "Rate limit exceeded",
+          "message": "Too many requests, please try again later"
+        }
+      }
+    }
+  ]
+}
