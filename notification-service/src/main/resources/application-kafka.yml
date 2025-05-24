@@ -1,0 +1,186 @@
+# Kafka Configuration for Notification Service
+
+spring:
+  kafka:
+    # Kafka broker connection settings
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+      ssl.truststore.location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+      ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      # Enable idempotent producer to avoid duplicate messages
+      enable.idempotence: true
+      # Compression for efficient network usage
+      compression.type: lz4
+      # Client identification
+      client.id: notification-service
+
+    # Consumer configuration
+    consumer:
+      # Consumer group ID for horizontal scaling
+      group-id: notification-service-group
+      # Auto-offset reset policy (earliest to ensure no messages are missed on restart)
+      auto-offset-reset: earliest
+      # Disable auto-commit to use manual acknowledgment
+      enable-auto-commit: false
+      # Key and value deserializers
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        # Trust packages for deserialization
+        spring.json.trusted.packages: org.traccar.notification,org.traccar.model,org.traccar.proto
+        # Maximum records to fetch in a single poll
+        max.poll.records: 500
+        # Maximum time between polls before considering consumer failed
+        max.poll.interval.ms: 300000
+        # Heartbeat interval for consumer group coordination
+        heartbeat.interval.ms: 3000
+        # Session timeout for consumer group coordination
+        session.timeout.ms: 30000
+        # Isolation level for reading transactional messages
+        isolation.level: read_committed
+
+    # Producer configuration
+    producer:
+      # Key and value serializers
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # Acknowledgment level (all = leader and replicas must acknowledge)
+      acks: all
+      # Number of retries for producer operations
+      retries: 3
+      # Batch size for grouping messages
+      batch-size: 16384
+      # Buffer memory for producer
+      buffer-memory: 33554432
+      properties:
+        # Linger time to allow batching
+        linger.ms: 10
+        # Request timeout
+        request.timeout.ms: 30000
+        # Maximum in-flight requests per connection
+        max.in.flight.requests.per.connection: 5
+        # Enable transactional messaging
+        transactional.id: notification-service-tx-
+
+    # Listener configuration
+    listener:
+      # Concurrency level for consumers (can be scaled based on available resources)
+      concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+      # Ack mode (MANUAL_IMMEDIATE for explicit acknowledgment)
+      ack-mode: MANUAL_IMMEDIATE
+      # Error handler for consumer exceptions
+      type: BATCH
+      # Missing records recovery policy
+      missing-topics-fatal: false
+
+# Spring Cloud Stream configuration for Kafka binders
+spring.cloud.stream:
+  kafka:
+    binder:
+      # Broker configuration
+      brokers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      # Required ACKs from brokers
+      required-acks: all
+      # Auto-create topics if they don't exist
+      auto-create-topics: true
+      # Minimum number of replicas that must acknowledge a write
+      min-partition-count: 3
+      # Replication factor for auto-created topics
+      replication-factor: 3
+      # Configuration for Kafka consumer properties
+      consumer-properties:
+        max.poll.records: 500
+        max.poll.interval.ms: 300000
+
+  # Bindings configuration for input and output channels
+  bindings:
+    # Input channel for consuming events
+    notification-events-in:
+      destination: events
+      group: notification-service-group
+      consumer:
+        # Maximum attempts before sending to DLQ
+        max-attempts: 3
+        # Backoff configuration for retries
+        backoff-initial-interval: 1000
+        backoff-max-interval: 10000
+        backoff-multiplier: 2.0
+        # Enable DLQ for failed messages
+        auto-bind-dlq: true
+        dlq-name: events.dlq
+
+    # Output channels for different notification types
+    email-notifications-out:
+      destination: email-out
+      producer:
+        # Partition key expression for routing related messages to same partition
+        partition-key-expression: headers['userId']
+        # Number of partitions for the topic
+        partition-count: 6
+        # Required number of partitions
+        required-groups: email-processor-group
+
+    sms-notifications-out:
+      destination: sms-out
+      producer:
+        partition-key-expression: headers['userId']
+        partition-count: 6
+        required-groups: sms-processor-group
+
+    push-notifications-out:
+      destination: push-out
+      producer:
+        partition-key-expression: headers['userId']
+        partition-count: 6
+        required-groups: push-processor-group
+
+    web-notifications-out:
+      destination: web-out
+      producer:
+        partition-key-expression: headers['userId']
+        partition-count: 6
+        required-groups: web-processor-group
+
+    # Dead letter queue for notification processing failures
+    notification-dlq-out:
+      destination: notification-dlq
+      producer:
+        partition-count: 3
+
+# Resilience4j circuit breaker configuration for Kafka producers
+resilience4j.circuitbreaker:
+  instances:
+    kafkaProducer:
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 100
+      failureRateThreshold: 50
+      waitDurationInOpenState: 60s
+      permittedNumberOfCallsInHalfOpenState: 10
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      recordExceptions:
+        - org.apache.kafka.common.errors.TimeoutException
+        - org.apache.kafka.common.errors.NetworkException
+        - org.springframework.kafka.KafkaException
+
+# Retry configuration for Kafka operations
+resilience4j.retry:
+  instances:
+    kafkaConsumer:
+      maxAttempts: 3
+      waitDuration: 1s
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+      retryExceptions:
+        - org.apache.kafka.common.errors.RetriableException
+        - org.springframework.kafka.KafkaException
+
+# Management endpoints for Kafka health checks
+management:
+  health:
+    kafka:
+      enabled: true
+    binders:
+      enabled: true
