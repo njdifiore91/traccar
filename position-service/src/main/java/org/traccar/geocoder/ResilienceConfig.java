@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,132 +21,161 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Provides centralized configuration for resilience patterns used by geocoder implementations.
  * This includes circuit breakers, retry mechanisms, and fallback strategies.
  */
-@Singleton
+@Component
 public class ResilienceConfig {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResilienceConfig.class);
 
     private final CircuitBreakerRegistry circuitBreakerRegistry;
     private final RetryRegistry retryRegistry;
-    private final Map<String, CircuitBreaker> circuitBreakers = new ConcurrentHashMap<>();
-    private final Map<String, Retry> retries = new ConcurrentHashMap<>();
+    private final Map<String, CircuitBreaker> circuitBreakers = new HashMap<>();
+    private final Map<String, Retry> retries = new HashMap<>();
 
-    /**
-     * Default constructor that initializes the circuit breaker and retry registries
-     * with default configurations.
-     */
-    @Inject
-    public ResilienceConfig() {
-        // Create circuit breaker registry with default configuration
+    @Autowired
+    public ResilienceConfig(
+            MeterRegistry meterRegistry,
+            @Value("${geocoder.circuitBreaker.slidingWindowSize:100}") int slidingWindowSize,
+            @Value("${geocoder.circuitBreaker.failureRateThreshold:50}") float failureRateThreshold,
+            @Value("${geocoder.circuitBreaker.waitDurationInOpenState:30s}") Duration waitDurationInOpenState,
+            @Value("${geocoder.circuitBreaker.permittedNumberOfCallsInHalfOpenState:10}") int permittedNumberOfCallsInHalfOpenState,
+            @Value("${geocoder.retry.maxAttempts:3}") int maxAttempts,
+            @Value("${geocoder.retry.waitDuration:1s}") Duration waitDuration) {
+
+        // Configure default circuit breaker settings
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-                .failureRateThreshold(50) // 50% failure rate to open circuit
-                .waitDurationInOpenState(Duration.ofSeconds(30)) // Wait 30 seconds in OPEN state
                 .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                .slidingWindowSize(10) // Count last 10 calls
-                .minimumNumberOfCalls(5) // Minimum calls before calculating failure rate
-                .permittedNumberOfCallsInHalfOpenState(3) // Allow 3 calls in HALF_OPEN state
-                .automaticTransitionFromOpenToHalfOpenEnabled(true) // Auto transition to HALF_OPEN
-                .recordExceptions(Exception.class) // Record all exceptions as failures
+                .slidingWindowSize(slidingWindowSize)
+                .failureRateThreshold(failureRateThreshold)
+                .waitDurationInOpenState(waitDurationInOpenState)
+                .permittedNumberOfCallsInHalfOpenState(permittedNumberOfCallsInHalfOpenState)
+                .recordExceptions(IOException.class, TimeoutException.class, RuntimeException.class)
                 .build();
 
-        this.circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
-
-        // Create retry registry with default configuration
+        // Configure default retry settings with exponential backoff
         RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(3) // Maximum 3 attempts
-                .waitDuration(Duration.ofMillis(500)) // Initial wait duration
-                .retryExceptions(Exception.class) // Retry on all exceptions
+                .maxAttempts(maxAttempts)
+                .waitDuration(waitDuration)
+                .retryExceptions(IOException.class, TimeoutException.class)
+                .ignoreExceptions(IllegalArgumentException.class)
+                .enableExponentialBackoff(true)
+                .exponentialBackoffMultiplier(2)
+                .enableRandomizedWait(true)
+                .randomizedWaitFactor(0.5)
                 .build();
 
-        this.retryRegistry = RetryRegistry.of(retryConfig);
-    }
-    
-    /**
-     * Constructor with custom registry instances for testing.
-     *
-     * @param circuitBreakerRegistry Custom circuit breaker registry
-     * @param retryRegistry Custom retry registry
-     */
-    public ResilienceConfig(CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry) {
-        this.circuitBreakerRegistry = circuitBreakerRegistry;
-        this.retryRegistry = retryRegistry;
+        // Create registries with metrics integration
+        circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        retryRegistry = RetryRegistry.of(retryConfig);
+
+        // Register with metrics registry
+        circuitBreakerRegistry.getEventPublisher().onEntryAdded(event -> 
+                event.getAddedEntry().getEventPublisher().onStateTransition(state -> 
+                        meterRegistry.counter(
+                                "resilience4j.circuitbreaker.state", 
+                                "name", event.getAddedEntry().getName(),
+                                "state", state.getStateTransition().getToState().name())
+                                .increment()));
+
+        retryRegistry.getEventPublisher().onEntryAdded(event -> 
+                event.getAddedEntry().getEventPublisher().onRetry(retry -> 
+                        meterRegistry.counter(
+                                "resilience4j.retry.calls", 
+                                "name", event.getAddedEntry().getName(),
+                                "kind", "retry")
+                                .increment()));
     }
 
     /**
-     * Creates or retrieves a circuit breaker for the specified provider.
-     * Each provider can have its own circuit breaker with custom configuration.
+     * Gets a circuit breaker for the specified geocoder provider.
+     * Creates a new one if it doesn't exist.
      *
-     * @param providerName Name of the geocoding provider
-     * @return CircuitBreaker instance for the provider
+     * @param provider the geocoder provider name (e.g., "geoapify", "google")
+     * @return the circuit breaker instance
      */
-    public CircuitBreaker createCircuitBreaker(String providerName) {
-        return circuitBreakers.computeIfAbsent(providerName, name -> {
-            LOGGER.info("Creating circuit breaker for geocoder provider: {}", name);
-            
-            // Provider-specific configurations can be applied here
-            CircuitBreakerConfig config = CircuitBreakerConfig.custom()
-                    .failureRateThreshold(50)
-                    .waitDurationInOpenState(Duration.ofSeconds(30))
-                    .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                    .slidingWindowSize(10)
-                    .minimumNumberOfCalls(5)
-                    .permittedNumberOfCallsInHalfOpenState(3)
-                    .automaticTransitionFromOpenToHalfOpenEnabled(true)
-                    .recordExceptions(Exception.class);
-            
-            // Apply provider-specific customizations
-            if ("tomtom".equals(name)) {
-                // TomTom-specific configuration
-                config.waitDurationInOpenState(Duration.ofSeconds(60)); // Longer wait for TomTom
-            } else if ("google".equals(name)) {
-                // Google-specific configuration
-                config.failureRateThreshold(30); // More sensitive threshold for Google
-            }
-            
-            return circuitBreakerRegistry.circuitBreaker(name, config.build());
-        });
+    public CircuitBreaker getCircuitBreaker(String provider) {
+        return circuitBreakers.computeIfAbsent(provider, 
+                name -> circuitBreakerRegistry.circuitBreaker("geocoder." + name));
     }
 
     /**
-     * Creates or retrieves a retry mechanism for the specified provider.
-     * Each provider can have its own retry policy with custom configuration.
+     * Gets a retry for the specified geocoder provider.
+     * Creates a new one if it doesn't exist.
      *
-     * @param providerName Name of the geocoding provider
-     * @return Retry instance for the provider
+     * @param provider the geocoder provider name (e.g., "geoapify", "google")
+     * @return the retry instance
      */
-    public Retry createRetry(String providerName) {
-        return retries.computeIfAbsent(providerName, name -> {
-            LOGGER.info("Creating retry for geocoder provider: {}", name);
-            
-            // Provider-specific configurations can be applied here
-            RetryConfig config = RetryConfig.custom()
-                    .maxAttempts(3)
-                    .waitDuration(Duration.ofMillis(500))
-                    .retryExceptions(Exception.class);
-            
-            // Apply provider-specific customizations
-            if ("tomtom".equals(name)) {
-                // TomTom-specific configuration
-                config.maxAttempts(4); // More retries for TomTom
-            } else if ("google".equals(name)) {
-                // Google-specific configuration
-                config.waitDuration(Duration.ofSeconds(1)); // Longer wait between retries for Google
-            }
-            
-            return retryRegistry.retry(name, config.build());
+    public Retry getRetry(String provider) {
+        return retries.computeIfAbsent(provider, 
+                name -> retryRegistry.retry("geocoder." + name));
+    }
+
+    /**
+     * Configures a provider-specific circuit breaker with custom settings.
+     *
+     * @param provider the geocoder provider name
+     * @param config the custom circuit breaker configuration
+     * @return the configured circuit breaker
+     */
+    public CircuitBreaker configureCircuitBreaker(String provider, CircuitBreakerConfig config) {
+        CircuitBreaker circuitBreaker = CircuitBreaker.of("geocoder." + provider, config);
+        circuitBreakers.put(provider, circuitBreaker);
+        return circuitBreaker;
+    }
+
+    /**
+     * Configures a provider-specific retry with custom settings.
+     *
+     * @param provider the geocoder provider name
+     * @param config the custom retry configuration
+     * @return the configured retry
+     */
+    public Retry configureRetry(String provider, RetryConfig config) {
+        Retry retry = Retry.of("geocoder." + provider, config);
+        retries.put(provider, retry);
+        return retry;
+    }
+
+    /**
+     * Gets the health status of all circuit breakers.
+     *
+     * @return a map of provider names to their circuit breaker states
+     */
+    public Map<String, CircuitBreaker.State> getCircuitBreakerStates() {
+        Map<String, CircuitBreaker.State> states = new HashMap<>();
+        circuitBreakers.forEach((provider, circuitBreaker) -> 
+                states.put(provider, circuitBreaker.getState()));
+        return states;
+    }
+
+    /**
+     * Gets metrics for all circuit breakers.
+     *
+     * @return a map of provider names to their circuit breaker metrics
+     */
+    public Map<String, Map<String, Float>> getCircuitBreakerMetrics() {
+        Map<String, Map<String, Float>> metrics = new HashMap<>();
+        circuitBreakers.forEach((provider, circuitBreaker) -> {
+            Map<String, Float> providerMetrics = new HashMap<>();
+            providerMetrics.put("failureRate", circuitBreaker.getMetrics().getFailureRate());
+            providerMetrics.put("slowCallRate", circuitBreaker.getMetrics().getSlowCallRate());
+            providerMetrics.put("numberOfBufferedCalls", (float) circuitBreaker.getMetrics().getNumberOfBufferedCalls());
+            providerMetrics.put("numberOfFailedCalls", (float) circuitBreaker.getMetrics().getNumberOfFailedCalls());
+            providerMetrics.put("numberOfSlowCalls", (float) circuitBreaker.getMetrics().getNumberOfSlowCalls());
+            metrics.put(provider, providerMetrics);
         });
+        return metrics;
     }
 }
