@@ -1,0 +1,446 @@
+# Notification Service Configuration
+spring:
+  application:
+    name: notification-service
+  
+  # Database Configuration
+  datasource:
+    url: ${JDBC_URL:jdbc:h2:./data/database}
+    username: ${JDBC_USER:sa}
+    password: ${JDBC_PASSWORD:}
+    driver-class-name: ${JDBC_DRIVER:org.h2.Driver}
+    hikari:
+      maximum-pool-size: ${DATABASE_MAX_POOL_SIZE:10}
+      minimum-idle: ${DATABASE_MIN_IDLE:2}
+      idle-timeout: 30000
+      max-lifetime: 60000
+      connection-timeout: 30000
+      pool-name: NotificationHikariCP
+      connection-test-query: SELECT 1
+  
+  # JPA Configuration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
+        format_sql: false
+        show_sql: false
+        use_sql_comments: false
+  
+  # Message Broker Configuration - Kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:notification-service}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "org.traccar.*"
+    listener:
+      concurrency: ${KAFKA_LISTENER_CONCURRENCY:3}
+      missing-topics-fatal: false
+  
+  # Message Broker Configuration - RabbitMQ (alternative)
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+    listener:
+      simple:
+        concurrency: ${RABBITMQ_LISTENER_CONCURRENCY:3}
+        max-concurrency: ${RABBITMQ_LISTENER_MAX_CONCURRENCY:10}
+        prefetch: 10
+        default-requeue-rejected: false
+  
+  # Mail Configuration
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS_ENABLE:false}
+      mail.smtp.ssl.enable: ${MAIL_SMTP_SSL_ENABLE:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8083}
+  servlet:
+    context-path: /
+  tomcat:
+    max-threads: 200
+    max-connections: 8192
+    accesslog:
+      enabled: true
+      directory: logs
+      pattern: "%h %l %u %t \"%r\" %s %b %D"
+      prefix: notification_access_log
+      suffix: .log
+      rotate: true
+  shutdown: graceful
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+# Management (Actuator) Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db,messageBroker
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        notification.processing.time: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        notification.processing.time: 0.5, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# Service Discovery Configuration
+# Consul Configuration
+consul:
+  enabled: ${CONSUL_ENABLED:false}
+  host: ${CONSUL_HOST:localhost}
+  port: ${CONSUL_PORT:8500}
+  discovery:
+    instanceId: ${spring.application.name}:${random.value}
+    healthCheckPath: /actuator/health
+    healthCheckInterval: 15s
+    prefer-ip-address: true
+    tags: notification,traccar,microservice
+    register: true
+    register-health-check: true
+    deregister: true
+    service-name: ${spring.application.name}
+    instance-zone: ${CONSUL_INSTANCE_ZONE:default}
+    instance-group: ${CONSUL_INSTANCE_GROUP:default}
+
+# Kubernetes Configuration
+kubernetes:
+  enabled: ${KUBERNETES_ENABLED:false}
+  service-name: ${KUBERNETES_SERVICE_NAME:notification-service}
+  namespace: ${KUBERNETES_NAMESPACE:default}
+  trust-certificates: ${KUBERNETES_TRUST_CERTIFICATES:true}
+  discovery:
+    all-namespaces: ${KUBERNETES_DISCOVERY_ALL_NAMESPACES:false}
+    service-labels:
+      app: traccar
+      component: notification
+    service-name-prefix: ${KUBERNETES_DISCOVERY_SERVICE_NAME_PREFIX:}
+    service-name-suffix: ${KUBERNETES_DISCOVERY_SERVICE_NAME_SUFFIX:}
+
+# Notification Service Configuration
+notification:
+  # Notification Channels Configuration
+  channels:
+    enabled: ${NOTIFICATION_CHANNELS_ENABLED:web,mail,sms,firebase,telegram,pushover,command,traccar}
+    # Notificator types from NotificatorManager
+    types: ${NOTIFICATOR_TYPES:web,mail,sms,firebase,traccar,telegram,pushover,command}
+    # Email Notification Configuration
+    mail:
+      from: ${NOTIFICATION_MAIL_FROM:no-reply@example.com}
+      subject-template: ${NOTIFICATION_MAIL_SUBJECT_TEMPLATE:Traccar Notification}
+      html-template-path: ${NOTIFICATION_MAIL_HTML_TEMPLATE_PATH:classpath:templates/mail/notification.html}
+      text-template-path: ${NOTIFICATION_MAIL_TEXT_TEMPLATE_PATH:classpath:templates/mail/notification.txt}
+      signature: ${NOTIFICATION_MAIL_SIGNATURE:}
+      smtp-timeout: ${NOTIFICATION_MAIL_SMTP_TIMEOUT:5000}
+    
+    # SMS Notification Configuration
+    sms:
+      provider: ${NOTIFICATION_SMS_PROVIDER:http}
+      # HTTP SMS Gateway Configuration
+      http:
+        url: ${NOTIFICATION_SMS_HTTP_URL:}
+        authorization: ${NOTIFICATION_SMS_HTTP_AUTHORIZATION:}
+        template: ${NOTIFICATION_SMS_HTTP_TEMPLATE:}
+      # AWS SNS Configuration
+      aws-sns:
+        access-key: ${NOTIFICATION_SMS_AWS_ACCESS_KEY:}
+        secret-key: ${NOTIFICATION_SMS_AWS_SECRET_KEY:}
+        region: ${NOTIFICATION_SMS_AWS_REGION:us-east-1}
+    
+    # Firebase Push Notification Configuration
+    firebase:
+      service-account-path: ${NOTIFICATION_FIREBASE_SERVICE_ACCOUNT_PATH:}
+      database-url: ${NOTIFICATION_FIREBASE_DATABASE_URL:}
+    
+    # Telegram Notification Configuration
+    telegram:
+      bot-token: ${NOTIFICATION_TELEGRAM_BOT_TOKEN:}
+      chat-id: ${NOTIFICATION_TELEGRAM_CHAT_ID:}
+    
+    # Pushover Notification Configuration
+    pushover:
+      user-key: ${NOTIFICATION_PUSHOVER_USER_KEY:}
+      app-token: ${NOTIFICATION_PUSHOVER_APP_TOKEN:}
+    
+    # Web Notification Configuration
+    web:
+      enabled: true
+  
+  # Notification Processing Configuration
+  processing:
+    thread-pool-size: ${NOTIFICATION_PROCESSING_THREAD_POOL_SIZE:10}
+    max-retry-attempts: ${NOTIFICATION_PROCESSING_MAX_RETRY_ATTEMPTS:3}
+    retry-delay-ms: ${NOTIFICATION_PROCESSING_RETRY_DELAY_MS:1000}
+    max-event-age-seconds: ${NOTIFICATION_PROCESSING_MAX_EVENT_AGE_SECONDS:300}
+    batch-size: ${NOTIFICATION_PROCESSING_BATCH_SIZE:100}
+    correlation-id-header: ${NOTIFICATION_PROCESSING_CORRELATION_ID_HEADER:X-Correlation-ID}
+    error-handling-strategy: ${NOTIFICATION_PROCESSING_ERROR_HANDLING_STRATEGY:dead-letter-queue}
+  
+  # Notification Template Configuration
+  template:
+    engine: ${NOTIFICATION_TEMPLATE_ENGINE:velocity}
+    cache-size: ${NOTIFICATION_TEMPLATE_CACHE_SIZE:100}
+    default-locale: ${NOTIFICATION_TEMPLATE_DEFAULT_LOCALE:en}
+    fallback-locale: ${NOTIFICATION_TEMPLATE_FALLBACK_LOCALE:en}
+    base-path: ${NOTIFICATION_TEMPLATE_BASE_PATH:classpath:templates/}
+    refresh-interval-seconds: ${NOTIFICATION_TEMPLATE_REFRESH_INTERVAL_SECONDS:300}
+
+# Message Topics/Queues Configuration
+messaging:
+  # Kafka Topics
+  kafka:
+    topics:
+      notifications-in: ${KAFKA_TOPIC_NOTIFICATIONS_IN:notifications}
+      email-out: ${KAFKA_TOPIC_EMAIL_OUT:email-notifications}
+      sms-out: ${KAFKA_TOPIC_SMS_OUT:sms-notifications}
+      push-out: ${KAFKA_TOPIC_PUSH_OUT:push-notifications}
+      web-out: ${KAFKA_TOPIC_WEB_OUT:web-notifications}
+      dead-letter: ${KAFKA_TOPIC_DEAD_LETTER:notification-dead-letter}
+    consumer:
+      auto-startup: ${KAFKA_CONSUMER_AUTO_STARTUP:true}
+      concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+      max-poll-records: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
+      max-poll-interval-ms: ${KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS:300000}
+      session-timeout-ms: ${KAFKA_CONSUMER_SESSION_TIMEOUT_MS:10000}
+      heartbeat-interval-ms: ${KAFKA_CONSUMER_HEARTBEAT_INTERVAL_MS:3000}
+    producer:
+      acks: ${KAFKA_PRODUCER_ACKS:all}
+      retries: ${KAFKA_PRODUCER_RETRIES:3}
+      batch-size: ${KAFKA_PRODUCER_BATCH_SIZE:16384}
+      buffer-memory: ${KAFKA_PRODUCER_BUFFER_MEMORY:33554432}
+      linger-ms: ${KAFKA_PRODUCER_LINGER_MS:1}
+  
+  # RabbitMQ Queues
+  rabbitmq:
+    queues:
+      notifications-in: ${RABBITMQ_QUEUE_NOTIFICATIONS_IN:notifications}
+      email-out: ${RABBITMQ_QUEUE_EMAIL_OUT:email-notifications}
+      sms-out: ${RABBITMQ_QUEUE_SMS_OUT:sms-notifications}
+      push-out: ${RABBITMQ_QUEUE_PUSH_OUT:push-notifications}
+      web-out: ${RABBITMQ_QUEUE_WEB_OUT:web-notifications}
+      dead-letter: ${RABBITMQ_QUEUE_DEAD_LETTER:notification-dead-letter}
+    exchanges:
+      notifications: ${RABBITMQ_EXCHANGE_NOTIFICATIONS:traccar.notifications}
+      email: ${RABBITMQ_EXCHANGE_EMAIL:traccar.email}
+      sms: ${RABBITMQ_EXCHANGE_SMS:traccar.sms}
+      push: ${RABBITMQ_EXCHANGE_PUSH:traccar.push}
+      web: ${RABBITMQ_EXCHANGE_WEB:traccar.web}
+      dead-letter: ${RABBITMQ_EXCHANGE_DEAD_LETTER:traccar.dead-letter}
+    routing-keys:
+      notifications: ${RABBITMQ_ROUTING_KEY_NOTIFICATIONS:notifications.#}
+      email: ${RABBITMQ_ROUTING_KEY_EMAIL:email.notifications}
+      sms: ${RABBITMQ_ROUTING_KEY_SMS:sms.notifications}
+      push: ${RABBITMQ_ROUTING_KEY_PUSH:push.notifications}
+      web: ${RABBITMQ_ROUTING_KEY_WEB:web.notifications}
+      dead-letter: ${RABBITMQ_ROUTING_KEY_DEAD_LETTER:dead-letter.notifications}
+
+# Resilience4j Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      # Default circuit breaker configuration
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+      # Email notification circuit breaker
+      emailNotification:
+        baseConfig: default
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+      # SMS notification circuit breaker
+      smsNotification:
+        baseConfig: default
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+      # Push notification circuit breaker
+      pushNotification:
+        baseConfig: default
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+      # Telegram notification circuit breaker
+      telegramNotification:
+        baseConfig: default
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+      # Pushover notification circuit breaker
+      pushoverNotification:
+        baseConfig: default
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+  retry:
+    instances:
+      # Default retry configuration
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+      # Email notification retry
+      emailNotification:
+        baseConfig: default
+        maxAttempts: 3
+      # SMS notification retry
+      smsNotification:
+        baseConfig: default
+        maxAttempts: 3
+      # Push notification retry
+      pushNotification:
+        baseConfig: default
+        maxAttempts: 3
+      # Telegram notification retry
+      telegramNotification:
+        baseConfig: default
+        maxAttempts: 3
+      # Pushover notification retry
+      pushoverNotification:
+        baseConfig: default
+        maxAttempts: 3
+  ratelimiter:
+    instances:
+      default:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+      # SMS rate limiter (to prevent excessive SMS costs)
+      smsNotification:
+        limitForPeriod: ${SMS_RATE_LIMIT_PER_SECOND:10}
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+  bulkhead:
+    instances:
+      default:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+      # Email notification bulkhead
+      emailNotification:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+      # SMS notification bulkhead
+      smsNotification:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 500ms
+      # Push notification bulkhead
+      pushNotification:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+
+# Logging Configuration
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    org.traccar: ${LOG_LEVEL_TRACCAR:INFO}
+    org.springframework.web: ${LOG_LEVEL_SPRING_WEB:INFO}
+    org.springframework.kafka: ${LOG_LEVEL_SPRING_KAFKA:INFO}
+    org.springframework.amqp: ${LOG_LEVEL_SPRING_AMQP:INFO}
+    org.traccar.notification: ${LOG_LEVEL_NOTIFICATION:INFO}
+    org.traccar.notificators: ${LOG_LEVEL_NOTIFICATORS:INFO}
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId},%X{spanId}] %-5level %logger{36} - %msg%n'
+  config: ${LOGGING_CONFIG:classpath:logback-spring.xml}
+  file:
+    name: ${LOG_FILE:logs/notification-service.log}
+  logback:
+    rollingpolicy:
+      max-file-size: ${LOG_FILE_MAX_SIZE:10MB}
+      max-history: ${LOG_FILE_MAX_HISTORY:7}
+      total-size-cap: ${LOG_FILE_TOTAL_SIZE_CAP:100MB}
+
+# OpenTelemetry Configuration
+otel:
+  service:
+    name: ${spring.application.name}
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+    jaeger:
+      endpoint: ${JAEGER_ENDPOINT:http://localhost:14250}
+  traces:
+    sampler: ${OTEL_TRACES_SAMPLER:parentbased_traceidratio}
+    sampler-arg: ${OTEL_TRACES_SAMPLER_ARG:0.1}
+  propagators: ${OTEL_PROPAGATORS:tracecontext,baggage,b3}
+  resource:
+    attributes:
+      deployment.environment: ${DEPLOYMENT_ENVIRONMENT:production}
+      service.version: ${SERVICE_VERSION:1.0.0}
+      service.namespace: traccar
+
+# Dead Letter Queue Configuration
+dead-letter:
+  retry:
+    fixed-delay: ${DEAD_LETTER_RETRY_FIXED_DELAY:60000}
+    max-attempts: ${DEAD_LETTER_RETRY_MAX_ATTEMPTS:3}
+  consumer:
+    enabled: ${DEAD_LETTER_CONSUMER_ENABLED:true}
+    concurrency: ${DEAD_LETTER_CONSUMER_CONCURRENCY:1}
+
+# Notification Formatter Configuration
+formatter:
+  velocity:
+    resource-loader-path: ${FORMATTER_VELOCITY_RESOURCE_LOADER_PATH:classpath:/templates/}
+    cache-enabled: ${FORMATTER_VELOCITY_CACHE_ENABLED:true}
+    encoding: ${FORMATTER_VELOCITY_ENCODING:UTF-8}
+
+# Notification Metrics Configuration
+metrics:
+  notification:
+    enabled: ${METRICS_NOTIFICATION_ENABLED:true}
+    channel-tags: ${METRICS_NOTIFICATION_CHANNEL_TAGS:true}
+    status-tags: ${METRICS_NOTIFICATION_STATUS_TAGS:true}
