@@ -1,0 +1,356 @@
+{
+  "responses": [
+    {
+      "id": "admin-all-access",
+      "description": "Administrator with full access to all position data",
+      "request": {
+        "userId": 1,
+        "userRole": "ADMIN",
+        "resourceType": "position",
+        "action": "VIEW_ANY"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "ADMIN_ROLE",
+        "scope": "GLOBAL",
+        "deviceIds": [],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "admin-specific-device",
+      "description": "Administrator accessing specific device position",
+      "request": {
+        "userId": 1,
+        "userRole": "ADMIN",
+        "resourceType": "position",
+        "resourceId": 123,
+        "deviceId": 456,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "ADMIN_ROLE",
+        "scope": "RESOURCE",
+        "deviceIds": [456],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "manager-group-access",
+      "description": "Manager with access to devices in their groups",
+      "request": {
+        "userId": 2,
+        "userRole": "MANAGER",
+        "resourceType": "position",
+        "action": "VIEW_GROUP",
+        "groupId": 10
+      },
+      "response": {
+        "allowed": true,
+        "reason": "GROUP_PERMISSION",
+        "scope": "GROUP",
+        "deviceIds": [],
+        "groupIds": [10, 11, 12]
+      }
+    },
+    {
+      "id": "manager-device-list",
+      "description": "Manager with access to specific devices",
+      "request": {
+        "userId": 2,
+        "userRole": "MANAGER",
+        "resourceType": "position",
+        "action": "VIEW_MULTIPLE"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "DEVICE_PERMISSION",
+        "scope": "DEVICES",
+        "deviceIds": [101, 102, 103, 104, 105],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "user-own-devices",
+      "description": "Regular user with access to their own devices",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "action": "VIEW_OWN"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "DEVICE_PERMISSION",
+        "scope": "DEVICES",
+        "deviceIds": [201, 202, 203],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "user-specific-device",
+      "description": "Regular user accessing specific device position",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "resourceId": 789,
+        "deviceId": 201,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "DEVICE_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [201],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "user-unauthorized-device",
+      "description": "Regular user attempting to access unauthorized device",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "resourceId": 999,
+        "deviceId": 301,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": false,
+        "reason": "NO_DEVICE_PERMISSION",
+        "scope": "NONE",
+        "deviceIds": [],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "user-shared-device",
+      "description": "Regular user with access to a shared device",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "resourceId": 555,
+        "deviceId": 301,
+        "action": "VIEW",
+        "shared": true
+      },
+      "response": {
+        "allowed": true,
+        "reason": "SHARED_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [301],
+        "groupIds": [],
+        "limitations": {
+          "historicalAccess": false,
+          "attributeAccess": ["position", "speed", "course"],
+          "timeRestriction": "CURRENT_ONLY"
+        }
+      }
+    },
+    {
+      "id": "user-historical-positions",
+      "description": "Regular user requesting historical positions",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "deviceId": 201,
+        "action": "VIEW_HISTORY",
+        "from": "2023-01-01T00:00:00Z",
+        "to": "2023-01-02T00:00:00Z"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "DEVICE_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [201],
+        "groupIds": [],
+        "limitations": {
+          "maxResults": 1000,
+          "maxTimeRange": "P7D"
+        }
+      }
+    },
+    {
+      "id": "user-excessive-history",
+      "description": "Regular user requesting excessive historical data",
+      "request": {
+        "userId": 3,
+        "userRole": "USER",
+        "resourceType": "position",
+        "deviceId": 201,
+        "action": "VIEW_HISTORY",
+        "from": "2022-01-01T00:00:00Z",
+        "to": "2023-01-01T00:00:00Z"
+      },
+      "response": {
+        "allowed": false,
+        "reason": "EXCESSIVE_TIME_RANGE",
+        "scope": "NONE",
+        "deviceIds": [],
+        "groupIds": [],
+        "limitations": {
+          "maxTimeRange": "P7D",
+          "message": "Time range exceeds maximum allowed period of 7 days"
+        }
+      }
+    },
+    {
+      "id": "service-account-access",
+      "description": "Service account with specific position access",
+      "request": {
+        "userId": "position-service",
+        "userRole": "SERVICE",
+        "resourceType": "position",
+        "action": "PROCESS"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "SERVICE_PERMISSION",
+        "scope": "GLOBAL",
+        "deviceIds": [],
+        "groupIds": []
+      }
+    },
+    {
+      "id": "expired-session",
+      "description": "User with expired session",
+      "request": {
+        "userId": 4,
+        "userRole": "USER",
+        "resourceType": "position",
+        "action": "VIEW_OWN",
+        "sessionId": "expired-session-12345"
+      },
+      "response": {
+        "allowed": false,
+        "reason": "SESSION_EXPIRED",
+        "scope": "NONE",
+        "deviceIds": [],
+        "groupIds": [],
+        "error": {
+          "code": "AUTH_SESSION_EXPIRED",
+          "message": "Your session has expired. Please log in again."
+        }
+      }
+    },
+    {
+      "id": "rate-limited-user",
+      "description": "User who has exceeded position API rate limits",
+      "request": {
+        "userId": 5,
+        "userRole": "USER",
+        "resourceType": "position",
+        "action": "VIEW_MULTIPLE",
+        "deviceIds": [501, 502, 503, 504, 505]
+      },
+      "response": {
+        "allowed": false,
+        "reason": "RATE_LIMITED",
+        "scope": "NONE",
+        "deviceIds": [],
+        "groupIds": [],
+        "error": {
+          "code": "RATE_LIMIT_EXCEEDED",
+          "message": "Position API rate limit exceeded. Please try again later.",
+          "retryAfter": 60
+        }
+      }
+    },
+    {
+      "id": "partial-group-access",
+      "description": "User with partial access to a device group",
+      "request": {
+        "userId": 6,
+        "userRole": "USER",
+        "resourceType": "position",
+        "action": "VIEW_GROUP",
+        "groupId": 20
+      },
+      "response": {
+        "allowed": true,
+        "reason": "PARTIAL_GROUP_PERMISSION",
+        "scope": "PARTIAL_GROUP",
+        "deviceIds": [601, 603, 605],
+        "groupIds": [20],
+        "limitations": {
+          "excludedDeviceIds": [602, 604, 606]
+        }
+      }
+    },
+    {
+      "id": "geofence-restricted-access",
+      "description": "User with geofence-restricted position access",
+      "request": {
+        "userId": 7,
+        "userRole": "USER",
+        "resourceType": "position",
+        "deviceId": 701,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "GEOFENCE_RESTRICTED_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [701],
+        "groupIds": [],
+        "limitations": {
+          "geofenceIds": [50, 51, 52],
+          "visibilityOutsideGeofences": false,
+          "message": "Position data only available within authorized geofences"
+        }
+      }
+    },
+    {
+      "id": "time-restricted-access",
+      "description": "User with time-restricted position access",
+      "request": {
+        "userId": 8,
+        "userRole": "USER",
+        "resourceType": "position",
+        "deviceId": 801,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "TIME_RESTRICTED_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [801],
+        "groupIds": [],
+        "limitations": {
+          "allowedTimeRanges": ["09:00-17:00"],
+          "timezone": "UTC",
+          "allowedDays": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+          "message": "Position data only available during business hours"
+        }
+      }
+    },
+    {
+      "id": "attribute-restricted-access",
+      "description": "User with attribute-restricted position access",
+      "request": {
+        "userId": 9,
+        "userRole": "USER",
+        "resourceType": "position",
+        "deviceId": 901,
+        "action": "VIEW"
+      },
+      "response": {
+        "allowed": true,
+        "reason": "ATTRIBUTE_RESTRICTED_PERMISSION",
+        "scope": "RESOURCE",
+        "deviceIds": [901],
+        "groupIds": [],
+        "limitations": {
+          "allowedAttributes": ["deviceId", "protocol", "serverTime", "deviceTime", "fixTime", "valid", "latitude", "longitude", "altitude", "speed", "course", "address", "accuracy", "network"],
+          "deniedAttributes": ["attributes", "raw", "fuel", "batteryLevel", "ignition", "motion", "status"],
+          "message": "Access to certain position attributes is restricted"
+        }
+      }
+    }
+  ]
+}
