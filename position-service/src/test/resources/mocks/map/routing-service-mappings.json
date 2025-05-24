@@ -1,0 +1,1002 @@
+{
+  "mappings": [
+    {
+      "name": "Google Directions API - Basic Route",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "routes": [
+            {
+              "summary": "Test Route",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "5.2 km",
+                    "value": 5200
+                  },
+                  "duration": {
+                    "text": "12 mins",
+                    "value": 720
+                  },
+                  "steps": [
+                    {
+                      "distance": {
+                        "text": "0.2 km",
+                        "value": 200
+                      },
+                      "duration": {
+                        "text": "1 min",
+                        "value": 60
+                      },
+                      "html_instructions": "Head north on Main St",
+                      "travel_mode": "DRIVING"
+                    },
+                    {
+                      "distance": {
+                        "text": "5.0 km",
+                        "value": 5000
+                      },
+                      "duration": {
+                        "text": "11 mins",
+                        "value": 660
+                      },
+                      "html_instructions": "Continue onto Highway 1",
+                      "travel_mode": "DRIVING"
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "abc123def456ghi789"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Directions API - Route with Traffic",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "departure_time": {
+            "matches": ".*"
+          },
+          "traffic_model": {
+            "equalTo": "best_guess"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "routes": [
+            {
+              "summary": "Test Route with Traffic",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "5.2 km",
+                    "value": 5200
+                  },
+                  "duration": {
+                    "text": "12 mins",
+                    "value": 720
+                  },
+                  "duration_in_traffic": {
+                    "text": "18 mins",
+                    "value": 1080
+                  },
+                  "steps": [
+                    {
+                      "distance": {
+                        "text": "0.2 km",
+                        "value": 200
+                      },
+                      "duration": {
+                        "text": "1 min",
+                        "value": 60
+                      },
+                      "html_instructions": "Head north on Main St",
+                      "travel_mode": "DRIVING"
+                    },
+                    {
+                      "distance": {
+                        "text": "5.0 km",
+                        "value": 5000
+                      },
+                      "duration": {
+                        "text": "11 mins",
+                        "value": 660
+                      },
+                      "html_instructions": "Continue onto Highway 1",
+                      "travel_mode": "DRIVING"
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "abc123def456ghi789"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Directions API - Alternative Routes",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "alternatives": {
+            "equalTo": "true"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "routes": [
+            {
+              "summary": "Primary Route",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "5.2 km",
+                    "value": 5200
+                  },
+                  "duration": {
+                    "text": "12 mins",
+                    "value": 720
+                  },
+                  "steps": [
+                    {
+                      "distance": {
+                        "text": "0.2 km",
+                        "value": 200
+                      },
+                      "duration": {
+                        "text": "1 min",
+                        "value": 60
+                      },
+                      "html_instructions": "Head north on Main St",
+                      "travel_mode": "DRIVING"
+                    },
+                    {
+                      "distance": {
+                        "text": "5.0 km",
+                        "value": 5000
+                      },
+                      "duration": {
+                        "text": "11 mins",
+                        "value": 660
+                      },
+                      "html_instructions": "Continue onto Highway 1",
+                      "travel_mode": "DRIVING"
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "abc123def456ghi789"
+              }
+            },
+            {
+              "summary": "Alternative Route 1",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "6.5 km",
+                    "value": 6500
+                  },
+                  "duration": {
+                    "text": "15 mins",
+                    "value": 900
+                  },
+                  "steps": [
+                    {
+                      "distance": {
+                        "text": "0.5 km",
+                        "value": 500
+                      },
+                      "duration": {
+                        "text": "2 mins",
+                        "value": 120
+                      },
+                      "html_instructions": "Head east on Side St",
+                      "travel_mode": "DRIVING"
+                    },
+                    {
+                      "distance": {
+                        "text": "6.0 km",
+                        "value": 6000
+                      },
+                      "duration": {
+                        "text": "13 mins",
+                        "value": 780
+                      },
+                      "html_instructions": "Continue onto Highway 2",
+                      "travel_mode": "DRIVING"
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "jkl123mno456pqr789"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Directions API - Heavy Traffic",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "departure_time": {
+            "matches": ".*"
+          },
+          "traffic_model": {
+            "equalTo": "pessimistic"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "OK",
+          "routes": [
+            {
+              "summary": "Test Route with Heavy Traffic",
+              "legs": [
+                {
+                  "distance": {
+                    "text": "5.2 km",
+                    "value": 5200
+                  },
+                  "duration": {
+                    "text": "12 mins",
+                    "value": 720
+                  },
+                  "duration_in_traffic": {
+                    "text": "25 mins",
+                    "value": 1500
+                  },
+                  "steps": [
+                    {
+                      "distance": {
+                        "text": "0.2 km",
+                        "value": 200
+                      },
+                      "duration": {
+                        "text": "1 min",
+                        "value": 60
+                      },
+                      "html_instructions": "Head north on Main St",
+                      "travel_mode": "DRIVING"
+                    },
+                    {
+                      "distance": {
+                        "text": "5.0 km",
+                        "value": 5000
+                      },
+                      "duration": {
+                        "text": "11 mins",
+                        "value": 660
+                      },
+                      "html_instructions": "Continue onto Highway 1",
+                      "travel_mode": "DRIVING"
+                    }
+                  ]
+                }
+              ],
+              "overview_polyline": {
+                "points": "abc123def456ghi789"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "OSRM Route API - Basic Route",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/route/v1/driving/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "Ok",
+          "routes": [
+            {
+              "distance": 5200.0,
+              "duration": 720.0,
+              "geometry": "abc123def456ghi789",
+              "legs": [
+                {
+                  "steps": [
+                    {
+                      "distance": 200.0,
+                      "duration": 60.0,
+                      "name": "Main St",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.388860, 52.517037],
+                        "bearing_before": 0,
+                        "bearing_after": 90,
+                        "type": "depart",
+                        "modifier": "right"
+                      }
+                    },
+                    {
+                      "distance": 5000.0,
+                      "duration": 660.0,
+                      "name": "Highway 1",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.389860, 52.517037],
+                        "bearing_before": 90,
+                        "bearing_after": 90,
+                        "type": "continue",
+                        "modifier": "straight"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "waypoints": [
+            {
+              "hint": "hint1",
+              "distance": 0.0,
+              "name": "Start",
+              "location": [13.388860, 52.517037]
+            },
+            {
+              "hint": "hint2",
+              "distance": 0.0,
+              "name": "End",
+              "location": [13.428555, 52.523219]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "OSRM Route API - Alternative Routes",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/route/v1/driving/.*",
+        "queryParameters": {
+          "alternatives": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "Ok",
+          "routes": [
+            {
+              "distance": 5200.0,
+              "duration": 720.0,
+              "geometry": "abc123def456ghi789",
+              "legs": [
+                {
+                  "steps": [
+                    {
+                      "distance": 200.0,
+                      "duration": 60.0,
+                      "name": "Main St",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.388860, 52.517037],
+                        "bearing_before": 0,
+                        "bearing_after": 90,
+                        "type": "depart",
+                        "modifier": "right"
+                      }
+                    },
+                    {
+                      "distance": 5000.0,
+                      "duration": 660.0,
+                      "name": "Highway 1",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.389860, 52.517037],
+                        "bearing_before": 90,
+                        "bearing_after": 90,
+                        "type": "continue",
+                        "modifier": "straight"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "distance": 6500.0,
+              "duration": 900.0,
+              "geometry": "jkl123mno456pqr789",
+              "legs": [
+                {
+                  "steps": [
+                    {
+                      "distance": 500.0,
+                      "duration": 120.0,
+                      "name": "Side St",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.388860, 52.517037],
+                        "bearing_before": 0,
+                        "bearing_after": 180,
+                        "type": "depart",
+                        "modifier": "left"
+                      }
+                    },
+                    {
+                      "distance": 6000.0,
+                      "duration": 780.0,
+                      "name": "Highway 2",
+                      "mode": "driving",
+                      "maneuver": {
+                        "location": [13.388860, 52.516037],
+                        "bearing_before": 180,
+                        "bearing_after": 90,
+                        "type": "turn",
+                        "modifier": "right"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "waypoints": [
+            {
+              "hint": "hint1",
+              "distance": 0.0,
+              "name": "Start",
+              "location": [13.388860, 52.517037]
+            },
+            {
+              "hint": "hint2",
+              "distance": 0.0,
+              "name": "End",
+              "location": [13.428555, 52.523219]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "OSRM Table API - Distance Matrix",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/table/v1/driving/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "Ok",
+          "durations": [
+            [0, 720, 1200],
+            [720, 0, 600],
+            [1200, 600, 0]
+          ],
+          "distances": [
+            [0, 5200, 10000],
+            [5200, 0, 4800],
+            [10000, 4800, 0]
+          ],
+          "sources": [
+            {
+              "hint": "hint1",
+              "distance": 0.0,
+              "name": "Point 1",
+              "location": [13.388860, 52.517037]
+            },
+            {
+              "hint": "hint2",
+              "distance": 0.0,
+              "name": "Point 2",
+              "location": [13.428555, 52.523219]
+            },
+            {
+              "hint": "hint3",
+              "distance": 0.0,
+              "name": "Point 3",
+              "location": [13.448555, 52.533219]
+            }
+          ],
+          "destinations": [
+            {
+              "hint": "hint1",
+              "distance": 0.0,
+              "name": "Point 1",
+              "location": [13.388860, 52.517037]
+            },
+            {
+              "hint": "hint2",
+              "distance": 0.0,
+              "name": "Point 2",
+              "location": [13.428555, 52.523219]
+            },
+            {
+              "hint": "hint3",
+              "distance": 0.0,
+              "name": "Point 3",
+              "location": [13.448555, 52.533219]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "HERE Routing API - Basic Route",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v8/routes",
+        "queryParameters": {
+          "transportMode": {
+            "equalTo": "car"
+          },
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "apikey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "id": "route1",
+              "sections": [
+                {
+                  "id": "section1",
+                  "type": "vehicle",
+                  "departure": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5308,
+                        "lng": 13.3847
+                      }
+                    },
+                    "time": "2023-01-01T12:00:00Z"
+                  },
+                  "arrival": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5323,
+                        "lng": 13.3789
+                      }
+                    },
+                    "time": "2023-01-01T12:12:00Z"
+                  },
+                  "summary": {
+                    "duration": 720,
+                    "length": 5200
+                  },
+                  "transport": {
+                    "mode": "car"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "HERE Routing API - Route with Traffic",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v8/routes",
+        "queryParameters": {
+          "transportMode": {
+            "equalTo": "car"
+          },
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "departureTime": {
+            "matches": ".*"
+          },
+          "traffic": {
+            "equalTo": "enabled"
+          },
+          "apikey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "id": "route1",
+              "sections": [
+                {
+                  "id": "section1",
+                  "type": "vehicle",
+                  "departure": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5308,
+                        "lng": 13.3847
+                      }
+                    },
+                    "time": "2023-01-01T12:00:00Z"
+                  },
+                  "arrival": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5323,
+                        "lng": 13.3789
+                      }
+                    },
+                    "time": "2023-01-01T12:18:00Z"
+                  },
+                  "summary": {
+                    "duration": 1080,
+                    "length": 5200,
+                    "baseDuration": 720
+                  },
+                  "transport": {
+                    "mode": "car"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "HERE Routing API - Alternative Routes",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v8/routes",
+        "queryParameters": {
+          "transportMode": {
+            "equalTo": "car"
+          },
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "alternatives": {
+            "equalTo": "2"
+          },
+          "apikey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "id": "route1",
+              "sections": [
+                {
+                  "id": "section1",
+                  "type": "vehicle",
+                  "departure": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5308,
+                        "lng": 13.3847
+                      }
+                    },
+                    "time": "2023-01-01T12:00:00Z"
+                  },
+                  "arrival": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5323,
+                        "lng": 13.3789
+                      }
+                    },
+                    "time": "2023-01-01T12:12:00Z"
+                  },
+                  "summary": {
+                    "duration": 720,
+                    "length": 5200
+                  },
+                  "transport": {
+                    "mode": "car"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "route2",
+              "sections": [
+                {
+                  "id": "section1",
+                  "type": "vehicle",
+                  "departure": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5308,
+                        "lng": 13.3847
+                      }
+                    },
+                    "time": "2023-01-01T12:00:00Z"
+                  },
+                  "arrival": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5323,
+                        "lng": 13.3789
+                      }
+                    },
+                    "time": "2023-01-01T12:15:00Z"
+                  },
+                  "summary": {
+                    "duration": 900,
+                    "length": 6500
+                  },
+                  "transport": {
+                    "mode": "car"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "HERE Routing API - Heavy Traffic",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v8/routes",
+        "queryParameters": {
+          "transportMode": {
+            "equalTo": "car"
+          },
+          "origin": {
+            "matches": ".*"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "departureTime": {
+            "matches": ".*"
+          },
+          "traffic": {
+            "equalTo": "enabled"
+          },
+          "trafficMode": {
+            "equalTo": "pessimistic"
+          },
+          "apikey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "routes": [
+            {
+              "id": "route1",
+              "sections": [
+                {
+                  "id": "section1",
+                  "type": "vehicle",
+                  "departure": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5308,
+                        "lng": 13.3847
+                      }
+                    },
+                    "time": "2023-01-01T12:00:00Z"
+                  },
+                  "arrival": {
+                    "place": {
+                      "location": {
+                        "lat": 52.5323,
+                        "lng": 13.3789
+                      }
+                    },
+                    "time": "2023-01-01T12:25:00Z"
+                  },
+                  "summary": {
+                    "duration": 1500,
+                    "length": 5200,
+                    "baseDuration": 720
+                  },
+                  "transport": {
+                    "mode": "car"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Google Directions API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/maps/api/directions/json",
+        "queryParameters": {
+          "origin": {
+            "equalTo": "invalid"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "key": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "ZERO_RESULTS",
+          "error_message": "No route found between origin and destination",
+          "routes": []
+        }
+      }
+    },
+    {
+      "name": "OSRM Route API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/route/v1/driving/invalid"
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "InvalidQuery",
+          "message": "Invalid coordinate format"
+        }
+      }
+    },
+    {
+      "name": "HERE Routing API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v8/routes",
+        "queryParameters": {
+          "transportMode": {
+            "equalTo": "car"
+          },
+          "origin": {
+            "equalTo": "invalid"
+          },
+          "destination": {
+            "matches": ".*"
+          },
+          "apikey": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "title": "Invalid input",
+          "status": 400,
+          "cause": "Invalid coordinate format",
+          "action": "Provide valid coordinates"
+        }
+      }
+    }
+  ]
+}
