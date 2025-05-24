@@ -1,0 +1,884 @@
+{
+  "provider": {
+    "name": "position-service"
+  },
+  "consumer": {
+    "name": "api-gateway"
+  },
+  "interactions": [
+    {
+      "description": "Get positions by device ID",
+      "request": {
+        "method": "GET",
+        "path": "/positions",
+        "query": {
+          "deviceId": "123"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": 1,
+            "deviceId": 123,
+            "protocol": "tk103",
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "deviceTime": "2023-01-01T12:00:00.000Z",
+            "fixTime": "2023-01-01T12:00:00.000Z",
+            "valid": true,
+            "latitude": 37.4219999,
+            "longitude": -122.0840575,
+            "altitude": 10.0,
+            "speed": 50.0,
+            "course": 90.0,
+            "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].protocol": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].serverTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].deviceTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].fixTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].valid": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].latitude": {
+              "matchers": [
+                {
+                  "match": "decimal",
+                  "scale": 7
+                }
+              ]
+            },
+            "$[*].longitude": {
+              "matchers": [
+                {
+                  "match": "decimal",
+                  "scale": 7
+                }
+              ]
+            },
+            "$[*].altitude": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].speed": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].course": {
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].address": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].attributes": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get positions by position IDs",
+      "request": {
+        "method": "GET",
+        "path": "/positions",
+        "query": {
+          "id": ["1", "2"]
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "id": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": 1,
+            "deviceId": 123,
+            "protocol": "tk103",
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "deviceTime": "2023-01-01T12:00:00.000Z",
+            "fixTime": "2023-01-01T12:00:00.000Z",
+            "valid": true,
+            "latitude": 37.4219999,
+            "longitude": -122.0840575,
+            "altitude": 10.0,
+            "speed": 50.0,
+            "course": 90.0,
+            "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          },
+          {
+            "id": 2,
+            "deviceId": 123,
+            "protocol": "tk103",
+            "serverTime": "2023-01-01T12:05:00.000Z",
+            "deviceTime": "2023-01-01T12:05:00.000Z",
+            "fixTime": "2023-01-01T12:05:00.000Z",
+            "valid": true,
+            "latitude": 37.4220001,
+            "longitude": -122.0840580,
+            "altitude": 11.0,
+            "speed": 55.0,
+            "course": 92.0,
+            "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+            "attributes": {
+              "batteryLevel": 84,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].protocol": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].serverTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].deviceTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].fixTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "$[*].valid": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].latitude": {
+              "matchers": [
+                {
+                  "match": "decimal",
+                  "scale": 7
+                }
+              ]
+            },
+            "$[*].longitude": {
+              "matchers": [
+                {
+                  "match": "decimal",
+                  "scale": 7
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get positions by device ID with time range",
+      "request": {
+        "method": "GET",
+        "path": "/positions",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "from": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "to": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": 1,
+            "deviceId": 123,
+            "protocol": "tk103",
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "deviceTime": "2023-01-01T12:00:00.000Z",
+            "fixTime": "2023-01-01T12:00:00.000Z",
+            "valid": true,
+            "latitude": 37.4219999,
+            "longitude": -122.0840575,
+            "altitude": 10.0,
+            "speed": 50.0,
+            "course": 90.0,
+            "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].fixTime": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get latest positions for all devices",
+      "request": {
+        "method": "GET",
+        "path": "/positions",
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "id": 1,
+            "deviceId": 123,
+            "protocol": "tk103",
+            "serverTime": "2023-01-01T12:00:00.000Z",
+            "deviceTime": "2023-01-01T12:00:00.000Z",
+            "fixTime": "2023-01-01T12:00:00.000Z",
+            "valid": true,
+            "latitude": 37.4219999,
+            "longitude": -122.0840575,
+            "altitude": 10.0,
+            "speed": 50.0,
+            "course": 90.0,
+            "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Delete position by ID",
+      "request": {
+        "method": "DELETE",
+        "path": "/positions/1",
+        "headers": {
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "path": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/positions/[0-9]+"
+              }
+            ]
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "description": "Delete positions by device ID and time range",
+      "request": {
+        "method": "DELETE",
+        "path": "/positions",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "from": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "to": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "description": "Get positions in KML format",
+      "request": {
+        "method": "GET",
+        "path": "/positions/kml",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "application/vnd.google-earth.kml+xml",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "from": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "to": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/vnd.google-earth.kml+xml",
+          "Content-Disposition": "attachment; filename=positions.kml"
+        },
+        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n  <Document>\n    <name>Positions</name>\n    <Placemark>\n      <name>Position 1</name>\n      <Point>\n        <coordinates>-122.0840575,37.4219999,10.0</coordinates>\n      </Point>\n    </Placemark>\n  </Document>\n</kml>",
+        "matchingRules": {
+          "body": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "<\\?xml.*\\?>.*<kml.*>.*<Document>.*<Placemark>.*<Point>.*<coordinates>.*</coordinates>.*</Point>.*</Placemark>.*</Document>.*</kml>",
+                "multiline": true
+              }
+            ]
+          },
+          "headers": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/vnd\\.google-earth\\.kml\\+xml"
+                }
+              ]
+            },
+            "Content-Disposition": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "attachment; filename=positions\\.kml"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get positions in CSV format",
+      "request": {
+        "method": "GET",
+        "path": "/positions/csv",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "text/csv",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "from": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "to": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/csv",
+          "Content-Disposition": "attachment; filename=positions.csv"
+        },
+        "body": "id,deviceId,protocol,serverTime,deviceTime,fixTime,valid,latitude,longitude,altitude,speed,course,address\n1,123,tk103,2023-01-01T12:00:00.000Z,2023-01-01T12:00:00.000Z,2023-01-01T12:00:00.000Z,true,37.4219999,-122.0840575,10.0,50.0,90.0,\"1600 Amphitheatre Parkway, Mountain View, CA\"",
+        "matchingRules": {
+          "body": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "id,deviceId,protocol,.*\\n.*,.*,.*,.*",
+                "multiline": true
+              }
+            ]
+          },
+          "headers": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "text/csv"
+                }
+              ]
+            },
+            "Content-Disposition": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "attachment; filename=positions\\.csv"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Get positions in GPX format",
+      "request": {
+        "method": "GET",
+        "path": "/positions/gpx",
+        "query": {
+          "deviceId": "123",
+          "from": "2023-01-01T00:00:00.000Z",
+          "to": "2023-01-02T00:00:00.000Z"
+        },
+        "headers": {
+          "Accept": "application/gpx+xml",
+          "Authorization": "Bearer ${anyToken}"
+        },
+        "matchingRules": {
+          "query": {
+            "deviceId": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "from": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            },
+            "to": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"
+                }
+              ]
+            }
+          },
+          "headers": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/gpx+xml",
+          "Content-Disposition": "attachment; filename=positions.gpx"
+        },
+        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<gpx version=\"1.1\" creator=\"Traccar\" xmlns=\"http://www.topografix.com/GPX/1/1\">\n  <trk>\n    <name>Device 123</name>\n    <trkseg>\n      <trkpt lat=\"37.4219999\" lon=\"-122.0840575\">\n        <ele>10.0</ele>\n        <time>2023-01-01T12:00:00.000Z</time>\n        <speed>50.0</speed>\n        <course>90.0</course>\n      </trkpt>\n    </trkseg>\n  </trk>\n</gpx>",
+        "matchingRules": {
+          "body": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "<\\?xml.*\\?>.*<gpx.*>.*<trk>.*<trkpt.*>.*</trkpt>.*</trkseg>.*</trk>.*</gpx>",
+                "multiline": true
+              }
+            ]
+          },
+          "headers": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/gpx\\+xml"
+                }
+              ]
+            },
+            "Content-Disposition": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "attachment; filename=positions\\.gpx"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}
