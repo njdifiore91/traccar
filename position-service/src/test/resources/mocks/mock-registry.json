@@ -1,0 +1,490 @@
+{
+  "version": "1.0.0",
+  "description": "Registry of all available mock services for the Position Service",
+  "lastUpdated": "2025-05-24",
+  "mockServices": {
+    "authentication": {
+      "version": "1.0.0",
+      "description": "Authentication and authorization mock services",
+      "capabilities": [
+        "JWT token generation and validation",
+        "mTLS certificate simulation",
+        "Service account authentication",
+        "Authorization decision simulation"
+      ],
+      "limitations": [
+        "Does not support OAuth2 token exchange flows",
+        "Certificate validation is simulated, not cryptographically secure"
+      ],
+      "dependencies": [],
+      "mocks": {
+        "jwtTokens": {
+          "path": "authentication/jwt-tokens.json",
+          "description": "Mock JWT tokens for service-to-service authentication",
+          "realServiceMapping": "api-gateway/auth-service"
+        },
+        "mtlsCertificates": {
+          "path": "authentication/mtls-certificates.json",
+          "description": "Mock mTLS certificates for secure service communication",
+          "realServiceMapping": "api-gateway/certificate-service"
+        },
+        "serviceAccounts": {
+          "path": "authentication/service-accounts.json",
+          "description": "Mock service account credentials for inter-service authentication",
+          "realServiceMapping": "api-gateway/account-service"
+        },
+        "positionAuthResponses": {
+          "path": "authentication/position-auth-responses.json",
+          "description": "Mock authentication responses for position data access",
+          "realServiceMapping": "api-gateway/authorization-service"
+        },
+        "tokenValidationResponses": {
+          "path": "authentication/token-validation-responses.json",
+          "description": "Mock responses for token validation requests",
+          "realServiceMapping": "api-gateway/token-service"
+        }
+      }
+    },
+    "broker": {
+      "version": "1.0.0",
+      "description": "Message broker mock services for Kafka and RabbitMQ",
+      "capabilities": [
+        "Message production and consumption simulation",
+        "Failure scenario simulation",
+        "Topic/queue configuration",
+        "Message validation"
+      ],
+      "limitations": [
+        "Limited transaction support",
+        "Simplified partition assignment for Kafka",
+        "No support for complex RabbitMQ exchange types"
+      ],
+      "dependencies": [],
+      "mocks": {
+        "kafkaMock": {
+          "path": "broker/kafka-mock.json",
+          "description": "Main configuration for Kafka mock broker",
+          "realServiceMapping": "kafka-broker"
+        },
+        "kafkaTopics": {
+          "path": "broker/kafka-topics.json",
+          "description": "Kafka topic configurations for Position Service",
+          "realServiceMapping": "kafka-broker/topics"
+        },
+        "kafkaConsumerTemplates": {
+          "path": "broker/kafka-consumer-templates.json",
+          "description": "Templates for position messages consumed from Kafka",
+          "realServiceMapping": "protocol-service/position-producer"
+        },
+        "kafkaProducerTemplates": {
+          "path": "broker/kafka-producer-templates.json",
+          "description": "Templates for event messages published to Kafka",
+          "realServiceMapping": "position-service/event-producer"
+        },
+        "kafkaFailureScenarios": {
+          "path": "broker/kafka-failure-scenarios.json",
+          "description": "Failure scenarios for Kafka resilience testing",
+          "realServiceMapping": "kafka-broker"
+        },
+        "rabbitmqMock": {
+          "path": "broker/rabbitmq-mock.json",
+          "description": "Main configuration for RabbitMQ mock broker",
+          "realServiceMapping": "rabbitmq-broker"
+        },
+        "rabbitmqQueues": {
+          "path": "broker/rabbitmq-queues.json",
+          "description": "RabbitMQ queue configurations for Position Service",
+          "realServiceMapping": "rabbitmq-broker/queues"
+        },
+        "rabbitmqConsumerTemplates": {
+          "path": "broker/rabbitmq-consumer-templates.json",
+          "description": "Templates for position messages consumed from RabbitMQ",
+          "realServiceMapping": "protocol-service/position-producer"
+        },
+        "rabbitmqProducerTemplates": {
+          "path": "broker/rabbitmq-producer-templates.json",
+          "description": "Templates for event messages published to RabbitMQ",
+          "realServiceMapping": "position-service/event-producer"
+        },
+        "rabbitmqFailureScenarios": {
+          "path": "broker/rabbitmq-failure-scenarios.json",
+          "description": "Failure scenarios for RabbitMQ resilience testing",
+          "realServiceMapping": "rabbitmq-broker"
+        }
+      }
+    },
+    "discovery": {
+      "version": "1.0.0",
+      "description": "Service discovery mock services for Consul and Kubernetes",
+      "capabilities": [
+        "Service registration and discovery",
+        "Health check simulation",
+        "Failure scenario simulation",
+        "Service resolution"
+      ],
+      "limitations": [
+        "Limited support for complex ACL rules",
+        "Simplified DNS resolution for Kubernetes",
+        "No support for Consul Connect service mesh features"
+      ],
+      "dependencies": [],
+      "mocks": {
+        "consulMock": {
+          "path": "discovery/consul-mock.json",
+          "description": "Mock configuration for Consul service discovery",
+          "realServiceMapping": "consul-server"
+        },
+        "kubernetesMock": {
+          "path": "discovery/kubernetes-mock.json",
+          "description": "Mock Kubernetes API responses for service discovery",
+          "realServiceMapping": "kubernetes-api-server"
+        },
+        "positionServiceRegistration": {
+          "path": "discovery/position-service-registration.json",
+          "description": "Position Service registration template for service discovery",
+          "realServiceMapping": "position-service/registration"
+        },
+        "serviceFailureScenarios": {
+          "path": "discovery/service-failure-scenarios.json",
+          "description": "Service discovery failure scenarios for resilience testing",
+          "realServiceMapping": "service-discovery"
+        },
+        "healthCheckResponses": {
+          "path": "discovery/health-check-responses.json",
+          "description": "Mock health check responses for service discovery",
+          "realServiceMapping": "health-check-service"
+        },
+        "serviceResolutionScenarios": {
+          "path": "discovery/service-resolution-scenarios.json",
+          "description": "Test scenarios for service resolution testing",
+          "realServiceMapping": "service-discovery"
+        }
+      }
+    },
+    "geocoding": {
+      "version": "1.0.0",
+      "description": "Geocoding service mock responses for various providers",
+      "capabilities": [
+        "Forward and reverse geocoding",
+        "Multiple provider support",
+        "Error response simulation",
+        "Internationalization support"
+      ],
+      "limitations": [
+        "Limited address format variations",
+        "Predefined set of test coordinates",
+        "No support for batch geocoding operations"
+      ],
+      "dependencies": [],
+      "mocks": {
+        "googleSuccess": {
+          "path": "geocoding/google-success.json",
+          "description": "Successful response from Google Maps Geocoding API",
+          "realServiceMapping": "google-maps-api/geocoding"
+        },
+        "googleError": {
+          "path": "geocoding/google-error.json",
+          "description": "Error response from Google Maps Geocoding API",
+          "realServiceMapping": "google-maps-api/geocoding"
+        },
+        "nominatimSuccess": {
+          "path": "geocoding/nominatim-success.json",
+          "description": "Successful response from Nominatim Geocoding API",
+          "realServiceMapping": "openstreetmap-api/nominatim"
+        },
+        "nominatimError": {
+          "path": "geocoding/nominatim-error.json",
+          "description": "Error response from Nominatim Geocoding API",
+          "realServiceMapping": "openstreetmap-api/nominatim"
+        },
+        "hereSuccess": {
+          "path": "geocoding/here-success.json",
+          "description": "Successful response from HERE Maps Geocoding API",
+          "realServiceMapping": "here-api/geocoding"
+        },
+        "hereError": {
+          "path": "geocoding/here-error.json",
+          "description": "Error response from HERE Maps Geocoding API",
+          "realServiceMapping": "here-api/geocoding"
+        },
+        "mapboxSuccess": {
+          "path": "geocoding/mapbox-success.json",
+          "description": "Successful response from Mapbox Geocoding API",
+          "realServiceMapping": "mapbox-api/geocoding"
+        },
+        "mapboxError": {
+          "path": "geocoding/mapbox-error.json",
+          "description": "Error response from Mapbox Geocoding API",
+          "realServiceMapping": "mapbox-api/geocoding"
+        },
+        "bingSuccess": {
+          "path": "geocoding/bing-success.json",
+          "description": "Successful response from Bing Maps Geocoding API",
+          "realServiceMapping": "bing-maps-api/geocoding"
+        },
+        "bingError": {
+          "path": "geocoding/bing-error.json",
+          "description": "Error response from Bing Maps Geocoding API",
+          "realServiceMapping": "bing-maps-api/geocoding"
+        },
+        "geocodexyzSuccess": {
+          "path": "geocoding/geocodexyz-success.json",
+          "description": "Successful response from Geocode.xyz API",
+          "realServiceMapping": "geocodexyz-api"
+        },
+        "geocodexyzError": {
+          "path": "geocoding/geocodexyz-error.json",
+          "description": "Error response from Geocode.xyz API",
+          "realServiceMapping": "geocodexyz-api"
+        },
+        "geoapifySuccess": {
+          "path": "geocoding/geoapify-success.json",
+          "description": "Successful response from Geoapify Geocoding API",
+          "realServiceMapping": "geoapify-api/geocoding"
+        },
+        "geoapifyError": {
+          "path": "geocoding/geoapify-error.json",
+          "description": "Error response from Geoapify Geocoding API",
+          "realServiceMapping": "geoapify-api/geocoding"
+        }
+      }
+    },
+    "map": {
+      "version": "1.0.0",
+      "description": "Map service mock responses for visualization and routing",
+      "capabilities": [
+        "Map tile service simulation",
+        "Routing service responses",
+        "Geocoding service integration",
+        "Visualization fixtures"
+      ],
+      "limitations": [
+        "Limited map styles and zoom levels",
+        "Predefined routes for specific test coordinates",
+        "No support for real-time traffic simulation"
+      ],
+      "dependencies": [
+        "geocoding"
+      ],
+      "mocks": {
+        "mapVisualizationFixtures": {
+          "path": "map/map-visualization-fixtures.json",
+          "description": "Test fixtures for map visualization scenarios",
+          "realServiceMapping": "map-visualization-service"
+        },
+        "tileServiceMappings": {
+          "path": "map/tile-service-mappings.json",
+          "description": "WireMock mappings for map tile service APIs",
+          "realServiceMapping": "map-tile-service"
+        },
+        "routingServiceMappings": {
+          "path": "map/routing-service-mappings.json",
+          "description": "WireMock mappings for routing service APIs",
+          "realServiceMapping": "routing-service"
+        },
+        "geocodingServiceMappings": {
+          "path": "map/geocoding-service-mappings.json",
+          "description": "WireMock mappings for geocoding services",
+          "realServiceMapping": "geocoding-service"
+        },
+        "mapServiceMappings": {
+          "path": "map/map-service-mappings.json",
+          "description": "WireMock mappings for map service providers",
+          "realServiceMapping": "map-service"
+        }
+      }
+    },
+    "notification": {
+      "version": "1.0.0",
+      "description": "Notification service mock responses for position-triggered alerts",
+      "capabilities": [
+        "Notification delivery simulation",
+        "Multiple channel support (email, SMS, push, web)",
+        "Template rendering",
+        "Delivery status reporting"
+      ],
+      "limitations": [
+        "No actual message delivery to external systems",
+        "Limited template variation",
+        "Simplified notification routing"
+      ],
+      "dependencies": [],
+      "mocks": {
+        "notificationConfig": {
+          "path": "notification/notification-config.json",
+          "description": "Configuration for notification service mocking",
+          "realServiceMapping": "notification-service/config"
+        },
+        "positionEventTemplates": {
+          "path": "notification/position-event-templates.json",
+          "description": "Position-specific notification templates",
+          "realServiceMapping": "notification-service/templates"
+        },
+        "mockResponses": {
+          "path": "notification/mock-responses.json",
+          "description": "Simulated notification service responses",
+          "realServiceMapping": "notification-service/api"
+        },
+        "channelBehaviors": {
+          "path": "notification/channel-behaviors.json",
+          "description": "Behavior configurations for notification channels",
+          "realServiceMapping": "notification-service/channels"
+        },
+        "testScenarios": {
+          "path": "notification/test-scenarios.json",
+          "description": "Predefined test scenarios for position-triggered notifications",
+          "realServiceMapping": "notification-service/scenarios"
+        },
+        "brokerMessages": {
+          "path": "notification/broker-messages.json",
+          "description": "Sample message broker payloads for notification events",
+          "realServiceMapping": "notification-service/messages"
+        }
+      }
+    },
+    "speedlimit": {
+      "version": "1.0.0",
+      "description": "Speed limit provider mock responses for various road types",
+      "capabilities": [
+        "Speed limit lookup by coordinates",
+        "Multiple road type support",
+        "Variable speed limit simulation",
+        "Special zone handling"
+      ],
+      "limitations": [
+        "Limited geographic coverage",
+        "Predefined set of test coordinates",
+        "No support for historical speed limit changes"
+      ],
+      "dependencies": [
+        "map"
+      ],
+      "mocks": {
+        "genericSpeedlimitProvider": {
+          "path": "speedlimit/generic-speedlimit-provider.json",
+          "description": "Generic speed limit provider API simulation",
+          "realServiceMapping": "speedlimit-service/generic"
+        },
+        "overpassErrorResponse": {
+          "path": "speedlimit/overpass-error-response.json",
+          "description": "Error responses from the Overpass API",
+          "realServiceMapping": "overpass-api"
+        },
+        "overpassVariableSpeedlimit": {
+          "path": "speedlimit/overpass-variable-speedlimit.json",
+          "description": "Overpass API responses for variable speed limits",
+          "realServiceMapping": "overpass-api/variable"
+        },
+        "overpassSpecialZoneSpeedlimit": {
+          "path": "speedlimit/overpass-special-zone-speedlimit.json",
+          "description": "Overpass API responses for special zone speed limits",
+          "realServiceMapping": "overpass-api/special-zone"
+        },
+        "overpassRuralSpeedlimit": {
+          "path": "speedlimit/overpass-rural-speedlimit.json",
+          "description": "Overpass API responses for rural road speed limits",
+          "realServiceMapping": "overpass-api/rural"
+        },
+        "overpassUrbanSpeedlimit": {
+          "path": "speedlimit/overpass-urban-speedlimit.json",
+          "description": "Overpass API responses for urban road speed limits",
+          "realServiceMapping": "overpass-api/urban"
+        },
+        "overpassHighwaySpeedlimit": {
+          "path": "speedlimit/overpass-highway-speedlimit.json",
+          "description": "Overpass API responses for highway speed limits",
+          "realServiceMapping": "overpass-api/highway"
+        }
+      }
+    }
+  },
+  "testScenarios": {
+    "basic": {
+      "description": "Basic test scenario with minimal mock services",
+      "mockServices": [
+        "authentication.jwtTokens",
+        "broker.kafkaMock",
+        "broker.kafkaTopics",
+        "discovery.consulMock",
+        "geocoding.googleSuccess"
+      ]
+    },
+    "comprehensive": {
+      "description": "Comprehensive test scenario with all mock services",
+      "mockServices": [
+        "authentication.jwtTokens",
+        "authentication.mtlsCertificates",
+        "authentication.serviceAccounts",
+        "authentication.positionAuthResponses",
+        "authentication.tokenValidationResponses",
+        "broker.kafkaMock",
+        "broker.kafkaTopics",
+        "broker.kafkaConsumerTemplates",
+        "broker.kafkaProducerTemplates",
+        "discovery.consulMock",
+        "discovery.positionServiceRegistration",
+        "discovery.healthCheckResponses",
+        "geocoding.googleSuccess",
+        "map.mapVisualizationFixtures",
+        "map.routingServiceMappings",
+        "notification.notificationConfig",
+        "notification.positionEventTemplates",
+        "notification.mockResponses",
+        "speedlimit.genericSpeedlimitProvider",
+        "speedlimit.overpassHighwaySpeedlimit"
+      ]
+    },
+    "failureResilience": {
+      "description": "Test scenario for failure resilience testing",
+      "mockServices": [
+        "authentication.jwtTokens",
+        "broker.kafkaMock",
+        "broker.kafkaFailureScenarios",
+        "discovery.consulMock",
+        "discovery.serviceFailureScenarios",
+        "geocoding.googleError",
+        "notification.mockResponses"
+      ]
+    },
+    "performanceTesting": {
+      "description": "Test scenario for performance testing",
+      "mockServices": [
+        "authentication.jwtTokens",
+        "broker.kafkaMock",
+        "broker.kafkaTopics",
+        "discovery.consulMock",
+        "geocoding.googleSuccess"
+      ],
+      "configuration": {
+        "highVolume": true,
+        "simulatedLatency": false,
+        "concurrentRequests": 1000
+      }
+    },
+    "integrationTesting": {
+      "description": "Test scenario for integration testing with other services",
+      "mockServices": [
+        "authentication.jwtTokens",
+        "authentication.serviceAccounts",
+        "broker.kafkaMock",
+        "broker.kafkaTopics",
+        "broker.kafkaConsumerTemplates",
+        "broker.kafkaProducerTemplates",
+        "discovery.consulMock",
+        "discovery.positionServiceRegistration",
+        "discovery.serviceResolutionScenarios",
+        "geocoding.googleSuccess",
+        "notification.notificationConfig",
+        "notification.positionEventTemplates",
+        "notification.brokerMessages"
+      ]
+    }
+  },
+  "mockServiceDefaults": {
+    "basePath": "src/test/resources/mocks",
+    "defaultScenario": "basic",
+    "autoInitialize": true,
+    "cleanupAfterTest": true,
+    "logLevel": "INFO"
+  }
+}
