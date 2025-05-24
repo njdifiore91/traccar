@@ -1,0 +1,725 @@
+{
+  "distanceHandler": {
+    "description": "Test cases for DistanceHandler which calculates distance between positions and maintains total distance",
+    "testCases": [
+      {
+        "name": "initialPosition",
+        "description": "First position should have zero distance",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "distance": 0.0,
+            "totalDistance": 0.0
+          }
+        }
+      },
+      {
+        "name": "subsequentPosition",
+        "description": "Subsequent position should calculate distance from previous position",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:01:00.000Z",
+          "deviceTime": "2023-06-01T10:01:00.000Z",
+          "fixTime": "2023-06-01T10:01:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 5.0,
+          "course": 45.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "distance": 123.45,
+            "totalDistance": 123.45
+          }
+        }
+      },
+      {
+        "name": "invalidPosition",
+        "description": "Invalid position should not calculate distance",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:02:00.000Z",
+          "deviceTime": "2023-06-01T10:02:00.000Z",
+          "fixTime": "2023-06-01T10:02:00.000Z",
+          "valid": false,
+          "latitude": 40.7148,
+          "longitude": -74.0080,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "distance": 0.0,
+            "totalDistance": 123.45
+          }
+        }
+      },
+      {
+        "name": "presetDistance",
+        "description": "Position with preset distance attribute should use that value",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:03:00.000Z",
+          "deviceTime": "2023-06-01T10:03:00.000Z",
+          "fixTime": "2023-06-01T10:03:00.000Z",
+          "valid": true,
+          "latitude": 40.7158,
+          "longitude": -74.0090,
+          "altitude": 100.0,
+          "speed": 10.0,
+          "course": 45.0,
+          "attributes": {
+            "distance": 100.0
+          }
+        },
+        "expected": {
+          "attributes": {
+            "distance": 100.0,
+            "totalDistance": 223.45
+          }
+        }
+      }
+    ]
+  },
+  "motionHandler": {
+    "description": "Test cases for MotionHandler which determines if a device is in motion based on speed threshold",
+    "testCases": [
+      {
+        "name": "stoppedDevice",
+        "description": "Device with zero speed should be marked as not in motion",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "motion": false
+          }
+        },
+        "config": {
+          "speedThreshold": 0.01
+        }
+      },
+      {
+        "name": "movingDevice",
+        "description": "Device with speed above threshold should be marked as in motion",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:01:00.000Z",
+          "deviceTime": "2023-06-01T10:01:00.000Z",
+          "fixTime": "2023-06-01T10:01:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 5.0,
+          "course": 45.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "motion": true
+          }
+        },
+        "config": {
+          "speedThreshold": 0.01
+        }
+      },
+      {
+        "name": "borderlineSpeed",
+        "description": "Device with speed at threshold should be marked as in motion",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:02:00.000Z",
+          "deviceTime": "2023-06-01T10:02:00.000Z",
+          "fixTime": "2023-06-01T10:02:00.000Z",
+          "valid": true,
+          "latitude": 40.7148,
+          "longitude": -74.0080,
+          "altitude": 100.0,
+          "speed": 0.01,
+          "course": 45.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "motion": true
+          }
+        },
+        "config": {
+          "speedThreshold": 0.01
+        }
+      },
+      {
+        "name": "invalidPosition",
+        "description": "Invalid position should be marked as not in motion",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:03:00.000Z",
+          "deviceTime": "2023-06-01T10:03:00.000Z",
+          "fixTime": "2023-06-01T10:03:00.000Z",
+          "valid": false,
+          "latitude": 40.7158,
+          "longitude": -74.0090,
+          "altitude": 100.0,
+          "speed": 10.0,
+          "course": 45.0,
+          "attributes": {}
+        },
+        "expected": {
+          "attributes": {
+            "motion": false
+          }
+        },
+        "config": {
+          "speedThreshold": 0.01
+        }
+      }
+    ]
+  },
+  "computedAttributesHandler": {
+    "description": "Test cases for ComputedAttributesHandler which calculates custom attributes based on device attributes and position data",
+    "testCases": [
+      {
+        "name": "basicComputation",
+        "description": "Basic attribute computation using position data",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 60.0,
+          "course": 90.0,
+          "attributes": {
+            "batteryLevel": 75
+          }
+        },
+        "expected": {
+          "attributes": {
+            "batteryLevel": 75,
+            "speedMph": 37.28,
+            "batteryLow": false
+          }
+        },
+        "config": {
+          "deviceAttributes": {
+            "1": {
+              "speedMph": "speed * 0.621371",
+              "batteryLow": "batteryLevel < 25"
+            }
+          }
+        }
+      },
+      {
+        "name": "conditionalComputation",
+        "description": "Conditional attribute computation based on position data",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:01:00.000Z",
+          "deviceTime": "2023-06-01T10:01:00.000Z",
+          "fixTime": "2023-06-01T10:01:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "batteryLevel": 20
+          }
+        },
+        "expected": {
+          "attributes": {
+            "batteryLevel": 20,
+            "speedMph": 0.0,
+            "batteryLow": true
+          }
+        },
+        "config": {
+          "deviceAttributes": {
+            "1": {
+              "speedMph": "speed * 0.621371",
+              "batteryLow": "batteryLevel < 25"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "geocoderHandler": {
+    "description": "Test cases for GeocoderHandler which performs reverse geocoding to determine address from coordinates",
+    "testCases": [
+      {
+        "name": "basicGeocoding",
+        "description": "Basic geocoding for a position",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "address": "New York, NY, USA"
+        },
+        "mockResponse": "New York, NY, USA"
+      },
+      {
+        "name": "invalidPosition",
+        "description": "Geocoding should not be performed for invalid positions",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:01:00.000Z",
+          "deviceTime": "2023-06-01T10:01:00.000Z",
+          "fixTime": "2023-06-01T10:01:00.000Z",
+          "valid": false,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "address": null
+        },
+        "mockResponse": null
+      },
+      {
+        "name": "detailedAddress",
+        "description": "Detailed address with multiple components",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:02:00.000Z",
+          "deviceTime": "2023-06-01T10:02:00.000Z",
+          "fixTime": "2023-06-01T10:02:00.000Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        "expected": {
+          "address": "123 Market St, San Francisco, CA 94105, USA"
+        },
+        "mockResponse": "123 Market St, San Francisco, CA 94105, USA"
+      }
+    ]
+  },
+  "geolocationHandler": {
+    "description": "Test cases for GeolocationHandler which determines device location using network information",
+    "testCases": [
+      {
+        "name": "cellTowerLocation",
+        "description": "Location determination using cell tower information",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": false,
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "altitude": 0.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "cellTowers": [
+              {
+                "mobileCountryCode": 310,
+                "mobileNetworkCode": 410,
+                "locationAreaCode": 54321,
+                "cellId": 12345
+              }
+            ]
+          }
+        },
+        "expected": {
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "accuracy": 500.0
+        },
+        "mockResponse": {
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "accuracy": 500.0
+        }
+      },
+      {
+        "name": "wifiNetworkLocation",
+        "description": "Location determination using WiFi network information",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:01:00.000Z",
+          "deviceTime": "2023-06-01T10:01:00.000Z",
+          "fixTime": "2023-06-01T10:01:00.000Z",
+          "valid": false,
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "altitude": 0.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "wifiAccessPoints": [
+              {
+                "macAddress": "00:11:22:33:44:55",
+                "signalStrength": -65
+              },
+              {
+                "macAddress": "66:77:88:99:AA:BB",
+                "signalStrength": -85
+              }
+            ]
+          }
+        },
+        "expected": {
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "accuracy": 100.0
+        },
+        "mockResponse": {
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "accuracy": 100.0
+        }
+      }
+    ]
+  },
+  "engineHoursHandler": {
+    "description": "Test cases for EngineHoursHandler which calculates engine hours based on ignition status",
+    "testCases": [
+      {
+        "name": "engineOn",
+        "description": "Engine hours should increase when ignition is on",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "ignition": true
+          }
+        },
+        "expected": {
+          "attributes": {
+            "ignition": true,
+            "hours": 0.0
+          }
+        },
+        "deviceState": {
+          "lastUpdate": "2023-06-01T10:00:00.000Z",
+          "totalEngineHours": 100.0
+        }
+      },
+      {
+        "name": "engineRunning",
+        "description": "Engine hours should increase based on time elapsed",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:30:00.000Z",
+          "deviceTime": "2023-06-01T10:30:00.000Z",
+          "fixTime": "2023-06-01T10:30:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 5.0,
+          "course": 45.0,
+          "attributes": {
+            "ignition": true
+          }
+        },
+        "expected": {
+          "attributes": {
+            "ignition": true,
+            "hours": 0.5
+          }
+        },
+        "deviceState": {
+          "lastUpdate": "2023-06-01T10:00:00.000Z",
+          "totalEngineHours": 100.0,
+          "ignition": true
+        }
+      },
+      {
+        "name": "engineOff",
+        "description": "Engine hours should not increase when ignition is off",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T11:00:00.000Z",
+          "deviceTime": "2023-06-01T11:00:00.000Z",
+          "fixTime": "2023-06-01T11:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7148,
+          "longitude": -74.0080,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "ignition": false
+          }
+        },
+        "expected": {
+          "attributes": {
+            "ignition": false,
+            "hours": 0.0
+          }
+        },
+        "deviceState": {
+          "lastUpdate": "2023-06-01T10:30:00.000Z",
+          "totalEngineHours": 100.5,
+          "ignition": true
+        }
+      }
+    ]
+  },
+  "fuelLevelHandler": {
+    "description": "Test cases for FuelLevelHandler which processes fuel level data and detects refills or fuel theft",
+    "testCases": [
+      {
+        "name": "normalFuelLevel",
+        "description": "Normal fuel level reading",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "fuel": 75.5
+          }
+        },
+        "expected": {
+          "attributes": {
+            "fuel": 75.5,
+            "fuelChange": 0.0
+          }
+        },
+        "deviceState": {
+          "lastFuelLevel": 75.5
+        }
+      },
+      {
+        "name": "fuelRefill",
+        "description": "Fuel level increase indicating refill",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:30:00.000Z",
+          "deviceTime": "2023-06-01T10:30:00.000Z",
+          "fixTime": "2023-06-01T10:30:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "fuel": 95.5
+          }
+        },
+        "expected": {
+          "attributes": {
+            "fuel": 95.5,
+            "fuelChange": 20.0
+          }
+        },
+        "deviceState": {
+          "lastFuelLevel": 75.5
+        }
+      },
+      {
+        "name": "fuelTheft",
+        "description": "Fuel level decrease indicating possible theft",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T11:00:00.000Z",
+          "deviceTime": "2023-06-01T11:00:00.000Z",
+          "fixTime": "2023-06-01T11:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7148,
+          "longitude": -74.0080,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "fuel": 75.5
+          }
+        },
+        "expected": {
+          "attributes": {
+            "fuel": 75.5,
+            "fuelChange": -20.0
+          }
+        },
+        "deviceState": {
+          "lastFuelLevel": 95.5
+        }
+      }
+    ]
+  },
+  "tripHandler": {
+    "description": "Test cases for TripHandler which detects trip start and end based on motion and ignition",
+    "testCases": [
+      {
+        "name": "tripStart",
+        "description": "Trip should start when motion begins",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:00:00.000Z",
+          "deviceTime": "2023-06-01T10:00:00.000Z",
+          "fixTime": "2023-06-01T10:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 100.0,
+          "speed": 5.0,
+          "course": 45.0,
+          "attributes": {
+            "motion": true,
+            "ignition": true
+          }
+        },
+        "expected": {
+          "attributes": {
+            "tripStart": true
+          }
+        },
+        "deviceState": {
+          "motion": false,
+          "ignition": false
+        }
+      },
+      {
+        "name": "tripOngoing",
+        "description": "Trip should continue when motion continues",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T10:30:00.000Z",
+          "deviceTime": "2023-06-01T10:30:00.000Z",
+          "fixTime": "2023-06-01T10:30:00.000Z",
+          "valid": true,
+          "latitude": 40.7138,
+          "longitude": -74.0070,
+          "altitude": 100.0,
+          "speed": 10.0,
+          "course": 45.0,
+          "attributes": {
+            "motion": true,
+            "ignition": true
+          }
+        },
+        "expected": {
+          "attributes": {}
+        },
+        "deviceState": {
+          "motion": true,
+          "ignition": true
+        }
+      },
+      {
+        "name": "tripEnd",
+        "description": "Trip should end when motion stops",
+        "input": {
+          "deviceId": 1,
+          "protocol": "test",
+          "serverTime": "2023-06-01T11:00:00.000Z",
+          "deviceTime": "2023-06-01T11:00:00.000Z",
+          "fixTime": "2023-06-01T11:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7148,
+          "longitude": -74.0080,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {
+            "motion": false,
+            "ignition": false
+          }
+        },
+        "expected": {
+          "attributes": {
+            "tripEnd": true
+          }
+        },
+        "deviceState": {
+          "motion": true,
+          "ignition": true
+        }
+      }
+    ]
+  }
+}
