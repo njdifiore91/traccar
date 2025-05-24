@@ -1,0 +1,286 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: traccar
+  labels:
+    app: api-gateway
+    component: config
+    part-of: traccar
+data:
+  # API Gateway main configuration
+  api-gateway.yaml: |
+    server:
+      port: 8080
+      # Jetty server configuration
+      jetty:
+        threads:
+          min: 10
+          max: 200
+          idleTimeout: 60000
+        # Connection timeout in milliseconds
+        connectionTimeout: 30000
+        # Request header size in bytes
+        requestHeaderSize: 16384
+        # Response buffer size in bytes
+        responseBufferSize: 32768
+
+    # Logging configuration
+    logging:
+      level:
+        root: INFO
+        org.traccar: INFO
+        org.traccar.api: INFO
+        org.traccar.web: INFO
+        org.traccar.api.security: WARN
+      # Enable request logging
+      requestLogging: true
+      # Log format (JSON recommended for production)
+      format: JSON
+      # Include correlation IDs in logs
+      includeCorrelationId: true
+
+    # Service discovery configuration
+    serviceDiscovery:
+      # Service discovery type: kubernetes, consul, or static
+      type: kubernetes
+      # Refresh interval in seconds
+      refreshInterval: 30
+      # Kubernetes namespace for services
+      namespace: traccar
+      # Service lookup timeout in milliseconds
+      timeout: 5000
+      # Static service endpoints (used if type is static)
+      staticEndpoints:
+        protocol-service: http://protocol-service:8080
+        position-service: http://position-service:8080
+        event-service: http://event-service:8080
+        notification-service: http://notification-service:8080
+        reporting-service: http://reporting-service:8080
+
+    # API routing configuration
+    routing:
+      # Default timeout for route in milliseconds
+      defaultTimeout: 30000
+      # Enable circuit breaker for routes
+      circuitBreaker:
+        enabled: true
+        errorThresholdPercentage: 50
+        requestVolumeThreshold: 20
+        sleepWindowInMilliseconds: 5000
+        timeoutInMilliseconds: 10000
+        # Fallback behavior when circuit is open
+        fallbackEnabled: true
+        # Metrics collection for circuit breaker
+        metricsEnabled: true
+      # Retry configuration
+      retry:
+        enabled: true
+        maxAttempts: 3
+        backoffMultiplier: 2
+        initialBackoffMillis: 1000
+        maxBackoffMillis: 10000
+      # Bulkhead configuration for resource isolation
+      bulkhead:
+        enabled: true
+        maxConcurrentCalls: 100
+        maxWaitDurationMillis: 1000
+      # Routes configuration
+      routes:
+        - path: /api/devices/**
+          service: position-service
+          timeout: 10000
+        - path: /api/positions/**
+          service: position-service
+          timeout: 10000
+        - path: /api/events/**
+          service: event-service
+          timeout: 10000
+        - path: /api/notifications/**
+          service: notification-service
+          timeout: 10000
+        - path: /api/reports/**
+          service: reporting-service
+          timeout: 60000
+        - path: /api/protocols/**
+          service: protocol-service
+          timeout: 10000
+        # Legacy API paths for backward compatibility
+        - path: /api/legacy/**
+          service: position-service
+          timeout: 10000
+          stripPrefix: true
+
+    # Authentication configuration
+    authentication:
+      # JWT token configuration
+      jwt:
+        # Secret key for JWT signing (should be in Kubernetes Secret in production)
+        secretKey: ${JWT_SECRET_KEY:changeit}
+        # Token expiration time in seconds
+        expirationTime: 86400
+        # Refresh token expiration time in seconds
+        refreshExpirationTime: 2592000
+        # Issuer name
+        issuer: traccar-api-gateway
+      # Enable/disable authentication for specific paths
+      publicPaths:
+        - /api/session
+        - /api/devices/*/command
+        - /api/socket
+        - /api/health
+        - /api/ready
+        - /metrics
+
+    # Rate limiting configuration
+    rateLimiting:
+      enabled: true
+      # Default requests per second
+      defaultLimit: 50
+      # Per-client rate limits
+      clientLimits:
+        # Higher limit for trusted clients
+        trusted: 200
+        # Lower limit for anonymous clients
+        anonymous: 20
+        # Mobile app clients
+        mobile: 100
+        # Third-party integrations
+        thirdParty: 150
+      # Path-specific rate limits
+      pathLimits:
+        # Limit for authentication attempts
+        - path: /api/session
+          limit: 10
+        # Limit for device commands
+        - path: /api/devices/*/command
+          limit: 5
+        # Limit for report generation
+        - path: /api/reports/**
+          limit: 2
+        # Limit for position queries
+        - path: /api/positions
+          limit: 30
+        # Limit for device queries
+        - path: /api/devices
+          limit: 30
+      # Rate limit response headers
+      responseHeaders: true
+      # Rate limit storage (redis or in-memory)
+      storageType: redis
+      # Redis configuration for rate limiting
+      redis:
+        host: ${REDIS_HOST:redis}
+        port: ${REDIS_PORT:6379}
+        database: 0
+        keyPrefix: ratelimit:
+      # Throttling configuration
+      throttling:
+        enabled: true
+        # Throttle type: reject, delay, or queue
+        type: reject
+        # Queue size for queue throttling
+        queueSize: 1000
+        # Maximum delay in milliseconds for delay throttling
+        maxDelayMs: 5000
+
+    # WebSocket configuration
+    websocket:
+      # Enable WebSocket support
+      enabled: true
+      # Maximum text message size in bytes
+      maxTextMessageSize: 65536
+      # Maximum binary message size in bytes
+      maxBinaryMessageSize: 65536
+      # Idle timeout in milliseconds
+      idleTimeout: 300000
+      # Topic subscriptions
+      topics:
+        # Position updates topic
+        positions: enriched.positions
+        # Events topic
+        events: events
+        # Device connection status topic
+        connections: device.connections
+      # Message broker connection
+      broker:
+        # Broker type: kafka or rabbitmq
+        type: kafka
+        # Broker connection string
+        connectionString: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+        # Consumer group ID
+        consumerGroupId: api-gateway
+        # Auto-commit interval in milliseconds
+        autoCommitInterval: 5000
+
+    # Backward compatibility settings
+    backwardCompatibility:
+      # Enable legacy API endpoints
+      legacyApiEnabled: true
+      # Enable legacy WebSocket format
+      legacyWebSocketFormat: true
+      # Enable legacy authentication methods
+      legacyAuthMethods: true
+      # Legacy API version for compatibility
+      legacyApiVersion: "1.0"
+
+    # Monitoring and health check configuration
+    monitoring:
+      # Enable Prometheus metrics
+      prometheusEnabled: true
+      # Health check path
+      healthCheckPath: /api/health
+      # Readiness check path
+      readinessCheckPath: /api/ready
+      # Include detailed health information
+      detailedHealth: false
+      # Metrics endpoint path
+      metricsPath: /metrics
+      # Service name for metrics
+      serviceName: api-gateway
+
+    # OpenTelemetry configuration for distributed tracing
+    openTelemetry:
+      # Enable OpenTelemetry tracing
+      enabled: true
+      # Exporter type: jaeger, zipkin, or otlp
+      exporterType: otlp
+      # Exporter endpoint
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+      # Service name for tracing
+      serviceName: api-gateway
+      # Sampling configuration
+      sampling:
+        # Sampling type: always, never, or ratio
+        type: ratio
+        # Sampling ratio (0.0 - 1.0)
+        ratio: 0.1
+      # Propagation format
+      propagation: tracecontext,baggage
+      # Include request/response headers in spans
+      includeHeaders: true
+      # Include request parameters in spans
+      includeParameters: false
+
+  # Logging configuration
+  logback.xml: |
+    <configuration>
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+          <includeMdc>true</includeMdc>
+          <includeContext>false</includeContext>
+          <customFields>{"service":"api-gateway"}</customFields>
+        </encoder>
+      </appender>
+      
+      <root level="INFO">
+        <appender-ref ref="STDOUT" />
+      </root>
+      
+      <logger name="org.traccar" level="INFO" />
+      <logger name="org.traccar.api" level="INFO" />
+      <logger name="org.traccar.web" level="INFO" />
+      <logger name="org.traccar.api.security" level="WARN" />
+      <logger name="org.eclipse.jetty" level="WARN" />
+      <logger name="com.zaxxer.hikari" level="WARN" />
+    </configuration>
