@@ -1,0 +1,28 @@
+{
+  "request": {
+    "urlPathPattern": "/([\-0-9\.]+),([\-0-9\.]+)",
+    "queryParameters": {
+      "geoit": {
+        "equalTo": "JSON"
+      }
+    },
+    "method": "GET"
+  },
+  "response": {
+    "status": 429,
+    "headers": {
+      "Content-Type": "application/json",
+      "Retry-After": "60",
+      "X-RateLimit-Limit": "2",
+      "X-RateLimit-Remaining": "0",
+      "X-RateLimit-Reset": "60"
+    },
+    "jsonBody": {
+      "error": {
+        "code": "rate_limit_exceeded",
+        "message": "Rate limit exceeded. Please wait 60 seconds before making another request or upgrade your plan."
+      }
+    },
+    "fixedDelayMilliseconds": 500
+  }
+}
