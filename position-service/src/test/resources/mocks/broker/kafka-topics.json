@@ -1,0 +1,132 @@
+{
+  "topics": [
+    {
+      "name": "raw-positions",
+      "partitions": 3,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 86400000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for consuming raw position data from Protocol Service"
+    },
+    {
+      "name": "enriched-positions",
+      "partitions": 3,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 172800000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for publishing enriched position data to Event Service"
+    },
+    {
+      "name": "position-commands",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 43200000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for device command communication testing"
+    },
+    {
+      "name": "position-dlq",
+      "partitions": 1,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 604800000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Dead letter queue for position processing errors"
+    },
+    {
+      "name": "position-events",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 172800000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for position-related events"
+    },
+    {
+      "name": "geofence-events",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 172800000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for geofence-related events"
+    },
+    {
+      "name": "device-status",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 86400000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for device status updates"
+    },
+    {
+      "name": "position-forward",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 86400000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for position forwarding to external systems"
+    },
+    {
+      "name": "command-responses",
+      "partitions": 2,
+      "replicationFactor": 1,
+      "configs": {
+        "retention.ms": 43200000,
+        "cleanup.policy": "delete",
+        "compression.type": "lz4"
+      },
+      "description": "Topic for device command responses"
+    }
+  ],
+  "consumerGroups": [
+    {
+      "name": "position-service",
+      "topics": ["raw-positions", "position-commands"],
+      "description": "Consumer group for Position Service"
+    },
+    {
+      "name": "event-service",
+      "topics": ["enriched-positions"],
+      "description": "Consumer group for Event Service consuming enriched positions"
+    },
+    {
+      "name": "position-forwarder",
+      "topics": ["position-forward"],
+      "description": "Consumer group for position forwarding service"
+    },
+    {
+      "name": "command-processor",
+      "topics": ["command-responses"],
+      "description": "Consumer group for processing command responses"
+    }
+  ],
+  "testConfig": {
+    "autoCreateTopics": true,
+    "defaultPartitions": 1,
+    "defaultReplicationFactor": 1,
+    "mockBrokerPort": 9092,
+    "mockZookeeperPort": 2181
+  }
+}
