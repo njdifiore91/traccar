@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 package org.traccar.geocoder;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.stereotype.Component;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,105 +29,113 @@ import java.util.Map;
  * Health indicator for geocoding services that exposes health metrics for monitoring
  * and integrates with service discovery for health checks.
  */
-@Component
-public class GeocoderHealthIndicator implements HealthIndicator {
+@Singleton
+public class GeocoderHealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHealthIndicator.class);
 
-    private final ResilienceConfig resilienceConfig;
-    private final Map<String, Geocoder> geocoders;
+    private final Map<String, Geocoder> geocoders = new HashMap<>();
+    private final MeterRegistry meterRegistry;
 
-    @Autowired
-    public GeocoderHealthIndicator(ResilienceConfig resilienceConfig, Map<String, Geocoder> geocoders) {
-        this.resilienceConfig = resilienceConfig;
-        this.geocoders = geocoders;
-    }
-
-    @Override
-    public Health health() {
-        Map<String, CircuitBreaker.State> states = resilienceConfig.getCircuitBreakerStates();
-        Map<String, Object> details = new HashMap<>();
-        boolean isHealthy = true;
-
-        // Check if any circuit breakers are open
-        for (Map.Entry<String, CircuitBreaker.State> entry : states.entrySet()) {
-            String provider = entry.getKey();
-            CircuitBreaker.State state = entry.getValue();
-            details.put(provider + ".state", state.name());
-            
-            // If any circuit breaker is OPEN or FORCED_OPEN, mark as unhealthy
-            if (state == CircuitBreaker.State.OPEN || state == CircuitBreaker.State.FORCED_OPEN) {
-                isHealthy = false;
-                LOGGER.warn("Geocoder circuit breaker for {} is in {} state", provider, state);
-            }
-        }
-
-        // Add metrics for each geocoder
-        for (Map.Entry<String, Geocoder> entry : geocoders.entrySet()) {
-            String provider = entry.getKey();
-            Geocoder geocoder = entry.getValue();
-            
-            if (geocoder instanceof GeoapifyGeocoder) {
-                GeoapifyGeocoder geoapifyGeocoder = (GeoapifyGeocoder) geocoder;
-                details.put(provider + ".metrics", geoapifyGeocoder.getMetrics());
-            }
-            // Add similar checks for other geocoder implementations as they are updated
-        }
-
-        // Add circuit breaker metrics
-        details.put("circuitBreakerMetrics", resilienceConfig.getCircuitBreakerMetrics());
-
-        if (isHealthy) {
-            return Health.up().withDetails(details).build();
-        } else {
-            return Health.down().withDetails(details).build();
-        }
+    /**
+     * Initialize the health indicator with metrics registry.
+     *
+     * @param meterRegistry Metrics registry for exposing health metrics
+     */
+    @Inject
+    public GeocoderHealthIndicator(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+        LOGGER.info("Initialized geocoder health indicator");
     }
 
     /**
-     * Checks if a specific geocoder provider is healthy
-     * 
-     * @param provider the geocoder provider name
-     * @return true if the provider is healthy, false otherwise
+     * Register a geocoder for health monitoring.
+     *
+     * @param name Name of the geocoder provider
+     * @param geocoder Geocoder instance to monitor
      */
-    public boolean isProviderHealthy(String provider) {
-        Map<String, CircuitBreaker.State> states = resilienceConfig.getCircuitBreakerStates();
-        CircuitBreaker.State state = states.get(provider);
+    public void registerGeocoder(String name, Geocoder geocoder) {
+        geocoders.put(name, geocoder);
         
-        if (state == null) {
-            // If we don't have a circuit breaker for this provider, assume it's healthy
-            return true;
-        }
+        // Register a gauge that reports the health status (1 for healthy, 0 for unhealthy)
+        Gauge.builder("geocoder.health", () -> isGeocoderHealthy(name) ? 1 : 0)
+                .tag("provider", name)
+                .description("Health status of geocoder provider")
+                .register(meterRegistry);
         
-        return state != CircuitBreaker.State.OPEN && state != CircuitBreaker.State.FORCED_OPEN;
+        LOGGER.debug("Registered geocoder for health monitoring: {}", name);
     }
 
     /**
-     * Gets detailed health information for all geocoder providers
-     * 
-     * @return a map of provider names to their health status
+     * Check if a specific geocoder is healthy.
+     *
+     * @param name Name of the geocoder provider
+     * @return true if the geocoder is healthy, false otherwise
      */
-    public Map<String, Object> getDetailedHealth() {
-        Map<String, Object> health = new HashMap<>();
-        Map<String, CircuitBreaker.State> states = resilienceConfig.getCircuitBreakerStates();
-        
-        for (Map.Entry<String, CircuitBreaker.State> entry : states.entrySet()) {
-            String provider = entry.getKey();
-            CircuitBreaker.State state = entry.getValue();
-            
-            Map<String, Object> providerHealth = new HashMap<>();
-            providerHealth.put("state", state.name());
-            providerHealth.put("healthy", state != CircuitBreaker.State.OPEN && state != CircuitBreaker.State.FORCED_OPEN);
-            
-            // Add metrics if available
-            Map<String, Map<String, Float>> metrics = resilienceConfig.getCircuitBreakerMetrics();
-            if (metrics.containsKey(provider)) {
-                providerHealth.put("metrics", metrics.get(provider));
-            }
-            
-            health.put(provider, providerHealth);
+    public boolean isGeocoderHealthy(String name) {
+        Geocoder geocoder = geocoders.get(name);
+        if (geocoder == null) {
+            LOGGER.warn("Attempted to check health of unknown geocoder: {}", name);
+            return false;
         }
-        
-        return health;
+        return geocoder.isHealthy();
+    }
+
+    /**
+     * Check if all registered geocoders are healthy.
+     *
+     * @return true if all geocoders are healthy, false if any are unhealthy
+     */
+    public boolean areAllGeocodersHealthy() {
+        return geocoders.entrySet().stream()
+                .allMatch(entry -> {
+                    boolean healthy = entry.getValue().isHealthy();
+                    if (!healthy) {
+                        LOGGER.warn("Geocoder unhealthy: {}", entry.getKey());
+                    }
+                    return healthy;
+                });
+    }
+
+    /**
+     * Check if any registered geocoder is healthy.
+     * This is useful for determining if the service can operate in degraded mode.
+     *
+     * @return true if at least one geocoder is healthy, false if all are unhealthy
+     */
+    public boolean isAnyGeocoderHealthy() {
+        return geocoders.entrySet().stream()
+                .anyMatch(entry -> entry.getValue().isHealthy());
+    }
+
+    /**
+     * Get the count of healthy geocoders.
+     *
+     * @return Number of healthy geocoders
+     */
+    public int getHealthyGeocoderCount() {
+        return (int) geocoders.entrySet().stream()
+                .filter(entry -> entry.getValue().isHealthy())
+                .count();
+    }
+
+    /**
+     * Get the total count of registered geocoders.
+     *
+     * @return Total number of registered geocoders
+     */
+    public int getTotalGeocoderCount() {
+        return geocoders.size();
+    }
+
+    /**
+     * Get a map of geocoder names to their health status.
+     *
+     * @return Map of geocoder names to boolean health status
+     */
+    public Map<String, Boolean> getGeocoderHealthStatus() {
+        Map<String, Boolean> status = new HashMap<>();
+        geocoders.forEach((name, geocoder) -> status.put(name, geocoder.isHealthy()));
+        return status;
     }
 }
