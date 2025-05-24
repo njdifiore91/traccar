@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Import Spring boot default configuration -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Properties for logging configuration -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name" defaultValue="event-service"/>
+    <springProperty scope="context" name="logLevel" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="logFormat" source="logging.format" defaultValue="json"/>
+
+    <!-- Environment-specific property -->
+    <springProperty scope="context" name="activeProfile" source="spring.profiles.active" defaultValue="default"/>
+
+    <!-- Instance ID for container environments -->
+    <property name="INSTANCE_ID" value="${HOSTNAME:-unknown}"/>
+
+    <!-- Common log pattern for non-JSON format -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([${springAppName},%X{trace_id:-},%X{span_id:-}]){magenta} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"/>
+
+    <!-- OpenTelemetry MDC integration -->
+    <contextListener class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryContextListener"/>
+
+    <!-- Appenders -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder" if="${logFormat.equalsIgnoreCase('json')}">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                            "timestamp": "%date{ISO8601}",
+                            "level": "%level",
+                            "thread": "%thread",
+                            "logger": "%logger{40}",
+                            "message": "%message",
+                            "service": "${springAppName}",
+                            "instance": "${INSTANCE_ID}",
+                            "environment": "${activeProfile}",
+                            "traceId": "%X{trace_id:-}",
+                            "spanId": "%X{span_id:-}",
+                            "traceFlags": "%X{trace_flags:-}",
+                            "eventId": "%X{eventId:-}",
+                            "deviceId": "%X{deviceId:-}",
+                            "userId": "%X{userId:-}"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>4096</maxLength>
+                        <shortenedClassNameLength>36</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+                <mdc/>
+                <contextName/>
+            </providers>
+        </encoder>
+        <encoder if="${logFormat.equalsIgnoreCase('plain')}">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Specific logger configurations -->
+    <logger name="org.traccar" level="${logLevel}"/>
+    <logger name="org.traccar.handler.events" level="${logLevel}"/>
+    <logger name="org.traccar.messaging" level="${logLevel}"/>
+    <logger name="org.traccar.discovery" level="${logLevel}"/>
+    <logger name="org.traccar.metrics" level="${logLevel}"/>
+    <logger name="org.traccar.health" level="${logLevel}"/>
+
+    <!-- Third-party libraries -->
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.boot.actuate" level="INFO"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.apache.zookeeper" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="io.opentelemetry" level="INFO"/>
+    <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="io.micrometer" level="INFO"/>
+    <logger name="io.grpc" level="WARN"/>
+    <logger name="io.r2dbc" level="WARN"/>
+    <logger name="reactor.netty" level="WARN"/>
+
+    <!-- Environment-specific configurations -->
+    <springProfile name="dev">
+        <logger name="org.traccar" level="DEBUG"/>
+        <logger name="org.traccar.handler.events" level="DEBUG"/>
+        <logger name="org.traccar.messaging" level="DEBUG"/>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.springframework.web" level="DEBUG"/>
+        <logger name="io.opentelemetry" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="org.traccar" level="DEBUG"/>
+        <logger name="org.traccar.handler.events" level="DEBUG"/>
+        <logger name="org.traccar.messaging" level="DEBUG"/>
+        <logger name="io.opentelemetry" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="org.traccar" level="INFO"/>
+        <logger name="org.traccar.handler.events" level="INFO"/>
+        <logger name="org.traccar.messaging" level="INFO"/>
+        <logger name="io.opentelemetry" level="WARN"/>
+    </springProfile>
+    
+    <!-- Specific configuration for local development -->
+    <springProfile name="local">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [${springAppName},%X{trace_id:-},%X{span_id:-}] [%thread] %-5level %logger{36} - %msg%n</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+        <logger name="org.traccar" level="DEBUG"/>
+        <logger name="org.traccar.handler.events" level="DEBUG"/>
+        <logger name="org.traccar.messaging" level="DEBUG"/>
+        <logger name="org.springframework.web" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Root logger configuration -->
+    <root level="${logLevel}">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
