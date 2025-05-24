@@ -1,0 +1,707 @@
+{
+  "provider": {
+    "name": "protocol-service"
+  },
+  "consumer": {
+    "name": "position-service"
+  },
+  "interactions": [
+    {
+      "description": "a position message from the protocol service",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "deviceTime": "2023-01-01T12:00:00.000Z",
+          "serverTime": "2023-01-01T12:00:01.000Z",
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "altitude": 100.0,
+          "speed": 50.0,
+          "course": 90.0,
+          "accuracy": 10.0,
+          "valid": true,
+          "attributes": {
+            "batteryLevel": 75,
+            "ignition": true
+          }
+        },
+        "matchingRules": {
+          "$.body.deviceId": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.protocol": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.deviceTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.serverTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.latitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -90.0,
+                "max": 90.0
+              }
+            ]
+          },
+          "$.body.longitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -180.0,
+                "max": 180.0
+              }
+            ]
+          },
+          "$.body.altitude": {
+            "matchers": [
+              {
+                "match": "decimal"
+              }
+            ]
+          },
+          "$.body.speed": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0
+              }
+            ]
+          },
+          "$.body.course": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0,
+                "max": 360.0
+              }
+            ]
+          },
+          "$.body.accuracy": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0
+              }
+            ]
+          },
+          "$.body.valid": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.attributes": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "id": 456,
+          "message": "Position processed successfully"
+        },
+        "matchingRules": {
+          "$.body.success": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.id": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.message": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "a batch of position messages from the protocol service",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions/batch",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "positions": [
+            {
+              "deviceId": 123,
+              "protocol": "tk103",
+              "deviceTime": "2023-01-01T12:00:00.000Z",
+              "serverTime": "2023-01-01T12:00:01.000Z",
+              "latitude": 60.0,
+              "longitude": 30.0,
+              "altitude": 100.0,
+              "speed": 50.0,
+              "course": 90.0,
+              "accuracy": 10.0,
+              "valid": true,
+              "attributes": {
+                "batteryLevel": 75,
+                "ignition": true
+              }
+            },
+            {
+              "deviceId": 123,
+              "protocol": "tk103",
+              "deviceTime": "2023-01-01T12:01:00.000Z",
+              "serverTime": "2023-01-01T12:01:01.000Z",
+              "latitude": 60.01,
+              "longitude": 30.01,
+              "altitude": 101.0,
+              "speed": 52.0,
+              "course": 91.0,
+              "accuracy": 9.0,
+              "valid": true,
+              "attributes": {
+                "batteryLevel": 74,
+                "ignition": true
+              }
+            }
+          ]
+        },
+        "matchingRules": {
+          "$.body.positions": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.positions[*].deviceId": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.positions[*].protocol": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.positions[*].deviceTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.positions[*].serverTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.positions[*].latitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -90.0,
+                "max": 90.0
+              }
+            ]
+          },
+          "$.body.positions[*].longitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -180.0,
+                "max": 180.0
+              }
+            ]
+          },
+          "$.body.positions[*].altitude": {
+            "matchers": [
+              {
+                "match": "decimal"
+              }
+            ]
+          },
+          "$.body.positions[*].speed": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0
+              }
+            ]
+          },
+          "$.body.positions[*].course": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0,
+                "max": 360.0
+              }
+            ]
+          },
+          "$.body.positions[*].accuracy": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": 0.0
+              }
+            ]
+          },
+          "$.body.positions[*].valid": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.positions[*].attributes": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "count": 2,
+          "ids": [456, 457],
+          "message": "Positions processed successfully"
+        },
+        "matchingRules": {
+          "$.body.success": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.count": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.ids": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.message": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "a position message with invalid data from the protocol service",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "deviceId": 123,
+          "protocol": "tk103",
+          "deviceTime": "2023-01-01T12:00:00.000Z",
+          "serverTime": "2023-01-01T12:00:01.000Z",
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "altitude": 0.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "accuracy": 0.0,
+          "valid": false,
+          "attributes": {
+            "batteryLevel": 10,
+            "ignition": false,
+            "alarm": "lowBattery"
+          }
+        },
+        "matchingRules": {
+          "$.body.deviceId": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.protocol": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.deviceTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.serverTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.valid": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.attributes": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.attributes.alarm": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "id": 458,
+          "message": "Invalid position data accepted for processing",
+          "warnings": ["Zero coordinates detected", "Invalid GPS data"]
+        },
+        "matchingRules": {
+          "$.body.success": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.id": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.message": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.warnings": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "a position message with protocol-specific attributes from the protocol service",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/positions",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "deviceId": 123,
+          "protocol": "teltonika",
+          "deviceTime": "2023-01-01T12:00:00.000Z",
+          "serverTime": "2023-01-01T12:00:01.000Z",
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "altitude": 100.0,
+          "speed": 50.0,
+          "course": 90.0,
+          "accuracy": 10.0,
+          "valid": true,
+          "attributes": {
+            "batteryLevel": 75,
+            "ignition": true,
+            "io78": 1,
+            "io79": 0,
+            "io80": 15.6,
+            "hdop": 1.2,
+            "satellites": 9,
+            "rssi": -67,
+            "temperature": 24.5,
+            "odometer": 12345.6
+          }
+        },
+        "matchingRules": {
+          "$.body.deviceId": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.protocol": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "(teltonika|meitrack|atrack|totem|tk103|meiligao)"
+              }
+            ]
+          },
+          "$.body.deviceTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.serverTime": {
+            "matchers": [
+              {
+                "match": "timestamp"
+              }
+            ]
+          },
+          "$.body.latitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -90.0,
+                "max": 90.0
+              }
+            ]
+          },
+          "$.body.longitude": {
+            "matchers": [
+              {
+                "match": "decimal",
+                "min": -180.0,
+                "max": 180.0
+              }
+            ]
+          },
+          "$.body.attributes": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "id": 459,
+          "message": "Position with protocol-specific attributes processed successfully"
+        },
+        "matchingRules": {
+          "$.body.success": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.id": {
+            "matchers": [
+              {
+                "match": "type",
+                "min": 1
+              }
+            ]
+          },
+          "$.body.message": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "a health check request to the protocol service",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/health",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "UP",
+          "components": {
+            "db": "UP",
+            "broker": "UP",
+            "discovery": "UP"
+          },
+          "version": "${regex('\\d+\\.\\d+\\.\\d+')}"
+        },
+        "matchingRules": {
+          "$.body.status": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "(UP|DOWN|DEGRADED)"
+              }
+            ]
+          },
+          "$.body.components": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.body.components.db": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "(UP|DOWN)"
+              }
+            ]
+          },
+          "$.body.components.broker": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "(UP|DOWN)"
+              }
+            ]
+          },
+          "$.body.components.discovery": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "(UP|DOWN)"
+              }
+            ]
+          },
+          "$.body.version": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "\\d+\\.\\d+\\.\\d+"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "contractVersion": "1.0.0",
+    "supportedProtocols": ["tk103", "teltonika", "meitrack", "atrack", "totem", "meiligao"],
+    "positionAttributes": {
+      "common": ["batteryLevel", "ignition", "motion", "alarm", "odometer", "hdop", "satellites", "rssi", "temperature"],
+      "teltonika": ["io78", "io79", "io80", "operator", "cellId", "lac"],
+      "meitrack": ["fuel", "rpm", "hours", "adc1", "adc2", "adc3"],
+      "atrack": ["event", "status", "voltage", "mcc", "mnc"],
+      "totem": ["rfid", "fuel", "battery", "cellId"],
+      "tk103": ["status", "alarm", "voltage", "battery"],
+      "meiligao": ["fuel", "temperature", "rfid", "event"]
+    }
+  }
+}
