@@ -1,0 +1,231 @@
+{
+  "enabled": true,
+  "version": "1.0",
+  "description": "Configuration for mocking notification service behavior during Position Service tests",
+  "global": {
+    "responseDelay": {
+      "enabled": false,
+      "minMilliseconds": 0,
+      "maxMilliseconds": 0,
+      "variabilityEnabled": false
+    },
+    "errorSimulation": {
+      "enabled": false,
+      "errorRate": 0.0,
+      "errorTypes": ["TIMEOUT", "CONNECTION_REFUSED", "SERVICE_UNAVAILABLE", "INTERNAL_ERROR"]
+    },
+    "circuitBreaker": {
+      "enabled": true,
+      "failureThreshold": 5,
+      "resetTimeoutSeconds": 30
+    }
+  },
+  "notificators": {
+    "command": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 50,
+        "maxMilliseconds": 200,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.05,
+        "errorTypes": ["COMMAND_EXECUTION_FAILED", "DEVICE_OFFLINE"]
+      }
+    },
+    "web": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 10,
+        "maxMilliseconds": 50,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.02,
+        "errorTypes": ["SESSION_NOT_FOUND", "USER_OFFLINE"]
+      }
+    },
+    "mail": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 100,
+        "maxMilliseconds": 500,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.1,
+        "errorTypes": ["SMTP_ERROR", "INVALID_RECIPIENT"]
+      }
+    },
+    "sms": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 200,
+        "maxMilliseconds": 800,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.15,
+        "errorTypes": ["SMS_GATEWAY_ERROR", "INVALID_PHONE_NUMBER"]
+      }
+    },
+    "firebase": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 150,
+        "maxMilliseconds": 600,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.08,
+        "errorTypes": ["FIREBASE_ERROR", "INVALID_TOKEN"]
+      }
+    },
+    "traccar": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 50,
+        "maxMilliseconds": 200,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.05,
+        "errorTypes": ["APP_NOTIFICATION_ERROR"]
+      }
+    },
+    "telegram": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 200,
+        "maxMilliseconds": 1000,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.12,
+        "errorTypes": ["TELEGRAM_API_ERROR", "BOT_TOKEN_INVALID"]
+      }
+    },
+    "pushover": {
+      "enabled": true,
+      "responseDelay": {
+        "enabled": false,
+        "minMilliseconds": 150,
+        "maxMilliseconds": 700,
+        "variabilityEnabled": true
+      },
+      "errorSimulation": {
+        "enabled": false,
+        "errorRate": 0.1,
+        "errorTypes": ["PUSHOVER_API_ERROR", "INVALID_USER_KEY"]
+      }
+    }
+  },
+  "testScenarios": {
+    "allSuccessful": {
+      "description": "All notifications succeed without errors",
+      "global": {
+        "errorSimulation": {
+          "enabled": false
+        },
+        "responseDelay": {
+          "enabled": false
+        }
+      }
+    },
+    "highLatency": {
+      "description": "Simulate high latency responses",
+      "global": {
+        "responseDelay": {
+          "enabled": true,
+          "minMilliseconds": 500,
+          "maxMilliseconds": 2000,
+          "variabilityEnabled": true
+        }
+      }
+    },
+    "serviceUnavailable": {
+      "description": "Simulate notification service being unavailable",
+      "global": {
+        "errorSimulation": {
+          "enabled": true,
+          "errorRate": 1.0,
+          "errorTypes": ["SERVICE_UNAVAILABLE"]
+        }
+      }
+    },
+    "intermittentFailures": {
+      "description": "Simulate random failures across different channels",
+      "global": {
+        "errorSimulation": {
+          "enabled": true,
+          "errorRate": 0.3,
+          "errorTypes": ["TIMEOUT", "CONNECTION_REFUSED", "INTERNAL_ERROR"]
+        }
+      }
+    },
+    "emailFailure": {
+      "description": "Simulate email notification failures",
+      "notificators": {
+        "mail": {
+          "errorSimulation": {
+            "enabled": true,
+            "errorRate": 1.0,
+            "errorTypes": ["SMTP_ERROR"]
+          }
+        }
+      }
+    },
+    "smsFailure": {
+      "description": "Simulate SMS notification failures",
+      "notificators": {
+        "sms": {
+          "errorSimulation": {
+            "enabled": true,
+            "errorRate": 1.0,
+            "errorTypes": ["SMS_GATEWAY_ERROR"]
+          }
+        }
+      }
+    }
+  },
+  "messageTemplates": {
+    "positionUpdate": {
+      "title": "Position Update",
+      "body": "Device {deviceName} updated position at {timestamp}. Location: {latitude}, {longitude}"
+    },
+    "geofenceEnter": {
+      "title": "Geofence Enter",
+      "body": "Device {deviceName} entered geofence {geofenceName} at {timestamp}"
+    },
+    "geofenceExit": {
+      "title": "Geofence Exit",
+      "body": "Device {deviceName} exited geofence {geofenceName} at {timestamp}"
+    },
+    "deviceOffline": {
+      "title": "Device Offline",
+      "body": "Device {deviceName} went offline at {timestamp}"
+    },
+    "deviceOnline": {
+      "title": "Device Online",
+      "body": "Device {deviceName} came online at {timestamp}"
+    },
+    "overspeed": {
+      "title": "Overspeed Alert",
+      "body": "Device {deviceName} exceeded speed limit. Current speed: {speed} km/h, Limit: {speedLimit} km/h"
+    }
+  }
+}
