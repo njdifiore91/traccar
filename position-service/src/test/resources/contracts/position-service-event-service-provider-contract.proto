@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package org.traccar.position;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.position.proto";
+option java_outer_classname = "PositionServiceProto";
+
+/**
+ * This contract defines how Position Service provides data to Event Service.
+ * It specifies the service methods, request/response message structures, and
+ * binary communication format for efficient event detection.
+ */
+
+// Position message containing all data needed for event detection
+message Position {
+  int64 id = 1;                // Unique position identifier
+  int64 device_id = 2;          // Device identifier
+  string protocol = 3;          // Protocol used to receive the position
+  int64 server_time = 4;        // Server timestamp (milliseconds since epoch)
+  int64 device_time = 5;        // Device timestamp (milliseconds since epoch)
+  int64 fix_time = 6;           // GPS fix timestamp (milliseconds since epoch)
+  bool valid = 7;               // Position validity flag
+  double latitude = 8;          // Latitude in degrees
+  double longitude = 9;         // Longitude in degrees
+  double altitude = 10;         // Altitude in meters
+  double speed = 11;            // Speed in knots
+  double course = 12;           // Course in degrees
+  int32 satellites = 13;        // Number of satellites
+  double hdop = 14;             // HDOP precision
+  map<string, string> attributes = 15;  // Additional attributes
+  
+  // Optional fields for event detection
+  double accuracy = 16;         // Position accuracy in meters
+  string network = 17;          // Network information
+  double battery_level = 18;    // Battery level in percentage
+  bool motion = 19;             // Motion state
+  int64 geofence_id = 20;       // Associated geofence ID if applicable
+  double speed_limit = 21;      // Speed limit at current position if available
+}
+
+// Request message for streaming positions for a specific device
+message DevicePositionRequest {
+  int64 device_id = 1;          // Device ID to get positions for
+  int64 from_time = 2;          // Start time (milliseconds since epoch)
+  int64 to_time = 3;            // End time (milliseconds since epoch)
+  int32 limit = 4;              // Maximum number of positions to return
+}
+
+// Response containing a list of positions
+message PositionListResponse {
+  repeated Position positions = 1;  // List of positions
+}
+
+// Request for a single position by ID
+message PositionRequest {
+  int64 position_id = 1;        // Position ID to retrieve
+}
+
+// Request for the latest position of a device
+message LatestPositionRequest {
+  int64 device_id = 1;          // Device ID to get latest position for
+}
+
+// Event types that can be detected from position data
+enum EventType {
+  UNKNOWN = 0;
+  DEVICE_ONLINE = 1;
+  DEVICE_OFFLINE = 2;
+  DEVICE_MOVING = 3;
+  DEVICE_STOPPED = 4;
+  DEVICE_OVERSPEED = 5;
+  GEOFENCE_ENTER = 6;
+  GEOFENCE_EXIT = 7;
+  ALARM = 8;
+  IGNITION_ON = 9;
+  IGNITION_OFF = 10;
+  MAINTENANCE = 11;
+  TEXT_MESSAGE = 12;
+  DRIVER_CHANGED = 13;
+  DEVICE_FUEL_DROP = 14;
+  COMMAND_RESULT = 15;
+}
+
+// Service definition for Position Service as a provider to Event Service
+service PositionService {
+  // Get a single position by ID
+  rpc GetPosition(PositionRequest) returns (Position);
+  
+  // Get the latest position for a device
+  rpc GetLatestPosition(LatestPositionRequest) returns (Position);
+  
+  // Get positions for a device within a time range
+  rpc GetPositions(DevicePositionRequest) returns (PositionListResponse);
+  
+  // Stream positions for a device in real-time
+  rpc StreamPositions(DevicePositionRequest) returns (stream Position);
+  
+  // Stream all positions from all devices in real-time
+  rpc StreamAllPositions(stream DevicePositionRequest) returns (stream Position);
+}
