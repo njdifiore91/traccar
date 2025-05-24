@@ -1,0 +1,293 @@
+/*
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package org.traccar.proto;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto.notification";
+option java_outer_classname = "NotificationProto";
+
+// Notification message schema for communication between microservices
+message NotificationMessage {
+  // Unique identifier for the notification
+  string id = 1;
+  
+  // Correlation ID for distributed tracing across services
+  string correlation_id = 2;
+  
+  // Notification content
+  string subject = 3;
+  string body = 4;
+  
+  // Notification metadata
+  map<string, string> metadata = 5;
+  
+  // Notification priority
+  NotificationPriority priority = 6;
+  
+  // Notification type
+  NotificationType type = 7;
+  
+  // Timestamp when the notification was created (milliseconds since epoch)
+  int64 timestamp = 8;
+  
+  // Source information
+  SourceInfo source = 9;
+  
+  // Target information
+  TargetInfo target = 10;
+  
+  // Delivery channels
+  repeated NotificationChannel channels = 11;
+  
+  // Template information for formatting
+  TemplateInfo template = 12;
+  
+  // Retry information
+  RetryInfo retry = 13;
+  
+  // Channel-specific configurations
+  EmailConfig email_config = 14;
+  SmsConfig sms_config = 15;
+  PushConfig push_config = 16;
+  WebConfig web_config = 17;
+  WebhookConfig webhook_config = 18;
+}
+
+// Priority levels for notifications
+enum NotificationPriority {
+  UNKNOWN_PRIORITY = 0;
+  LOW = 1;
+  NORMAL = 2;
+  HIGH = 3;
+  URGENT = 4;
+}
+
+// Types of notifications
+enum NotificationType {
+  UNKNOWN_TYPE = 0;
+  DEVICE_ONLINE = 1;
+  DEVICE_OFFLINE = 2;
+  DEVICE_MOVING = 3;
+  DEVICE_STOPPED = 4;
+  DEVICE_OVERSPEED = 5;
+  GEOFENCE_ENTER = 6;
+  GEOFENCE_EXIT = 7;
+  ALARM = 8;
+  IGNITION_ON = 9;
+  IGNITION_OFF = 10;
+  MAINTENANCE = 11;
+  TEXT_MESSAGE = 12;
+  DEVICE_FUEL_DROP = 13;
+  DEVICE_FUEL_FILL = 14;
+  COMMAND_RESULT = 15;
+  DEVICE_UNKNOWN = 16;
+  DRIVER_CHANGE = 17;
+  MEDIA = 18;
+  CUSTOM = 19;
+}
+
+// Notification channel types
+enum NotificationChannel {
+  UNKNOWN_CHANNEL = 0;
+  EMAIL = 1;
+  SMS = 2;
+  PUSH = 3;
+  WEB = 4;
+  TELEGRAM = 5;
+  PUSHOVER = 6;
+  DISCORD = 7;
+  SLACK = 8;
+  WEBHOOK = 9;
+  COMMAND = 10;
+}
+
+// Channel-specific configuration for email notifications
+message EmailConfig {
+  // Email addresses to send to (in addition to user's email)
+  repeated string additional_emails = 1;
+  
+  // Email attachments
+  repeated Attachment attachments = 2;
+  
+  // HTML content flag
+  bool html_format = 3;
+}
+
+// Channel-specific configuration for SMS notifications
+message SmsConfig {
+  // Phone numbers to send to (in addition to user's phone)
+  repeated string additional_phones = 1;
+}
+
+// Channel-specific configuration for push notifications
+message PushConfig {
+  // Additional data to include with push notification
+  map<string, string> data = 1;
+  
+  // Device tokens to target
+  repeated string device_tokens = 2;
+}
+
+// Channel-specific configuration for web notifications
+message WebConfig {
+  // Web notification icon URL
+  string icon_url = 1;
+  
+  // Web notification click action URL
+  string click_action = 2;
+}
+
+// Channel-specific configuration for webhook notifications
+message WebhookConfig {
+  // Webhook URL
+  string url = 1;
+  
+  // HTTP method (GET, POST, etc.)
+  string method = 2;
+  
+  // HTTP headers
+  map<string, string> headers = 3;
+  
+  // Custom payload template
+  string payload_template = 4;
+}
+
+// Attachment for email notifications
+message Attachment {
+  // Attachment name
+  string name = 1;
+  
+  // MIME type
+  string mime_type = 2;
+  
+  // Attachment data (base64 encoded)
+  string data = 3;
+}
+
+// Source information for the notification
+message SourceInfo {
+  // Source service that generated the notification
+  string service_name = 1;
+  
+  // Event ID that triggered the notification
+  string event_id = 2;
+  
+  // Event type that triggered the notification
+  string event_type = 3;
+  
+  // Position ID associated with the event, if applicable
+  string position_id = 4;
+  
+  // Additional source attributes
+  map<string, string> attributes = 5;
+}
+
+// Target information for the notification
+message TargetInfo {
+  // User IDs to notify
+  repeated int64 user_ids = 1;
+  
+  // Device ID associated with the notification
+  int64 device_id = 2;
+  
+  // Group ID associated with the notification
+  int64 group_id = 3;
+  
+  // Geofence ID associated with the notification, if applicable
+  int64 geofence_id = 4;
+  
+  // Maintenance ID associated with the notification, if applicable
+  int64 maintenance_id = 5;
+  
+  // Driver ID associated with the notification, if applicable
+  string driver_id = 6;
+  
+  // Additional targeting attributes
+  map<string, string> attributes = 7;
+}
+
+// Notification template information
+message TemplateInfo {
+  // Template name to use for formatting
+  string template_name = 1;
+  
+  // Template path
+  string template_path = 2;
+  
+  // Template variables
+  map<string, string> variables = 3;
+}
+
+// Retry information for failed notifications
+message RetryInfo {
+  // Number of retry attempts made so far
+  int32 attempt_count = 1;
+  
+  // Maximum number of retry attempts
+  int32 max_attempts = 2;
+  
+  // Next retry timestamp (milliseconds since epoch)
+  int64 next_retry_time = 3;
+  
+  // Last error message
+  string last_error = 4;
+  
+  // Last error timestamp (milliseconds since epoch)
+  int64 last_error_time = 5;
+}
+
+// Notification delivery status message
+message NotificationDeliveryStatus {
+  // Original notification ID
+  string notification_id = 1;
+  
+  // Correlation ID for distributed tracing
+  string correlation_id = 2;
+  
+  // Delivery channel
+  NotificationChannel channel = 3;
+  
+  // Delivery status
+  DeliveryStatus status = 4;
+  
+  // Timestamp of the delivery attempt (milliseconds since epoch)
+  int64 timestamp = 5;
+  
+  // Error message if delivery failed
+  string error_message = 6;
+  
+  // Additional status metadata
+  map<string, string> metadata = 7;
+  
+  // User ID the notification was delivered to
+  int64 user_id = 8;
+  
+  // Device ID associated with the notification
+  int64 device_id = 9;
+}
+
+// Delivery status enum
+enum DeliveryStatus {
+  UNKNOWN = 0;
+  PENDING = 1;
+  DELIVERED = 2;
+  FAILED = 3;
+  RETRYING = 4;
+  REJECTED = 5;
+}
