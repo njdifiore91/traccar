@@ -1,0 +1,186 @@
+# Production Configuration for Notification Service
+
+spring:
+  application:
+    name: notification-service
+  # Database configuration
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  # Message broker configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 10
+        prefetch: 10
+        default-requeue-rejected: false
+    connection-timeout: 5000
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-interval: 10000
+        multiplier: 2.0
+        max-attempts: 3
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8084}
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 8192
+    accept-count: 100
+    connection-timeout: 20000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 2048
+
+# Security settings
+security:
+  require-ssl: true
+  tls:
+    enabled: true
+    key-store: ${TLS_KEYSTORE_PATH:/etc/notification-service/keystore.p12}
+    key-store-password: ${TLS_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: notification-service
+  service-auth:
+    enabled: true
+    cert-path: ${SERVICE_CERT_PATH:/etc/certs/service.crt}
+    key-path: ${SERVICE_KEY_PATH:/etc/certs/service.key}
+    ca-path: ${SERVICE_CA_PATH:/etc/certs/ca.crt}
+
+# Notification service specific settings
+notification:
+  # Enabled notification types
+  types: mail,sms,firebase,web,telegram,pushover,command
+  # Retry configuration
+  retry:
+    max-attempts: 5
+    initial-backoff: 1000
+    max-backoff: 60000
+    backoff-multiplier: 2.0
+  # Circuit breaker configuration
+  circuit-breaker:
+    failure-rate-threshold: 50
+    wait-duration-in-open-state: 60000
+    ring-buffer-size-in-half-open-state: 10
+    ring-buffer-size-in-closed-state: 100
+  # Channel specific settings
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    from: ${MAIL_FROM:no-reply@example.com}
+    starttls-enable: true
+    connection-timeout: 10000
+    timeout: 10000
+    write-timeout: 10000
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+  sms:
+    provider: ${SMS_PROVIDER:http}
+    http:
+      url: ${SMS_HTTP_URL}
+      authorization: ${SMS_HTTP_AUTH}
+      template: ${SMS_HTTP_TEMPLATE}
+      timeout: 10000
+    aws:
+      region: ${SMS_AWS_REGION:us-east-1}
+      access-key: ${SMS_AWS_ACCESS_KEY}
+      secret-key: ${SMS_AWS_SECRET_KEY}
+  firebase:
+    database-url: ${FIREBASE_DATABASE_URL}
+    service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:/etc/notification-service/firebase-service-account.json}
+    connection-timeout: 10000
+    read-timeout: 10000
+  telegram:
+    bot-token: ${TELEGRAM_BOT_TOKEN}
+    chat-id: ${TELEGRAM_CHAT_ID}
+    timeout: 10000
+  pushover:
+    user-key: ${PUSHOVER_USER_KEY}
+    app-token: ${PUSHOVER_APP_TOKEN}
+    timeout: 10000
+
+# Distributed tracing configuration
+tracing:
+  enabled: true
+  service-name: notification-service
+  sampler-rate: 0.1
+  zipkin:
+    base-url: ${ZIPKIN_URL:http://zipkin:9411}
+    sender:
+      type: web
+
+# Monitoring and metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: INFO
+    org.traccar.notification: INFO
+    org.traccar.notificators: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n'
+  file:
+    name: /var/log/notification-service/notification-service.log
+    max-size: 100MB
+    max-history: 30
+
+# Service discovery configuration
+discovery:
+  enabled: true
+  service-name: notification-service
+  consul:
+    host: ${CONSUL_HOST:consul}
+    port: ${CONSUL_PORT:8500}
+    register: true
+    deregister: true
+    prefer-ip-address: true
+    health-check-path: /actuator/health
+    health-check-interval: 15s
+    instance-id: ${spring.application.name}:${random.value}
