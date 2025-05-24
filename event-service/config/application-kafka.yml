@@ -1,0 +1,163 @@
+# Kafka Configuration for Event Processing Service
+# This file contains Kafka-specific settings for broker connection, topics, consumer groups, and producer properties
+
+# Kafka Broker Connection Settings
+spring:
+  kafka:
+    # Primary broker connection configuration
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    # Security configuration
+    security:
+      protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+    # SSL configuration if needed
+    ssl:
+      trust-store-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+      trust-store-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION:}
+      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD:}
+    
+    # Consumer Configuration for enriched position data
+    consumer:
+      # Consumer group ID for this service
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:event-service}
+      # Auto offset reset strategy - start from earliest to ensure no events are missed
+      auto-offset-reset: earliest
+      # Disable auto-commit for manual acknowledgment after processing
+      enable-auto-commit: false
+      # Key and value deserializer classes
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # JSON deserializer trust packages
+      properties:
+        spring.json.trusted.packages: org.traccar.model,org.traccar.proto
+        # Maximum poll records per consumer poll - balance between throughput and memory usage
+        max.poll.records: 500
+        # Maximum poll interval (ms) - must process batch within this time
+        max.poll.interval.ms: 300000
+        # Session timeout (ms) - how long before consumer considered dead
+        session.timeout.ms: 30000
+        # Heartbeat interval (ms) - should be 1/3 of session timeout
+        heartbeat.interval.ms: 10000
+        # Isolation level for reading - read only committed messages
+        isolation.level: read_committed
+    
+    # Producer Configuration for event data
+    producer:
+      # Key and value serializer classes
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # Producer client ID prefix
+      client-id: ${KAFKA_PRODUCER_CLIENT_ID:event-service-producer}
+      # Acknowledgment settings - wait for all replicas to acknowledge for durability
+      acks: all
+      # Retries configuration - retry failed sends
+      retries: 3
+      # Producer-specific properties
+      properties:
+        # Retry backoff (ms)
+        retry.backoff.ms: 1000
+        # Enable idempotent producer for exactly-once semantics
+        enable.idempotence: true
+        # Linger time to allow batching (ms) - improves throughput
+        linger.ms: 5
+        # Batch size (bytes) - messages are batched up to this size
+        batch.size: 16384
+        # Buffer memory (bytes) - total memory for buffering
+        buffer.memory: 33554432
+        # Compression type - reduces network bandwidth and storage
+        compression.type: lz4
+    
+    # Listener Configuration
+    listener:
+      # Concurrency level for consumers - number of threads consuming messages
+      concurrency: ${KAFKA_LISTENER_CONCURRENCY:3}
+      # Ack mode for manual acknowledgment - only ack after successful processing
+      ack-mode: MANUAL_IMMEDIATE
+      # Missing topics behavior - don't fail if topics don't exist yet
+      missing-topics-fatal: false
+      # Error handler configuration - batch error handling
+      type: BATCH
+      # Idle event interval - time between idle events when no messages
+      idle-event-interval: 60000
+
+# Topic Configuration
+kafka:
+  # Topics for event processing data flow
+  topic:
+    # Input topic for enriched positions from Position Service
+    enriched-positions: ${KAFKA_TOPIC_ENRICHED_POSITIONS:enriched-positions}
+    # Output topic for detected events to be consumed by Notification Service
+    events: ${KAFKA_TOPIC_EVENTS:events}
+    # Dead letter queue topic for failed messages that couldn't be processed
+    dead-letter-queue: ${KAFKA_TOPIC_DLQ:event-service-dlq}
+  
+  # Consumer Configuration for error handling and performance
+  consumer:
+    # Maximum number of retry attempts for failed messages before sending to DLQ
+    max-retry-attempts: 3
+    # Initial backoff interval between retries (ms)
+    retry-interval: 1000
+    # Maximum backoff interval (ms) for retry attempts
+    max-retry-interval: 10000
+    # Backoff multiplier for exponential backoff strategy
+    retry-multiplier: 2.0
+    # Concurrency settings - number of parallel consumers
+    concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+  
+  # Producer Configuration for event publishing
+  producer:
+    # Transaction timeout (ms) for transactional producers
+    transaction-timeout: 60000
+    # Batch size for event publishing - number of events to accumulate before sending
+    batch-size: 100
+    # Flush interval for batched events (ms) - max time to wait before sending batch
+    flush-interval: 500
+
+# Error Handling Configuration
+error:
+  handling:
+    # Enable dead letter queue for failed messages that can't be processed after retries
+    dlq-enabled: true
+    # Enable retry mechanism for transient failures
+    retry-enabled: true
+    # Log failed messages for debugging and monitoring
+    log-failures: true
+    # Categories of exceptions that should not be retried (permanent failures)
+    non-retryable-exceptions:
+      - org.springframework.kafka.support.serializer.DeserializationException
+      - org.apache.kafka.common.errors.RecordTooLargeException
+      - java.lang.IllegalArgumentException
+
+# Health Check Configuration for monitoring service health
+management:
+  health:
+    # Enable Kafka connection health check
+    kafka:
+      enabled: true
+    # Enable Kafka topics health check to verify topic existence and accessibility
+    kafka-topics:
+      enabled: true
+
+# Resilience Configuration
+resilience:
+  # Circuit breaker configuration for external service calls
+  circuit-breaker:
+    # Failure threshold percentage to open circuit
+    failure-rate-threshold: 50
+    # Minimum number of calls before calculating failure rate
+    minimum-number-of-calls: 10
+    # Duration to wait before transitioning to half-open state (ms)
+    wait-duration-in-open-state: 10000
+    # Number of permitted calls in half-open state
+    permitted-calls-in-half-open: 5
+  
+  # Retry configuration for failed operations
+  retry:
+    # Maximum number of retry attempts
+    max-attempts: 3
+    # Backoff period between retries (ms)
+    backoff-period: 1000
+    # Enable exponential backoff
+    enable-exponential-backoff: true
+    # Exponential backoff multiplier
+    exponential-backoff-multiplier: 2.0
