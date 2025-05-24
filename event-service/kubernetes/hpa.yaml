@@ -1,0 +1,70 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: event-service-hpa
+  namespace: event
+  labels:
+    app: event-service
+    component: event-processing
+    part-of: traccar
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: event-service
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  # Standard resource metrics
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # Custom metrics for event processing
+  - type: Pods
+    pods:
+      metric:
+        name: event_processing_time_p95
+      target:
+        type: AverageValue
+        averageValue: 200m # 200 milliseconds
+  - type: External
+    external:
+      metric:
+        name: kafka_consumer_lag
+        selector:
+          matchLabels:
+            topic: enriched-positions
+            consumergroup: event-service
+      target:
+        type: AverageValue
+        averageValue: 1000
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 4
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 120
+      - type: Pods
+        value: 1
+        periodSeconds: 120
+      selectPolicy: Min
