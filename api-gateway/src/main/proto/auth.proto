@@ -1,0 +1,253 @@
+syntax = "proto3";
+
+package org.traccar.proto.auth;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto.auth";
+option java_outer_classname = "AuthProto";
+
+// Authentication service for handling user authentication operations
+service AuthenticationService {
+  // Validates user credentials and returns an authentication token
+  rpc ValidateCredentials(CredentialsRequest) returns (AuthenticationResponse);
+  
+  // Validates an existing authentication token
+  rpc ValidateToken(TokenValidationRequest) returns (TokenValidationResponse);
+  
+  // Refreshes an existing authentication token
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthenticationResponse);
+  
+  // Validates a session
+  rpc ValidateSession(SessionValidationRequest) returns (SessionValidationResponse);
+  
+  // Verifies a two-factor authentication code
+  rpc VerifyTwoFactor(TwoFactorVerificationRequest) returns (TwoFactorVerificationResponse);
+  
+  // Invalidates an authentication token or session (logout)
+  rpc Invalidate(InvalidationRequest) returns (InvalidationResponse);
+  
+  // Authenticates with an external identity provider
+  rpc ExternalAuthenticate(ExternalAuthRequest) returns (AuthenticationResponse);
+}
+
+// Authorization service for handling access control operations
+service AuthorizationService {
+  // Checks if a user has permission to access a resource
+  rpc CheckPermission(PermissionRequest) returns (PermissionResponse);
+  
+  // Gets all permissions for a user
+  rpc GetUserPermissions(UserPermissionsRequest) returns (UserPermissionsResponse);
+  
+  // Checks if a user has a specific role
+  rpc CheckRole(RoleRequest) returns (RoleResponse);
+  
+  // Gets all roles for a user
+  rpc GetUserRoles(UserRolesRequest) returns (UserRolesResponse);
+}
+
+// Authentication types supported by the system
+enum AuthenticationType {
+  BASIC = 0;       // Username/password authentication
+  TOKEN = 1;       // Token-based authentication
+  SESSION = 2;     // Session-based authentication
+  EXTERNAL = 3;    // External identity provider
+  SERVICE = 4;     // Service-to-service authentication
+}
+
+// Authentication request with username and password
+message CredentialsRequest {
+  string username = 1;
+  string password = 2;
+  bool remember_me = 3;  // Whether to issue a long-lived token
+  string client_id = 4;  // Client application identifier
+  string device_info = 5; // Information about the client device
+}
+
+// Authentication response with token and user information
+message AuthenticationResponse {
+  bool success = 1;
+  string token = 2;       // JWT token for API access
+  string refresh_token = 3; // Token for refreshing the authentication token
+  uint64 expires_at = 4;  // Token expiration timestamp (Unix time in milliseconds)
+  UserContext user = 5;   // User context information
+  bool requires_two_factor = 6; // Whether 2FA is required to complete authentication
+  string session_id = 7;  // Session identifier for session-based auth
+  repeated string permissions = 8; // List of user permissions
+  repeated string roles = 9; // List of user roles
+  ErrorDetails error = 10; // Error details if authentication failed
+}
+
+// Token validation request
+message TokenValidationRequest {
+  string token = 1;
+}
+
+// Token validation response
+message TokenValidationResponse {
+  bool valid = 1;
+  UserContext user = 2;   // User context if token is valid
+  uint64 expires_at = 3;  // Token expiration timestamp
+  ErrorDetails error = 4; // Error details if validation failed
+}
+
+// Refresh token request
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+// Session validation request
+message SessionValidationRequest {
+  string session_id = 1;
+}
+
+// Session validation response
+message SessionValidationResponse {
+  bool valid = 1;
+  UserContext user = 2;   // User context if session is valid
+  uint64 expires_at = 3;  // Session expiration timestamp
+  ErrorDetails error = 4; // Error details if validation failed
+}
+
+// Two-factor authentication verification request
+message TwoFactorVerificationRequest {
+  string token = 1;       // Authentication token from initial login
+  string code = 2;        // Two-factor verification code
+  string method = 3;      // 2FA method (TOTP, SMS, etc.)
+}
+
+// Two-factor authentication verification response
+message TwoFactorVerificationResponse {
+  bool success = 1;
+  string token = 2;       // New JWT token after successful 2FA
+  uint64 expires_at = 3;  // Token expiration timestamp
+  ErrorDetails error = 4; // Error details if verification failed
+}
+
+// Token/session invalidation request (logout)
+message InvalidationRequest {
+  string token = 1;       // Token to invalidate
+  string session_id = 2;  // Session ID to invalidate
+  bool invalidate_all = 3; // Whether to invalidate all user sessions
+}
+
+// Invalidation response
+message InvalidationResponse {
+  bool success = 1;
+  ErrorDetails error = 2; // Error details if invalidation failed
+}
+
+// External authentication request
+message ExternalAuthRequest {
+  string provider = 1;    // Identity provider name (Google, Microsoft, etc.)
+  string token = 2;       // Token from the external provider
+  string code = 3;        // Authorization code for OAuth flow
+  string redirect_uri = 4; // Redirect URI used in OAuth flow
+  string client_id = 5;    // Client application identifier
+}
+
+// User context information
+message UserContext {
+  int64 id = 1;           // User ID
+  string username = 2;     // Username
+  string email = 3;        // Email address
+  string name = 4;         // Full name
+  bool admin = 5;          // Whether the user is an administrator
+  bool disabled = 6;       // Whether the user account is disabled
+  uint64 expiration = 7;   // Account expiration timestamp
+  map<string, string> attributes = 8; // Additional user attributes
+  int64 managed_by = 9;    // ID of the user manager (if applicable)
+  int64 company_id = 10;   // Company ID (for multi-tenant systems)
+}
+
+// Permission check request
+message PermissionRequest {
+  UserContext user = 1;    // User context
+  string resource_type = 2; // Type of resource (device, geofence, etc.)
+  int64 resource_id = 3;   // Resource ID
+  string action = 4;       // Action to perform (view, edit, delete, etc.)
+}
+
+// Permission check response
+message PermissionResponse {
+  bool permitted = 1;      // Whether the action is permitted
+  ErrorDetails error = 2;  // Error details if check failed
+}
+
+// User permissions request
+message UserPermissionsRequest {
+  int64 user_id = 1;       // User ID
+  string resource_type = 2; // Optional resource type filter
+}
+
+// User permissions response
+message UserPermissionsResponse {
+  repeated Permission permissions = 1; // List of permissions
+  ErrorDetails error = 2;  // Error details if request failed
+}
+
+// Permission definition
+message Permission {
+  string resource_type = 1; // Type of resource
+  int64 resource_id = 2;    // Resource ID (0 for all resources of this type)
+  repeated string actions = 3; // Allowed actions (view, edit, delete, etc.)
+}
+
+// Role check request
+message RoleRequest {
+  int64 user_id = 1;       // User ID
+  string role = 2;         // Role to check
+}
+
+// Role check response
+message RoleResponse {
+  bool has_role = 1;       // Whether the user has the role
+  ErrorDetails error = 2;  // Error details if check failed
+}
+
+// User roles request
+message UserRolesRequest {
+  int64 user_id = 1;       // User ID
+}
+
+// User roles response
+message UserRolesResponse {
+  repeated string roles = 1; // List of roles
+  ErrorDetails error = 2;   // Error details if request failed
+}
+
+// Error details
+message ErrorDetails {
+  int32 code = 1;          // Error code
+  string message = 2;      // Error message
+  string details = 3;      // Additional error details
+}
+
+// Error codes
+enum ErrorCode {
+  UNKNOWN_ERROR = 0;
+  INVALID_CREDENTIALS = 1;
+  INVALID_TOKEN = 2;
+  EXPIRED_TOKEN = 3;
+  ACCOUNT_DISABLED = 4;
+  ACCOUNT_LOCKED = 5;
+  ACCOUNT_EXPIRED = 6;
+  INSUFFICIENT_PERMISSIONS = 7;
+  TWO_FACTOR_REQUIRED = 8;
+  INVALID_TWO_FACTOR_CODE = 9;
+  EXTERNAL_AUTH_FAILED = 10;
+  SERVICE_UNAVAILABLE = 11;
+}
+
+// Security context for propagating user information to backend services
+message SecurityContext {
+  int64 user_id = 1;       // User ID
+  string username = 2;     // Username
+  repeated string roles = 3; // User roles
+  repeated string permissions = 4; // User permissions
+  int64 company_id = 5;    // Company ID (for multi-tenant systems)
+  bool admin = 6;          // Whether the user is an administrator
+  string correlation_id = 7; // Request correlation ID for tracing
+  string client_ip = 8;    // Client IP address
+  string user_agent = 9;   // User agent string
+  uint64 timestamp = 10;   // Request timestamp
+}
