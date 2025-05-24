@@ -346,4 +346,98 @@ public class NotificationFormatter {
         String fallbackMessage = "Notification: " + (event != null ? event.getType() : "Unknown event type");
         return CompletableFuture.completedFuture(fallbackMessage);
     }
+    
+    /**
+     * Formats a notification for the web interface, creating a structured data object
+     * that can be serialized to JSON and sent to WebSocket clients.
+     *
+     * @param notification The notification to format
+     * @param user The user receiving the notification
+     * @return A map containing the formatted notification data
+     */
+    @CircuitBreaker(name = "webFormatting", fallbackMethod = "formatForWebFallback")
+    public Map<String, Object> formatForWeb(Notification notification, User user) {
+        Span span = tracer.spanBuilder("notification.formatForWeb")
+                .setParent(Context.current().with(Span.current()))
+                .setSpanKind(SpanKind.INTERNAL)
+                .setAttribute("userId", user.getId())
+                .setAttribute("notificationId", notification.getId())
+                .startSpan();
+        
+        try (Scope scope = span.makeCurrent()) {
+            LOGGER.debug("Formatting web notification for user {}", user.getId());
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", notification.getId());
+            data.put("type", notification.getType());
+            data.put("userId", user.getId());
+            data.put("timestamp", System.currentTimeMillis());
+            
+            // Add notification-specific data
+            if (notification.getAttributes() != null) {
+                data.put("attributes", notification.getAttributes());
+            }
+            
+            // Add event data if available
+            if (notification.getEventId() > 0) {
+                Map<String, Object> eventData = new HashMap<>();
+                eventData.put("id", notification.getEventId());
+                eventData.put("type", notification.getType());
+                data.put("event", eventData);
+            }
+            
+            // Add position data if available
+            if (notification.getPositionId() > 0) {
+                Map<String, Object> positionData = new HashMap<>();
+                positionData.put("id", notification.getPositionId());
+                data.put("position", positionData);
+            }
+            
+            // Add device data if available
+            if (notification.getDeviceId() > 0) {
+                Map<String, Object> deviceData = new HashMap<>();
+                deviceData.put("id", notification.getDeviceId());
+                data.put("device", deviceData);
+            }
+            
+            // Add formatted message if available
+            if (notification.getMessage() != null && !notification.getMessage().isEmpty()) {
+                data.put("message", notification.getMessage());
+            } else if (notification.getType() != null) {
+                // Generate a default message based on notification type
+                data.put("message", "New " + notification.getType() + " notification");
+            }
+            
+            return data;
+        } catch (Exception e) {
+            span.recordException(e);
+            span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());
+            throw e;
+        } finally {
+            span.end();
+        }
+    }
+    
+    /**
+     * Fallback method for web notification formatting when the circuit breaker is open.
+     * Provides a minimal notification object to ensure notifications can still be sent.
+     *
+     * @param notification The notification to format
+     * @param user The user receiving the notification
+     * @param e The exception that triggered the fallback
+     * @return A map containing minimal notification data
+     */
+    public Map<String, Object> formatForWebFallback(Notification notification, User user, Exception e) {
+        LOGGER.warn("Using fallback web notification formatting due to error: {}", e.getMessage());
+        
+        Map<String, Object> fallbackData = new HashMap<>();
+        fallbackData.put("id", notification.getId());
+        fallbackData.put("type", notification.getType() != null ? notification.getType() : "unknown");
+        fallbackData.put("userId", user.getId());
+        fallbackData.put("timestamp", System.currentTimeMillis());
+        fallbackData.put("message", "Notification received");
+        fallbackData.put("fallback", true);
+        
+        return fallbackData;
+    }
 }
