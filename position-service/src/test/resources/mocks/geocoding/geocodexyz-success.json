@@ -1,0 +1,39 @@
+{
+  "request": {
+    "urlPattern": "/geocode\\.xyz/[0-9.-]+,[0-9.-]+\\?geoit=JSON(&key=.+)?$",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "standard": {
+        "addresst": "Main Street",
+        "city": "New York",
+        "prov": "United States",
+        "countryname": "United States of America",
+        "postal": "10001",
+        "region": "New York"
+      },
+      "alt": {
+        "loc": {
+          "longt": "-73.9866",
+          "latt": "40.7306"
+        }
+      },
+      "stnumber": "123",
+      "staddress": "Main Street",
+      "city": "New York",
+      "region": "New York",
+      "prov": "United States",
+      "postal": "10001",
+      "confidence": "0.9",
+      "osmtags": {
+        "place": "city",
+        "highway": "residential"
+      }
+    }
+  }
+}
