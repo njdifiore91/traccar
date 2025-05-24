@@ -1,0 +1,284 @@
+[
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-1234-5678-90ab",
+    "correlationId": "corr-1234-5678-90ab",
+    "timestamp": "2023-06-15T14:30:45.123Z",
+    "eventType": "geofenceEnter",
+    "deviceId": 123,
+    "positionId": 456789,
+    "geofenceId": 42,
+    "metadata": {
+      "deviceName": "Delivery Truck 1",
+      "geofenceName": "Warehouse Zone",
+      "priority": "normal"
+    },
+    "position": {
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 15.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 5.0,
+      "timestamp": "2023-06-15T14:30:40.000Z"
+    },
+    "notification": {
+      "subject": "Geofence Enter Alert",
+      "body": "Device 'Delivery Truck 1' has entered geofence 'Warehouse Zone' at 2023-06-15 14:30:40 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-2345-6789-01cd",
+    "correlationId": "corr-2345-6789-01cd",
+    "timestamp": "2023-06-15T15:45:12.456Z",
+    "eventType": "geofenceExit",
+    "deviceId": 123,
+    "positionId": 456790,
+    "geofenceId": 42,
+    "metadata": {
+      "deviceName": "Delivery Truck 1",
+      "geofenceName": "Warehouse Zone",
+      "priority": "normal"
+    },
+    "position": {
+      "latitude": 37.7755,
+      "longitude": -122.4200,
+      "altitude": 15.0,
+      "speed": 15.5,
+      "course": 90.0,
+      "accuracy": 4.0,
+      "timestamp": "2023-06-15T15:45:10.000Z"
+    },
+    "notification": {
+      "subject": "Geofence Exit Alert",
+      "body": "Device 'Delivery Truck 1' has exited geofence 'Warehouse Zone' at 2023-06-15 15:45:10 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-3456-7890-12ef",
+    "correlationId": "corr-3456-7890-12ef",
+    "timestamp": "2023-06-15T16:20:33.789Z",
+    "eventType": "deviceOverspeed",
+    "deviceId": 456,
+    "positionId": 567890,
+    "metadata": {
+      "deviceName": "Delivery Van 2",
+      "speedLimit": 80.0,
+      "actualSpeed": 95.5,
+      "priority": "high",
+      "speedUnit": "km/h"
+    },
+    "position": {
+      "latitude": 37.8049,
+      "longitude": -122.4132,
+      "altitude": 10.0,
+      "speed": 95.5,
+      "course": 180.0,
+      "accuracy": 3.0,
+      "timestamp": "2023-06-15T16:20:30.000Z"
+    },
+    "notification": {
+      "subject": "Overspeed Alert",
+      "body": "Device 'Delivery Van 2' exceeded speed limit (95.5 km/h in a 80.0 km/h zone) at 2023-06-15 16:20:30 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-4567-8901-23gh",
+    "correlationId": "corr-4567-8901-23gh",
+    "timestamp": "2023-06-15T17:05:22.345Z",
+    "eventType": "motionStart",
+    "deviceId": 789,
+    "positionId": 678901,
+    "metadata": {
+      "deviceName": "Fleet Car 3",
+      "priority": "low",
+      "previousState": "stopped",
+      "stoppedDuration": "PT1H23M45S"
+    },
+    "position": {
+      "latitude": 37.7833,
+      "longitude": -122.4167,
+      "altitude": 12.0,
+      "speed": 5.2,
+      "course": 270.0,
+      "accuracy": 6.0,
+      "timestamp": "2023-06-15T17:05:20.000Z"
+    },
+    "notification": {
+      "subject": "Motion Started",
+      "body": "Device 'Fleet Car 3' started moving at 2023-06-15 17:05:20 UTC after being stopped for 1 hour 23 minutes"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-5678-9012-34ij",
+    "correlationId": "corr-5678-9012-34ij",
+    "timestamp": "2023-06-15T18:15:55.678Z",
+    "eventType": "motionStop",
+    "deviceId": 789,
+    "positionId": 789012,
+    "metadata": {
+      "deviceName": "Fleet Car 3",
+      "priority": "low",
+      "previousState": "moving",
+      "movingDuration": "PT1H10M35S",
+      "distanceMoved": 32.5
+    },
+    "position": {
+      "latitude": 37.7923,
+      "longitude": -122.4167,
+      "altitude": 12.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 4.0,
+      "timestamp": "2023-06-15T18:15:50.000Z"
+    },
+    "notification": {
+      "subject": "Motion Stopped",
+      "body": "Device 'Fleet Car 3' stopped moving at 2023-06-15 18:15:50 UTC after traveling 32.5 km"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-6789-0123-45kl",
+    "correlationId": "corr-6789-0123-45kl",
+    "timestamp": "2023-06-15T19:30:10.123Z",
+    "eventType": "deviceOffline",
+    "deviceId": 321,
+    "positionId": 890123,
+    "metadata": {
+      "deviceName": "Delivery Truck 5",
+      "priority": "high",
+      "lastReportedTime": "2023-06-15T19:00:10.000Z",
+      "offlineDuration": "PT30M"
+    },
+    "position": {
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 15.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 5.0,
+      "timestamp": "2023-06-15T19:00:10.000Z"
+    },
+    "notification": {
+      "subject": "Device Offline Alert",
+      "body": "Device 'Delivery Truck 5' has been offline for 30 minutes. Last reported position at 2023-06-15 19:00:10 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-7890-1234-56mn",
+    "correlationId": "corr-7890-1234-56mn",
+    "timestamp": "2023-06-15T20:45:33.456Z",
+    "eventType": "deviceOnline",
+    "deviceId": 321,
+    "positionId": 901234,
+    "metadata": {
+      "deviceName": "Delivery Truck 5",
+      "priority": "normal",
+      "offlineDuration": "PT1H45M23S"
+    },
+    "position": {
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 15.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 5.0,
+      "timestamp": "2023-06-15T20:45:30.000Z"
+    },
+    "notification": {
+      "subject": "Device Online Alert",
+      "body": "Device 'Delivery Truck 5' is now online at 2023-06-15 20:45:30 UTC after being offline for 1 hour 45 minutes"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-8901-2345-67op",
+    "correlationId": "corr-8901-2345-67op",
+    "timestamp": "2023-06-15T21:10:22.789Z",
+    "eventType": "deviceFuelDrop",
+    "deviceId": 654,
+    "positionId": 123456,
+    "metadata": {
+      "deviceName": "Heavy Truck 7",
+      "priority": "high",
+      "previousFuelLevel": 75.5,
+      "currentFuelLevel": 45.2,
+      "fuelDrop": 30.3,
+      "fuelUnit": "liters"
+    },
+    "position": {
+      "latitude": 37.7833,
+      "longitude": -122.4167,
+      "altitude": 12.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 6.0,
+      "timestamp": "2023-06-15T21:10:20.000Z"
+    },
+    "notification": {
+      "subject": "Fuel Drop Alert",
+      "body": "Device 'Heavy Truck 7' detected a fuel drop of 30.3 liters at 2023-06-15 21:10:20 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-9012-3456-78qr",
+    "correlationId": "corr-9012-3456-78qr",
+    "timestamp": "2023-06-15T22:25:45.012Z",
+    "eventType": "deviceIdling",
+    "deviceId": 987,
+    "positionId": 234567,
+    "metadata": {
+      "deviceName": "Delivery Van 9",
+      "priority": "medium",
+      "idlingDuration": "PT15M",
+      "engineRunning": true
+    },
+    "position": {
+      "latitude": 37.7923,
+      "longitude": -122.4167,
+      "altitude": 12.0,
+      "speed": 0.0,
+      "course": 0.0,
+      "accuracy": 4.0,
+      "timestamp": "2023-06-15T22:25:40.000Z"
+    },
+    "notification": {
+      "subject": "Excessive Idling Alert",
+      "body": "Device 'Delivery Van 9' has been idling for 15 minutes at 2023-06-15 22:25:40 UTC"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "messageId": "pos-notif-0123-4567-89st",
+    "correlationId": "corr-0123-4567-89st",
+    "timestamp": "2023-06-15T23:40:15.345Z",
+    "eventType": "deviceSosActivated",
+    "deviceId": 555,
+    "positionId": 345678,
+    "metadata": {
+      "deviceName": "Security Vehicle 1",
+      "priority": "critical",
+      "sosType": "panic button"
+    },
+    "position": {
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 15.0,
+      "speed": 45.2,
+      "course": 180.0,
+      "accuracy": 5.0,
+      "timestamp": "2023-06-15T23:40:10.000Z"
+    },
+    "notification": {
+      "subject": "SOS ALERT - IMMEDIATE ACTION REQUIRED",
+      "body": "Device 'Security Vehicle 1' has activated the panic button at 2023-06-15 23:40:10 UTC. Immediate assistance required."
+    }
+  }
+]
