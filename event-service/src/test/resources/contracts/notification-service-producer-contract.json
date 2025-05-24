@@ -1,0 +1,458 @@
+{
+  "provider": {
+    "name": "event-service"
+  },
+  "consumer": {
+    "name": "notification-service"
+  },
+  "providerStates": [
+    {
+      "name": "Event Service is running and connected to the message broker"
+    },
+    {
+      "name": "Event Service has detected events that require notifications"
+    },
+    {
+      "name": "Event Service has access to position data for events"
+    }
+  ],
+  "interactions": [
+    {
+      "description": "a notification request for an alarm event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "alarm",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "alarmType": "general"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "high",
+            "notificationChannels": ["email", "sms", "push"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a geofence entry event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "geofenceEnter",
+          "deviceId": "${number()}",
+          "geofenceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "geofenceName": "${string()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "medium",
+            "notificationChannels": ["email", "push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a geofence exit event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "geofenceExit",
+          "deviceId": "${number()}",
+          "geofenceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "geofenceName": "${string()}",
+            "dwellTime": "${number()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "medium",
+            "notificationChannels": ["email", "push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for an overspeed event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "deviceOverspeed",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "speedLimit": "${decimal()}",
+            "actualSpeed": "${decimal()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "high",
+            "notificationChannels": ["sms", "push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a motion event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "deviceMoving",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "previousState": "stopped",
+            "currentState": "moving"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}",
+              "ignition": "${boolean()}"
+            }
+          },
+          "metadata": {
+            "priority": "low",
+            "notificationChannels": ["web", "push"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a device stopped event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "deviceStopped",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "previousState": "moving",
+            "currentState": "stopped",
+            "motionDuration": "${number()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}",
+              "ignition": "${boolean()}"
+            }
+          },
+          "metadata": {
+            "priority": "low",
+            "notificationChannels": ["web", "push"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a device offline event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "deviceOffline",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "lastReportedTime": "${timestamp()}",
+            "offlineDuration": "${number()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "high",
+            "notificationChannels": ["email", "sms", "push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a device online event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "deviceOnline",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "lastOfflineTime": "${timestamp()}",
+            "offlineDuration": "${number()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "medium",
+            "notificationChannels": ["push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    },
+    {
+      "description": "a notification request for a command result event",
+      "request": {
+        "method": "POST",
+        "path": "/api/notifications",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Correlation-ID": "${uuid()}"
+        },
+        "body": {
+          "eventId": "${number()}",
+          "eventType": "commandResult",
+          "deviceId": "${number()}",
+          "timestamp": "${timestamp()}",
+          "attributes": {
+            "commandId": "${number()}",
+            "commandType": "${string()}",
+            "commandStatus": "${string()}",
+            "commandResult": "${string()}"
+          },
+          "position": {
+            "latitude": "${decimal()}",
+            "longitude": "${decimal()}",
+            "altitude": "${decimal()}",
+            "speed": "${decimal()}",
+            "course": "${decimal()}",
+            "address": "${string()}",
+            "attributes": {
+              "protocol": "${string()}"
+            }
+          },
+          "metadata": {
+            "priority": "medium",
+            "notificationChannels": ["email", "push", "web"],
+            "correlationId": "${uuid()}",
+            "sourceService": "event-service",
+            "timestamp": "${timestamp()}",
+            "userId": "${number()}"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "notificationId": "${string()}"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "schemaVersion": "1.0.0",
+    "description": "Producer contract between Event Service and Notification Service defining notification request formats for different event types",
+    "lastUpdated": "${timestamp()}",
+    "messageFormat": "JSON",
+    "transportProtocol": "HTTP/REST",
+    "asyncPattern": true,
+    "tags": ["event-service", "notification-service", "contract-test", "producer"],
+    "maintainers": ["Traccar Platform Team"],
+    "serviceVersions": {
+      "eventService": "1.0.0",
+      "notificationService": "1.0.0"
+    }
+  }
+}
