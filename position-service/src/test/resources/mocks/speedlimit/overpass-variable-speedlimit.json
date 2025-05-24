@@ -1,0 +1,85 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/interpreter",
+    "queryParameters": {
+      "data": {
+        "matches": ".*way\\[maxspeed\\]\\(around:.*34\\.74.*,-82\\.48.*\\).*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache",
+      "X-Powered-By": "Overpass API"
+    },
+    "jsonBody": {
+      "version": 0.6,
+      "generator": "Overpass API 0.7.56.3 mock",
+      "osm3s": {
+        "timestamp_osm_base": "2023-05-24T12:34:56Z",
+        "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+      },
+      "elements": [
+        {
+          "type": "way",
+          "id": 123456789,
+          "bounds": {
+            "minlat": 34.74700,
+            "minlon": -82.48200,
+            "maxlat": 34.74800,
+            "maxlon": -82.48000
+          },
+          "nodes": [1111111, 2222222, 3333333],
+          "tags": {
+            "highway": "primary",
+            "name": "Main Street",
+            "maxspeed": "52.1",
+            "maxspeed:variable": "yes",
+            "maxspeed:conditional": "45 @ (rainfall > 2mm)"
+          }
+        },
+        {
+          "type": "way",
+          "id": 987654321,
+          "bounds": {
+            "minlat": 34.74750,
+            "minlon": -82.48150,
+            "maxlat": 34.74850,
+            "maxlon": -82.47950
+          },
+          "nodes": [4444444, 5555555, 6666666],
+          "tags": {
+            "highway": "secondary",
+            "name": "Cross Street",
+            "maxspeed": "52.1",
+            "maxspeed:variable": "yes",
+            "maxspeed:conditional": "35 @ (Mo-Fr 07:00-09:00,16:00-19:00); 40 @ (snow)"
+          }
+        },
+        {
+          "type": "way",
+          "id": 555555555,
+          "bounds": {
+            "minlat": 34.74720,
+            "minlon": -82.48120,
+            "maxlat": 34.74820,
+            "maxlon": -82.47920
+          },
+          "nodes": [7777777, 8888888, 9999999],
+          "tags": {
+            "highway": "tertiary",
+            "name": "Side Road",
+            "maxspeed": "52.1",
+            "maxspeed:variable": "yes",
+            "maxspeed:type": "electronic",
+            "maxspeed:source": "variable_message_sign"
+          }
+        }
+      ]
+    }
+  }
+}
