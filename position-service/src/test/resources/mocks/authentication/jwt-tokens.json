@@ -1,0 +1,416 @@
+{
+  "tokens": {
+    "valid": {
+      "api_gateway": {
+        "description": "Valid service-to-service token for API Gateway",
+        "raw": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoiYXBpLWdhdGV3YXkiLCJhdWQiOlsicG9zaXRpb24tc2VydmljZSJdLCJleHAiOjE3MTY0MzkwMjIsImlhdCI6MTcxNTQzOTAyMiwianRpIjoic2VydmljZS10b2tlbi0xMjYiLCJyb2xlIjoic2VydmljZSIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiLCJwb3NpdGlvbjp3cml0ZSJdLCJzZXJ2aWNlX2lkIjoiYXBpLWdhdGV3YXkifQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "api-gateway",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "service-token-126",
+            "role": "service",
+            "scope": ["position:read", "position:write"],
+            "service_id": "api-gateway"
+          }
+        }
+      },
+      "admin": {
+        "description": "Valid admin token with full position access",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoiYWRtaW4iLCJhdWQiOlsicG9zaXRpb24tc2VydmljZSJdLCJleHAiOjE3MTY0MzkwMjIsImlhdCI6MTcxNTQzOTAyMiwianRpIjoiYWRtaW4tdG9rZW4tMTIzIiwicm9sZSI6ImFkbWluIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCIsInBvc2l0aW9uOndyaXRlIiwicG9zaXRpb246ZGVsZXRlIl0sImRldmljZXMiOlsiKiJdfQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "admin",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "admin-token-123",
+            "role": "admin",
+            "scope": ["position:read", "position:write", "position:delete"],
+            "devices": ["*"]
+          }
+        }
+      },
+      "manager": {
+        "description": "Valid manager token with limited position access",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoibWFuYWdlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJtYW5hZ2VyLXRva2VuLTEyMyIsInJvbGUiOiJtYW5hZ2VyIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCIsInBvc2l0aW9uOndyaXRlIl0sImRldmljZXMiOlsiMTAwIiwiMTAxIiwiMTAyIl19.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "manager",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "manager-token-123",
+            "role": "manager",
+            "scope": ["position:read", "position:write"],
+            "devices": ["100", "101", "102"]
+          }
+        }
+      },
+      "user": {
+        "description": "Valid user token with read-only position access",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJ1c2VyLXRva2VuLTEyMyIsInJvbGUiOiJ1c2VyIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCJdLCJkZXZpY2VzIjpbIjIwMCJdfQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "user-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "protocol_service": {
+        "description": "Valid service-to-service token for Protocol Service",
+        "raw": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoicHJvdG9jb2wtc2VydmljZSIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJzZXJ2aWNlLXRva2VuLTEyMyIsInJvbGUiOiJzZXJ2aWNlIiwic2NvcGUiOlsicG9zaXRpb246d3JpdGUiXSwic2VydmljZV9pZCI6InByb3RvY29sLXNlcnZpY2UifQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "protocol-service",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "service-token-123",
+            "role": "service",
+            "scope": ["position:write"],
+            "service_id": "protocol-service"
+          }
+        }
+      },
+      "event_service": {
+        "description": "Valid service-to-service token for Event Service",
+        "raw": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoiZXZlbnQtc2VydmljZSIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJzZXJ2aWNlLXRva2VuLTEyNCIsInJvbGUiOiJzZXJ2aWNlIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCJdLCJzZXJ2aWNlX2lkIjoiZXZlbnQtc2VydmljZSJ9.signature",
+        "decoded": {
+          "header": {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "event-service",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "service-token-124",
+            "role": "service",
+            "scope": ["position:read"],
+            "service_id": "event-service"
+          }
+        }
+      },
+      "reporting_service": {
+        "description": "Valid service-to-service token for Reporting Service",
+        "raw": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoicmVwb3J0aW5nLXNlcnZpY2UiLCJhdWQiOlsicG9zaXRpb24tc2VydmljZSJdLCJleHAiOjE3MTY0MzkwMjIsImlhdCI6MTcxNTQzOTAyMiwianRpIjoic2VydmljZS10b2tlbi0xMjUiLCJyb2xlIjoic2VydmljZSIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiXSwic2VydmljZV9pZCI6InJlcG9ydGluZy1zZXJ2aWNlIn0.signature",
+        "decoded": {
+          "header": {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "reporting-service",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "service-token-125",
+            "role": "service",
+            "scope": ["position:read"],
+            "service_id": "reporting-service"
+          }
+        }
+      },
+      "short_lived": {
+        "description": "Valid token with short expiration time (5 minutes)",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNTQzOTMyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJzaG9ydC1saXZlZC10b2tlbi0xMjMiLCJyb2xlIjoidXNlciIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiXSwiZGV2aWNlcyI6WyIyMDAiXX0.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1715439322,
+            "iat": 1715439022,
+            "jti": "short-lived-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "specific_device_access": {
+        "description": "Valid token with access to specific device IDs",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJkZXZpY2UtYWNjZXNzLXRva2VuLTEyMyIsInJvbGUiOiJ1c2VyIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCJdLCJkZXZpY2VzIjpbIjMwMSIsIjMwMiIsIjMwMyJdfQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "device-access-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["301", "302", "303"]
+          }
+        }
+      },
+      "position_history_access": {
+        "description": "Valid token with position history access scope",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJoaXN0b3J5LWFjY2Vzcy10b2tlbi0xMjMiLCJyb2xlIjoidXNlciIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiLCJwb3NpdGlvbjpoaXN0b3J5Il0sImRldmljZXMiOlsiMjAwIl19.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "history-access-token-123",
+            "role": "user",
+            "scope": ["position:read", "position:history"],
+            "devices": ["200"]
+          }
+        }
+      }
+    },
+    "invalid": {
+      "not_yet_valid": {
+        "description": "Token that is not yet valid (future iat)",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNzQzOTAyMiwiaWF0IjoxNzE2NDM5MDIyLCJuYmYiOjE3MTY0MzkwMjIsImp0aSI6ImZ1dHVyZS10b2tlbi0xMjMiLCJyb2xlIjoidXNlciIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiXSwiZGV2aWNlcyI6WyIyMDAiXX0.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1717439022,
+            "iat": 1716439022,
+            "nbf": 1716439022,
+            "jti": "future-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "expired": {
+        "description": "Expired token for testing expiration validation",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNDQzOTAyMiwiaWF0IjoxNzEzNDM5MDIyLCJqdGkiOiJleHBpcmVkLXRva2VuLTEyMyIsInJvbGUiOiJ1c2VyIiwic2NvcGUiOlsicG9zaXRpb246cmVhZCJdLCJkZXZpY2VzIjpbIjIwMCJdfQ.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1714439022,
+            "iat": 1713439022,
+            "jti": "expired-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "wrong_audience": {
+        "description": "Token with incorrect audience claim",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJldmVudC1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJ3cm9uZy1hdWRpZW5jZS10b2tlbi0xMjMiLCJyb2xlIjoidXNlciIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiXSwiZGV2aWNlcyI6WyIyMDAiXX0.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["event-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "wrong-audience-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "missing_scope": {
+        "description": "Token missing required scope for position access",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJtaXNzaW5nLXNjb3BlLXRva2VuLTEyMyIsInJvbGUiOiJ1c2VyIiwic2NvcGUiOlsiZGV2aWNlOnJlYWQiXSwiZGV2aWNlcyI6WyIyMDAiXX0.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "missing-scope-token-123",
+            "role": "user",
+            "scope": ["device:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "wrong_issuer": {
+        "description": "Token with incorrect issuer claim",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL3Vua25vd24taXNzdWVyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJ3cm9uZy1pc3N1ZXItdG9rZW4tMTIzIiwicm9sZSI6InVzZXIiLCJzY29wZSI6WyJwb3NpdGlvbjpyZWFkIl0sImRldmljZXMiOlsiMjAwIl19.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://unknown-issuer.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "wrong-issuer-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "tampered_signature": {
+        "description": "Token with invalid signature (tampered)",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJ0YW1wZXJlZC10b2tlbi0xMjMiLCJyb2xlIjoiYWRtaW4iLCJzY29wZSI6WyJwb3NpdGlvbjpyZWFkIiwicG9zaXRpb246d3JpdGUiLCJwb3NpdGlvbjpkZWxldGUiXSwiZGV2aWNlcyI6WyIqIl19.invalid-signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "tampered-token-123",
+            "role": "admin",
+            "scope": ["position:read", "position:write", "position:delete"],
+            "devices": ["*"]
+          }
+        }
+      },
+      "wrong_algorithm": {
+        "description": "Token with unsupported algorithm",
+        "raw": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJ3cm9uZy1hbGdvcml0aG0tdG9rZW4tMTIzIiwicm9sZSI6InVzZXIiLCJzY29wZSI6WyJwb3NpdGlvbjpyZWFkIl0sImRldmljZXMiOlsiMjAwIl19.signature",
+        "decoded": {
+          "header": {
+            "alg": "HS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "wrong-algorithm-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "missing_kid": {
+        "description": "Token missing key ID (kid) in header",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FwaS50cmFjY2FyLmNvbS9hdXRoIiwic3ViIjoidXNlciIsImF1ZCI6WyJwb3NpdGlvbi1zZXJ2aWNlIl0sImV4cCI6MTcxNjQzOTAyMiwiaWF0IjoxNzE1NDM5MDIyLCJqdGkiOiJtaXNzaW5nLWtpZC10b2tlbi0xMjMiLCJyb2xlIjoidXNlciIsInNjb3BlIjpbInBvc2l0aW9uOnJlYWQiXSwiZGV2aWNlcyI6WyIyMDAiXX0.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT"
+          },
+          "payload": {
+            "iss": "https://api.traccar.com/auth",
+            "sub": "user",
+            "aud": ["position-service"],
+            "exp": 1716439022,
+            "iat": 1715439022,
+            "jti": "missing-kid-token-123",
+            "role": "user",
+            "scope": ["position:read"],
+            "devices": ["200"]
+          }
+        }
+      },
+      "malformed": {
+        "description": "Malformed token with invalid structure",
+        "raw": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InBvc2l0aW9uLXNlcnZpY2UtMSJ9.invalid-payload-section.signature",
+        "decoded": {
+          "header": {
+            "alg": "RS256",
+            "typ": "JWT",
+            "kid": "position-service-1"
+          },
+          "payload": "invalid-payload-format"
+        }
+      }
+    }
+  }
+}
