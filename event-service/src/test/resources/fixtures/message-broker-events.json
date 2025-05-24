@@ -1,0 +1,898 @@
+{
+  "description": "Test fixtures for message broker events used in Event Service integration testing",
+  "version": "1.0.0",
+  "incoming": {
+    "positions": [
+      {
+        "description": "Standard position message from Position Service",
+        "topic": "enriched.positions",
+        "key": "device-123",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174000",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1001,
+          "deviceId": 123,
+          "protocol": "tk103",
+          "deviceTime": "2023-06-01T12:00:00.000Z",
+          "serverTime": "2023-06-01T12:00:05.000Z",
+          "fixTime": "2023-06-01T12:00:00.000Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.0,
+          "speed": 62.5,
+          "course": 45.0,
+          "address": "123 Main St, San Francisco, CA",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 85,
+            "fuel": 75.5,
+            "motion": true,
+            "driverId": "driver-789"
+          }
+        }
+      },
+      {
+        "description": "Position message for overspeed event testing",
+        "topic": "enriched.positions",
+        "key": "device-456",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174001",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1002,
+          "deviceId": 456,
+          "protocol": "teltonika",
+          "deviceTime": "2023-06-01T13:00:00.000Z",
+          "serverTime": "2023-06-01T13:00:02.000Z",
+          "fixTime": "2023-06-01T13:00:00.000Z",
+          "valid": true,
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "altitude": 15.0,
+          "speed": 120.0,
+          "course": 90.0,
+          "address": "456 Broadway, New York, NY",
+          "accuracy": 3.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 90,
+            "fuel": 65.0,
+            "motion": true,
+            "speedLimit": 80.0
+          }
+        }
+      },
+      {
+        "description": "Position message for geofence entry event testing",
+        "topic": "enriched.positions",
+        "key": "device-789",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174002",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1003,
+          "deviceId": 789,
+          "protocol": "meitrack",
+          "deviceTime": "2023-06-01T14:00:00.000Z",
+          "serverTime": "2023-06-01T14:00:03.000Z",
+          "fixTime": "2023-06-01T14:00:00.000Z",
+          "valid": true,
+          "latitude": 34.0522,
+          "longitude": -118.2437,
+          "altitude": 20.0,
+          "speed": 15.0,
+          "course": 180.0,
+          "address": "789 Wilshire Blvd, Los Angeles, CA",
+          "accuracy": 4.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 75,
+            "fuel": 80.0,
+            "motion": true,
+            "geofenceIds": [101, 102, 103]
+          }
+        }
+      },
+      {
+        "description": "Position message for ignition off event testing",
+        "topic": "enriched.positions",
+        "key": "device-321",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174003",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1004,
+          "deviceId": 321,
+          "protocol": "atrack",
+          "deviceTime": "2023-06-01T15:00:00.000Z",
+          "serverTime": "2023-06-01T15:00:01.000Z",
+          "fixTime": "2023-06-01T15:00:00.000Z",
+          "valid": true,
+          "latitude": 41.8781,
+          "longitude": -87.6298,
+          "altitude": 12.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "address": "321 Michigan Ave, Chicago, IL",
+          "accuracy": 6.0,
+          "attributes": {
+            "ignition": false,
+            "batteryLevel": 70,
+            "fuel": 60.0,
+            "motion": false,
+            "previousIgnition": true
+          }
+        }
+      },
+      {
+        "description": "Position message for fuel drop event testing",
+        "topic": "enriched.positions",
+        "key": "device-654",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174004",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1005,
+          "deviceId": 654,
+          "protocol": "totem",
+          "deviceTime": "2023-06-01T16:00:00.000Z",
+          "serverTime": "2023-06-01T16:00:04.000Z",
+          "fixTime": "2023-06-01T16:00:00.000Z",
+          "valid": true,
+          "latitude": 29.7604,
+          "longitude": -95.3698,
+          "altitude": 8.0,
+          "speed": 5.0,
+          "course": 270.0,
+          "address": "654 Main St, Houston, TX",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 65,
+            "fuel": 40.0,
+            "previousFuel": 75.0,
+            "motion": true
+          }
+        }
+      },
+      {
+        "description": "Position message for driver change event testing",
+        "topic": "enriched.positions",
+        "key": "device-987",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174005",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1006,
+          "deviceId": 987,
+          "protocol": "gt06",
+          "deviceTime": "2023-06-01T17:00:00.000Z",
+          "serverTime": "2023-06-01T17:00:02.000Z",
+          "fixTime": "2023-06-01T17:00:00.000Z",
+          "valid": true,
+          "latitude": 33.7490,
+          "longitude": -84.3880,
+          "altitude": 10.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "address": "987 Peachtree St, Atlanta, GA",
+          "accuracy": 4.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 80,
+            "fuel": 70.0,
+            "motion": false,
+            "driverId": "driver-456",
+            "previousDriverId": "driver-123"
+          }
+        }
+      },
+      {
+        "description": "Position message for maintenance event testing",
+        "topic": "enriched.positions",
+        "key": "device-135",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174006",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1007,
+          "deviceId": 135,
+          "protocol": "h02",
+          "deviceTime": "2023-06-01T18:00:00.000Z",
+          "serverTime": "2023-06-01T18:00:03.000Z",
+          "fixTime": "2023-06-01T18:00:00.000Z",
+          "valid": true,
+          "latitude": 39.9526,
+          "longitude": -75.1652,
+          "altitude": 15.0,
+          "speed": 25.0,
+          "course": 45.0,
+          "address": "135 Market St, Philadelphia, PA",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 60,
+            "fuel": 55.0,
+            "motion": true,
+            "hours": 5000,
+            "totalDistance": 100000.0,
+            "serviceOdometer": 9500.0,
+            "serviceOdometerThreshold": 10000.0
+          }
+        }
+      },
+      {
+        "description": "Position message for alarm event testing",
+        "topic": "enriched.positions",
+        "key": "device-246",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174007",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1008,
+          "deviceId": 246,
+          "protocol": "suntech",
+          "deviceTime": "2023-06-01T19:00:00.000Z",
+          "serverTime": "2023-06-01T19:00:02.000Z",
+          "fixTime": "2023-06-01T19:00:00.000Z",
+          "valid": true,
+          "latitude": 32.7767,
+          "longitude": -96.7970,
+          "altitude": 12.0,
+          "speed": 30.0,
+          "course": 90.0,
+          "address": "246 Main St, Dallas, TX",
+          "accuracy": 4.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 55,
+            "fuel": 65.0,
+            "motion": true,
+            "alarm": "sos"
+          }
+        }
+      },
+      {
+        "description": "Position message for behavior event testing",
+        "topic": "enriched.positions",
+        "key": "device-357",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174008",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1009,
+          "deviceId": 357,
+          "protocol": "galileo",
+          "deviceTime": "2023-06-01T20:00:00.000Z",
+          "serverTime": "2023-06-01T20:00:01.000Z",
+          "fixTime": "2023-06-01T20:00:00.000Z",
+          "valid": true,
+          "latitude": 47.6062,
+          "longitude": -122.3321,
+          "altitude": 18.0,
+          "speed": 45.0,
+          "course": 180.0,
+          "address": "357 Pike St, Seattle, WA",
+          "accuracy": 3.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 75,
+            "fuel": 60.0,
+            "motion": true,
+            "acceleration": 3.5,
+            "braking": 0.0,
+            "cornering": 0.0
+          }
+        }
+      },
+      {
+        "description": "Position message for command result event testing",
+        "topic": "enriched.positions",
+        "key": "device-468",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174009",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1010,
+          "deviceId": 468,
+          "protocol": "meiligao",
+          "deviceTime": "2023-06-01T21:00:00.000Z",
+          "serverTime": "2023-06-01T21:00:03.000Z",
+          "fixTime": "2023-06-01T21:00:00.000Z",
+          "valid": true,
+          "latitude": 36.1699,
+          "longitude": -115.1398,
+          "altitude": 20.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "address": "468 Las Vegas Blvd, Las Vegas, NV",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 85,
+            "fuel": 70.0,
+            "motion": false,
+            "result": "success",
+            "commandId": 12345,
+            "commandType": "engineStop"
+          }
+        }
+      },
+      {
+        "description": "Position message for media event testing",
+        "topic": "enriched.positions",
+        "key": "device-579",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174010",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 1011,
+          "deviceId": 579,
+          "protocol": "wondex",
+          "deviceTime": "2023-06-01T22:00:00.000Z",
+          "serverTime": "2023-06-01T22:00:02.000Z",
+          "fixTime": "2023-06-01T22:00:00.000Z",
+          "valid": true,
+          "latitude": 25.7617,
+          "longitude": -80.1918,
+          "altitude": 5.0,
+          "speed": 10.0,
+          "course": 135.0,
+          "address": "579 Ocean Dr, Miami, FL",
+          "accuracy": 4.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 70,
+            "fuel": 75.0,
+            "motion": true,
+            "image": true,
+            "mediaId": "media-12345",
+            "mediaType": "image/jpeg"
+          }
+        }
+      }
+    ]
+  },
+  "outgoing": {
+    "events": [
+      {
+        "description": "Overspeed event message to Notification Service",
+        "topic": "events",
+        "key": "overspeed",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174001",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2001,
+          "type": "overspeed",
+          "eventTime": "2023-06-01T13:00:02.000Z",
+          "deviceId": 456,
+          "positionId": 1002,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "speed": 120.0,
+            "speedLimit": 80.0
+          }
+        }
+      },
+      {
+        "description": "Geofence entry event message to Notification Service",
+        "topic": "events",
+        "key": "geofenceEnter",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174002",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2002,
+          "type": "geofenceEnter",
+          "eventTime": "2023-06-01T14:00:03.000Z",
+          "deviceId": 789,
+          "positionId": 1003,
+          "geofenceId": 101,
+          "maintenanceId": null,
+          "attributes": {
+            "geofenceName": "Warehouse Zone"
+          }
+        }
+      },
+      {
+        "description": "Ignition off event message to Notification Service",
+        "topic": "events",
+        "key": "ignitionOff",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174003",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2003,
+          "type": "ignitionOff",
+          "eventTime": "2023-06-01T15:00:01.000Z",
+          "deviceId": 321,
+          "positionId": 1004,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {}
+        }
+      },
+      {
+        "description": "Fuel drop event message to Notification Service",
+        "topic": "events",
+        "key": "fuelDrop",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174004",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2004,
+          "type": "fuelDrop",
+          "eventTime": "2023-06-01T16:00:04.000Z",
+          "deviceId": 654,
+          "positionId": 1005,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "fuel": 40.0,
+            "previousFuel": 75.0
+          }
+        }
+      },
+      {
+        "description": "Driver change event message to Notification Service",
+        "topic": "events",
+        "key": "driverChanged",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174005",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2005,
+          "type": "driverChanged",
+          "eventTime": "2023-06-01T17:00:02.000Z",
+          "deviceId": 987,
+          "positionId": 1006,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "driverId": "driver-456",
+            "previousDriverId": "driver-123"
+          }
+        }
+      },
+      {
+        "description": "Maintenance event message to Notification Service",
+        "topic": "events",
+        "key": "maintenance",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174006",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2006,
+          "type": "maintenance",
+          "eventTime": "2023-06-01T18:00:03.000Z",
+          "deviceId": 135,
+          "positionId": 1007,
+          "geofenceId": null,
+          "maintenanceId": 501,
+          "attributes": {
+            "maintenanceType": "odometer",
+            "maintenanceName": "Oil Change",
+            "serviceOdometer": 9500.0,
+            "serviceOdometerThreshold": 10000.0
+          }
+        }
+      },
+      {
+        "description": "Alarm event message to Notification Service",
+        "topic": "events",
+        "key": "alarm",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174007",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2007,
+          "type": "alarm",
+          "eventTime": "2023-06-01T19:00:02.000Z",
+          "deviceId": 246,
+          "positionId": 1008,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "alarmType": "sos"
+          }
+        }
+      },
+      {
+        "description": "Behavior event message to Notification Service",
+        "topic": "events",
+        "key": "hardAcceleration",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174008",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2008,
+          "type": "hardAcceleration",
+          "eventTime": "2023-06-01T20:00:01.000Z",
+          "deviceId": 357,
+          "positionId": 1009,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "acceleration": 3.5
+          }
+        }
+      },
+      {
+        "description": "Command result event message to Notification Service",
+        "topic": "events",
+        "key": "commandResult",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174009",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2009,
+          "type": "commandResult",
+          "eventTime": "2023-06-01T21:00:03.000Z",
+          "deviceId": 468,
+          "positionId": 1010,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "result": "success",
+            "commandId": 12345,
+            "commandType": "engineStop"
+          }
+        }
+      },
+      {
+        "description": "Media event message to Notification Service",
+        "topic": "events",
+        "key": "media",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174010",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "payload": {
+          "id": 2010,
+          "type": "media",
+          "eventTime": "2023-06-01T22:00:02.000Z",
+          "deviceId": 579,
+          "positionId": 1011,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "mediaId": "media-12345",
+            "mediaType": "image/jpeg"
+          }
+        }
+      }
+    ]
+  },
+  "alternative_formats": {
+    "kafka": {
+      "description": "Kafka-specific message format example",
+      "position_message": {
+        "topic": "enriched.positions",
+        "partition": 0,
+        "offset": 12345,
+        "timestamp": 1685635200000,
+        "timestampType": "CREATE_TIME",
+        "key": "device-123",
+        "headers": [
+          {
+            "key": "correlation-id",
+            "value": "corr-123e4567-e89b-12d3-a456-426614174000"
+          },
+          {
+            "key": "message-type",
+            "value": "position"
+          },
+          {
+            "key": "schema-version",
+            "value": "1.0"
+          }
+        ],
+        "value": {
+          "id": 1001,
+          "deviceId": 123,
+          "protocol": "tk103",
+          "deviceTime": "2023-06-01T12:00:00.000Z",
+          "serverTime": "2023-06-01T12:00:05.000Z",
+          "fixTime": "2023-06-01T12:00:00.000Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.0,
+          "speed": 62.5,
+          "course": 45.0,
+          "address": "123 Main St, San Francisco, CA",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 85,
+            "fuel": 75.5,
+            "motion": true,
+            "driverId": "driver-789"
+          }
+        }
+      },
+      "event_message": {
+        "topic": "events",
+        "partition": 0,
+        "offset": 54321,
+        "timestamp": 1685642400000,
+        "timestampType": "CREATE_TIME",
+        "key": "overspeed",
+        "headers": [
+          {
+            "key": "correlation-id",
+            "value": "corr-123e4567-e89b-12d3-a456-426614174001"
+          },
+          {
+            "key": "message-type",
+            "value": "event"
+          },
+          {
+            "key": "schema-version",
+            "value": "1.0"
+          }
+        ],
+        "value": {
+          "id": 2001,
+          "type": "overspeed",
+          "eventTime": "2023-06-01T13:00:02.000Z",
+          "deviceId": 456,
+          "positionId": 1002,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "speed": 120.0,
+            "speedLimit": 80.0
+          }
+        }
+      }
+    },
+    "rabbitmq": {
+      "description": "RabbitMQ-specific message format example",
+      "position_message": {
+        "exchange": "traccar.positions",
+        "routingKey": "enriched.positions",
+        "properties": {
+          "messageId": "msg-123e4567-e89b-12d3-a456-426614174000",
+          "timestamp": 1685635200000,
+          "correlationId": "corr-123e4567-e89b-12d3-a456-426614174000",
+          "contentType": "application/json",
+          "headers": {
+            "message-type": "position",
+            "schema-version": "1.0"
+          }
+        },
+        "body": {
+          "id": 1001,
+          "deviceId": 123,
+          "protocol": "tk103",
+          "deviceTime": "2023-06-01T12:00:00.000Z",
+          "serverTime": "2023-06-01T12:00:05.000Z",
+          "fixTime": "2023-06-01T12:00:00.000Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.0,
+          "speed": 62.5,
+          "course": 45.0,
+          "address": "123 Main St, San Francisco, CA",
+          "accuracy": 5.0,
+          "attributes": {
+            "ignition": true,
+            "batteryLevel": 85,
+            "fuel": 75.5,
+            "motion": true,
+            "driverId": "driver-789"
+          }
+        }
+      },
+      "event_message": {
+        "exchange": "traccar.events",
+        "routingKey": "events.overspeed",
+        "properties": {
+          "messageId": "msg-123e4567-e89b-12d3-a456-426614174001",
+          "timestamp": 1685642400000,
+          "correlationId": "corr-123e4567-e89b-12d3-a456-426614174001",
+          "contentType": "application/json",
+          "headers": {
+            "message-type": "event",
+            "schema-version": "1.0"
+          }
+        },
+        "body": {
+          "id": 2001,
+          "type": "overspeed",
+          "eventTime": "2023-06-01T13:00:02.000Z",
+          "deviceId": 456,
+          "positionId": 1002,
+          "geofenceId": null,
+          "maintenanceId": null,
+          "attributes": {
+            "speed": 120.0,
+            "speedLimit": 80.0
+          }
+        }
+      }
+    },
+    "protobuf": {
+      "description": "Example of Protocol Buffer serialized message (shown as base64 encoded string)",
+      "position_message": {
+        "topic": "enriched.positions",
+        "key": "device-123",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174000",
+          "message-type": "position",
+          "schema-version": "1.0"
+        },
+        "value": "CgQIARACEgQIAhADGgQIAxAEIgQIBBAFKgQIBRAGMgQIBhAHOgQIBxAIQgQICRAJSJwBUAFYgCBggwFoAXABeMgBeQCAAQGIAQGQAQGYAQGgAQGoAQGwAQG4AQHAAQHIAQHQAQHYAQHgAQHoAQHwAQH4AQGAAgGIAgGQAgGYAgGgAgGoAgGwAgG4AgHAAgHIAgHQAgHYAgHgAgHoAgHwAgH4AgGAAwGIAwGQAwGYAwGgAwGoAwGwAwG4AwHAAwHIAwHQAwHYAwHgAwHoAwHwAwH4AwGABAGIBAGQBAGYBAGgBAGoBAGwBAG4BAHABAHIBAHQBAHYBAHgBAHoBAHwBAH4BAGABQGIBQGQBQGYBQGgBQGoBQGwBQG4BQHABQHIBQHQBQHYBQHgBQHoBQHwBQH4BQGABgGIBgGQBgGYBgGgBgGoBgGwBgG4BgHABgHIBgHQBgHYBgHgBgHoBgHwBgH4BgGABwGIBwGQBwGYBwGgBwGoBwGwBwG4BwHABwHIBwHQBwHYBwHgBwHoBwHwBwH4BwGACAGICAGQCAGYCAGgCAGoCAGwCAG4CAHACAHICAHQCAHYCAHgCAHoCAHwCAH4CAGACQGICQGQCQGYCQGgCQGoCQGwCQG4CQHACQHICQHQCQHYCQHgCQHoCQHwCQH4CQGACgGICgGQCgGYCgGgCgGoCgGwCgG4CgHACgHICgHQCgHYCgHgCgHoCgHwCgH4CgGACwGICwGQCwGYCwGgCwGoCwGwCwG4CwHACwHICwHQCwHYCwHgCwHoCwHwCwH4CwGADAGIDAGQDAGYDAGgDAGoDAGwDAG4DAHADAHIDAHQDAHYDAHgDAHoDAHwDAH4DAGADQGIDQGQDQGYDQGgDQGoDQGwDQG4DQHADQHIDQHQDQHYDQHgDQHoDQHwDQH4DQGADgGIDgGQDgGYDgGgDgGoDgGwDgG4DgHADgHIDgHQDgHYDgHgDgHoDgHwDgH4DgGADwGIDwGQDwGYDwGgDwGoDwGwDwG4DwHADwHIDwHQDwHYDwHgDwHoDwHwDwH4DwGAEAGIEAGQEAGYEAGgEAGoEAGwEAG4EAHAEAHIEAHQEAHYEAHgEAHoEAHwEAH4EAGAEQGIEQGQEQGYEQGgEQGoEQGwEQG4EQHAEQHIEQHQEQHYEQHgEQHoEQHwEQH4EQGAEgGIEgGQEgGYEgGgEgGoEgGwEgG4EgHAEgHIEgHQEgHYEgHgEgHoEgHwEgH4EgGAEwGIEwGQEwGYEwGgEwGoEwGwEwG4EwHAEwHIEwHQEwHYEwHgEwHoEwHwEwH4EwGAFAGIFAGQFAGYFAGgFAGoFAGwFAG4FAHAFAHIFAHQFAHYFAHgFAHoFAHwFAH4FAGAFQGIFQGQFQGYFQGgFQGoFQGwFQG4FQHAFQHIFQHQFQHYFQHgFQHoFQHwFQH4FQGAFgGIFgGQFgGYFgGgFgGoFgGwFgG4FgHAFgHIFgHQFgHYFgHgFgHoFgHwFgH4FgGAFwGIFwGQFwGYFwGgFwGoFwGwFwG4FwHAFwHIFwHQFwHYFwHgFwHoFwHwFwH4FwGAGAGIGAGQGAGYGAGgGAGoGAGwGAG4GAHAGAHIGAHQGAHYGAHgGAHoGAHwGAH4GAGAGQGIGQGQGQGYGQGgGQGoGQGwGQG4GQHAGQHIGQHQGQHYGQHgGQHoGQHwGQH4GQGAGgGIGgGQGgGYGgGgGgGoGgGwGgG4GgHAGgHIGgHQGgHYGgHgGgHoGgHwGgH4GgGAGwGIGwGQGwGYGwGgGwGoGwGwGwG4GwHAGwHIGwHQGwHYGwHgGwHoGwHwGwH4GwGAHAGIHAGQHAGYHAGgHAGoHAGwHAG4HAHAHAHIHAHQHAHYHAHgHAHoHAHwHAH4HAGAHQGIHQGQHQGYHQGgHQGoHQGwHQG4HQHAHQHIHQHQHQHYHQHgHQHoHQHwHQH4HQGAHgGIHgGQHgGYHgGgHgGoHgGwHgG4HgHAHgHIHgHQHgHYHgHgHgHoHgHwHgH4HgGAHwGIHwGQHwGYHwGgHwGoHwGwHwG4HwHAHwHIHwHQHwHYHwHgHwHoHwHwHwH4HwGAIAGIIAGQIAGYIAGgIAGoIAGwIAG4IAHAIAHIIAHQIAHYIAHgIAHoIAHwIAH4IAGAIQGIIQGQIQGYIQGgIQGoIQGwIQG4IQHAIQHIIQHQIQHYIQHgIQHoIQHwIQH4IQGAIgGIIgGQIgGYIgGgIgGoIgGwIgG4IgHAIgHIIgHQIgHYIgHgIgHoIgHwIgH4IgGAIwGIIwGQIwGYIwGgIwGoIwGwIwG4IwHAIwHIIwHQIwHYIwHgIwHoIwHwIwH4IwGAJAGIJAGQJAGYJAGgJAGoJAGwJAG4JAHAJAHIJAHQJAHYJAHgJAHoJAHwJAH4JAGAJQGIJQGQJQGYJQGgJQGoJQGwJQG4JQHAJQHIJQHQJQHYJQHgJQHoJQHwJQH4JQGAJgGIJgGQJgGYJgGgJgGoJgGwJgG4JgHAJgHIJgHQJgHYJgHgJgHoJgHwJgH4JgGAJwGIJwGQJwGYJwGgJwGoJwGwJwG4JwHAJwHIJwHQJwHYJwHgJwHoJwHwJwH4JwGAKAGIKAGQKAGYKAGgKAGoKAGwKAG4KAHAKAHIKAHQKAHYKAHgKAHoKAHwKAH4KAGAKQGIKQGQKQGYKQGgKQGoKQGwKQG4KQHAKQHIKQHQKQHYKQ"
+      },
+      "event_message": {
+        "topic": "events",
+        "key": "overspeed",
+        "headers": {
+          "correlation-id": "corr-123e4567-e89b-12d3-a456-426614174001",
+          "message-type": "event",
+          "schema-version": "1.0"
+        },
+        "value": "CgQIARACEgQIAhADGgQIAxAEIgQIBBAFKgQIBRAGMgQIBhAHOgQIBxAIQgQICRAJSJwBUAFYgCBggwFoAXABeMgBeQCAAQGIAQGQAQGYAQGgAQGoAQGwAQG4AQHAAQHIAQHQAQHYAQHgAQHoAQHwAQH4AQGAAgGIAgGQAgGYAgGgAgGoAgGwAgG4AgHAAgHIAgHQAgHYAgHgAgHoAgHwAgH4AgGAAwGIAwGQAwGYAwGgAwGoAwGwAwG4AwHAAwHIAwHQAwHYAwHgAwHoAwHwAwH4AwGABAGIBAGQBAGYBAGgBAGoBAGwBAG4BAHABAHIBAHQBAHYBAHgBAHoBAHwBAH4BAGABQGIBQGQBQGYBQGgBQGoBQGwBQG4BQHABQHIBQHQBQHYBQHgBQHoBQHwBQH4BQGABgGIBgGQBgGYBgGgBgGoBgGwBgG4BgHABgHIBgHQBgHYBgHgBgHoBgHwBgH4BgGABwGIBwGQBwGYBwGgBwGoBwGwBwG4BwHABwHIBwHQBwHYBwHgBwHoBwHwBwH4BwGACAGICAGQCAGYCAGgCAGoCAGwCAG4CAHACAHICAHQCAHYCAHgCAHoCAHwCAH4CAGACQGICQGQCQGYCQGgCQGoCQGwCQG4CQHACQHICQHQCQHYCQHgCQHoCQHwCQH4CQGACgGICgGQCgGYCgGgCgGoCgGwCgG4CgHACgHICgHQCgHYCgHgCgHoCgHwCgH4CgGACwGICwGQCwGYCwGgCwGoCwGwCwG4CwHACwHICwHQCwHYCwHgCwHoCwHwCwH4CwGADAGIDAGQDAGYDAGgDAGoDAGwDAG4DAHADAHIDAHQDAHYDAHgDAHoDAHwDAH4DAGADQGIDQGQDQGYDQGgDQGoDQGwDQG4DQHADQHIDQHQDQHYDQHgDQHoDQHwDQH4DQGADgGIDgGQDgGYDgGgDgGoDgGwDgG4DgHADgHIDgHQDgHYDgHgDgHoDgHwDgH4DgGADwGIDwGQDwGYDwGgDwGoDwGwDwG4DwHADwHIDwHQDwHYDwHgDwHoDwHwDwH4DwGAEAGIEAGQEAGYEAGgEAGoEAGwEAG4EAHAEAHIEAHQEAHYEAHgEAHoEAHwEAH4EAGAEQGIEQGQEQGYEQGgEQGoEQGwEQG4EQHAEQHIEQHQEQHYEQHgEQHoEQHwEQH4EQGAEgGIEgGQEgGYEgGgEgGoEgGwEgG4EgHAEgHIEgHQEgHYEgHgEgHoEgHwEgH4EgGAEwGIEwGQEwGYEwGgEwGoEwGwEwG4EwHAEwHIEwHQEwHYEwHgEwHoEwHwEwH4EwGAFAGIFAGQFAGYFAGgFAGoFAGwFAG4FAHAFAHIFAHQFAHYFAHgFAHoFAHwFAH4FAGAFQGIFQGQFQGYFQGgFQGoFQGwFQG4FQHAFQHIFQHQFQHYFQHgFQHoFQHwFQH4FQGAFgGIFgGQFgGYFgGgFgGoFgGwFgG4FgHAFgHIFgHQFgHYFgHgFgHoFgHwFgH4FgGAFwGIFwGQFwGYFwGgFwGoFwGwFwG4FwHAFwHIFwHQFwHYFwHgFwHoFwHwFwH4FwGAGAGIGAGQGAGYGAGgGAGoGAGwGAG4GAHAGAHIGAHQGAHYGAHgGAHoGAHwGAH4GAGAGQGIGQGQGQGYGQGgGQGoGQGwGQG4GQHAGQHIGQHQGQHYGQHgGQHoGQHwGQH4GQGAGgGIGgGQGgGYGgGgGgGoGgGwGgG4GgHAGgHIGgHQGgHYGgHgGgHoGgHwGgH4GgGAGwGIGwGQGwGYGwGgGwGoGwGwGwG4GwHAGwHIGwHQGwHYGwHgGwHoGwHwGwH4GwGAHAGIHAGQHAGYHAGgHAGoHAGwHAG4HAHAHAHIHAHQHAHYHAHgHAHoHAHwHAH4HAGAHQGIHQGQHQGYHQGgHQGoHQGwHQG4HQHAHQHIHQHQHQHYHQHgHQHoHQHwHQH4HQGAHgGIHgGQHgGYHgGgHgGoHgGwHgG4HgHAHgHIHgHQHgHYHgHgHgHoHgHwHgH4HgGAHwGIHwGQHwGYHwGgHwGoHwGwHwG4HwHAHwHIHwHQHwHYHwHgHwHoHwHwHwH4HwGAIAGIIAGQIAGYIAGgIAGoIAGwIAG4IAHAIAHIIAHQIAHYIAHgIAHoIAHwIAH4IAGAIQGIIQGQIQGYIQGgIQGoIQGwIQG4IQHAIQHIIQHQIQHYIQHgIQHoIQHwIQH4IQGAIgGIIgGQIgGYIgGgIgGoIgGwIgG4IgHAIgHIIgHQIgHYIgHgIgHoIgHwIgH4IgGAIwGIIwGQIwGYIwGgIwGoIwGwIwG4IwHAIwHIIwHQIwHYIwHgIwHoIwHwIwH4IwGAJAGIJAGQJAGYJAGgJAGoJAGwJAG4JAHAJAHIJAHQJAHYJAHgJAHoJAHwJAH4JAGAJQGIJQGQJQGYJQGgJQGoJQGwJQG4JQHAJQHIJQHQJQHYJQHgJQHoJQHwJQH4JQGAJgGIJgGQJgGYJgGgJgGoJgGwJgG4JgHAJgHIJgHQJgHYJgHgJgHoJgHwJgH4JgGAJwGIJwGQJwGYJwGgJwGoJwGwJwG4JwHAJwHIJwHQJwHYJwHgJwHoJwHwJwH4JwGAKAGIKAGQKAGYKAGgKAGoKAGwKAG4KAHAKAHIKAHQKAHYKAHgKAHoKAHwKAH4KAGAKQGIKQGQKQGYKQGgKQGoKQGwKQG4KQHAKQHIKQHQKQHYKQ"
+      }
+    }
+  },
+  "schema_versions": {
+    "position_v1.0": {
+      "description": "Standard position message schema version 1.0",
+      "required_fields": ["id", "deviceId", "protocol", "deviceTime", "serverTime", "latitude", "longitude", "valid"],
+      "optional_fields": ["fixTime", "altitude", "speed", "course", "address", "accuracy", "attributes"],
+      "example": {
+        "id": 1001,
+        "deviceId": 123,
+        "protocol": "tk103",
+        "deviceTime": "2023-06-01T12:00:00.000Z",
+        "serverTime": "2023-06-01T12:00:05.000Z",
+        "fixTime": "2023-06-01T12:00:00.000Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.0,
+        "speed": 62.5,
+        "course": 45.0,
+        "address": "123 Main St, San Francisco, CA",
+        "accuracy": 5.0,
+        "attributes": {
+          "ignition": true,
+          "batteryLevel": 85,
+          "fuel": 75.5,
+          "motion": true,
+          "driverId": "driver-789"
+        }
+      }
+    },
+    "position_v1.1": {
+      "description": "Updated position message schema version 1.1 with additional fields",
+      "required_fields": ["id", "deviceId", "protocol", "deviceTime", "serverTime", "latitude", "longitude", "valid"],
+      "optional_fields": ["fixTime", "altitude", "speed", "course", "address", "accuracy", "attributes", "network", "geofences", "indoor"],
+      "example": {
+        "id": 1001,
+        "deviceId": 123,
+        "protocol": "tk103",
+        "deviceTime": "2023-06-01T12:00:00.000Z",
+        "serverTime": "2023-06-01T12:00:05.000Z",
+        "fixTime": "2023-06-01T12:00:00.000Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.0,
+        "speed": 62.5,
+        "course": 45.0,
+        "address": "123 Main St, San Francisco, CA",
+        "accuracy": 5.0,
+        "network": {
+          "radioType": "gsm",
+          "cellTowers": [
+            {
+              "cellId": 12345,
+              "locationAreaCode": 1000,
+              "mobileCountryCode": 310,
+              "mobileNetworkCode": 410,
+              "signalStrength": -70
+            }
+          ]
+        },
+        "geofences": [101, 102],
+        "indoor": false,
+        "attributes": {
+          "ignition": true,
+          "batteryLevel": 85,
+          "fuel": 75.5,
+          "motion": true,
+          "driverId": "driver-789"
+        }
+      }
+    },
+    "event_v1.0": {
+      "description": "Standard event message schema version 1.0",
+      "required_fields": ["id", "type", "eventTime", "deviceId", "positionId"],
+      "optional_fields": ["geofenceId", "maintenanceId", "attributes"],
+      "example": {
+        "id": 2001,
+        "type": "overspeed",
+        "eventTime": "2023-06-01T13:00:02.000Z",
+        "deviceId": 456,
+        "positionId": 1002,
+        "geofenceId": null,
+        "maintenanceId": null,
+        "attributes": {
+          "speed": 120.0,
+          "speedLimit": 80.0
+        }
+      }
+    },
+    "event_v1.1": {
+      "description": "Updated event message schema version 1.1 with additional fields",
+      "required_fields": ["id", "type", "eventTime", "deviceId", "positionId"],
+      "optional_fields": ["geofenceId", "maintenanceId", "attributes", "priority", "notificationSent", "processed"],
+      "example": {
+        "id": 2001,
+        "type": "overspeed",
+        "eventTime": "2023-06-01T13:00:02.000Z",
+        "deviceId": 456,
+        "positionId": 1002,
+        "geofenceId": null,
+        "maintenanceId": null,
+        "priority": "high",
+        "notificationSent": false,
+        "processed": false,
+        "attributes": {
+          "speed": 120.0,
+          "speedLimit": 80.0
+        }
+      }
+    }
+  }
+}
