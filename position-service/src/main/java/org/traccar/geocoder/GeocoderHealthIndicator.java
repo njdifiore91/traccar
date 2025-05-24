@@ -16,75 +16,102 @@
 package org.traccar.geocoder;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.stereotype.Component;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Health indicator for geocoding services that exposes health metrics for monitoring
- * and integrates with service discovery for health checks.
+ * Implements a health indicator for geocoding services that exposes health metrics for monitoring
+ * and integrates with service discovery for health checks. This component is critical for the
+ * microservices architecture as it provides visibility into the health and availability of external
+ * geocoding services, enabling automated failover and alerting when services degrade.
  */
-@Component
-public class GeocoderHealthIndicator implements HealthIndicator {
+@Singleton
+public class GeocoderHealthIndicator {
 
-    private final CircuitBreakerRegistry circuitBreakerRegistry;
-    private final Map<String, Geocoder> geocoders;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHealthIndicator.class);
+
+    private final List<JsonGeocoder> geocoders = new ArrayList<>();
+    private final MeterRegistry meterRegistry;
 
     /**
-     * Constructs a GeocoderHealthIndicator with the specified circuit breaker registry and geocoders.
+     * Creates a new GeocoderHealthIndicator.
      *
-     * @param circuitBreakerRegistry The circuit breaker registry
-     * @param geocoders The map of geocoder names to geocoder instances
+     * @param meterRegistry The meter registry for metrics collection
      */
-    public GeocoderHealthIndicator(CircuitBreakerRegistry circuitBreakerRegistry, Map<String, Geocoder> geocoders) {
-        this.circuitBreakerRegistry = circuitBreakerRegistry;
-        this.geocoders = geocoders;
+    @Inject
+    public GeocoderHealthIndicator(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+        LOGGER.info("GeocoderHealthIndicator initialized");
     }
 
     /**
-     * Provides health information for geocoding services.
+     * Registers a geocoder for health monitoring.
      *
-     * @return The health status of geocoding services
+     * @param geocoder The geocoder to register
+     * @param name The name of the geocoder
      */
-    @Override
-    public Health health() {
-        Map<String, Object> details = new HashMap<>();
-        boolean allHealthy = true;
+    public void registerGeocoder(JsonGeocoder geocoder, String name) {
+        geocoders.add(geocoder);
+        LOGGER.info("Registered geocoder for health monitoring: {}", name);
 
-        for (Map.Entry<String, Geocoder> entry : geocoders.entrySet()) {
-            String geocoderName = entry.getKey();
-            CircuitBreaker circuitBreaker = circuitBreakerRegistry.find(geocoderName).orElse(null);
+        // Register health gauge metric
+        if (meterRegistry != null) {
+            meterRegistry.gauge("geocoder.health", 
+                    Tags.of(Tag.of("name", name)), 
+                    geocoder, 
+                    g -> g.isHealthy() ? 1.0 : 0.0);
+            LOGGER.debug("Registered health gauge for geocoder: {}", name);
+        }
+    }
 
-            if (circuitBreaker != null) {
-                CircuitBreaker.State state = circuitBreaker.getState();
-                boolean isHealthy = state != CircuitBreaker.State.OPEN;
+    /**
+     * Checks the health of all registered geocoders.
+     *
+     * @return A map containing the health status of each geocoder
+     */
+    public Map<String, Object> checkHealth() {
+        Map<String, Object> health = new HashMap<>();
+        boolean overallHealth = true;
 
-                Map<String, Object> geocoderDetails = new HashMap<>();
-                geocoderDetails.put("state", state.name());
-                geocoderDetails.put("failureRate", circuitBreaker.getMetrics().getFailureRate());
-                geocoderDetails.put("slowCallRate", circuitBreaker.getMetrics().getSlowCallRate());
-                geocoderDetails.put("numberOfFailedCalls", circuitBreaker.getMetrics().getNumberOfFailedCalls());
-                geocoderDetails.put("numberOfSlowCalls", circuitBreaker.getMetrics().getNumberOfSlowCalls());
-                geocoderDetails.put("numberOfSuccessfulCalls", circuitBreaker.getMetrics().getNumberOfSuccessfulCalls());
+        for (JsonGeocoder geocoder : geocoders) {
+            boolean geocoderHealth = geocoder.isHealthy();
+            overallHealth = overallHealth && geocoderHealth;
 
-                details.put(geocoderName, geocoderDetails);
+            // Add circuit breaker state if available
+            CircuitBreaker.State state = geocoder.getCircuitBreakerState();
+            if (state != null) {
+                health.put("circuitBreakerState", state.name());
+            }
 
-                if (!isHealthy) {
-                    allHealthy = false;
-                }
-            } else {
-                details.put(geocoderName, "No circuit breaker configured");
+            // Add metrics if available
+            health.put("metrics", geocoder.getMetrics());
+        }
+
+        health.put("status", overallHealth ? "UP" : "DOWN");
+        return health;
+    }
+
+    /**
+     * Gets the overall health status of all geocoders.
+     *
+     * @return true if all geocoders are healthy, false otherwise
+     */
+    public boolean isHealthy() {
+        for (JsonGeocoder geocoder : geocoders) {
+            if (!geocoder.isHealthy()) {
+                return false;
             }
         }
-
-        if (allHealthy) {
-            return Health.up().withDetails(details).build();
-        } else {
-            return Health.down().withDetails(details).build();
-        }
+        return true;
     }
 }
