@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package org.traccar.proto.discovery;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto.discovery";
+option java_outer_classname = "ServiceDiscoveryProto";
+
+// Service Discovery Protocol
+// Defines interfaces and message types for service registration, discovery, and health checking
+
+// Service registration message containing service metadata and endpoint information
+message ServiceRegistration {
+  // Unique identifier for the service instance
+  string instance_id = 1;
+  
+  // Service name (e.g., "position-service", "protocol-service")
+  string service_name = 2;
+  
+  // Service version in semantic versioning format
+  string version = 3;
+  
+  // Service endpoints
+  repeated Endpoint endpoints = 4;
+  
+  // Service metadata
+  map<string, string> metadata = 5;
+  
+  // Health check configuration
+  HealthCheckConfig health_check = 6;
+  
+  // Service capabilities
+  repeated string capabilities = 7;
+  
+  // Environment (e.g., "dev", "staging", "prod")
+  string environment = 8;
+  
+  // Registration timestamp (milliseconds since epoch)
+  int64 registration_time = 9;
+}
+
+// Service endpoint information
+message Endpoint {
+  // Endpoint type (e.g., "http", "grpc", "tcp")
+  string type = 1;
+  
+  // Host address
+  string host = 2;
+  
+  // Port number
+  int32 port = 3;
+  
+  // Path (if applicable)
+  string path = 4;
+  
+  // Secure connection flag
+  bool secure = 5;
+  
+  // Weight for load balancing (higher values receive more traffic)
+  int32 weight = 6;
+  
+  // Additional endpoint metadata
+  map<string, string> metadata = 7;
+}
+
+// Health check configuration
+message HealthCheckConfig {
+  // Health check type (e.g., "http", "tcp", "grpc")
+  string type = 1;
+  
+  // Health check endpoint path (for HTTP/gRPC)
+  string path = 2;
+  
+  // Health check interval in seconds
+  int32 interval = 3;
+  
+  // Health check timeout in seconds
+  int32 timeout = 4;
+  
+  // Number of consecutive failures before marking unhealthy
+  int32 failure_threshold = 5;
+  
+  // Number of consecutive successes before marking healthy
+  int32 success_threshold = 6;
+}
+
+// Health check request
+message HealthCheckRequest {
+  // Service instance ID to check
+  string instance_id = 1;
+  
+  // Check type ("liveness", "readiness", or "startup")
+  string check_type = 2;
+}
+
+// Health check response
+message HealthCheckResponse {
+  // Health status
+  enum Status {
+    UNKNOWN = 0;
+    HEALTHY = 1;
+    UNHEALTHY = 2;
+    DEGRADED = 3;
+  }
+  
+  // Current health status
+  Status status = 1;
+  
+  // Optional details about the health status
+  string details = 2;
+  
+  // Timestamp of the health check (milliseconds since epoch)
+  int64 timestamp = 3;
+  
+  // Service instance ID
+  string instance_id = 4;
+  
+  // Component-specific health statuses
+  map<string, Status> component_status = 5;
+}
+
+// Service lookup request
+message ServiceLookupRequest {
+  // Service name to look up
+  string service_name = 1;
+  
+  // Optional version constraint (semver format, e.g., ">=1.0.0,<2.0.0")
+  string version_constraint = 2;
+  
+  // Required capabilities
+  repeated string required_capabilities = 3;
+  
+  // Environment filter
+  string environment = 4;
+  
+  // Only return healthy instances
+  bool healthy_only = 5;
+}
+
+// Service lookup response
+message ServiceLookupResponse {
+  // List of matching service instances
+  repeated ServiceInstance instances = 1;
+}
+
+// Service instance information
+message ServiceInstance {
+  // Service registration information
+  ServiceRegistration registration = 1;
+  
+  // Current health status
+  HealthCheckResponse.Status health_status = 2;
+  
+  // Last health check timestamp (milliseconds since epoch)
+  int64 last_health_check = 3;
+  
+  // Last heartbeat timestamp (milliseconds since epoch)
+  int64 last_heartbeat = 4;
+}
+
+// Service deregistration request
+message ServiceDeregistrationRequest {
+  // Service instance ID to deregister
+  string instance_id = 1;
+}
+
+// Service deregistration response
+message ServiceDeregistrationResponse {
+  // Success flag
+  bool success = 1;
+  
+  // Optional error message if deregistration failed
+  string error_message = 2;
+}
+
+// Heartbeat request to keep service registration active
+message HeartbeatRequest {
+  // Service instance ID
+  string instance_id = 1;
+  
+  // Current timestamp (milliseconds since epoch)
+  int64 timestamp = 2;
+  
+  // Optional status update
+  HealthCheckResponse.Status status = 3;
+}
+
+// Heartbeat response
+message HeartbeatResponse {
+  // Success flag
+  bool success = 1;
+  
+  // Next expected heartbeat interval in seconds
+  int32 next_heartbeat_interval = 2;
+}
+
+// Service Discovery Service
+service ServiceDiscovery {
+  // Register a service with the discovery system
+  rpc RegisterService(ServiceRegistration) returns (ServiceRegistration);
+  
+  // Deregister a service from the discovery system
+  rpc DeregisterService(ServiceDeregistrationRequest) returns (ServiceDeregistrationResponse);
+  
+  // Look up service instances by name and criteria
+  rpc LookupService(ServiceLookupRequest) returns (ServiceLookupResponse);
+  
+  // Check health of a specific service instance
+  rpc CheckHealth(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Send heartbeat to keep service registration active
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  
+  // Stream of service registry changes (registrations, deregistrations, status changes)
+  rpc WatchServices(ServiceLookupRequest) returns (stream ServiceInstance);
+}
