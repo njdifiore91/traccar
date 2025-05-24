@@ -1,0 +1,294 @@
+{
+  "scenarios": [
+    {
+      "id": "service-not-found",
+      "name": "Service Not Found",
+      "description": "Simulates a scenario where a required service cannot be found in service discovery",
+      "targetServices": ["geocoding-service", "event-service", "protocol-service"],
+      "behavior": {
+        "type": "NOT_FOUND",
+        "duration": 60000,
+        "errorCode": 404,
+        "errorMessage": "Service not registered in discovery"
+      },
+      "expectedFallback": "Use cached data or default values",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest"
+      ]
+    },
+    {
+      "id": "network-partition",
+      "name": "Network Partition",
+      "description": "Simulates a network partition where services are registered but unreachable",
+      "targetServices": ["event-service", "notification-service"],
+      "behavior": {
+        "type": "NETWORK_PARTITION",
+        "duration": 120000,
+        "errorCode": 503,
+        "errorMessage": "Service unreachable due to network partition",
+        "packetLossPercentage": 100
+      },
+      "expectedFallback": "Activate circuit breaker and queue messages for later delivery",
+      "testCases": [
+        "org.traccar.handler.events.EventForwardingTest"
+      ]
+    },
+    {
+      "id": "timeout-condition",
+      "name": "Service Timeout",
+      "description": "Simulates slow response times from dependent services to test timeout handling",
+      "targetServices": ["geocoding-service", "database-service"],
+      "behavior": {
+        "type": "TIMEOUT",
+        "duration": 300000,
+        "latencyMs": 5000,
+        "errorCode": 504,
+        "errorMessage": "Service request timed out"
+      },
+      "expectedFallback": "Skip enrichment and continue with basic position processing",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.database.DatabaseTest"
+      ]
+    },
+    {
+      "id": "intermittent-failure",
+      "name": "Intermittent Service Failure",
+      "description": "Simulates services that fail intermittently to test stability detection",
+      "targetServices": ["geocoding-service", "event-service", "message-broker"],
+      "behavior": {
+        "type": "INTERMITTENT",
+        "duration": 180000,
+        "failurePercentage": 50,
+        "errorCode": 500,
+        "errorMessage": "Internal service error",
+        "pattern": "RANDOM"
+      },
+      "expectedFallback": "Implement retry with exponential backoff",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest"
+      ]
+    },
+    {
+      "id": "degraded-performance",
+      "name": "Degraded Service Performance",
+      "description": "Simulates services that are available but performing poorly",
+      "targetServices": ["geocoding-service", "database-service"],
+      "behavior": {
+        "type": "DEGRADED",
+        "duration": 240000,
+        "latencyMs": 2000,
+        "latencyVarianceMs": 1000,
+        "errorCode": 200,
+        "cpuUsagePercentage": 90,
+        "memoryUsagePercentage": 85
+      },
+      "expectedFallback": "Reduce request rate and implement request prioritization",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.database.DatabaseTest"
+      ]
+    },
+    {
+      "id": "multi-service-failure",
+      "name": "Multiple Service Failure",
+      "description": "Simulates multiple critical services failing simultaneously to test cascading failure prevention",
+      "targetServices": ["event-service", "notification-service", "database-service", "message-broker"],
+      "behavior": {
+        "type": "MULTI_FAILURE",
+        "duration": 300000,
+        "failureSequence": [
+          {
+            "service": "database-service",
+            "startOffsetMs": 0,
+            "durationMs": 300000,
+            "errorCode": 503
+          },
+          {
+            "service": "message-broker",
+            "startOffsetMs": 60000,
+            "durationMs": 240000,
+            "errorCode": 503
+          },
+          {
+            "service": "event-service",
+            "startOffsetMs": 120000,
+            "durationMs": 180000,
+            "errorCode": 503
+          },
+          {
+            "service": "notification-service",
+            "startOffsetMs": 180000,
+            "durationMs": 120000,
+            "errorCode": 503
+          }
+        ]
+      },
+      "expectedFallback": "Enter emergency mode with local caching and minimal functionality",
+      "testCases": [
+        "org.traccar.handler.events.EventHandlerTest",
+        "org.traccar.database.DatabaseTest"
+      ]
+    },
+    {
+      "id": "service-instance-failure",
+      "name": "Partial Service Instance Failure",
+      "description": "Simulates some instances of a service failing while others remain operational",
+      "targetServices": ["geocoding-service", "event-service"],
+      "behavior": {
+        "type": "PARTIAL_FAILURE",
+        "duration": 180000,
+        "instanceFailurePercentage": 60,
+        "errorCode": 500,
+        "errorMessage": "Service instance unavailable"
+      },
+      "expectedFallback": "Load balancing to healthy instances with retry for failed requests",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest"
+      ]
+    },
+    {
+      "id": "service-registry-failure",
+      "name": "Service Registry Failure",
+      "description": "Simulates the service discovery registry itself becoming unavailable",
+      "targetServices": ["service-registry"],
+      "behavior": {
+        "type": "REGISTRY_FAILURE",
+        "duration": 120000,
+        "errorCode": 503,
+        "errorMessage": "Service registry unavailable"
+      },
+      "expectedFallback": "Use cached service registry data and direct connections to known endpoints",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest"
+      ]
+    },
+    {
+      "id": "stale-registry-data",
+      "name": "Stale Service Registry Data",
+      "description": "Simulates outdated service registry information pointing to incorrect or decommissioned service instances",
+      "targetServices": ["geocoding-service", "event-service"],
+      "behavior": {
+        "type": "STALE_DATA",
+        "duration": 180000,
+        "errorCode": 404,
+        "errorMessage": "Service endpoint no longer valid",
+        "staleDataAgeSeconds": 3600
+      },
+      "expectedFallback": "Refresh registry data and retry with exponential backoff",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest"
+      ]
+    },
+    {
+      "id": "recovery-testing",
+      "name": "Service Recovery Testing",
+      "description": "Tests automatic recovery when services become available again after failure",
+      "targetServices": ["geocoding-service", "event-service", "database-service"],
+      "behavior": {
+        "type": "RECOVERY",
+        "duration": 300000,
+        "failureDurationMs": 120000,
+        "recoveryDurationMs": 180000,
+        "errorCode": 503,
+        "errorMessage": "Service temporarily unavailable"
+      },
+      "expectedFallback": "Automatic service reconnection and state recovery",
+      "testCases": [
+        "org.traccar.geocoder.GeocoderTest",
+        "org.traccar.handler.events.EventHandlerTest",
+        "org.traccar.database.DatabaseTest"
+      ]
+    }
+  ],
+  "serviceDefinitions": {
+    "geocoding-service": {
+      "name": "geocoding-service",
+      "description": "Provides reverse geocoding capabilities for position enrichment",
+      "criticalForOperation": false,
+      "defaultEndpoints": ["http://geocoding-service:8080", "http://geocoding-service-backup:8080"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "event-service": {
+      "name": "event-service",
+      "description": "Processes events generated from position data",
+      "criticalForOperation": true,
+      "defaultEndpoints": ["http://event-service:8080", "http://event-service-backup:8080"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "protocol-service": {
+      "name": "protocol-service",
+      "description": "Handles device connections and protocol implementations",
+      "criticalForOperation": true,
+      "defaultEndpoints": ["http://protocol-service:8080", "http://protocol-service-backup:8080"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "notification-service": {
+      "name": "notification-service",
+      "description": "Delivers notifications through multiple channels",
+      "criticalForOperation": false,
+      "defaultEndpoints": ["http://notification-service:8080", "http://notification-service-backup:8080"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "database-service": {
+      "name": "database-service",
+      "description": "Provides database access for position storage",
+      "criticalForOperation": true,
+      "defaultEndpoints": ["jdbc:postgresql://database-primary:5432/traccar", "jdbc:postgresql://database-replica:5432/traccar"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "message-broker": {
+      "name": "message-broker",
+      "description": "Handles asynchronous messaging between services",
+      "criticalForOperation": true,
+      "defaultEndpoints": ["kafka-1:9092", "kafka-2:9092", "kafka-3:9092"],
+      "healthCheckEndpoint": "/actuator/health"
+    },
+    "service-registry": {
+      "name": "service-registry",
+      "description": "Service discovery registry (Consul or Kubernetes API)",
+      "criticalForOperation": true,
+      "defaultEndpoints": ["consul-1:8500", "consul-2:8500", "consul-3:8500"],
+      "healthCheckEndpoint": "/v1/health/service"
+    }
+  },
+  "testConfiguration": {
+    "enabledByDefault": false,
+    "logFailures": true,
+    "mockResponseTemplates": {
+      "NOT_FOUND": {
+        "status": 404,
+        "body": {
+          "error": "Service not found",
+          "message": "The requested service could not be located in service discovery"
+        }
+      },
+      "TIMEOUT": {
+        "status": 504,
+        "body": {
+          "error": "Gateway Timeout",
+          "message": "The service request timed out"
+        }
+      },
+      "SERVICE_UNAVAILABLE": {
+        "status": 503,
+        "body": {
+          "error": "Service Unavailable",
+          "message": "The service is currently unavailable"
+        }
+      },
+      "INTERNAL_ERROR": {
+        "status": 500,
+        "body": {
+          "error": "Internal Server Error",
+          "message": "The service encountered an internal error"
+        }
+      }
+    }
+  }
+}
