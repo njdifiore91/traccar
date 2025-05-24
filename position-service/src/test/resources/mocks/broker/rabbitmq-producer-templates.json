@@ -1,0 +1,585 @@
+[
+  {
+    "name": "position-update",
+    "description": "Standard position update event with complete position data",
+    "exchange": "position.events",
+    "routingKey": "position.update",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 0,
+      "correlationId": "${correlationId}",
+      "replyTo": null,
+      "expiration": null,
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.update",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "clusterId": null,
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}",
+        "x-protocol": "${protocol}"
+      }
+    },
+    "payload": {
+      "id": "${positionId}",
+      "deviceId": "${deviceId}",
+      "protocol": "${protocol}",
+      "deviceTime": "${deviceTime}",
+      "fixTime": "${fixTime}",
+      "serverTime": "${serverTime}",
+      "outdated": false,
+      "valid": true,
+      "latitude": 37.4219983,
+      "longitude": -122.084,
+      "altitude": 15.0,
+      "speed": 45.5,
+      "course": 90.0,
+      "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+      "accuracy": 5.0,
+      "network": {
+        "radioType": "gsm",
+        "cellTowers": [
+          {
+            "cellId": 12345,
+            "locationAreaCode": 1000,
+            "mobileCountryCode": 310,
+            "mobileNetworkCode": 260,
+            "signalStrength": -70
+          }
+        ],
+        "wifiAccessPoints": [
+          {
+            "macAddress": "01:23:45:67:89:ab",
+            "signalStrength": -65,
+            "channel": 11
+          }
+        ]
+      },
+      "attributes": {
+        "batteryLevel": 85,
+        "ignition": true,
+        "motion": true,
+        "odometer": 12345.6,
+        "fuelLevel": 75.5,
+        "temperature": 28.5,
+        "io": {
+          "digitalInput1": true,
+          "digitalInput2": false,
+          "digitalOutput1": false
+        }
+      }
+    }
+  },
+  {
+    "name": "position-minimal",
+    "description": "Minimal position update with only essential fields",
+    "exchange": "position.events",
+    "routingKey": "position.update.minimal",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 0,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.update.minimal",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}"
+      }
+    },
+    "payload": {
+      "id": "${positionId}",
+      "deviceId": "${deviceId}",
+      "protocol": "${protocol}",
+      "serverTime": "${serverTime}",
+      "valid": true,
+      "latitude": 37.4219983,
+      "longitude": -122.084,
+      "speed": 45.5,
+      "course": 90.0
+    }
+  },
+  {
+    "name": "geofence-enter",
+    "description": "Event triggered when device enters a geofence",
+    "exchange": "position.events",
+    "routingKey": "position.geofence.enter",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.geofence.enter",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}",
+        "x-geofence-id": "${geofenceId}"
+      }
+    },
+    "payload": {
+      "eventType": "geofenceEnter",
+      "geofenceId": "${geofenceId}",
+      "geofenceName": "${geofenceName}",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 15.5,
+        "course": 90.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA"
+      }
+    }
+  },
+  {
+    "name": "geofence-exit",
+    "description": "Event triggered when device exits a geofence",
+    "exchange": "position.events",
+    "routingKey": "position.geofence.exit",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.geofence.exit",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}",
+        "x-geofence-id": "${geofenceId}"
+      }
+    },
+    "payload": {
+      "eventType": "geofenceExit",
+      "geofenceId": "${geofenceId}",
+      "geofenceName": "${geofenceName}",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 45.5,
+        "course": 90.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA"
+      }
+    }
+  },
+  {
+    "name": "motion-start",
+    "description": "Event triggered when device starts moving",
+    "exchange": "position.events",
+    "routingKey": "position.motion.start",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.motion.start",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}"
+      }
+    },
+    "payload": {
+      "eventType": "motionStart",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 5.5,
+        "course": 90.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+        "attributes": {
+          "motion": true,
+          "ignition": true
+        }
+      }
+    }
+  },
+  {
+    "name": "motion-stop",
+    "description": "Event triggered when device stops moving",
+    "exchange": "position.events",
+    "routingKey": "position.motion.stop",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.motion.stop",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}"
+      }
+    },
+    "payload": {
+      "eventType": "motionStop",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 0.0,
+        "course": 90.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+        "attributes": {
+          "motion": false,
+          "ignition": true,
+          "totalDistance": 1250.5,
+          "duration": 3600
+        }
+      }
+    }
+  },
+  {
+    "name": "overspeed",
+    "description": "Event triggered when device exceeds speed limit",
+    "exchange": "position.events",
+    "routingKey": "position.overspeed",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 2,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.overspeed",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}",
+        "x-speed-limit": "${speedLimit}"
+      }
+    },
+    "payload": {
+      "eventType": "deviceOverspeed",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "speedLimit": "${speedLimit}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 85.5,
+        "course": 90.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA"
+      }
+    }
+  },
+  {
+    "name": "ignition-on",
+    "description": "Event triggered when device ignition is turned on",
+    "exchange": "position.events",
+    "routingKey": "position.ignition.on",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.ignition.on",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}"
+      }
+    },
+    "payload": {
+      "eventType": "ignitionOn",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+        "attributes": {
+          "ignition": true
+        }
+      }
+    }
+  },
+  {
+    "name": "ignition-off",
+    "description": "Event triggered when device ignition is turned off",
+    "exchange": "position.events",
+    "routingKey": "position.ignition.off",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.ignition.off",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}"
+      }
+    },
+    "payload": {
+      "eventType": "ignitionOff",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+        "attributes": {
+          "ignition": false
+        }
+      }
+    }
+  },
+  {
+    "name": "device-offline",
+    "description": "Event triggered when device goes offline",
+    "exchange": "position.events",
+    "routingKey": "position.device.offline",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 2,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.device.offline",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-device-id": "${deviceId}",
+        "x-last-position-id": "${positionId}"
+      }
+    },
+    "payload": {
+      "eventType": "deviceOffline",
+      "deviceId": "${deviceId}",
+      "lastPositionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "lastCommunication": "${lastCommunication}",
+      "lastPosition": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "time": "${lastPositionTime}"
+      }
+    }
+  },
+  {
+    "name": "device-online",
+    "description": "Event triggered when device comes online",
+    "exchange": "position.events",
+    "routingKey": "position.device.online",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 1,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.device.online",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-device-id": "${deviceId}",
+        "x-position-id": "${positionId}"
+      }
+    },
+    "payload": {
+      "eventType": "deviceOnline",
+      "deviceId": "${deviceId}",
+      "positionId": "${positionId}",
+      "serverTime": "${serverTime}",
+      "offlineDuration": "${offlineDuration}",
+      "position": {
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "time": "${positionTime}"
+      }
+    }
+  },
+  {
+    "name": "position-batch",
+    "description": "Batch of position updates for efficient processing",
+    "exchange": "position.events",
+    "routingKey": "position.batch",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 0,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.batch",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-device-id": "${deviceId}",
+        "x-batch-size": "${batchSize}"
+      }
+    },
+    "payload": {
+      "deviceId": "${deviceId}",
+      "batchSize": "${batchSize}",
+      "serverTime": "${serverTime}",
+      "positions": [
+        {
+          "id": "${positionId1}",
+          "deviceTime": "${deviceTime1}",
+          "serverTime": "${serverTime1}",
+          "latitude": 37.4219983,
+          "longitude": -122.084,
+          "speed": 45.5,
+          "course": 90.0
+        },
+        {
+          "id": "${positionId2}",
+          "deviceTime": "${deviceTime2}",
+          "serverTime": "${serverTime2}",
+          "latitude": 37.4220983,
+          "longitude": -122.085,
+          "speed": 46.5,
+          "course": 91.0
+        },
+        {
+          "id": "${positionId3}",
+          "deviceTime": "${deviceTime3}",
+          "serverTime": "${serverTime3}",
+          "latitude": 37.4221983,
+          "longitude": -122.086,
+          "speed": 47.5,
+          "course": 92.0
+        }
+      ]
+    }
+  },
+  {
+    "name": "position-forward",
+    "description": "Position update to be forwarded to external system",
+    "exchange": "position.forward",
+    "routingKey": "position.forward.external",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 0,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.forward",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-position-id": "${positionId}",
+        "x-device-id": "${deviceId}",
+        "x-destination": "${destination}"
+      }
+    },
+    "payload": {
+      "id": "${positionId}",
+      "deviceId": "${deviceId}",
+      "protocol": "${protocol}",
+      "deviceTime": "${deviceTime}",
+      "fixTime": "${fixTime}",
+      "serverTime": "${serverTime}",
+      "valid": true,
+      "latitude": 37.4219983,
+      "longitude": -122.084,
+      "altitude": 15.0,
+      "speed": 45.5,
+      "course": 90.0,
+      "address": "1600 Amphitheatre Parkway, Mountain View, CA",
+      "attributes": {
+        "batteryLevel": 85,
+        "ignition": true,
+        "motion": true,
+        "odometer": 12345.6
+      },
+      "destination": "${destination}",
+      "forwardTime": "${forwardTime}"
+    }
+  },
+  {
+    "name": "position-error",
+    "description": "Error event during position processing",
+    "exchange": "position.events",
+    "routingKey": "position.error",
+    "properties": {
+      "contentType": "application/json",
+      "contentEncoding": "UTF-8",
+      "deliveryMode": 2,
+      "priority": 3,
+      "correlationId": "${correlationId}",
+      "messageId": "${messageId}",
+      "timestamp": "${timestamp}",
+      "type": "position.error",
+      "userId": "position-service",
+      "appId": "org.traccar.position-service",
+      "headers": {
+        "x-device-id": "${deviceId}",
+        "x-error-code": "${errorCode}"
+      }
+    },
+    "payload": {
+      "eventType": "positionError",
+      "deviceId": "${deviceId}",
+      "serverTime": "${serverTime}",
+      "errorCode": "${errorCode}",
+      "errorMessage": "${errorMessage}",
+      "rawData": "${rawData}",
+      "lastValidPosition": {
+        "id": "${lastPositionId}",
+        "latitude": 37.4219983,
+        "longitude": -122.084,
+        "time": "${lastPositionTime}"
+      }
+    }
+  }
+]
