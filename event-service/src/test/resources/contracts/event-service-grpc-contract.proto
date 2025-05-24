@@ -1,0 +1,405 @@
+syntax = "proto3";
+
+package org.traccar.event;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.event.proto";
+option java_outer_classname = "EventServiceProto";
+option objc_class_prefix = "TSE";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Event Service definition
+service EventService {
+  // Detects events based on position data
+  rpc DetectEvents(DetectEventsRequest) returns (DetectEventsResponse);
+  
+  // Evaluates event rules for a specific device
+  rpc EvaluateEventRules(EvaluateEventRulesRequest) returns (EvaluateEventRulesResponse);
+  
+  // Processes an event (store, forward, etc.)
+  rpc ProcessEvent(ProcessEventRequest) returns (ProcessEventResponse);
+  
+  // Subscribes to events for a specific device or user
+  rpc SubscribeToEvents(SubscribeToEventsRequest) returns (stream EventMessage);
+  
+  // Gets events for a specific device within a time range
+  rpc GetEvents(GetEventsRequest) returns (GetEventsResponse);
+  
+  // Creates a new event rule
+  rpc CreateEventRule(CreateEventRuleRequest) returns (EventRule);
+  
+  // Updates an existing event rule
+  rpc UpdateEventRule(UpdateEventRuleRequest) returns (EventRule);
+  
+  // Deletes an event rule
+  rpc DeleteEventRule(DeleteEventRuleRequest) returns (google.protobuf.Empty);
+  
+  // Gets all event rules for a specific device or user
+  rpc GetEventRules(GetEventRulesRequest) returns (GetEventRulesResponse);
+}
+
+// Event types
+enum EventType {
+  UNKNOWN = 0;
+  DEVICE_ONLINE = 1;
+  DEVICE_OFFLINE = 2;
+  DEVICE_MOVING = 3;
+  DEVICE_STOPPED = 4;
+  DEVICE_OVERSPEED = 5;
+  GEOFENCE_ENTER = 6;
+  GEOFENCE_EXIT = 7;
+  ALARM = 8;
+  IGNITION_ON = 9;
+  IGNITION_OFF = 10;
+  MAINTENANCE = 11;
+  TEXT_MESSAGE = 12;
+  DRIVER_CHANGE = 13;
+  DEVICE_FUEL_DROP = 14;
+  DEVICE_FUEL_FILL = 15;
+  COMMAND_RESULT = 16;
+  DEVICE_UNKNOWN = 17;
+}
+
+// Event message
+message EventMessage {
+  // Unique identifier for the event
+  int64 id = 1;
+  
+  // Type of event
+  EventType type = 2;
+  
+  // Device ID associated with the event
+  int64 device_id = 3;
+  
+  // Position ID associated with the event (if applicable)
+  int64 position_id = 4;
+  
+  // Geofence ID associated with the event (if applicable)
+  int64 geofence_id = 5;
+  
+  // Maintenance ID associated with the event (if applicable)
+  int64 maintenance_id = 6;
+  
+  // Timestamp when the event occurred
+  google.protobuf.Timestamp event_time = 7;
+  
+  // Additional attributes as key-value pairs
+  map<string, string> attributes = 8;
+}
+
+// Position message (simplified for event service)
+message Position {
+  // Unique identifier for the position
+  int64 id = 1;
+  
+  // Device ID associated with the position
+  int64 device_id = 2;
+  
+  // Protocol used to receive the position
+  string protocol = 3;
+  
+  // Timestamp when the position was recorded
+  google.protobuf.Timestamp device_time = 4;
+  
+  // Timestamp when the position was received by the server
+  google.protobuf.Timestamp server_time = 5;
+  
+  // Timestamp when the position was fixed
+  google.protobuf.Timestamp fix_time = 6;
+  
+  // Validity flag
+  bool valid = 7;
+  
+  // Latitude in degrees
+  double latitude = 8;
+  
+  // Longitude in degrees
+  double longitude = 9;
+  
+  // Altitude in meters
+  double altitude = 10;
+  
+  // Speed in knots
+  double speed = 11;
+  
+  // Course in degrees
+  double course = 12;
+  
+  // Address (reverse geocoded)
+  string address = 13;
+  
+  // Additional attributes as key-value pairs
+  map<string, string> attributes = 14;
+}
+
+// Device message (simplified for event service)
+message Device {
+  // Unique identifier for the device
+  int64 id = 1;
+  
+  // Name of the device
+  string name = 2;
+  
+  // Unique identifier for the device
+  string unique_id = 3;
+  
+  // Status of the device
+  string status = 4;
+  
+  // Last position ID
+  int64 last_position_id = 5;
+  
+  // Group ID
+  int64 group_id = 6;
+  
+  // Additional attributes as key-value pairs
+  map<string, string> attributes = 7;
+}
+
+// Geofence message (simplified for event service)
+message Geofence {
+  // Unique identifier for the geofence
+  int64 id = 1;
+  
+  // Name of the geofence
+  string name = 2;
+  
+  // Description of the geofence
+  string description = 3;
+  
+  // Area definition in WKT format
+  string area = 4;
+  
+  // Geofence type (circle, polygon, etc.)
+  string type = 5;
+  
+  // Additional attributes as key-value pairs
+  map<string, string> attributes = 6;
+}
+
+// Event rule message
+message EventRule {
+  // Unique identifier for the rule
+  int64 id = 1;
+  
+  // Device ID associated with the rule (0 for all devices)
+  int64 device_id = 2;
+  
+  // Group ID associated with the rule (0 for all groups)
+  int64 group_id = 3;
+  
+  // Event type to detect
+  EventType type = 4;
+  
+  // Rule parameters as key-value pairs
+  map<string, string> parameters = 5;
+  
+  // Whether the rule is enabled
+  bool enabled = 6;
+  
+  // Description of the rule
+  string description = 7;
+  
+  // Notification template ID (if applicable)
+  int64 notification_template_id = 8;
+  
+  // Geofence ID (if applicable)
+  int64 geofence_id = 9;
+  
+  // Calendar ID for time-based rules (if applicable)
+  int64 calendar_id = 10;
+}
+
+// Request to detect events based on position data
+message DetectEventsRequest {
+  // Position data to analyze
+  Position position = 1;
+  
+  // Previous position data (if available)
+  Position previous_position = 2;
+  
+  // Device information
+  Device device = 3;
+  
+  // List of geofences to check (if applicable)
+  repeated Geofence geofences = 4;
+}
+
+// Response with detected events
+message DetectEventsResponse {
+  // List of detected events
+  repeated EventMessage events = 1;
+}
+
+// Request to evaluate event rules for a specific device
+message EvaluateEventRulesRequest {
+  // Device ID to evaluate rules for
+  int64 device_id = 1;
+  
+  // Position data to evaluate
+  Position position = 2;
+  
+  // Previous position data (if available)
+  Position previous_position = 3;
+}
+
+// Response with evaluation results
+message EvaluateEventRulesResponse {
+  // List of triggered events
+  repeated EventMessage events = 1;
+  
+  // List of rules that were evaluated
+  repeated EventRule evaluated_rules = 2;
+}
+
+// Request to process an event
+message ProcessEventRequest {
+  // Event to process
+  EventMessage event = 1;
+  
+  // Whether to store the event
+  bool store = 2;
+  
+  // Whether to forward the event to notification service
+  bool forward = 3;
+}
+
+// Response after processing an event
+message ProcessEventResponse {
+  // Processed event with updated information
+  EventMessage event = 1;
+  
+  // Status of the processing
+  string status = 2;
+  
+  // Error message (if any)
+  string error = 3;
+}
+
+// Request to subscribe to events
+message SubscribeToEventsRequest {
+  // Device ID to subscribe to (0 for all accessible devices)
+  int64 device_id = 1;
+  
+  // User ID making the subscription
+  int64 user_id = 2;
+  
+  // Types of events to subscribe to (empty for all types)
+  repeated EventType event_types = 3;
+}
+
+// Request to get events
+message GetEventsRequest {
+  // Device ID to get events for
+  int64 device_id = 1;
+  
+  // Types of events to get (empty for all types)
+  repeated EventType event_types = 2;
+  
+  // Start time for the query
+  google.protobuf.Timestamp from = 3;
+  
+  // End time for the query
+  google.protobuf.Timestamp to = 4;
+  
+  // Maximum number of events to return
+  int32 limit = 5;
+}
+
+// Response with events
+message GetEventsResponse {
+  // List of events
+  repeated EventMessage events = 1;
+}
+
+// Request to create a new event rule
+message CreateEventRuleRequest {
+  // Event rule to create
+  EventRule rule = 1;
+}
+
+// Request to update an existing event rule
+message UpdateEventRuleRequest {
+  // Event rule to update
+  EventRule rule = 1;
+}
+
+// Request to delete an event rule
+message DeleteEventRuleRequest {
+  // ID of the rule to delete
+  int64 rule_id = 1;
+}
+
+// Request to get event rules
+message GetEventRulesRequest {
+  // Device ID to get rules for (0 for all accessible devices)
+  int64 device_id = 1;
+  
+  // User ID making the request
+  int64 user_id = 2;
+  
+  // Types of rules to get (empty for all types)
+  repeated EventType event_types = 3;
+}
+
+// Response with event rules
+message GetEventRulesResponse {
+  // List of event rules
+  repeated EventRule rules = 1;
+}
+
+// Motion state message for motion event detection
+message MotionState {
+  // Whether the device is in motion
+  bool motion_state = 1;
+  
+  // Distance traveled in motion state
+  double motion_distance = 2;
+  
+  // Whether the device is in a motion streak
+  bool motion_streak = 3;
+  
+  // Event generated by motion state change (if any)
+  EventMessage event = 4;
+}
+
+// Overspeed state message for overspeed event detection
+message OverspeedState {
+  // Whether the device is in overspeed state
+  bool overspeed_state = 1;
+  
+  // Geofence ID associated with the overspeed state (if any)
+  int64 overspeed_geofence_id = 2;
+  
+  // Position ID when overspeed started
+  int64 overspeed_position_id = 3;
+  
+  // Time when overspeed started
+  google.protobuf.Timestamp overspeed_time = 4;
+  
+  // Event generated by overspeed state change (if any)
+  EventMessage event = 5;
+}
+
+// Trips configuration message for motion event detection
+message TripsConfig {
+  // Minimum distance for trip detection in meters
+  double min_distance = 1;
+  
+  // Minimum trip duration in milliseconds
+  int64 min_trip_duration = 2;
+  
+  // Minimum parking duration in milliseconds
+  int64 min_parking_duration = 3;
+  
+  // Minimum average speed in knots
+  double min_average_speed = 4;
+  
+  // Whether to use ignition for trip detection
+  bool use_ignition = 5;
+  
+  // Whether to process offline positions
+  bool process_offline = 6;
+}
