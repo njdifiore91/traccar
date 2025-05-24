@@ -1,0 +1,264 @@
+{
+  "version": "1.0",
+  "description": "Notification channel behavior configurations for Position Service testing",
+  "channels": {
+    "email": {
+      "success_rate": 0.95,
+      "latency": {
+        "min_ms": 500,
+        "max_ms": 3000,
+        "distribution": "normal",
+        "mean_ms": 1200,
+        "std_dev_ms": 500
+      },
+      "error_conditions": [
+        {
+          "type": "smtp_connection_failure",
+          "probability": 0.02,
+          "retry_success_probability": 0.8,
+          "error_code": "EMAIL-001",
+          "error_message": "SMTP connection failure"
+        },
+        {
+          "type": "invalid_recipient",
+          "probability": 0.01,
+          "retry_success_probability": 0.0,
+          "error_code": "EMAIL-002",
+          "error_message": "Invalid recipient email address"
+        },
+        {
+          "type": "rate_limit_exceeded",
+          "probability": 0.02,
+          "retry_success_probability": 0.9,
+          "error_code": "EMAIL-003",
+          "error_message": "Email rate limit exceeded"
+        }
+      ],
+      "throttling": {
+        "max_per_minute": 100,
+        "max_per_hour": 1000,
+        "cooldown_period_ms": 60000
+      }
+    },
+    "sms": {
+      "success_rate": 0.90,
+      "latency": {
+        "min_ms": 200,
+        "max_ms": 5000,
+        "distribution": "exponential",
+        "mean_ms": 800
+      },
+      "error_conditions": [
+        {
+          "type": "gateway_unavailable",
+          "probability": 0.03,
+          "retry_success_probability": 0.7,
+          "error_code": "SMS-001",
+          "error_message": "SMS gateway unavailable"
+        },
+        {
+          "type": "invalid_phone_number",
+          "probability": 0.02,
+          "retry_success_probability": 0.0,
+          "error_code": "SMS-002",
+          "error_message": "Invalid phone number format"
+        },
+        {
+          "type": "message_too_long",
+          "probability": 0.01,
+          "retry_success_probability": 0.0,
+          "error_code": "SMS-003",
+          "error_message": "SMS message exceeds maximum length"
+        },
+        {
+          "type": "carrier_rejected",
+          "probability": 0.04,
+          "retry_success_probability": 0.5,
+          "error_code": "SMS-004",
+          "error_message": "Message rejected by carrier"
+        }
+      ],
+      "throttling": {
+        "max_per_minute": 50,
+        "max_per_hour": 500,
+        "cooldown_period_ms": 120000
+      }
+    },
+    "push": {
+      "success_rate": 0.85,
+      "latency": {
+        "min_ms": 100,
+        "max_ms": 2000,
+        "distribution": "normal",
+        "mean_ms": 500,
+        "std_dev_ms": 300
+      },
+      "error_conditions": [
+        {
+          "type": "fcm_unavailable",
+          "probability": 0.05,
+          "retry_success_probability": 0.8,
+          "error_code": "PUSH-001",
+          "error_message": "Firebase Cloud Messaging service unavailable"
+        },
+        {
+          "type": "invalid_token",
+          "probability": 0.08,
+          "retry_success_probability": 0.0,
+          "error_code": "PUSH-002",
+          "error_message": "Invalid or expired device token"
+        },
+        {
+          "type": "device_offline",
+          "probability": 0.02,
+          "retry_success_probability": 0.9,
+          "error_code": "PUSH-003",
+          "error_message": "Target device is offline"
+        }
+      ],
+      "throttling": {
+        "max_per_minute": 200,
+        "max_per_hour": 2000,
+        "cooldown_period_ms": 30000
+      }
+    },
+    "web": {
+      "success_rate": 0.98,
+      "latency": {
+        "min_ms": 50,
+        "max_ms": 1000,
+        "distribution": "normal",
+        "mean_ms": 200,
+        "std_dev_ms": 100
+      },
+      "error_conditions": [
+        {
+          "type": "websocket_disconnected",
+          "probability": 0.01,
+          "retry_success_probability": 0.9,
+          "error_code": "WEB-001",
+          "error_message": "WebSocket connection disconnected"
+        },
+        {
+          "type": "session_expired",
+          "probability": 0.01,
+          "retry_success_probability": 0.0,
+          "error_code": "WEB-002",
+          "error_message": "User session expired"
+        }
+      ],
+      "throttling": {
+        "max_per_minute": 500,
+        "max_per_hour": 5000,
+        "cooldown_period_ms": 10000
+      }
+    }
+  },
+  "global_settings": {
+    "dead_letter_queue": {
+      "enabled": true,
+      "max_retries": 3,
+      "retry_delay_ms": {
+        "initial": 1000,
+        "multiplier": 2.0,
+        "max": 60000
+      }
+    },
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 0.5,
+      "reset_timeout_ms": 30000,
+      "half_open_allowed_calls": 5
+    },
+    "correlation": {
+      "enabled": true,
+      "header_name": "X-Correlation-ID",
+      "propagate": true
+    }
+  },
+  "test_scenarios": {
+    "normal_operation": {
+      "description": "Normal operation with typical success rates and latency",
+      "channel_overrides": {}
+    },
+    "high_latency": {
+      "description": "All channels experiencing higher than normal latency",
+      "channel_overrides": {
+        "email": {
+          "latency": {
+            "mean_ms": 3000,
+            "std_dev_ms": 1000
+          }
+        },
+        "sms": {
+          "latency": {
+            "mean_ms": 2000
+          }
+        },
+        "push": {
+          "latency": {
+            "mean_ms": 1500,
+            "std_dev_ms": 800
+          }
+        },
+        "web": {
+          "latency": {
+            "mean_ms": 800,
+            "std_dev_ms": 400
+          }
+        }
+      }
+    },
+    "degraded_service": {
+      "description": "All channels experiencing reduced success rates",
+      "channel_overrides": {
+        "email": {
+          "success_rate": 0.7
+        },
+        "sms": {
+          "success_rate": 0.6
+        },
+        "push": {
+          "success_rate": 0.5
+        },
+        "web": {
+          "success_rate": 0.8
+        }
+      }
+    },
+    "email_outage": {
+      "description": "Email service completely unavailable",
+      "channel_overrides": {
+        "email": {
+          "success_rate": 0.0,
+          "error_conditions": [
+            {
+              "type": "smtp_connection_failure",
+              "probability": 1.0,
+              "retry_success_probability": 0.0,
+              "error_code": "EMAIL-001",
+              "error_message": "SMTP connection failure - service outage"
+            }
+          ]
+        }
+      }
+    },
+    "push_token_issues": {
+      "description": "High rate of invalid push tokens",
+      "channel_overrides": {
+        "push": {
+          "success_rate": 0.6,
+          "error_conditions": [
+            {
+              "type": "invalid_token",
+              "probability": 0.4,
+              "retry_success_probability": 0.0,
+              "error_code": "PUSH-002",
+              "error_message": "Invalid or expired device token"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
