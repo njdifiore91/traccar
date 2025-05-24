@@ -1,0 +1,39 @@
+# Kubernetes Service for the Notification Service
+# This service exposes the Notification Service to other services within the cluster
+# It provides the network endpoint for health checks, administration, and inter-service communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    app: notification-service
+    component: notification
+    part-of: traccar
+  annotations:
+    # Prometheus monitoring annotations for metrics collection
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8083"
+    prometheus.io/path: "/actuator/prometheus"
+    
+    # Service discovery integration annotations
+    # These annotations help with service discovery in the microservices architecture
+    # as described in the technical specification
+    traccar.io/service-name: "notification-service"
+    traccar.io/service-version: "1.0.0"
+spec:
+  # ClusterIP for internal communication as specified in the requirements
+  type: ClusterIP
+  
+  # Selector must match the labels in the Deployment
+  selector:
+    app: notification-service
+  
+  ports:
+    # Main API port for health checks and administration as specified in requirements
+    - name: http-api
+      port: 8083
+      targetPort: 8083
+      protocol: TCP
+  
+  # No session affinity needed for stateless service
+  sessionAffinity: None
