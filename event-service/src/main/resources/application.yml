@@ -1,0 +1,145 @@
+# Event Processing Service Configuration
+
+spring:
+  application:
+    name: event-service
+  
+  # Message Broker Configuration (supports both Kafka and RabbitMQ)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:event-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.traccar.model,org.traccar.proto
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      position-input: ${KAFKA_TOPIC_POSITION_INPUT:enriched-positions}
+      event-output: ${KAFKA_TOPIC_EVENT_OUTPUT:events}
+  
+  # RabbitMQ Configuration (alternative to Kafka)
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 10
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          multiplier: 2.0
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 2.0
+
+  # Service Discovery Configuration
+  cloud:
+    consul:
+      enabled: ${CONSUL_ENABLED:false}
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        instance-id: ${spring.application.name}:${random.uuid}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8082}
+  servlet:
+    context-path: /
+
+# Management (Actuator) Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,diskSpace,kafka,rabbitmq
+  health:
+    kafka:
+      enabled: ${KAFKA_ENABLED:true}
+    rabbitmq:
+      enabled: ${RABBITMQ_ENABLED:false}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.springframework.kafka: ${KAFKA_LOG_LEVEL:INFO}
+    org.springframework.amqp: ${RABBITMQ_LOG_LEVEL:INFO}
+
+# Event Processing Configuration
+event:
+  processing:
+    # Event detection configuration
+    detection:
+      enabled: true
+      # Geofence event detection
+      geofence:
+        enabled: true
+      # Overspeed event detection
+      overspeed:
+        enabled: true
+        threshold: ${EVENT_OVERSPEED_THRESHOLD:90}
+      # Motion event detection
+      motion:
+        enabled: true
+      # Device status event detection
+      status:
+        enabled: true
+    # Event processing thread pool configuration
+    thread-pool:
+      core-size: ${EVENT_THREAD_POOL_CORE_SIZE:5}
+      max-size: ${EVENT_THREAD_POOL_MAX_SIZE:10}
+      queue-capacity: ${EVENT_THREAD_POOL_QUEUE_CAPACITY:100}
+
+# Resilience Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      eventProcessing:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  bulkhead:
+    instances:
+      eventProcessing:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 500ms
+  retry:
+    instances:
+      eventProcessing:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
