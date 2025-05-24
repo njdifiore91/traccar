@@ -1,0 +1,101 @@
+{
+  "mappings": [
+    {
+      "name": "Overpass API Timeout Error",
+      "request": {
+        "urlPathPattern": "/api/interpreter.*",
+        "method": "GET",
+        "queryParameters": {
+          "data": {
+            "matches": ".*\\[out:json\\].*"
+          }
+        }
+      },
+      "response": {
+        "status": 504,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "version": 0.6,
+          "generator": "Overpass API",
+          "error": {
+            "code": 504,
+            "message": "Gateway Timeout",
+            "details": "The server is probably too busy to handle your request. Please try again later or try a smaller query area."
+          },
+          "osm3s": {
+            "timestamp_osm_base": "2025-05-24T00:00:00Z",
+            "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+          }
+        }
+      }
+    },
+    {
+      "name": "Overpass API Rate Limit Error",
+      "request": {
+        "urlPathPattern": "/api/interpreter.*",
+        "method": "GET",
+        "queryParameters": {
+          "data": {
+            "matches": ".*way\\[maxspeed\\].*"
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Retry-After": "60"
+        },
+        "jsonBody": {
+          "version": 0.6,
+          "generator": "Overpass API",
+          "error": {
+            "code": 429,
+            "message": "Too Many Requests",
+            "details": "Rate limit exceeded. Please wait before making further requests."
+          },
+          "osm3s": {
+            "timestamp_osm_base": "2025-05-24T00:00:00Z",
+            "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+          }
+        }
+      }
+    },
+    {
+      "name": "Overpass API Bad Request Error",
+      "request": {
+        "urlPathPattern": "/api/interpreter.*",
+        "method": "GET",
+        "queryParameters": {
+          "data": {
+            "matches": ".*invalid_syntax.*"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        "jsonBody": {
+          "version": 0.6,
+          "generator": "Overpass API",
+          "error": {
+            "code": 400,
+            "message": "Bad Request",
+            "details": "Syntax error in query. Please check your query and try again."
+          },
+          "osm3s": {
+            "timestamp_osm_base": "2025-05-24T00:00:00Z",
+            "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+          }
+        }
+      }
+    }
+  ]
+}
