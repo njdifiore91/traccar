@@ -1,0 +1,98 @@
+{
+  "service": {
+    "id": "position-service-1",
+    "name": "position-service",
+    "tags": [
+      "traccar",
+      "position",
+      "processing",
+      "microservice",
+      "java"
+    ],
+    "address": "position-service.traccar.svc.cluster.local",
+    "port": 8080,
+    "meta": {
+      "version": "1.0.0",
+      "environment": "test",
+      "description": "Position Processing Service",
+      "capabilities": "position-processing,geocoding,geolocation,distance-calculation,motion-detection",
+      "dependencies": "database,message-broker,geocoder-service"
+    },
+    "checks": [
+      {
+        "id": "position-service-health-check",
+        "name": "Position Service Health Check",
+        "http": "http://position-service.traccar.svc.cluster.local:8080/actuator/health/live",
+        "method": "GET",
+        "interval": "15s",
+        "timeout": "5s",
+        "success_before_passing": 1,
+        "failures_before_critical": 3
+      },
+      {
+        "id": "position-service-readiness-check",
+        "name": "Position Service Readiness Check",
+        "http": "http://position-service.traccar.svc.cluster.local:8080/actuator/health/ready",
+        "method": "GET",
+        "interval": "30s",
+        "timeout": "5s"
+      }
+    ],
+    "connect": {
+      "sidecar_service": {
+        "proxy": {
+          "upstreams": [
+            {
+              "destination_name": "database",
+              "local_bind_port": 5432
+            },
+            {
+              "destination_name": "message-broker",
+              "local_bind_port": 5672
+            }
+          ]
+        }
+      }
+    },
+    "weights": {
+      "passing": 10,
+      "warning": 1
+    }
+  },
+  "kubernetes": {
+    "metadata": {
+      "name": "position-service",
+      "namespace": "traccar",
+      "labels": {
+        "app": "position-service",
+        "tier": "backend",
+        "part-of": "traccar"
+      },
+      "annotations": {
+        "prometheus.io/scrape": "true",
+        "prometheus.io/port": "8080",
+        "prometheus.io/path": "/actuator/prometheus"
+      }
+    },
+    "spec": {
+      "selector": {
+        "app": "position-service"
+      },
+      "ports": [
+        {
+          "name": "http",
+          "port": 8080,
+          "targetPort": 8080,
+          "protocol": "TCP"
+        },
+        {
+          "name": "grpc",
+          "port": 9090,
+          "targetPort": 9090,
+          "protocol": "TCP"
+        }
+      ],
+      "type": "ClusterIP"
+    }
+  }
+}
