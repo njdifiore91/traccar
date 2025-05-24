@@ -1,0 +1,53 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/interpreter",
+    "queryParameters": {
+      "data": {
+        "matches": ".*around.*34\\.74767.*-82\\.48098.*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache",
+      "X-Powered-By": "Overpass API"
+    },
+    "jsonBody": {
+      "version": 0.6,
+      "generator": "Overpass API mock for testing",
+      "osm3s": {
+        "timestamp_osm_base": "2023-05-24T12:34:56Z",
+        "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+      },
+      "elements": [
+        {
+          "type": "way",
+          "id": 123456789,
+          "tags": {
+            "highway": "residential",
+            "maxspeed": "52.1",
+            "maxspeed:type": "school",
+            "maxspeed:source": "sign",
+            "name": "School Zone Road",
+            "zone:traffic": "school"
+          }
+        },
+        {
+          "type": "way",
+          "id": 987654321,
+          "tags": {
+            "highway": "residential",
+            "maxspeed": "52.1",
+            "maxspeed:type": "school",
+            "maxspeed:source": "sign",
+            "name": "Another School Zone Road"
+          }
+        }
+      ]
+    }
+  }
+}
