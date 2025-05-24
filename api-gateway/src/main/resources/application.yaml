@@ -1,0 +1,460 @@
+# API Gateway Service Configuration
+# This is the primary configuration file for the API Gateway service
+# It defines routing rules, authentication settings, WebSocket configuration, and resilience patterns
+
+# Server configuration
+server:
+  port: 8082
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json
+    min-response-size: 1024
+  jetty:
+    threads:
+      min: 10
+      max: 200
+      idle-timeout: 60000
+  shutdown: graceful
+
+# Spring application settings
+spring:
+  application:
+    name: api-gateway
+  main:
+    banner-mode: off
+    allow-bean-definition-overriding: true
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+  
+  # WebSocket configuration
+  websocket:
+    max-text-message-size: 65536
+    max-binary-message-size: 65536
+    max-frame-size: 65536
+    max-sessions: 10000
+    idle-timeout: 300000
+  
+  # Message broker configuration (Kafka)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: api-gateway
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "org.traccar.*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    listener:
+      concurrency: 3
+      ack-mode: MANUAL_IMMEDIATE
+  
+  # Message broker configuration (RabbitMQ) - alternative to Kafka
+  rabbitmq:
+    enabled: ${RABBITMQ_ENABLED:false}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 50
+        default-requeue-rejected: false
+
+  # Cloud configuration
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Protocol Service routes
+        - id: protocol-service
+          uri: lb://protocol-service
+          predicates:
+            - Path=/api/protocols/**
+          filters:
+            - RewritePath=/api/protocols/(?<segment>.*), /api/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: protocolServiceCircuitBreaker
+                fallbackUri: forward:/fallback/protocol-service
+                statusCodes: 
+                  - 500
+                  - 503
+                  - 504
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        
+        # Position Service routes
+        - id: position-service
+          uri: lb://position-service
+          predicates:
+            - Path=/api/positions/**
+          filters:
+            - RewritePath=/api/positions/(?<segment>.*), /api/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: positionServiceCircuitBreaker
+                fallbackUri: forward:/fallback/position-service
+                statusCodes: 
+                  - 500
+                  - 503
+                  - 504
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+        
+        # Event Service routes
+        - id: event-service
+          uri: lb://event-service
+          predicates:
+            - Path=/api/events/**
+          filters:
+            - RewritePath=/api/events/(?<segment>.*), /api/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: eventServiceCircuitBreaker
+                fallbackUri: forward:/fallback/event-service
+                statusCodes: 
+                  - 500
+                  - 503
+                  - 504
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 15
+                redis-rate-limiter.burstCapacity: 30
+        
+        # Notification Service routes
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications/(?<segment>.*), /api/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: notificationServiceCircuitBreaker
+                fallbackUri: forward:/fallback/notification-service
+                statusCodes: 
+                  - 500
+                  - 503
+                  - 504
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        
+        # Reporting Service routes
+        - id: reporting-service
+          uri: lb://reporting-service
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - RewritePath=/api/reports/(?<segment>.*), /api/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: reportingServiceCircuitBreaker
+                fallbackUri: forward:/fallback/reporting-service
+                statusCodes: 
+                  - 500
+                  - 503
+                  - 504
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                
+        # WebSocket routes for real-time updates
+        - id: websocket-sockjs-route
+          uri: lb://event-service
+          predicates:
+            - Path=/socket/info/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: websocketCircuitBreaker
+                fallbackUri: forward:/fallback/websocket
+                
+        - id: websocket-route
+          uri: lb:ws://event-service
+          predicates:
+            - Path=/socket/**
+
+# Service discovery configuration
+service-discovery:
+  enabled: true
+  type: ${SERVICE_DISCOVERY_TYPE:kubernetes} # Options: kubernetes, consul
+  consul:
+    host: ${CONSUL_HOST:localhost}
+    port: ${CONSUL_PORT:8500}
+  kubernetes:
+    namespace: ${KUBERNETES_NAMESPACE:default}
+    service-label-selector: app.kubernetes.io/name
+
+# Authentication and security settings
+security:
+  authentication:
+    enabled: true
+    jwt:
+      enabled: true
+      secret: ${JWT_SECRET:changeme}
+      expiration: 86400 # 24 hours in seconds
+      header: Authorization
+      prefix: Bearer
+    basic:
+      enabled: true
+    cookie:
+      enabled: true
+      name: TRACCAR_SESSION
+      max-age: 86400
+      secure: ${COOKIE_SECURE:false}
+      http-only: true
+  authorization:
+    enabled: true
+    default-role: USER
+    admin-role: ADMIN
+    manager-role: MANAGER
+  cors:
+    enabled: true
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+    allowed-methods: GET, POST, PUT, DELETE, OPTIONS
+    allowed-headers: Authorization, Content-Type, Accept
+    max-age: 3600
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - org.springframework.web.client.HttpServerErrorException
+    instances:
+      protocolServiceCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+        waitDurationInOpenState: 5000
+      positionServiceCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+        waitDurationInOpenState: 5000
+      eventServiceCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+        waitDurationInOpenState: 5000
+      notificationServiceCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+        waitDurationInOpenState: 5000
+      reportingServiceCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 40
+        waitDurationInOpenState: 5000
+      websocketCircuitBreaker:
+        baseConfig: default
+        failureRateThreshold: 30
+        waitDurationInOpenState: 3000
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1000
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      protocolServiceRetry:
+        baseConfig: default
+      positionServiceRetry:
+        baseConfig: default
+      eventServiceRetry:
+        baseConfig: default
+      notificationServiceRetry:
+        baseConfig: default
+      reportingServiceRetry:
+        baseConfig: default
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+    instances:
+      apiRateLimiter:
+        baseConfig: default
+        limitForPeriod: 50
+      websocketRateLimiter:
+        baseConfig: default
+        limitForPeriod: 10
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 100
+        maxWaitDuration: 0
+    instances:
+      apiGatewayBulkhead:
+        baseConfig: default
+
+# WebSocket configuration for real-time updates
+websocket:
+  endpoint: /socket
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:*}
+  message-size-limit: 65536
+  send-buffer-size-limit: 1048576
+  send-time-limit: 10000
+  heartbeat-interval: 25000
+  session-timeout: 300000
+  topics:
+    positions: positions
+    events: events
+    notifications: notifications
+    commands: commands
+    status: status
+  broker:
+    type: ${WEBSOCKET_BROKER_TYPE:kafka} # Options: kafka, rabbitmq
+    topics:
+      positions: position-updates
+      events: event-updates
+      notifications: notification-updates
+      commands: command-updates
+      status: status-updates
+  stomp:
+    enabled: true
+    endpoint: /stomp
+    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:*}
+    heartbeat: 10000,10000
+    client-login-timeout: 10000
+    sockjs:
+      enabled: true
+      url: /sockjs
+
+# OpenTelemetry configuration for distributed tracing
+opentelemetry:
+  enabled: ${OPENTELEMETRY_ENABLED:false}
+  service-name: api-gateway
+  sampler:
+    probability: ${OPENTELEMETRY_SAMPLER_PROBABILITY:0.1}
+  exporter:
+    otlp:
+      endpoint: ${OPENTELEMETRY_ENDPOINT:http://localhost:4317}
+  metrics:
+    export:
+      enabled: true
+      step: 60s
+  logs:
+    export:
+      enabled: true
+
+# Management endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,retries,ratelimiters,bulkheads
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,kafka,rabbitmq,diskSpace
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: ${LOG_LEVEL:INFO}
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.springframework.cloud.gateway: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/api-gateway.log}
+    max-size: 10MB
+    max-history: 10
+
+# API Gateway specific configuration
+api-gateway:
+  version: 1.0.0
+  default-timeout: 30000
+  max-http-header-size: 16384
+  max-http-post-size: 10485760
+  websocket:
+    heartbeat-interval: 25000
+    session-timeout: 300000
+    buffer-size-limit: 5242880 # 5MB
+    message-size-limit: 65536 # 64KB
+    timeout: 10000 # 10 seconds
+    max-sessions-per-user: 5
+    max-text-message-buffer-size: 8192
+    max-binary-message-buffer-size: 8192
+  cache:
+    enabled: true
+    ttl: 300 # seconds
+  fallback:
+    enabled: true
+    default-message: "Service temporarily unavailable"
+    handlers:
+      protocol-service: "Protocol service is currently unavailable. Please try again later."
+      position-service: "Position service is currently unavailable. Please try again later."
+      event-service: "Event service is currently unavailable. Please try again later."
+      notification-service: "Notification service is currently unavailable. Please try again later."
+      reporting-service: "Reporting service is currently unavailable. Please try again later."
+      websocket: "WebSocket service is currently unavailable. Please try again later."
+  request-logging:
+    enabled: true
+    include-headers: false
+    include-payload: false
+    max-payload-length: 1000
+    exclude-paths: 
+      - /socket/**
+      - /actuator/**
+      - /health/**
+  response-compression:
+    enabled: true
+    min-size: 1024
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
