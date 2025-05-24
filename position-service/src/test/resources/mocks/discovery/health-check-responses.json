@@ -1,0 +1,566 @@
+{
+  "liveness": {
+    "healthy": {
+      "status": "UP",
+      "components": {
+        "livenessState": {
+          "status": "UP"
+        },
+        "ping": {
+          "status": "UP"
+        }
+      }
+    },
+    "unhealthy": {
+      "status": "DOWN",
+      "components": {
+        "livenessState": {
+          "status": "DOWN",
+          "details": {
+            "error": "Service is unresponsive",
+            "timestamp": "2023-10-15T14:30:45Z"
+          }
+        },
+        "ping": {
+          "status": "DOWN"
+        }
+      }
+    }
+  },
+  "readiness": {
+    "healthy": {
+      "status": "UP",
+      "components": {
+        "readinessState": {
+          "status": "UP"
+        },
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "messageBroker": {
+          "status": "UP",
+          "details": {
+            "type": "kafka",
+            "bootstrapServers": "kafka:9092"
+          }
+        },
+        "geocoder": {
+          "status": "UP",
+          "details": {
+            "provider": "google",
+            "requestsRemaining": 9850
+          }
+        }
+      }
+    },
+    "degraded": {
+      "status": "UP",
+      "components": {
+        "readinessState": {
+          "status": "UP"
+        },
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "messageBroker": {
+          "status": "UP",
+          "details": {
+            "type": "kafka",
+            "bootstrapServers": "kafka:9092"
+          }
+        },
+        "geocoder": {
+          "status": "DOWN",
+          "details": {
+            "provider": "google",
+            "error": "Connection timeout",
+            "timestamp": "2023-10-15T14:32:10Z"
+          }
+        }
+      }
+    },
+    "unhealthy": {
+      "status": "DOWN",
+      "components": {
+        "readinessState": {
+          "status": "DOWN"
+        },
+        "db": {
+          "status": "DOWN",
+          "details": {
+            "database": "PostgreSQL",
+            "error": "Connection refused",
+            "timestamp": "2023-10-15T14:33:22Z"
+          }
+        },
+        "messageBroker": {
+          "status": "DOWN",
+          "details": {
+            "type": "kafka",
+            "error": "Failed to connect to bootstrap servers",
+            "timestamp": "2023-10-15T14:33:25Z"
+          }
+        },
+        "geocoder": {
+          "status": "UNKNOWN",
+          "details": {
+            "provider": "google",
+            "error": "Check skipped due to upstream dependency failure",
+            "timestamp": "2023-10-15T14:33:30Z"
+          }
+        }
+      }
+    }
+  },
+  "startup": {
+    "inProgress": {
+      "status": "DOWN",
+      "components": {
+        "startupState": {
+          "status": "DOWN",
+          "details": {
+            "phase": "STARTING",
+            "progress": 65,
+            "timestamp": "2023-10-15T14:35:10Z"
+          }
+        },
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "messageBroker": {
+          "status": "DOWN",
+          "details": {
+            "type": "kafka",
+            "phase": "CONNECTING",
+            "timestamp": "2023-10-15T14:35:05Z"
+          }
+        }
+      }
+    },
+    "complete": {
+      "status": "UP",
+      "components": {
+        "startupState": {
+          "status": "UP",
+          "details": {
+            "phase": "STARTED",
+            "timestamp": "2023-10-15T14:36:30Z"
+          }
+        },
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "messageBroker": {
+          "status": "UP",
+          "details": {
+            "type": "kafka",
+            "bootstrapServers": "kafka:9092"
+          }
+        }
+      }
+    },
+    "failed": {
+      "status": "DOWN",
+      "components": {
+        "startupState": {
+          "status": "DOWN",
+          "details": {
+            "phase": "FAILED",
+            "error": "Failed to initialize required components",
+            "timestamp": "2023-10-15T14:37:45Z"
+          }
+        },
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "messageBroker": {
+          "status": "DOWN",
+          "details": {
+            "type": "kafka",
+            "error": "Failed to connect to bootstrap servers",
+            "timestamp": "2023-10-15T14:37:40Z"
+          }
+        }
+      }
+    }
+  },
+  "detailed": {
+    "healthy": {
+      "status": "UP",
+      "components": {
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()",
+            "activeConnections": 5,
+            "maxConnections": 20,
+            "idleConnections": 3,
+            "minIdle": 2
+          }
+        },
+        "messageBroker": {
+          "status": "UP",
+          "details": {
+            "type": "kafka",
+            "bootstrapServers": "kafka:9092",
+            "consumerGroups": [
+              {
+                "name": "position-processors",
+                "lag": 0,
+                "members": 3
+              }
+            ],
+            "topics": [
+              {
+                "name": "raw.positions",
+                "partitions": 8,
+                "replicationFactor": 3
+              },
+              {
+                "name": "enriched.positions",
+                "partitions": 8,
+                "replicationFactor": 3
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "status": "UP",
+          "details": {
+            "provider": "google",
+            "requestsRemaining": 9850,
+            "requestsPerSecond": 12.5,
+            "averageResponseTime": 85,
+            "cacheHitRatio": 0.75
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 107374182400,
+            "free": 65840054272,
+            "threshold": 10485760,
+            "exists": true
+          }
+        },
+        "memory": {
+          "status": "UP",
+          "details": {
+            "heap": {
+              "init": 268435456,
+              "used": 536870912,
+              "committed": 1073741824,
+              "max": 2147483648
+            },
+            "nonHeap": {
+              "init": 7667712,
+              "used": 75430400,
+              "committed": 79691776,
+              "max": -1
+            },
+            "gcPauseMillis": 120,
+            "gcCycles": 12
+          }
+        },
+        "messageProcessing": {
+          "status": "UP",
+          "details": {
+            "receivedMessages": 15240,
+            "processedMessages": 15235,
+            "failedMessages": 5,
+            "dropRatio": 0.0003,
+            "averageProcessingTime": 45
+          }
+        }
+      }
+    },
+    "degraded": {
+      "status": "UP",
+      "components": {
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()",
+            "activeConnections": 18,
+            "maxConnections": 20,
+            "idleConnections": 0,
+            "minIdle": 2,
+            "warning": "Connection pool near capacity"
+          }
+        },
+        "messageBroker": {
+          "status": "UP",
+          "details": {
+            "type": "kafka",
+            "bootstrapServers": "kafka:9092",
+            "consumerGroups": [
+              {
+                "name": "position-processors",
+                "lag": 850,
+                "members": 3,
+                "warning": "Consumer lag detected"
+              }
+            ],
+            "topics": [
+              {
+                "name": "raw.positions",
+                "partitions": 8,
+                "replicationFactor": 3
+              },
+              {
+                "name": "enriched.positions",
+                "partitions": 8,
+                "replicationFactor": 3
+              }
+            ]
+          }
+        },
+        "geocoder": {
+          "status": "DOWN",
+          "details": {
+            "provider": "google",
+            "error": "Connection timeout",
+            "timestamp": "2023-10-15T14:40:10Z",
+            "fallback": "Using cached geocoding data"
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 107374182400,
+            "free": 15840054272,
+            "threshold": 10485760,
+            "exists": true,
+            "warning": "Disk space below 20% free"
+          }
+        },
+        "memory": {
+          "status": "UP",
+          "details": {
+            "heap": {
+              "init": 268435456,
+              "used": 1610612736,
+              "committed": 1879048192,
+              "max": 2147483648
+            },
+            "nonHeap": {
+              "init": 7667712,
+              "used": 95430400,
+              "committed": 99691776,
+              "max": -1
+            },
+            "gcPauseMillis": 350,
+            "gcCycles": 45,
+            "warning": "Increased GC activity detected"
+          }
+        },
+        "messageProcessing": {
+          "status": "UP",
+          "details": {
+            "receivedMessages": 25240,
+            "processedMessages": 24990,
+            "failedMessages": 250,
+            "dropRatio": 0.0099,
+            "averageProcessingTime": 120,
+            "warning": "Increased message processing time"
+          }
+        }
+      }
+    },
+    "unhealthy": {
+      "status": "DOWN",
+      "components": {
+        "db": {
+          "status": "DOWN",
+          "details": {
+            "database": "PostgreSQL",
+            "error": "Connection refused",
+            "timestamp": "2023-10-15T14:42:22Z"
+          }
+        },
+        "messageBroker": {
+          "status": "DOWN",
+          "details": {
+            "type": "kafka",
+            "error": "Failed to connect to bootstrap servers",
+            "timestamp": "2023-10-15T14:42:25Z"
+          }
+        },
+        "geocoder": {
+          "status": "UNKNOWN",
+          "details": {
+            "provider": "google",
+            "error": "Check skipped due to upstream dependency failure",
+            "timestamp": "2023-10-15T14:42:30Z"
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 107374182400,
+            "free": 12840054272,
+            "threshold": 10485760,
+            "exists": true,
+            "warning": "Disk space below 15% free"
+          }
+        },
+        "memory": {
+          "status": "DOWN",
+          "details": {
+            "heap": {
+              "init": 268435456,
+              "used": 2040612736,
+              "committed": 2147483648,
+              "max": 2147483648
+            },
+            "nonHeap": {
+              "init": 7667712,
+              "used": 115430400,
+              "committed": 119691776,
+              "max": -1
+            },
+            "gcPauseMillis": 850,
+            "gcCycles": 120,
+            "error": "Memory usage at critical level"
+          }
+        },
+        "messageProcessing": {
+          "status": "DOWN",
+          "details": {
+            "receivedMessages": 35240,
+            "processedMessages": 31716,
+            "failedMessages": 3524,
+            "dropRatio": 0.1,
+            "averageProcessingTime": 450,
+            "error": "Message drop ratio exceeded threshold"
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "all_healthy": {
+      "status": "UP",
+      "components": {
+        "protocol-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://protocol-service:8080/actuator/health",
+            "responseTime": 45
+          }
+        },
+        "event-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://event-service:8080/actuator/health",
+            "responseTime": 38
+          }
+        },
+        "notification-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://notification-service:8080/actuator/health",
+            "responseTime": 42
+          }
+        },
+        "api-gateway": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://api-gateway:8080/actuator/health",
+            "responseTime": 35
+          }
+        }
+      }
+    },
+    "partial_degraded": {
+      "status": "UP",
+      "components": {
+        "protocol-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://protocol-service:8080/actuator/health",
+            "responseTime": 45
+          }
+        },
+        "event-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://event-service:8080/actuator/health",
+            "responseTime": 38
+          }
+        },
+        "notification-service": {
+          "status": "DOWN",
+          "details": {
+            "endpoint": "http://notification-service:8080/actuator/health",
+            "error": "Connection timeout",
+            "timestamp": "2023-10-15T14:45:10Z"
+          }
+        },
+        "api-gateway": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://api-gateway:8080/actuator/health",
+            "responseTime": 35
+          }
+        }
+      }
+    },
+    "critical_degraded": {
+      "status": "DOWN",
+      "components": {
+        "protocol-service": {
+          "status": "DOWN",
+          "details": {
+            "endpoint": "http://protocol-service:8080/actuator/health",
+            "error": "Connection refused",
+            "timestamp": "2023-10-15T14:47:22Z"
+          }
+        },
+        "event-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://event-service:8080/actuator/health",
+            "responseTime": 38
+          }
+        },
+        "notification-service": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://notification-service:8080/actuator/health",
+            "responseTime": 42
+          }
+        },
+        "api-gateway": {
+          "status": "UP",
+          "details": {
+            "endpoint": "http://api-gateway:8080/actuator/health",
+            "responseTime": 35
+          }
+        }
+      }
+    }
+  }
+}
