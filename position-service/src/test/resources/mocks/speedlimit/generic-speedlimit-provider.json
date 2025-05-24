@@ -1,0 +1,322 @@
+[
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "headers": {
+        "X-Test-Rate-Limit": {
+          "equalTo": "exceed"
+        }
+      }
+    },
+    "response": {
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "60",
+        "Retry-After": "60"
+      },
+      "jsonBody": {
+        "status": "error",
+        "error": {
+          "code": "RATE_LIMIT_EXCEEDED",
+          "message": "Rate limit exceeded. Please try again later."
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=5 upper=20}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 10
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "equalTo": "34.74767"
+        },
+        "lon": {
+          "equalTo": "-82.48098"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "success",
+        "data": {
+          "speedLimit": 52.1,
+          "unit": "km/h",
+          "roadType": "primary",
+          "source": "generic-provider",
+          "timestamp": "{{now}}",
+          "confidence": 0.95
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=10 upper=100}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 5
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "equalTo": "0.0"
+        },
+        "lon": {
+          "equalTo": "0.0"
+        }
+      }
+    },
+    "response": {
+      "status": 404,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "error",
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "No speed limit data available for the provided coordinates"
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=5 upper=30}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 5
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "matches": "40\\.\\d+"
+        },
+        "lon": {
+          "matches": "-74\\.\\d+"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "98",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "success",
+        "data": {
+          "speedLimit": 25,
+          "unit": "mph",
+          "roadType": "urban",
+          "source": "generic-provider",
+          "timestamp": "{{now}}",
+          "confidence": 0.85
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=10 upper=100}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 4
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "matches": "48\\.\\d+"
+        },
+        "lon": {
+          "matches": "2\\.\\d+"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "97",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "success",
+        "data": {
+          "speedLimit": 130,
+          "unit": "km/h",
+          "roadType": "motorway",
+          "source": "generic-provider",
+          "timestamp": "{{now}}",
+          "confidence": 0.98
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=10 upper=100}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 4
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "absent": true
+        }
+      }
+    },
+    "response": {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "error",
+        "error": {
+          "code": "INVALID_REQUEST",
+          "message": "Missing required parameter: lat"
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=5 upper=20}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 3
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lon": {
+          "absent": true
+        }
+      }
+    },
+    "response": {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "error",
+        "error": {
+          "code": "INVALID_REQUEST",
+          "message": "Missing required parameter: lon"
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=5 upper=20}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 3
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/lookup",
+      "queryParameters": {
+        "lat": {
+          "matches": "-?\\d+(\\.\\d+)?"
+        },
+        "lon": {
+          "matches": "-?\\d+(\\.\\d+)?"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "99",
+        "X-RateLimit-Reset": "3600"
+      },
+      "jsonBody": {
+        "status": "success",
+        "data": {
+          "speedLimit": 50,
+          "unit": "km/h",
+          "roadType": "residential",
+          "source": "generic-provider",
+          "timestamp": "{{now}}",
+          "confidence": 0.9
+        },
+        "metadata": {
+          "requestId": "{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "processingTimeMs": {{randomInt lower=10 upper=100}}
+        }
+      },
+      "transformers": ["response-template"]
+    },
+    "priority": 1
+  },
+  {
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/speedlimit/v1/status"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "status": "operational",
+        "version": "1.0.0",
+        "uptime": "{{now offset='-3 days' format='dd'}} days",
+        "requestsServed": {{randomInt lower=10000 upper=1000000}},
+        "lastUpdated": "{{now offset='-1 hours'}}"
+      },
+      "transformers": ["response-template"]
+    }
+  }
+]
