@@ -15,6 +15,8 @@
  */
 package org.traccar.geocoder;
 
+import org.traccar.database.StatisticsManager;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -23,6 +25,14 @@ import java.util.concurrent.CompletableFuture;
  * collection for microservices architecture.
  */
 public interface Geocoder {
+
+    /**
+     * Callback interface for asynchronous reverse geocoding.
+     */
+    interface ReverseGeocoderCallback {
+        void onSuccess(String address);
+        void onFailure(Throwable e);
+    }
 
     /**
      * Asynchronously get address string for specified location.
@@ -45,18 +55,51 @@ public interface Geocoder {
     CompletableFuture<String> getAddress(double latitude, double longitude, boolean useFallback);
 
     /**
+     * Get address string for specified location with callback.
+     *
+     * @param latitude latitude
+     * @param longitude longitude
+     * @param callback callback for handling the result
+     * @return address string if available immediately, null otherwise
+     */
+    default String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback) {
+        CompletableFuture<String> future = getAddress(latitude, longitude);
+        future.whenComplete((address, error) -> {
+            if (error != null) {
+                callback.onFailure(error);
+            } else {
+                callback.onSuccess(address);
+            }
+        });
+        return null;
+    }
+
+    /**
+     * Set the statistics manager for tracking geocoder usage.
+     *
+     * @param statisticsManager the statistics manager
+     */
+    default void setStatisticsManager(StatisticsManager statisticsManager) {
+        // Default implementation does nothing
+    }
+
+    /**
      * Check if the geocoder service is available and functioning properly.
      *
      * @return true if the service is healthy, false otherwise
      */
-    boolean isHealthy();
+    default boolean isHealthy() {
+        return true;
+    }
 
     /**
      * Get detailed health status information about the geocoder service.
      *
      * @return a HealthStatus object containing health metrics
      */
-    GeocoderHealthStatus getHealthStatus();
+    default GeocoderHealthStatus getHealthStatus() {
+        return new GeocoderHealthStatus(isHealthy(), "Default health status", 0);
+    }
 
     /**
      * Register this geocoder instance with the service discovery system.
@@ -65,7 +108,9 @@ public interface Geocoder {
      * @param serviceId unique identifier for this geocoder service
      * @return true if registration was successful, false otherwise
      */
-    boolean registerWithServiceDiscovery(String serviceId);
+    default boolean registerWithServiceDiscovery(String serviceId) {
+        return true;
+    }
 
     /**
      * Deregister this geocoder instance from the service discovery system.
@@ -73,7 +118,9 @@ public interface Geocoder {
      * @param serviceId unique identifier for this geocoder service
      * @return true if deregistration was successful, false otherwise
      */
-    boolean deregisterFromServiceDiscovery(String serviceId);
+    default boolean deregisterFromServiceDiscovery(String serviceId) {
+        return true;
+    }
 
     /**
      * Resolve the endpoint for a geocoding service using service discovery.
@@ -81,14 +128,18 @@ public interface Geocoder {
      * @param serviceType the type of geocoding service to resolve
      * @return the resolved endpoint URL or null if not found
      */
-    String resolveServiceEndpoint(String serviceType);
+    default String resolveServiceEndpoint(String serviceType) {
+        return null;
+    }
 
     /**
      * Get metrics about the geocoder service operations.
      *
      * @return a GeocoderMetrics object containing performance and usage metrics
      */
-    GeocoderMetrics getMetrics();
+    default GeocoderMetrics getMetrics() {
+        return new GeocoderMetrics(0, 0, 0, 0);
+    }
 
     /**
      * Reset the circuit breaker if it's in an open state.
@@ -96,7 +147,9 @@ public interface Geocoder {
      *
      * @return true if the circuit breaker was reset, false otherwise
      */
-    boolean resetCircuitBreaker();
+    default boolean resetCircuitBreaker() {
+        return false;
+    }
 
     /**
      * Configure the retry policy for this geocoder.
@@ -105,7 +158,9 @@ public interface Geocoder {
      * @param initialDelayMs initial delay in milliseconds before first retry
      * @param maxDelayMs maximum delay in milliseconds between retries
      */
-    void configureRetryPolicy(int maxRetries, long initialDelayMs, long maxDelayMs);
+    default void configureRetryPolicy(int maxRetries, long initialDelayMs, long maxDelayMs) {
+        // Default implementation does nothing
+    }
 
     /**
      * Configure the circuit breaker for this geocoder.
@@ -113,19 +168,25 @@ public interface Geocoder {
      * @param failureThreshold number of failures before opening the circuit
      * @param resetTimeoutMs time in milliseconds before attempting to close the circuit
      */
-    void configureCircuitBreaker(int failureThreshold, long resetTimeoutMs);
+    default void configureCircuitBreaker(int failureThreshold, long resetTimeoutMs) {
+        // Default implementation does nothing
+    }
 
     /**
      * Set a fallback geocoder to use when this geocoder fails.
      *
      * @param fallbackGeocoder the geocoder to use as a fallback
      */
-    void setFallbackGeocoder(Geocoder fallbackGeocoder);
+    default void setFallbackGeocoder(Geocoder fallbackGeocoder) {
+        // Default implementation does nothing
+    }
 
     /**
      * Get the current fallback geocoder.
      *
      * @return the current fallback geocoder or null if none is set
      */
-    Geocoder getFallbackGeocoder();
+    default Geocoder getFallbackGeocoder() {
+        return null;
+    }
 }
