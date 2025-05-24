@@ -1,0 +1,300 @@
+{
+  "brokerType": "kafka",
+  "brokerConfig": {
+    "bootstrapServers": "localhost:9092",
+    "autoCreateTopics": true,
+    "defaultReplicationFactor": 1,
+    "defaultPartitions": 3,
+    "autoOffsetReset": "earliest",
+    "enableIdempotence": true,
+    "acks": "all",
+    "maxInFlightRequestsPerConnection": 1,
+    "retryBackoffMs": 100,
+    "requestTimeoutMs": 30000,
+    "connectionTimeoutMs": 10000
+  },
+  "topics": {
+    "enriched-positions": {
+      "partitions": 5,
+      "replicationFactor": 1,
+      "retentionMs": 86400000,
+      "cleanupPolicy": "delete",
+      "schemaValidation": true,
+      "schema": "position.proto"
+    },
+    "events": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "cleanupPolicy": "delete",
+      "schemaValidation": true,
+      "schema": "event.proto"
+    },
+    "notifications": {
+      "partitions": 2,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "cleanupPolicy": "delete",
+      "schemaValidation": true,
+      "schema": "notification.proto"
+    }
+  },
+  "consumerGroups": {
+    "event-service": {
+      "topics": ["enriched-positions"],
+      "instanceCount": 3,
+      "autoCommit": false,
+      "maxPollRecords": 500,
+      "maxPollIntervalMs": 300000,
+      "sessionTimeoutMs": 10000,
+      "heartbeatIntervalMs": 3000,
+      "partitionAssignmentStrategy": "RangeAssignor"
+    },
+    "notification-service": {
+      "topics": ["events"],
+      "instanceCount": 2,
+      "autoCommit": false,
+      "maxPollRecords": 100,
+      "maxPollIntervalMs": 300000,
+      "sessionTimeoutMs": 10000,
+      "heartbeatIntervalMs": 3000,
+      "partitionAssignmentStrategy": "CooperativeStickyAssignor"
+    }
+  },
+  "deadLetterQueues": {
+    "enriched-positions.dlq": {
+      "retentionMs": 604800000,
+      "maxRetryAttempts": 3,
+      "retryIntervalMs": 60000,
+      "errorRoutingPolicy": "ALL_ERRORS"
+    },
+    "events.dlq": {
+      "retentionMs": 604800000,
+      "maxRetryAttempts": 3,
+      "retryIntervalMs": 60000,
+      "errorRoutingPolicy": "ALL_ERRORS"
+    }
+  },
+  "schemaRegistry": {
+    "url": "http://localhost:8081",
+    "schemas": {
+      "position.proto": {
+        "type": "PROTOBUF",
+        "path": "src/test/resources/schemas/position.proto"
+      },
+      "event.proto": {
+        "type": "PROTOBUF",
+        "path": "src/test/resources/schemas/event.proto"
+      },
+      "notification.proto": {
+        "type": "PROTOBUF",
+        "path": "src/test/resources/schemas/notification.proto"
+      }
+    }
+  },
+  "failureScenarios": {
+    "brokerUnavailable": {
+      "enabled": true,
+      "probabilityPercent": 5,
+      "durationMs": 10000,
+      "affectedOperations": ["PRODUCE", "CONSUME"],
+      "errorMessage": "Broker temporarily unavailable"
+    },
+    "networkPartition": {
+      "enabled": true,
+      "probabilityPercent": 2,
+      "durationMs": 15000,
+      "affectedBrokers": [1],
+      "errorMessage": "Network partition detected"
+    },
+    "messageCorruption": {
+      "enabled": true,
+      "probabilityPercent": 1,
+      "affectedTopics": ["enriched-positions"],
+      "corruptionType": "RANDOM_BYTES"
+    },
+    "schemaValidationFailure": {
+      "enabled": true,
+      "probabilityPercent": 3,
+      "affectedTopics": ["events"],
+      "errorMessage": "Schema validation failed"
+    }
+  },
+  "eventTypes": {
+    "deviceMoving": {
+      "type": "DEVICE_MOVING",
+      "priority": "MEDIUM",
+      "notificationEnabled": true
+    },
+    "deviceStopped": {
+      "type": "DEVICE_STOPPED",
+      "priority": "MEDIUM",
+      "notificationEnabled": true
+    },
+    "deviceOverspeed": {
+      "type": "DEVICE_OVERSPEED",
+      "priority": "HIGH",
+      "notificationEnabled": true,
+      "attributes": ["speed", "speedLimit"]
+    },
+    "geofenceEnter": {
+      "type": "GEOFENCE_ENTER",
+      "priority": "HIGH",
+      "notificationEnabled": true,
+      "attributes": ["geofenceId"]
+    },
+    "geofenceExit": {
+      "type": "GEOFENCE_EXIT",
+      "priority": "HIGH",
+      "notificationEnabled": true,
+      "attributes": ["geofenceId"]
+    },
+    "deviceOffline": {
+      "type": "DEVICE_OFFLINE",
+      "priority": "HIGH",
+      "notificationEnabled": true
+    },
+    "deviceOnline": {
+      "type": "DEVICE_ONLINE",
+      "priority": "MEDIUM",
+      "notificationEnabled": true
+    },
+    "deviceUnknown": {
+      "type": "DEVICE_UNKNOWN",
+      "priority": "LOW",
+      "notificationEnabled": false
+    },
+    "alarmGeneral": {
+      "type": "ALARM",
+      "priority": "HIGH",
+      "notificationEnabled": true,
+      "attributes": ["alarmType"]
+    }
+  },
+  "testScenarios": {
+    "motionEventTest": {
+      "description": "Tests motion event detection based on position updates",
+      "positionSequence": [
+        {
+          "deviceId": 123,
+          "time": "2023-01-01T00:00:00.000Z",
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "speed": 0.0,
+          "attributes": {
+            "motion": false,
+            "totalDistance": 0
+          }
+        },
+        {
+          "deviceId": 123,
+          "time": "2023-01-01T00:02:00.000Z",
+          "latitude": 60.01,
+          "longitude": 30.01,
+          "speed": 5.0,
+          "attributes": {
+            "motion": true,
+            "totalDistance": 100
+          }
+        },
+        {
+          "deviceId": 123,
+          "time": "2023-01-01T00:02:30.000Z",
+          "latitude": 60.02,
+          "longitude": 30.02,
+          "speed": 10.0,
+          "attributes": {
+            "motion": true,
+            "totalDistance": 700
+          }
+        },
+        {
+          "deviceId": 123,
+          "time": "2023-01-01T00:03:00.000Z",
+          "latitude": 60.02,
+          "longitude": 30.02,
+          "speed": 0.0,
+          "attributes": {
+            "motion": false,
+            "totalDistance": 700
+          }
+        },
+        {
+          "deviceId": 123,
+          "time": "2023-01-01T00:10:00.000Z",
+          "latitude": 60.02,
+          "longitude": 30.02,
+          "speed": 0.0,
+          "attributes": {
+            "motion": false,
+            "totalDistance": 700
+          }
+        }
+      ],
+      "expectedEvents": [
+        {
+          "type": "DEVICE_MOVING",
+          "deviceId": 123,
+          "positionIndex": 2
+        },
+        {
+          "type": "DEVICE_STOPPED",
+          "deviceId": 123,
+          "positionIndex": 4
+        }
+      ]
+    },
+    "overspeedEventTest": {
+      "description": "Tests overspeed event detection based on position updates",
+      "positionSequence": [
+        {
+          "deviceId": 456,
+          "time": "2023-01-01T00:00:00.000Z",
+          "latitude": 60.0,
+          "longitude": 30.0,
+          "speed": 50.0
+        },
+        {
+          "deviceId": 456,
+          "time": "2023-01-01T00:00:10.000Z",
+          "latitude": 60.01,
+          "longitude": 30.01,
+          "speed": 55.0
+        },
+        {
+          "deviceId": 456,
+          "time": "2023-01-01T00:00:20.000Z",
+          "latitude": 60.02,
+          "longitude": 30.02,
+          "speed": 55.0
+        },
+        {
+          "deviceId": 456,
+          "time": "2023-01-01T00:00:30.000Z",
+          "latitude": 60.03,
+          "longitude": 30.03,
+          "speed": 55.0
+        },
+        {
+          "deviceId": 456,
+          "time": "2023-01-01T00:00:40.000Z",
+          "latitude": 60.04,
+          "longitude": 30.04,
+          "speed": 30.0
+        }
+      ],
+      "speedLimit": 40.0,
+      "expectedEvents": [
+        {
+          "type": "DEVICE_OVERSPEED",
+          "deviceId": 456,
+          "positionIndex": 2,
+          "attributes": {
+            "speed": 55.0,
+            "speedLimit": 40.0
+          }
+        }
+      ]
+    }
+  }
+}
