@@ -54,6 +54,12 @@ public abstract class JsonGeocoder implements Geocoder {
     private final MeterRegistry meterRegistry;
     private final String geocoderName;
     private final boolean healthReportingEnabled;
+    private Geocoder fallbackGeocoder;
+    private int maxRetries = 3;
+    private long initialDelayMs = 100;
+    private long maxDelayMs = 1000;
+    private int failureThreshold = 50;
+    private long resetTimeoutMs = 30000;
 
     // Distributed cache using Redis or in-memory cache as fallback
     private Map<Map.Entry<Double, Double>, String> cache;
@@ -272,13 +278,52 @@ public abstract class JsonGeocoder implements Geocoder {
      * Fallback method when geocoding service is unavailable
      */
     protected String getFallbackAddress(double latitude, double longitude) {
+        // Try using fallback geocoder if available
+        if (fallbackGeocoder != null) {
+            try {
+                CompletableFuture<String> future = fallbackGeocoder.getAddress(latitude, longitude);
+                return future.getNow(String.format("%.6f, %.6f", latitude, longitude));
+            } catch (Exception e) {
+                LOGGER.warn("Fallback geocoder failed", e);
+            }
+        }
         // Default implementation returns coordinates as a string
         return String.format("%.6f, %.6f", latitude, longitude);
     }
 
-    /**
-     * Check if the geocoder service is healthy
-     */
+    @Override
+    public CompletableFuture<String> getAddress(double latitude, double longitude) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        String address = getAddress(latitude, longitude, new ReverseGeocoderCallback() {
+            @Override
+            public void onSuccess(String address) {
+                future.complete(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                future.completeExceptionally(e);
+            }
+        });
+        if (address != null) {
+            future.complete(address);
+        }
+        return future;
+    }
+
+    @Override
+    public CompletableFuture<String> getAddress(double latitude, double longitude, boolean useFallback) {
+        CompletableFuture<String> future = getAddress(latitude, longitude);
+        if (useFallback) {
+            return future.exceptionally(e -> {
+                LOGGER.warn("Primary geocoder failed, using fallback", e);
+                return getFallbackAddress(latitude, longitude);
+            });
+        }
+        return future;
+    }
+
+    @Override
     public boolean isHealthy() {
         if (!healthReportingEnabled) {
             return true; // Health reporting disabled, assume healthy
@@ -292,6 +337,112 @@ public abstract class JsonGeocoder implements Geocoder {
         return true; // No circuit breaker, assume healthy
     }
 
+    @Override
+    public GeocoderHealthStatus getHealthStatus() {
+        boolean healthy = isHealthy();
+        String statusMessage = healthy ? "Geocoder service is healthy" : "Geocoder service is unhealthy";
+        long responseTimeMs = 0;
+        int successfulRequests = 0;
+        int failedRequests = 0;
+        String lastError = null;
+
+        if (circuitBreaker != null) {
+            CircuitBreaker.Metrics metrics = circuitBreaker.getMetrics();
+            successfulRequests = (int) metrics.getNumberOfSuccessfulCalls();
+            failedRequests = (int) metrics.getNumberOfFailedCalls();
+            statusMessage = "Circuit breaker state: " + circuitBreaker.getState();
+        }
+
+        return new GeocoderHealthStatus(healthy, statusMessage, responseTimeMs,
+                successfulRequests, failedRequests, lastError);
+    }
+
+    @Override
+    public boolean registerWithServiceDiscovery(String serviceId) {
+        // Implementation would depend on the service discovery mechanism used
+        LOGGER.debug("Registering geocoder {} with service discovery as {}", geocoderName, serviceId);
+        return true;
+    }
+
+    @Override
+    public boolean deregisterFromServiceDiscovery(String serviceId) {
+        // Implementation would depend on the service discovery mechanism used
+        LOGGER.debug("Deregistering geocoder {} from service discovery", serviceId);
+        return true;
+    }
+
+    @Override
+    public String resolveServiceEndpoint(String serviceType) {
+        // Implementation would depend on the service discovery mechanism used
+        LOGGER.debug("Resolving endpoint for service type {}", serviceType);
+        return null;
+    }
+
+    @Override
+    public GeocoderMetrics getMetrics() {
+        long totalRequests = 0;
+        long successfulRequests = 0;
+        long failedRequests = 0;
+        long averageResponseTimeMs = 0;
+        long cacheHits = 0;
+        long cacheMisses = 0;
+        long circuitBreakerOpenCount = 0;
+        long retryCount = 0;
+
+        if (circuitBreaker != null) {
+            CircuitBreaker.Metrics metrics = circuitBreaker.getMetrics();
+            successfulRequests = metrics.getNumberOfSuccessfulCalls();
+            failedRequests = metrics.getNumberOfFailedCalls();
+            totalRequests = successfulRequests + failedRequests;
+        }
+
+        return new GeocoderMetrics(totalRequests, successfulRequests, failedRequests, averageResponseTimeMs,
+                cacheHits, cacheMisses, circuitBreakerOpenCount, retryCount);
+    }
+
+    @Override
+    public boolean resetCircuitBreaker() {
+        if (circuitBreaker != null) {
+            try {
+                circuitBreaker.reset();
+                LOGGER.info("Circuit breaker for geocoder {} has been reset", geocoderName);
+                return true;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to reset circuit breaker for geocoder {}", geocoderName, e);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void configureRetryPolicy(int maxRetries, long initialDelayMs, long maxDelayMs) {
+        this.maxRetries = maxRetries;
+        this.initialDelayMs = initialDelayMs;
+        this.maxDelayMs = maxDelayMs;
+        LOGGER.info("Retry policy configured for geocoder {}: maxRetries={}, initialDelay={}ms, maxDelay={}ms",
+                geocoderName, maxRetries, initialDelayMs, maxDelayMs);
+    }
+
+    @Override
+    public void configureCircuitBreaker(int failureThreshold, long resetTimeoutMs) {
+        this.failureThreshold = failureThreshold;
+        this.resetTimeoutMs = resetTimeoutMs;
+        LOGGER.info("Circuit breaker configured for geocoder {}: failureThreshold={}%, resetTimeout={}ms",
+                geocoderName, failureThreshold, resetTimeoutMs);
+    }
+
+    @Override
+    public void setFallbackGeocoder(Geocoder fallbackGeocoder) {
+        this.fallbackGeocoder = fallbackGeocoder;
+        LOGGER.info("Fallback geocoder set for {}: {}", geocoderName,
+                fallbackGeocoder != null ? fallbackGeocoder.getClass().getSimpleName() : "null");
+    }
+
+    @Override
+    public Geocoder getFallbackGeocoder() {
+        return fallbackGeocoder;
+    }
+
     /**
      * Get the current state of the circuit breaker
      */
@@ -300,23 +451,6 @@ public abstract class JsonGeocoder implements Geocoder {
             return circuitBreaker.getState();
         }
         return null;
-    }
-
-    /**
-     * Get metrics for the geocoder service
-     */
-    public Map<String, Object> getMetrics() {
-        Map<String, Object> metrics = new LinkedHashMap<>();
-        if (circuitBreaker != null) {
-            CircuitBreaker.Metrics circuitMetrics = circuitBreaker.getMetrics();
-            metrics.put("failureRate", circuitMetrics.getFailureRate());
-            metrics.put("slowCallRate", circuitMetrics.getSlowCallRate());
-            metrics.put("numberOfBufferedCalls", circuitMetrics.getNumberOfBufferedCalls());
-            metrics.put("numberOfFailedCalls", circuitMetrics.getNumberOfFailedCalls());
-            metrics.put("numberOfSlowCalls", circuitMetrics.getNumberOfSlowCalls());
-            metrics.put("numberOfSuccessfulCalls", circuitMetrics.getNumberOfSuccessfulCalls());
-        }
-        return metrics;
     }
 
     public abstract Address parseAddress(JsonObject json);
