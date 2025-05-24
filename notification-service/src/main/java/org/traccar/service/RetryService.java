@@ -23,108 +23,154 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Service interface for handling notification delivery retries with exponential backoff and jitter.
- * Provides methods for scheduling retries, tracking retry attempts, and implementing backoff strategies
- * for failed deliveries.
+ * This interface provides methods for scheduling retries, tracking retry attempts, and implementing
+ * backoff strategies for failed deliveries.
  */
 public interface RetryService {
 
     /**
-     * Schedule a retry for a failed notification delivery with exponential backoff and jitter.
+     * Schedule a retry for a failed notification delivery.
      *
-     * @param channelId The identifier of the notification channel (e.g., "email", "sms", "push")
+     * @param channelId The ID of the notification channel (e.g., "email", "sms", "push")
      * @param notificationId The unique identifier of the notification
      * @param payload The notification payload to be delivered
      * @param exception The exception that caused the delivery failure
      * @param metadata Additional metadata about the notification and delivery attempt
      * @return A CompletableFuture that completes when the retry is scheduled
      */
-    CompletableFuture<Void> scheduleRetry(String channelId, String notificationId, Object payload, 
+    CompletableFuture<Void> scheduleRetry(String channelId, String notificationId, Object payload,
                                          MessageException exception, Map<String, Object> metadata);
 
     /**
      * Get the retry history for a specific notification.
      *
      * @param notificationId The unique identifier of the notification
-     * @return A list of retry attempt records for the notification
+     * @return A list of RetryAttempt objects representing the retry history
      */
     List<RetryAttempt> getRetryHistory(String notificationId);
 
     /**
-     * Check if a notification has exceeded its retry limit.
+     * Check if a notification has exceeded its retry limit for a specific channel.
      *
-     * @param channelId The identifier of the notification channel
+     * @param channelId The ID of the notification channel
      * @param notificationId The unique identifier of the notification
      * @return true if the notification has exceeded its retry limit, false otherwise
      */
     boolean hasExceededRetryLimit(String channelId, String notificationId);
 
     /**
-     * Publish a notification to the dead letter queue after all retry attempts have been exhausted.
+     * Publish a failed notification to the dead letter queue after exceeding retry limits.
      *
-     * @param channelId The identifier of the notification channel
+     * @param channelId The ID of the notification channel
      * @param notificationId The unique identifier of the notification
      * @param payload The notification payload
-     * @param exception The last exception that caused the delivery failure
+     * @param exception The exception that caused the delivery failure
      * @param metadata Additional metadata about the notification and delivery attempts
-     * @return A CompletableFuture that completes when the notification is published to the dead letter queue
+     * @return A CompletableFuture that completes when the message is published to the dead letter queue
      */
     CompletableFuture<Void> publishToDeadLetterQueue(String channelId, String notificationId, Object payload,
                                                    MessageException exception, Map<String, Object> metadata);
 
     /**
-     * Get metrics for retry operations.
+     * Get metrics about retry operations across all channels.
      *
-     * @return A map of metric names to values
+     * @return A map containing retry metrics
      */
     Map<String, Object> getRetryMetrics();
 
     /**
-     * Class representing a retry attempt record.
+     * Class representing a single retry attempt for a notification.
      */
     class RetryAttempt {
         private final String notificationId;
         private final String channelId;
         private final int attemptNumber;
         private final long timestamp;
-        private final String exceptionMessage;
-        private final String exceptionType;
+        private final String errorMessage;
+        private final String errorType;
         private final long delayMs;
 
-        public RetryAttempt(String notificationId, String channelId, int attemptNumber, 
-                           long timestamp, String exceptionMessage, String exceptionType, long delayMs) {
+        /**
+         * Constructor for RetryAttempt.
+         *
+         * @param notificationId The unique identifier of the notification
+         * @param channelId The ID of the notification channel
+         * @param attemptNumber The retry attempt number
+         * @param timestamp The timestamp of the retry attempt
+         * @param errorMessage The error message from the exception
+         * @param errorType The type of the exception
+         * @param delayMs The delay before the retry attempt in milliseconds
+         */
+        public RetryAttempt(String notificationId, String channelId, int attemptNumber,
+                           long timestamp, String errorMessage, String errorType, long delayMs) {
             this.notificationId = notificationId;
             this.channelId = channelId;
             this.attemptNumber = attemptNumber;
             this.timestamp = timestamp;
-            this.exceptionMessage = exceptionMessage;
-            this.exceptionType = exceptionType;
+            this.errorMessage = errorMessage;
+            this.errorType = errorType;
             this.delayMs = delayMs;
         }
 
+        /**
+         * Get the notification ID.
+         *
+         * @return The notification ID
+         */
         public String getNotificationId() {
             return notificationId;
         }
 
+        /**
+         * Get the channel ID.
+         *
+         * @return The channel ID
+         */
         public String getChannelId() {
             return channelId;
         }
 
+        /**
+         * Get the attempt number.
+         *
+         * @return The attempt number
+         */
         public int getAttemptNumber() {
             return attemptNumber;
         }
 
+        /**
+         * Get the timestamp of the retry attempt.
+         *
+         * @return The timestamp in milliseconds
+         */
         public long getTimestamp() {
             return timestamp;
         }
 
-        public String getExceptionMessage() {
-            return exceptionMessage;
+        /**
+         * Get the error message from the exception.
+         *
+         * @return The error message
+         */
+        public String getErrorMessage() {
+            return errorMessage;
         }
 
-        public String getExceptionType() {
-            return exceptionType;
+        /**
+         * Get the type of the exception.
+         *
+         * @return The exception type
+         */
+        public String getErrorType() {
+            return errorType;
         }
 
+        /**
+         * Get the delay before the retry attempt.
+         *
+         * @return The delay in milliseconds
+         */
         public long getDelayMs() {
             return delayMs;
         }
