@@ -1,0 +1,176 @@
+# Logging configuration for Event Processing Service
+# Structured JSON logging with correlation ID support
+
+# Root logger configuration
+rootLogger:
+  level: INFO
+  appenders:
+    - type: console
+    - type: file
+    - type: centralized
+
+# Console appender configuration
+appenders:
+  console:
+    type: console
+    target: SYSTEM_OUT
+    encoder:
+      pattern: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n'
+      json:
+        enabled: false
+
+  # File appender with JSON formatting
+  file:
+    type: file
+    currentLogFilename: logs/event-service.log
+    archivedLogFilenamePattern: logs/event-service-%d{yyyy-MM-dd}-%i.log.gz
+    encoder:
+      pattern: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n'
+      json:
+        enabled: true
+        fieldNames:
+          timestamp: '@timestamp'
+          thread: thread_name
+          level: level
+          logger: logger_name
+          message: message
+          traceId: trace_id
+          spanId: span_id
+          serviceId: service_id
+          instanceId: instance_id
+    archiveFileCount: 7
+    maxFileSize: 50MB
+    totalSizeCap: 1GB
+    logFormat: json
+
+  # Centralized logging appender (for ELK/Graylog/etc.)
+  centralized:
+    type: logstash
+    destination: ${LOGSTASH_HOST:-localhost}:${LOGSTASH_PORT:-5044}
+    encoder:
+      json:
+        enabled: true
+        fieldNames:
+          timestamp: '@timestamp'
+          thread: thread_name
+          level: level
+          logger: logger_name
+          message: message
+          traceId: trace_id
+          spanId: span_id
+          serviceId: service_id
+          instanceId: instance_id
+    connectionTimeout: 5000
+    reconnectionDelay: 5000
+    includeCallerData: false
+    includeMdc: true
+    includeMdcKeyNames: [traceId, spanId, correlationId, requestId, userId, sessionId]
+
+# Logger configurations for specific packages
+loggers:
+  # Event Processing Service core packages
+  org.traccar.handler.events:
+    level: ${LOG_LEVEL_EVENTS:-INFO}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  # Event rule engine
+  org.traccar.rules:
+    level: ${LOG_LEVEL_RULES:-INFO}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  # Messaging system
+  org.traccar.messaging:
+    level: ${LOG_LEVEL_MESSAGING:-INFO}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  # Service discovery
+  org.traccar.discovery:
+    level: ${LOG_LEVEL_DISCOVERY:-INFO}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  # Third-party libraries
+  org.springframework:
+    level: ${LOG_LEVEL_SPRING:-WARN}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  io.netty:
+    level: ${LOG_LEVEL_NETTY:-WARN}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+  com.zaxxer.hikari:
+    level: ${LOG_LEVEL_HIKARI:-WARN}
+    additivity: false
+    appenders:
+      - type: console
+      - type: file
+      - type: centralized
+
+# MDC (Mapped Diagnostic Context) configuration
+mdc:
+  includeMdcKeyNames: [traceId, spanId, correlationId, requestId, userId, sessionId]
+
+# Metrics logging configuration
+metrics:
+  frequency: 60 seconds
+  reporters:
+    - type: log
+      logger: org.traccar.metrics
+      level: INFO
+
+# Health check logging configuration
+healthCheck:
+  logger: org.traccar.health
+  level: INFO
+
+# Environment-specific overrides
+environments:
+  development:
+    rootLogger:
+      level: DEBUG
+    loggers:
+      org.traccar:
+        level: DEBUG
+
+  staging:
+    rootLogger:
+      level: INFO
+    appenders:
+      file:
+        archiveFileCount: 14
+
+  production:
+    rootLogger:
+      level: WARN
+    loggers:
+      org.traccar.handler.events:
+        level: INFO
+      org.traccar.messaging:
+        level: INFO
+    appenders:
+      file:
+        archiveFileCount: 30
+        totalSizeCap: 5GB
