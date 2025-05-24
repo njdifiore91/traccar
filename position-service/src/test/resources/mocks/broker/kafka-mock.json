@@ -1,0 +1,136 @@
+{
+  "broker": {
+    "id": "mock-kafka-broker",
+    "host": "localhost",
+    "port": 9092,
+    "version": "3.6.1",
+    "enabled": true,
+    "autoCreateTopics": true
+  },
+  "connection": {
+    "connectionTimeout": 5000,
+    "sessionTimeout": 30000,
+    "maxPollInterval": 300000,
+    "maxPollRecords": 500,
+    "autoOffsetReset": "earliest",
+    "enableAutoCommit": false,
+    "isolationLevel": "read_committed"
+  },
+  "behavior": {
+    "simulateLatency": true,
+    "minLatencyMs": 5,
+    "maxLatencyMs": 50,
+    "simulateErrors": false,
+    "errorProbability": 0.05,
+    "simulateRebalancing": true,
+    "rebalancingIntervalMs": 300000
+  },
+  "topics": {
+    "raw.positions": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "enriched.positions": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "events": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    },
+    "device.sessions": {
+      "partitions": 3,
+      "replicationFactor": 1,
+      "retentionMs": 604800000,
+      "retentionBytes": 1073741824,
+      "cleanupPolicy": "delete"
+    }
+  },
+  "consumerGroups": {
+    "position-processors": {
+      "topics": ["raw.positions"],
+      "instanceCount": 2,
+      "autoOffsetReset": "earliest"
+    },
+    "event-processors": {
+      "topics": ["enriched.positions"],
+      "instanceCount": 1,
+      "autoOffsetReset": "earliest"
+    }
+  },
+  "testData": {
+    "raw.positions": [
+      {
+        "deviceId": "device-001",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "timestamp": 1621234567890,
+        "speed": 25.5,
+        "course": 180.0,
+        "altitude": 10.0,
+        "attributes": {
+          "batteryLevel": 85,
+          "signalStrength": 4
+        }
+      },
+      {
+        "deviceId": "device-002",
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "timestamp": 1621234568890,
+        "speed": 0.0,
+        "course": 0.0,
+        "altitude": 5.0,
+        "attributes": {
+          "batteryLevel": 65,
+          "signalStrength": 3
+        }
+      }
+    ],
+    "enriched.positions": [
+      {
+        "deviceId": "device-001",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "timestamp": 1621234567890,
+        "speed": 25.5,
+        "course": 180.0,
+        "altitude": 10.0,
+        "address": "San Francisco, CA, USA",
+        "attributes": {
+          "batteryLevel": 85,
+          "signalStrength": 4,
+          "distance": 1250.5,
+          "motion": true
+        }
+      }
+    ]
+  },
+  "security": {
+    "enabled": false,
+    "saslMechanism": "PLAIN",
+    "securityProtocol": "SASL_PLAINTEXT",
+    "truststore": {
+      "location": "kafka.client.truststore.jks",
+      "password": "test1234"
+    },
+    "keystore": {
+      "location": "kafka.client.keystore.jks",
+      "password": "test1234"
+    }
+  },
+  "monitoring": {
+    "jmxEnabled": true,
+    "jmxPort": 9999,
+    "metricsEnabled": true
+  }
+}
