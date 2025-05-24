@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,65 +21,117 @@ import org.traccar.model.User;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service interface for determining notification recipients based on event context,
- * permissions, and user preferences.
+ * permissions, and user preferences. This service is responsible for building recipient
+ * lists, filtering by permissions, and applying user notification preferences.
  */
 public interface RecipientService {
 
     /**
-     * Determines the list of recipients for a given event and notification configuration.
-     * This method applies permission checks and user preferences to filter the recipients.
+     * Represents a notification recipient with user information and channel preferences.
+     */
+    class Recipient {
+        private final User user;
+        private final Set<String> channels;
+
+        public Recipient(User user, Set<String> channels) {
+            this.user = user;
+            this.channels = channels;
+        }
+
+        public User getUser() {
+            return user;
+        }
+
+        public Set<String> getChannels() {
+            return channels;
+        }
+    }
+
+    /**
+     * Builds a list of recipients for a given event and notification type.
+     * This method determines who should receive notifications based on the event context
+     * and notification configuration.
      *
      * @param event The event that triggered the notification
-     * @param notification The notification configuration
-     * @return A list of users who should receive the notification
+     * @param notificationType The type of notification to be sent
+     * @return A future that resolves to a list of recipients
      */
-    List<User> getRecipients(Event event, Notification notification);
+    CompletableFuture<List<Recipient>> buildRecipientList(Event event, String notificationType);
 
     /**
-     * Determines the list of recipients with their channel-specific addressing information.
-     * This method applies permission checks, user preferences, and includes addressing details
-     * for each notification channel (email, phone, etc.).
+     * Filters a list of potential recipients based on their permissions.
+     * Only users with appropriate permissions to view the event and related entities
+     * will be included in the result.
      *
      * @param event The event that triggered the notification
-     * @param notification The notification configuration
-     * @return A map of users to their channel-specific addressing information
+     * @param potentialRecipients List of potential recipients to filter
+     * @return A future that resolves to a filtered list of recipients with permissions
      */
-    Map<User, Map<String, String>> getRecipientsWithAddressing(Event event, Notification notification);
+    CompletableFuture<List<Recipient>> filterByPermissions(Event event, List<Recipient> potentialRecipients);
 
     /**
-     * Filters a list of users based on their permissions for the given event.
-     * This method applies hierarchical permission checks (user, group, device).
+     * Applies user notification preferences to the recipient list.
+     * This method filters recipients based on their notification preferences,
+     * including enabled notification types and notification schedules.
      *
-     * @param users The list of users to filter
-     * @param event The event to check permissions against
-     * @return A filtered list of users who have permission to receive notifications for the event
+     * @param event The event that triggered the notification
+     * @param notificationType The type of notification to be sent
+     * @param recipients List of recipients to filter by preferences
+     * @return A future that resolves to a list of recipients filtered by preferences
      */
-    List<User> filterByPermission(List<User> users, Event event);
+    CompletableFuture<List<Recipient>> applyUserPreferences(Event event, String notificationType, List<Recipient> recipients);
 
     /**
-     * Applies user notification preferences to filter recipients.
-     * This method checks if users have enabled notifications for the given event type and channel.
+     * Gets user notification settings for a specific notification type.
+     * This method retrieves the notification settings for each user, including
+     * which channels they have enabled for the given notification type.
      *
-     * @param users The list of users to filter
-     * @param notification The notification configuration
-     * @return A filtered list of users based on their notification preferences
+     * @param notificationType The type of notification
+     * @param userIds Set of user IDs to retrieve settings for
+     * @return A future that resolves to a map of user IDs to their notification settings
      */
-    List<User> applyUserPreferences(List<User> users, Notification notification);
+    CompletableFuture<Map<Long, Notification>> getUserNotificationSettings(String notificationType, Set<Long> userIds);
 
     /**
-     * Invalidates the permission check cache for a specific user.
-     * This method should be called when user permissions change.
+     * Determines the notification channels for each recipient based on their preferences.
+     * This method enhances the recipient list with channel information (email, SMS, push, etc.)
+     * based on user preferences and notification type.
      *
-     * @param userId The ID of the user whose cache should be invalidated
+     * @param recipients List of recipients to enhance with channel information
+     * @param notificationType The type of notification to be sent
+     * @return A future that resolves to a list of recipients with channel preferences
      */
-    void invalidatePermissionCache(long userId);
+    CompletableFuture<List<Recipient>> determineChannels(List<Recipient> recipients, String notificationType);
 
     /**
-     * Invalidates the entire permission check cache.
-     * This method should be called when there are significant changes to the permission system.
+     * Deduplicates and validates the recipient list.
+     * This method ensures that each user appears only once in the recipient list
+     * and that all recipients are valid (e.g., have valid email addresses for email notifications).
+     *
+     * @param recipients List of recipients to deduplicate and validate
+     * @return A future that resolves to a deduplicated and validated list of recipients
      */
-    void invalidatePermissionCache();
+    CompletableFuture<List<Recipient>> deduplicateAndValidate(List<Recipient> recipients);
+
+    /**
+     * Gets the list of users who should be notified about a specific event.
+     * This is a convenience method that combines the other methods to provide a complete
+     * workflow for determining notification recipients.
+     *
+     * @param event The event that triggered the notification
+     * @param notificationType The type of notification to be sent
+     * @return A future that resolves to a list of recipients for the notification
+     */
+    default CompletableFuture<List<Recipient>> getNotificationRecipients(Event event, String notificationType) {
+        return buildRecipientList(event, notificationType)
+                .thenCompose(recipients -> filterByPermissions(event, recipients))
+                .thenCompose(recipients -> applyUserPreferences(event, notificationType, recipients))
+                .thenCompose(recipients -> determineChannels(recipients, notificationType))
+                .thenCompose(this::deduplicateAndValidate);
+    }
 }
