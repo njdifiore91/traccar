@@ -1,0 +1,481 @@
+{
+  "description": "RabbitMQ consumer message templates for Position Service testing",
+  "version": "1.0",
+  "messageSchema": {
+    "type": "object",
+    "properties": {
+      "properties": {
+        "type": "object",
+        "description": "RabbitMQ message properties",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "description": "Content type of the message payload"
+          },
+          "contentEncoding": {
+            "type": "string",
+            "description": "Content encoding of the message payload"
+          },
+          "headers": {
+            "type": "object",
+            "description": "Custom headers for the message"
+          },
+          "deliveryMode": {
+            "type": "integer",
+            "description": "Delivery mode (1 = non-persistent, 2 = persistent)"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Message priority (0-9)"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Correlation identifier for request/reply pattern"
+          },
+          "replyTo": {
+            "type": "string",
+            "description": "Queue name to reply to"
+          },
+          "expiration": {
+            "type": "string",
+            "description": "Message expiration specification"
+          },
+          "messageId": {
+            "type": "string",
+            "description": "Message identifier"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Message timestamp"
+          },
+          "type": {
+            "type": "string",
+            "description": "Message type name"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "appId": {
+            "type": "string",
+            "description": "Application ID"
+          },
+          "clusterId": {
+            "type": "string",
+            "description": "Cluster ID"
+          }
+        }
+      },
+      "routingKey": {
+        "type": "string",
+        "description": "Routing key used for the message"
+      },
+      "payload": {
+        "type": "object",
+        "description": "Message payload containing position data",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "description": "Device identifier"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol name"
+          },
+          "serverTime": {
+            "type": "string",
+            "description": "Server timestamp when the message was received"
+          },
+          "deviceTime": {
+            "type": "string",
+            "description": "Device timestamp when the position was recorded"
+          },
+          "fixTime": {
+            "type": "string",
+            "description": "GPS fix timestamp"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Position validity flag"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in degrees"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in degrees"
+          },
+          "altitude": {
+            "type": "number",
+            "description": "Altitude in meters"
+          },
+          "speed": {
+            "type": "number",
+            "description": "Speed in knots"
+          },
+          "course": {
+            "type": "number",
+            "description": "Course in degrees"
+          },
+          "address": {
+            "type": "string",
+            "description": "Geocoded address"
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Additional attributes specific to the protocol"
+          }
+        },
+        "required": ["deviceId", "protocol", "fixTime", "latitude", "longitude"]
+      }
+    },
+    "required": ["properties", "routingKey", "payload"]
+  },
+  "routingKeyPatterns": {
+    "allPositions": "position.#",
+    "rawPositions": "position.raw.#",
+    "processedPositions": "position.processed.#",
+    "deviceSpecific": "position.device.{deviceId}",
+    "protocolSpecific": "position.protocol.{protocol}"
+  },
+  "templates": [
+    {
+      "name": "generic-position",
+      "description": "Generic position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position"
+        },
+        "timestamp": "2023-06-01T12:00:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.generic",
+      "payload": {
+        "deviceId": 123,
+        "protocol": "generic",
+        "serverTime": "2023-06-01T12:00:00Z",
+        "deviceTime": "2023-06-01T12:00:00Z",
+        "fixTime": "2023-06-01T12:00:00Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "attributes": {}
+      }
+    },
+    {
+      "name": "teltonika-position",
+      "description": "Teltonika protocol position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position",
+          "protocol": "teltonika"
+        },
+        "timestamp": "2023-06-01T12:01:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.teltonika",
+      "payload": {
+        "deviceId": 456,
+        "protocol": "teltonika",
+        "serverTime": "2023-06-01T12:01:00Z",
+        "deviceTime": "2023-06-01T12:00:55Z",
+        "fixTime": "2023-06-01T12:00:55Z",
+        "valid": true,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": 15.0,
+        "speed": 35.0,
+        "course": 90.0,
+        "attributes": {
+          "ignition": true,
+          "batteryLevel": 95,
+          "externalPower": 12.5,
+          "io": {
+            "1": 1,
+            "2": 0,
+            "3": 1
+          },
+          "satellites": 8,
+          "hdop": 1.2,
+          "pdop": 2.3,
+          "odometer": 12345.6,
+          "rssi": -67
+        }
+      }
+    },
+    {
+      "name": "meitrack-position",
+      "description": "Meitrack protocol position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position",
+          "protocol": "meitrack"
+        },
+        "timestamp": "2023-06-01T12:02:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.meitrack",
+      "payload": {
+        "deviceId": 789,
+        "protocol": "meitrack",
+        "serverTime": "2023-06-01T12:02:00Z",
+        "deviceTime": "2023-06-01T12:01:45Z",
+        "fixTime": "2023-06-01T12:01:45Z",
+        "valid": true,
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "altitude": 25.0,
+        "speed": 15.0,
+        "course": 180.0,
+        "attributes": {
+          "fuel": 75.5,
+          "temperature": 28.5,
+          "batteryLevel": 85,
+          "externalPower": 13.8,
+          "satellites": 10,
+          "hdop": 0.9,
+          "alarm": "sos",
+          "door": true,
+          "ignition": true
+        }
+      }
+    },
+    {
+      "name": "tk103-position",
+      "description": "TK103 protocol position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position",
+          "protocol": "tk103"
+        },
+        "timestamp": "2023-06-01T12:03:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.tk103",
+      "payload": {
+        "deviceId": 101,
+        "protocol": "tk103",
+        "serverTime": "2023-06-01T12:03:00Z",
+        "deviceTime": "2023-06-01T12:02:30Z",
+        "fixTime": "2023-06-01T12:02:30Z",
+        "valid": true,
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "altitude": 35.0,
+        "speed": 5.0,
+        "course": 270.0,
+        "attributes": {
+          "batteryLevel": 65,
+          "externalPower": 12.1,
+          "ignition": false,
+          "alarm": "lowBattery",
+          "status": "parking"
+        }
+      }
+    },
+    {
+      "name": "atrack-position",
+      "description": "ATrack protocol position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position",
+          "protocol": "atrack"
+        },
+        "timestamp": "2023-06-01T12:04:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.atrack",
+      "payload": {
+        "deviceId": 202,
+        "protocol": "atrack",
+        "serverTime": "2023-06-01T12:04:00Z",
+        "deviceTime": "2023-06-01T12:03:15Z",
+        "fixTime": "2023-06-01T12:03:15Z",
+        "valid": true,
+        "latitude": 35.6762,
+        "longitude": 139.6503,
+        "altitude": 40.0,
+        "speed": 45.0,
+        "course": 45.0,
+        "attributes": {
+          "batteryLevel": 90,
+          "externalPower": 14.2,
+          "ignition": true,
+          "odometer": 78965.3,
+          "satellites": 12,
+          "hdop": 0.8,
+          "fuel": 82.3,
+          "rpm": 1850,
+          "temperature": 32.5
+        }
+      }
+    },
+    {
+      "name": "processed-position",
+      "description": "Processed position message template with enriched data",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "position-service",
+          "messageType": "position",
+          "processed": true
+        },
+        "timestamp": "2023-06-01T12:05:00Z",
+        "appId": "traccar-position-service"
+      },
+      "routingKey": "position.processed.generic",
+      "payload": {
+        "deviceId": 123,
+        "protocol": "generic",
+        "serverTime": "2023-06-01T12:00:00Z",
+        "deviceTime": "2023-06-01T12:00:00Z",
+        "fixTime": "2023-06-01T12:00:00Z",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": "123 Main St, San Francisco, CA 94105, USA",
+        "attributes": {
+          "distance": 0.0,
+          "totalDistance": 12345.6,
+          "motion": false,
+          "geofenceIds": [1, 3, 5],
+          "speedLimit": 55.0,
+          "processingTime": 25
+        }
+      }
+    },
+    {
+      "name": "invalid-position",
+      "description": "Invalid position message template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "position"
+        },
+        "timestamp": "2023-06-01T12:06:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.generic",
+      "payload": {
+        "deviceId": 999,
+        "protocol": "generic",
+        "serverTime": "2023-06-01T12:06:00Z",
+        "deviceTime": "2023-06-01T12:05:45Z",
+        "fixTime": "2023-06-01T12:05:45Z",
+        "valid": false,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "attributes": {
+          "reason": "no_fix",
+          "satellites": 2,
+          "hdop": 15.0,
+          "batteryLevel": 30
+        }
+      }
+    },
+    {
+      "name": "batch-positions",
+      "description": "Batch of position messages template",
+      "properties": {
+        "contentType": "application/json",
+        "contentEncoding": "UTF-8",
+        "deliveryMode": 2,
+        "priority": 0,
+        "headers": {
+          "source": "protocol-service",
+          "messageType": "positions",
+          "count": 3
+        },
+        "timestamp": "2023-06-01T12:07:00Z",
+        "appId": "traccar-protocol-service"
+      },
+      "routingKey": "position.raw.batch",
+      "payload": [
+        {
+          "deviceId": 123,
+          "protocol": "generic",
+          "serverTime": "2023-06-01T12:07:00Z",
+          "deviceTime": "2023-06-01T12:06:30Z",
+          "fixTime": "2023-06-01T12:06:30Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 10.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "attributes": {}
+        },
+        {
+          "deviceId": 123,
+          "protocol": "generic",
+          "serverTime": "2023-06-01T12:07:00Z",
+          "deviceTime": "2023-06-01T12:06:45Z",
+          "fixTime": "2023-06-01T12:06:45Z",
+          "valid": true,
+          "latitude": 37.7750,
+          "longitude": -122.4195,
+          "altitude": 10.0,
+          "speed": 5.0,
+          "course": 90.0,
+          "attributes": {}
+        },
+        {
+          "deviceId": 123,
+          "protocol": "generic",
+          "serverTime": "2023-06-01T12:07:00Z",
+          "deviceTime": "2023-06-01T12:07:00Z",
+          "fixTime": "2023-06-01T12:07:00Z",
+          "valid": true,
+          "latitude": 37.7751,
+          "longitude": -122.4196,
+          "altitude": 10.0,
+          "speed": 5.0,
+          "course": 90.0,
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}
