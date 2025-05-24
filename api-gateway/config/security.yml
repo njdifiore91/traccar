@@ -1,0 +1,413 @@
+# API Gateway Security Configuration
+# This file defines authentication, authorization, and security filter settings
+
+# ===================================================================
+# AUTHENTICATION CONFIGURATION
+# ===================================================================
+authentication:
+  # JWT Token Configuration
+  jwt:
+    enabled: true
+    # Signing key configuration
+    signing:
+      algorithm: RS256  # Alternatives: ECDSA (secp256r1)
+      key-store-path: ${JWT_KEYSTORE_PATH:config/security/jwt-keystore.jks}
+      key-store-password: ${JWT_KEYSTORE_PASSWORD:changeit}
+      key-alias: ${JWT_KEY_ALIAS:traccar-jwt}
+      key-password: ${JWT_KEY_PASSWORD:changeit}
+      # Key rotation settings
+      auto-generate: true  # Generate keys if not present
+      rotation-period-days: 90  # Rotate keys every 90 days
+    
+    # Token settings
+    token:
+      issuer: "traccar-api-gateway"
+      audience: "traccar-clients"
+      expiration-minutes: 60  # Default token lifetime
+      refresh-token-expiration-days: 30
+      include-permissions: true  # Include permissions in token claims
+      include-user-details: false  # Don't include sensitive user details
+      
+    # Token validation settings
+    validation:
+      require-issuer: true
+      require-expiration: true
+      leeway-seconds: 30  # Allow 30 seconds clock skew
+      validate-signature: true
+      validate-claims: true
+      
+  # Two-Factor Authentication
+  totp:
+    enabled: ${TOTP_ENABLED:false}
+    force: ${TOTP_FORCE:false}  # Force TOTP for all users
+    issuer: "Traccar GPS Tracking"
+    time-step-seconds: 30
+    window-size: 1  # Allow 1 step before/after for clock skew
+    code-digits: 6
+    qr-code-size: 200
+    
+  # Session Management
+  session:
+    enabled: true
+    store-type: redis  # Options: redis, in-memory (not recommended for production)
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      key-prefix: "traccar:session:"
+      cluster-enabled: ${REDIS_CLUSTER_ENABLED:false}
+      cluster-nodes: ${REDIS_CLUSTER_NODES:}
+    
+    # Session settings
+    timeout-minutes: 120
+    cookie:
+      name: "TRACCAR_SESSION"
+      http-only: true
+      secure: true
+      same-site: "Lax"  # Options: Strict, Lax, None
+      domain: ${COOKIE_DOMAIN:}
+      path: "/"
+      max-age-seconds: 7200  # 2 hours
+    
+    # Session heartbeat
+    heartbeat:
+      enabled: true
+      interval-seconds: 60
+      ttl-extension-seconds: 300
+      
+  # Authentication Providers
+  providers:
+    # Basic Authentication (username/password)
+    basic:
+      enabled: true
+      realm: "Traccar GPS Tracking"
+      password-encoder: "pbkdf2"  # PBKDF2WithHmacSHA1
+      
+    # Token Authentication
+    token:
+      enabled: true
+      header-name: "Authorization"
+      header-prefix: "Bearer "
+      query-param: "access_token"  # Optional token in query string
+      
+    # External Identity Providers
+    external:
+      enabled: ${EXTERNAL_AUTH_ENABLED:false}
+      providers:
+        # OpenID Connect Provider
+        oidc:
+          enabled: ${OIDC_ENABLED:false}
+          issuer-uri: ${OIDC_ISSUER_URI:}
+          client-id: ${OIDC_CLIENT_ID:}
+          client-secret: ${OIDC_CLIENT_SECRET:}
+          scopes: "openid,profile,email"
+          user-name-attribute: "preferred_username"
+          redirect-uri: ${OIDC_REDIRECT_URI:}
+          
+        # LDAP Provider
+        ldap:
+          enabled: ${LDAP_ENABLED:false}
+          url: ${LDAP_URL:}
+          base-dn: ${LDAP_BASE_DN:}
+          user-dn-pattern: ${LDAP_USER_DN_PATTERN:}
+          user-search-base: ${LDAP_USER_SEARCH_BASE:}
+          user-search-filter: ${LDAP_USER_SEARCH_FILTER:}
+          group-search-base: ${LDAP_GROUP_SEARCH_BASE:}
+          group-search-filter: ${LDAP_GROUP_SEARCH_FILTER:}
+          manager-dn: ${LDAP_MANAGER_DN:}
+          manager-password: ${LDAP_MANAGER_PASSWORD:}
+          
+      # Circuit breaker for external providers
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 5
+        reset-timeout-seconds: 30
+        timeout-ms: 5000
+
+# ===================================================================
+# AUTHORIZATION CONFIGURATION
+# ===================================================================
+authorization:
+  # Authorization Service
+  service:
+    enabled: true
+    discovery-enabled: true  # Use service discovery
+    service-id: "authorization-service"  # Service ID in registry
+    fallback:
+      enabled: true
+      cache-ttl-seconds: 300
+      default-policy: "deny-all"  # Options: deny-all, allow-minimal
+      
+  # Role Mappings
+  roles:
+    # Role hierarchy (higher roles include permissions of lower roles)
+    hierarchy:
+      - name: "admin"
+        includes: ["manager", "user"]
+      - name: "manager"
+        includes: ["user"]
+      - name: "user"
+        includes: []
+        
+    # External role mappings
+    mappings:
+      oidc:
+        admin: "traccar_admin"
+        manager: "traccar_manager"
+        user: "traccar_user"
+      ldap:
+        admin: "traccar-administrators"
+        manager: "traccar-managers"
+        user: "traccar-users"
+        
+  # Resource Permissions
+  resources:
+    # Device permissions
+    device:
+      view: ["user", "manager", "admin"]
+      edit: ["user", "manager", "admin"]
+      share: ["manager", "admin"]
+      delete: ["user", "manager", "admin"]
+      command: ["user", "manager", "admin"]
+      
+    # User permissions
+    user:
+      view: ["manager", "admin"]
+      edit: ["admin"]
+      share: ["admin"]
+      delete: ["admin"]
+      
+    # Group permissions
+    group:
+      view: ["user", "manager", "admin"]
+      edit: ["user", "manager", "admin"]
+      share: ["manager", "admin"]
+      delete: ["user", "manager", "admin"]
+      
+    # Geofence permissions
+    geofence:
+      view: ["user", "manager", "admin"]
+      edit: ["user", "manager", "admin"]
+      share: ["manager", "admin"]
+      delete: ["user", "manager", "admin"]
+      
+    # Report permissions
+    report:
+      view: ["user", "manager", "admin"]
+      edit: ["user", "manager", "admin"]
+      share: ["manager", "admin"]
+      delete: ["user", "manager", "admin"]
+      
+    # System settings permissions
+    settings:
+      view: ["admin"]
+      edit: ["admin"]
+
+# ===================================================================
+# SECURITY FILTER CONFIGURATION
+# ===================================================================
+filters:
+  # CORS Configuration
+  cors:
+    enabled: true
+    config-path: "classpath:config/cors.yml"  # Reference to cors.yml
+    
+  # Rate Limiting
+  rate-limit:
+    enabled: true
+    config-path: "classpath:config/rate-limiting.yml"  # Reference to rate-limiting.yml
+    
+  # Content Security Policy
+  content-security-policy:
+    enabled: true
+    policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+    
+  # HTTP Security Headers
+  security-headers:
+    enabled: true
+    xss-protection: "1; mode=block"
+    content-type-options: "nosniff"
+    frame-options: "DENY"
+    hsts-max-age-seconds: 31536000  # 1 year
+    hsts-include-subdomains: true
+    
+  # Request Validation
+  request-validation:
+    enabled: true
+    max-uri-length: 8192
+    max-header-size: 16384
+    max-body-size: 10485760  # 10MB
+    
+# ===================================================================
+# SECURITY FILTER CHAINS
+# ===================================================================
+filter-chains:
+  # Public endpoints (no authentication required)
+  - pattern: "/api/v1/session/login"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/api/v1/session/register"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/api/v1/session/oauth/**"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/api/v1/session/totp/setup"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/session/totp/verify"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/api/v1/session/password/reset"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/api/v1/session/password/reset/confirm"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  # Static resources
+  - pattern: "/static/**"
+    filters: ["cors", "rate-limit", "security-headers"]
+    authenticated: false
+    
+  - pattern: "/favicon.ico"
+    filters: ["cors", "security-headers"]
+    authenticated: false
+    
+  # Health and monitoring endpoints
+  - pattern: "/actuator/health/**"
+    filters: ["security-headers"]
+    authenticated: false
+    
+  - pattern: "/actuator/**"
+    filters: ["security-headers", "jwt-auth"]
+    authenticated: true
+    roles: ["admin"]
+    
+  # API endpoints (authenticated)
+  - pattern: "/api/v1/devices/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/positions/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/users/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/groups/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/geofences/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/reports/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/events/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/notifications/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  - pattern: "/api/v1/commands/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  # WebSocket endpoints
+  - pattern: "/api/v1/socket"
+    filters: ["cors", "security-headers", "jwt-auth"]
+    authenticated: true
+    
+  # Catch-all for any other endpoints
+  - pattern: "/**"
+    filters: ["cors", "rate-limit", "security-headers", "jwt-auth"]
+    authenticated: true
+
+# ===================================================================
+# SERVICE-TO-SERVICE SECURITY
+# ===================================================================
+service-security:
+  # Mutual TLS Configuration
+  mtls:
+    enabled: true
+    key-store-path: ${MTLS_KEYSTORE_PATH:config/security/mtls-keystore.p12}
+    key-store-password: ${MTLS_KEYSTORE_PASSWORD:changeit}
+    key-alias: ${MTLS_KEY_ALIAS:api-gateway}
+    key-password: ${MTLS_KEY_PASSWORD:changeit}
+    trust-store-path: ${MTLS_TRUSTSTORE_PATH:config/security/mtls-truststore.p12}
+    trust-store-password: ${MTLS_TRUSTSTORE_PASSWORD:changeit}
+    client-auth: "need"  # Options: need, want, none
+    
+  # Service Token Configuration (alternative to mTLS)
+  service-tokens:
+    enabled: false  # Disabled when mTLS is enabled
+    signing-key: ${SERVICE_TOKEN_SIGNING_KEY:}
+    expiration-seconds: 300  # Short-lived tokens
+    
+  # Service Registry Integration
+  service-registry:
+    enabled: true
+    type: "consul"  # Options: consul, kubernetes, eureka
+    consul:
+      host: ${CONSUL_HOST:consul}
+      port: ${CONSUL_PORT:8500}
+      acl-token: ${CONSUL_ACL_TOKEN:}
+    kubernetes:
+      namespace: ${K8S_NAMESPACE:default}
+      label-selector: "app.kubernetes.io/part-of=traccar"
+      
+  # Circuit Breaker for Service Calls
+  circuit-breaker:
+    enabled: true
+    failure-threshold: 5
+    reset-timeout-seconds: 30
+    timeout-ms: 2000
+
+# ===================================================================
+# AUDIT LOGGING CONFIGURATION
+# ===================================================================
+audit:
+  enabled: true
+  log-format: "json"  # Options: json, text
+  include-request-body: false
+  include-response-body: false
+  mask-sensitive-data: true
+  sensitive-fields: ["password", "token", "secret", "credential", "apiKey"]
+  
+  # Events to log
+  events:
+    authentication: true
+    authorization: true
+    session: true
+    user-management: true
+    device-management: true
+    command-execution: true
+    system-configuration: true
+    
+  # Destination
+  destination:
+    console: true
+    file:
+      enabled: true
+      path: ${AUDIT_LOG_PATH:logs/audit.log}
+      max-size: "100MB"
+      max-history: 30
+      total-size-cap: "3GB"
+    centralized:
+      enabled: ${CENTRALIZED_LOGGING_ENABLED:false}
+      type: ${CENTRALIZED_LOGGING_TYPE:elk}  # Options: elk, fluentd, cloudwatch
