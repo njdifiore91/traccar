@@ -1,0 +1,56 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/reverse",
+    "queryParameters": {
+      "format": {
+        "equalTo": "json"
+      },
+      "lat": {
+        "matches": "-?[0-9]+(\\.[0-9]+)?"
+      },
+      "lon": {
+        "matches": "-?[0-9]+(\\.[0-9]+)?"
+      },
+      "zoom": {
+        "equalTo": "18"
+      },
+      "addressdetails": {
+        "equalTo": "1"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "place_id": 287076348,
+      "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+      "osm_type": "way",
+      "osm_id": 35097944,
+      "lat": "40.7484284",
+      "lon": "-73.9856546",
+      "display_name": "Empire State Building, 350, 5th Avenue, Midtown, Manhattan, New York County, New York, 10118, United States",
+      "address": {
+        "house_number": "350",
+        "road": "5th Avenue",
+        "suburb": "Midtown",
+        "city": "New York",
+        "state_district": "Manhattan",
+        "state": "New York",
+        "postcode": "10118",
+        "country": "United States",
+        "country_code": "us",
+        "tourism": "Empire State Building"
+      },
+      "boundingbox": [
+        "40.7481346",
+        "40.7487576",
+        "-73.9860768",
+        "-73.9852325"
+      ]
+    }
+  }
+}
