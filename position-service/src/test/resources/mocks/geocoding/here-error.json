@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/revgeocode",
+    "queryParameters": {
+      "apiKey": {
+        "matches": "invalid-api-key|missing-api-key"
+      },
+      "at": {
+        "matches": "[0-9.-]+,[0-9.-]+"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache"
+    },
+    "jsonBody": {
+      "title": "Unauthorized",
+      "status": 401,
+      "detail": "Invalid authentication credentials. Please check your API key and ensure it has the appropriate permissions."
+    },
+    "fixedDelayMilliseconds": 100
+  }
+}
