@@ -1,0 +1,571 @@
+{
+  "templates": {
+    "position": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["POSITION"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "protocol", "deviceTime", "fixTime", "valid", "latitude", "longitude"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "protocol": {"type": "string"},
+              "deviceTime": {"type": "string", "format": "date-time"},
+              "serverTime": {"type": "string", "format": "date-time"},
+              "fixTime": {"type": "string", "format": "date-time"},
+              "valid": {"type": "boolean"},
+              "latitude": {"type": "number", "format": "double"},
+              "longitude": {"type": "number", "format": "double"},
+              "altitude": {"type": "number", "format": "double"},
+              "speed": {"type": "number", "format": "double"},
+              "course": {"type": "number", "format": "double"},
+              "address": {"type": "string"},
+              "accuracy": {"type": "number", "format": "double"},
+              "attributes": {"type": "object"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "POSITION",
+          "timestamp": 1621436587000,
+          "correlationId": "a7e31a2c-84c7-4c5b-8ab3-5ec5e5d428a2",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 100001,
+          "deviceId": 123,
+          "protocol": "teltonika",
+          "deviceTime": "2023-05-19T15:36:27.000Z",
+          "serverTime": "2023-05-19T15:36:28.235Z",
+          "fixTime": "2023-05-19T15:36:27.000Z",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 15.0,
+          "speed": 45.5,
+          "course": 180.0,
+          "address": "123 Main St, San Francisco, CA",
+          "accuracy": 5.0,
+          "attributes": {
+            "batteryLevel": 85,
+            "ignition": true,
+            "motion": true,
+            "rssi": -75,
+            "io": {
+              "digitalInput1": true,
+              "digitalOutput1": false
+            }
+          }
+        }
+      }
+    },
+    "geofenceEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["geofenceEnter", "geofenceExit"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "geofenceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId", "geofenceId"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["geofenceEnter", "geofenceExit"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "geofenceId": {"type": "number", "format": "int64"},
+              "maintenanceId": {"type": "number", "format": "int64"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "geofenceEnter",
+          "timestamp": 1621436587000,
+          "correlationId": "b8f41a3d-95c8-4d5b-9ab3-6ec5e5d428a2",
+          "deviceId": 123,
+          "geofenceId": 456
+        },
+        "payload": {
+          "id": 200001,
+          "deviceId": 123,
+          "type": "geofenceEnter",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "geofenceId": 456,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 5.5,
+            "course": 90.0,
+            "address": "456 Market St, San Francisco, CA",
+            "accuracy": 3.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        }
+      }
+    },
+    "overspeedEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["deviceOverspeed"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["deviceOverspeed"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "speedThreshold": {"type": "number", "format": "double"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "deviceOverspeed",
+          "timestamp": 1621436587000,
+          "correlationId": "c9f51a4e-a6d9-4e6c-0ac4-7fd6f6e539b3",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 200002,
+          "deviceId": 123,
+          "type": "deviceOverspeed",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "speedThreshold": 80.0,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 85.5,
+            "course": 180.0,
+            "address": "101 Highway 1, San Francisco, CA",
+            "accuracy": 2.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        }
+      }
+    },
+    "motionEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["deviceMoving", "deviceStopped"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["deviceMoving", "deviceStopped"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "deviceMoving",
+          "timestamp": 1621436587000,
+          "correlationId": "d0f61a5f-b7e0-4f7d-1bd5-8fe7f7e640c4",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 200003,
+          "deviceId": 123,
+          "type": "deviceMoving",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 15.5,
+            "course": 180.0,
+            "address": "789 Oak St, San Francisco, CA",
+            "accuracy": 4.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true
+            }
+          }
+        }
+      }
+    },
+    "deviceStatusEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["deviceOnline", "deviceOffline", "deviceUnknown"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["deviceOnline", "deviceOffline", "deviceUnknown"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "deviceOnline",
+          "timestamp": 1621436587000,
+          "correlationId": "e1f71a6g-c8f1-4g8e-2ce6-9gf8g8f751d5",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 200004,
+          "deviceId": 123,
+          "type": "deviceOnline",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "321 Pine St, San Francisco, CA",
+            "accuracy": 5.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": false,
+              "motion": false
+            }
+          }
+        }
+      }
+    },
+    "fuelLevelEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["deviceFuelDrop"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["deviceFuelDrop"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "deviceFuelDrop",
+          "timestamp": 1621436587000,
+          "correlationId": "f2g81a7h-d9g2-5h9f-3df7-0hg9h9g862e6",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 200005,
+          "deviceId": 123,
+          "type": "deviceFuelDrop",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "555 Mission St, San Francisco, CA",
+            "accuracy": 5.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": false,
+              "fuelLevel": 35.0,
+              "previousFuelLevel": 75.0
+            }
+          }
+        }
+      }
+    },
+    "alarmEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["alarm"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId", "alarmType"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["alarm"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "alarmType": {"type": "string"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "alarm",
+          "timestamp": 1621436587000,
+          "correlationId": "g3h91a8i-e0h3-6i0g-4eg8-1ih0i0h973f7",
+          "deviceId": 123
+        },
+        "payload": {
+          "id": 200006,
+          "deviceId": 123,
+          "type": "alarm",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "alarmType": "sos",
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "777 California St, San Francisco, CA",
+            "accuracy": 5.0,
+            "attributes": {
+              "batteryLevel": 15,
+              "ignition": true,
+              "motion": false,
+              "alarm": "sos"
+            }
+          }
+        }
+      }
+    },
+    "maintenanceEvent": {
+      "schema": {
+        "type": "object",
+        "required": ["headers", "payload"],
+        "properties": {
+          "headers": {
+            "type": "object",
+            "required": ["messageType", "timestamp", "correlationId", "eventType"],
+            "properties": {
+              "messageType": {"type": "string", "enum": ["EVENT"]},
+              "eventType": {"type": "string", "enum": ["maintenance"]},
+              "timestamp": {"type": "number", "format": "int64"},
+              "correlationId": {"type": "string", "format": "uuid"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "maintenanceId": {"type": "number", "format": "int64"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "required": ["id", "deviceId", "type", "eventTime", "positionId", "maintenanceId"],
+            "properties": {
+              "id": {"type": "number", "format": "int64"},
+              "deviceId": {"type": "number", "format": "int64"},
+              "type": {"type": "string", "enum": ["maintenance"]},
+              "eventTime": {"type": "string", "format": "date-time"},
+              "positionId": {"type": "number", "format": "int64"},
+              "maintenanceId": {"type": "number", "format": "int64"},
+              "position": {"$ref": "#/templates/position/schema/properties/payload"}
+            }
+          }
+        }
+      },
+      "example": {
+        "headers": {
+          "messageType": "EVENT",
+          "eventType": "maintenance",
+          "timestamp": 1621436587000,
+          "correlationId": "h4i01a9j-f1i4-7j1h-5fh9-2ji1j1i084g8",
+          "deviceId": 123,
+          "maintenanceId": 789
+        },
+        "payload": {
+          "id": 200007,
+          "deviceId": 123,
+          "type": "maintenance",
+          "eventTime": "2023-05-19T15:36:27.000Z",
+          "positionId": 100001,
+          "maintenanceId": 789,
+          "position": {
+            "id": 100001,
+            "deviceId": 123,
+            "protocol": "teltonika",
+            "deviceTime": "2023-05-19T15:36:27.000Z",
+            "serverTime": "2023-05-19T15:36:28.235Z",
+            "fixTime": "2023-05-19T15:36:27.000Z",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.0,
+            "speed": 35.5,
+            "course": 90.0,
+            "address": "999 Market St, San Francisco, CA",
+            "accuracy": 5.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true,
+              "motion": true,
+              "odometer": 15000.5,
+              "hours": 2500.75
+            }
+          }
+        }
+      }
+    }
+  }
+}
