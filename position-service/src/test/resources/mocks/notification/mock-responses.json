@@ -1,0 +1,425 @@
+[
+  {
+    "id": "success-all-channels",
+    "description": "Successful notification delivery to all channels",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-123e4567-e89b-12d3-a456-426614174000"
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Notification delivered successfully",
+        "correlationId": "corr-123e4567-e89b-12d3-a456-426614174000",
+        "timestamp": "2023-06-15T14:22:31.456Z",
+        "deliveryDetails": {
+          "email": {
+            "status": "DELIVERED",
+            "recipient": "user@example.com",
+            "timestamp": "2023-06-15T14:22:30.123Z"
+          },
+          "sms": {
+            "status": "DELIVERED",
+            "recipient": "+15551234567",
+            "timestamp": "2023-06-15T14:22:30.456Z"
+          },
+          "push": {
+            "status": "DELIVERED",
+            "deviceCount": 2,
+            "timestamp": "2023-06-15T14:22:30.789Z"
+          },
+          "web": {
+            "status": "DELIVERED",
+            "sessionCount": 1,
+            "timestamp": "2023-06-15T14:22:31.012Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "success-email-only",
+    "description": "Successful notification delivery to email channel only",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-223e4567-e89b-12d3-a456-426614174001"
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Notification delivered successfully",
+        "correlationId": "corr-223e4567-e89b-12d3-a456-426614174001",
+        "timestamp": "2023-06-15T15:32:41.123Z",
+        "deliveryDetails": {
+          "email": {
+            "status": "DELIVERED",
+            "recipient": "user@example.com",
+            "timestamp": "2023-06-15T15:32:40.789Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "partial-delivery",
+    "description": "Partial notification delivery (some channels succeeded, some failed)",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 207,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-323e4567-e89b-12d3-a456-426614174002"
+      },
+      "body": {
+        "status": "PARTIAL",
+        "message": "Notification partially delivered",
+        "correlationId": "corr-323e4567-e89b-12d3-a456-426614174002",
+        "timestamp": "2023-06-15T16:45:22.789Z",
+        "deliveryDetails": {
+          "email": {
+            "status": "DELIVERED",
+            "recipient": "user@example.com",
+            "timestamp": "2023-06-15T16:45:21.123Z"
+          },
+          "sms": {
+            "status": "FAILED",
+            "recipient": "+15551234567",
+            "errorCode": "SMS_GATEWAY_ERROR",
+            "errorMessage": "SMS gateway unavailable",
+            "timestamp": "2023-06-15T16:45:21.456Z"
+          },
+          "push": {
+            "status": "DELIVERED",
+            "deviceCount": 1,
+            "timestamp": "2023-06-15T16:45:21.789Z"
+          },
+          "web": {
+            "status": "FAILED",
+            "errorCode": "NO_ACTIVE_SESSIONS",
+            "errorMessage": "No active web sessions found",
+            "timestamp": "2023-06-15T16:45:22.012Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "complete-failure",
+    "description": "Failed notification delivery to all channels",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 500,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-423e4567-e89b-12d3-a456-426614174003"
+      },
+      "body": {
+        "status": "FAILED",
+        "message": "Notification delivery failed for all channels",
+        "correlationId": "corr-423e4567-e89b-12d3-a456-426614174003",
+        "timestamp": "2023-06-15T17:55:33.456Z",
+        "deliveryDetails": {
+          "email": {
+            "status": "FAILED",
+            "recipient": "user@example.com",
+            "errorCode": "SMTP_ERROR",
+            "errorMessage": "SMTP server connection failed",
+            "timestamp": "2023-06-15T17:55:32.123Z"
+          },
+          "sms": {
+            "status": "FAILED",
+            "recipient": "+15551234567",
+            "errorCode": "SMS_GATEWAY_ERROR",
+            "errorMessage": "SMS gateway authentication failed",
+            "timestamp": "2023-06-15T17:55:32.456Z"
+          },
+          "push": {
+            "status": "FAILED",
+            "errorCode": "FCM_ERROR",
+            "errorMessage": "Firebase Cloud Messaging service unavailable",
+            "timestamp": "2023-06-15T17:55:32.789Z"
+          },
+          "web": {
+            "status": "FAILED",
+            "errorCode": "NO_ACTIVE_SESSIONS",
+            "errorMessage": "No active web sessions found",
+            "timestamp": "2023-06-15T17:55:33.012Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "rate-limited",
+    "description": "Notification rejected due to rate limiting",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-523e4567-e89b-12d3-a456-426614174004",
+        "X-RateLimit-Limit": "10",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "60"
+      },
+      "body": {
+        "status": "RATE_LIMITED",
+        "message": "Notification rate limit exceeded",
+        "correlationId": "corr-523e4567-e89b-12d3-a456-426614174004",
+        "timestamp": "2023-06-15T18:12:44.789Z",
+        "retryAfter": 60
+      }
+    }
+  },
+  {
+    "id": "invalid-request",
+    "description": "Invalid notification request format",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-623e4567-e89b-12d3-a456-426614174005"
+      },
+      "body": {
+        "status": "INVALID_REQUEST",
+        "message": "Invalid notification request format",
+        "correlationId": "corr-623e4567-e89b-12d3-a456-426614174005",
+        "timestamp": "2023-06-15T19:25:55.123Z",
+        "errors": [
+          {
+            "field": "recipients",
+            "message": "Recipients list cannot be empty"
+          },
+          {
+            "field": "message.body",
+            "message": "Notification body is required"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "service-unavailable",
+    "description": "Notification service temporarily unavailable",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 503,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-723e4567-e89b-12d3-a456-426614174006",
+        "Retry-After": "120"
+      },
+      "body": {
+        "status": "SERVICE_UNAVAILABLE",
+        "message": "Notification service temporarily unavailable",
+        "correlationId": "corr-723e4567-e89b-12d3-a456-426614174006",
+        "timestamp": "2023-06-15T20:35:16.456Z",
+        "retryAfter": 120
+      }
+    }
+  },
+  {
+    "id": "unauthorized",
+    "description": "Unauthorized notification request",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-823e4567-e89b-12d3-a456-426614174007"
+      },
+      "body": {
+        "status": "UNAUTHORIZED",
+        "message": "Authentication required for notification service",
+        "correlationId": "corr-823e4567-e89b-12d3-a456-426614174007",
+        "timestamp": "2023-06-15T21:42:27.789Z"
+      }
+    }
+  },
+  {
+    "id": "forbidden",
+    "description": "Forbidden notification request (insufficient permissions)",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 403,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-923e4567-e89b-12d3-a456-426614174008"
+      },
+      "body": {
+        "status": "FORBIDDEN",
+        "message": "Insufficient permissions to send notifications",
+        "correlationId": "corr-923e4567-e89b-12d3-a456-426614174008",
+        "timestamp": "2023-06-15T22:53:38.123Z",
+        "requiredPermission": "NOTIFICATION_SEND"
+      }
+    }
+  },
+  {
+    "id": "success-with-queued",
+    "description": "Successful notification with some channels queued for delayed delivery",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 202,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-a23e4567-e89b-12d3-a456-426614174009"
+      },
+      "body": {
+        "status": "ACCEPTED",
+        "message": "Notification accepted with some channels queued",
+        "correlationId": "corr-a23e4567-e89b-12d3-a456-426614174009",
+        "timestamp": "2023-06-16T08:15:49.456Z",
+        "deliveryDetails": {
+          "email": {
+            "status": "DELIVERED",
+            "recipient": "user@example.com",
+            "timestamp": "2023-06-16T08:15:48.123Z"
+          },
+          "sms": {
+            "status": "QUEUED",
+            "recipient": "+15551234567",
+            "queuedReason": "RATE_LIMITED",
+            "estimatedDelivery": "2023-06-16T08:20:48.456Z",
+            "timestamp": "2023-06-16T08:15:48.456Z"
+          },
+          "push": {
+            "status": "DELIVERED",
+            "deviceCount": 1,
+            "timestamp": "2023-06-16T08:15:48.789Z"
+          },
+          "web": {
+            "status": "QUEUED",
+            "queuedReason": "NO_ACTIVE_SESSIONS",
+            "retryCount": 0,
+            "maxRetries": 3,
+            "timestamp": "2023-06-16T08:15:49.012Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "success-telegram",
+    "description": "Successful notification delivery to Telegram channel",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-b23e4567-e89b-12d3-a456-426614174010"
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Notification delivered successfully",
+        "correlationId": "corr-b23e4567-e89b-12d3-a456-426614174010",
+        "timestamp": "2023-06-16T09:25:50.789Z",
+        "deliveryDetails": {
+          "telegram": {
+            "status": "DELIVERED",
+            "chatId": "123456789",
+            "messageId": "987654321",
+            "timestamp": "2023-06-16T09:25:50.123Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "success-pushover",
+    "description": "Successful notification delivery to Pushover channel",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-c23e4567-e89b-12d3-a456-426614174011"
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Notification delivered successfully",
+        "correlationId": "corr-c23e4567-e89b-12d3-a456-426614174011",
+        "timestamp": "2023-06-16T10:35:51.123Z",
+        "deliveryDetails": {
+          "pushover": {
+            "status": "DELIVERED",
+            "user": "u12345abcdef",
+            "receipt": "r67890ghijkl",
+            "timestamp": "2023-06-16T10:35:50.456Z"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "success-device-command",
+    "description": "Successful notification delivery as device command",
+    "request": {
+      "method": "POST",
+      "path": "/api/notifications/send"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "corr-d23e4567-e89b-12d3-a456-426614174012"
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Notification delivered successfully as device command",
+        "correlationId": "corr-d23e4567-e89b-12d3-a456-426614174012",
+        "timestamp": "2023-06-16T11:45:52.456Z",
+        "deliveryDetails": {
+          "command": {
+            "status": "DELIVERED",
+            "deviceId": 123456,
+            "commandType": "custom",
+            "commandId": 789012,
+            "timestamp": "2023-06-16T11:45:51.789Z"
+          }
+        }
+      }
+    }
+  }
+]
