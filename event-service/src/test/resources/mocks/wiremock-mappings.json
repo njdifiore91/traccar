@@ -1,0 +1,528 @@
+{
+  "mappings": [
+    {
+      "name": "Speed Limit Service - Get Speed Limit",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/speedlimit",
+        "queryParameters": {
+          "latitude": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "longitude": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "speedLimit": 50,
+          "unit": "km/h",
+          "source": "OpenStreetMap",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Speed Limit Service - Not Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/speedlimit",
+        "queryParameters": {
+          "latitude": {
+            "equalTo": "0.0"
+          },
+          "longitude": {
+            "equalTo": "0.0"
+          }
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Speed limit data not available for this location",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Speed Limit Service - Server Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/speedlimit",
+        "queryParameters": {
+          "latitude": {
+            "equalTo": "-91.0"
+          },
+          "longitude": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal server error",
+          "message": "Speed limit service temporarily unavailable",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Geofence Service - Check Point",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/geofence/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.latitude"
+          },
+          {
+            "matchesJsonPath": "$.longitude"
+          },
+          {
+            "matchesJsonPath": "$.geofenceIds"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "inside": true,
+          "geofenceId": "{{jsonPath request.body '$.geofenceIds[0]'}}",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Geofence Service - Check Point Outside",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/geofence/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.latitude"
+          },
+          {
+            "matchesJsonPath": "$.longitude"
+          },
+          {
+            "matchesJsonPath": "$.geofenceIds[?(@ == 999)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "inside": false,
+          "geofenceId": 999,
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Geofence Service - Server Error",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/geofence/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.geofenceIds[?(@ == -1)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal server error",
+          "message": "Geofence service temporarily unavailable",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Service Discovery - Get Service",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/v1/catalog/service/([\\w-]+)",
+        "queryParameters": {
+          "passing": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "ID": "{{randomValue length=8 type='ALPHANUMERIC'}}",
+            "Node": "node1",
+            "Address": "10.0.0.1",
+            "ServiceID": "{{request.pathSegments.[3]}}",
+            "ServiceName": "{{request.pathSegments.[3]}}",
+            "ServiceAddress": "{{request.pathSegments.[3]}}.service.local",
+            "ServicePort": 8080,
+            "ServiceTags": ["v1", "production"],
+            "ServiceMeta": {
+              "version": "1.0.0"
+            }
+          }
+        ],
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Service Discovery - Service Not Found",
+      "request": {
+        "method": "GET",
+        "urlPath": "/v1/catalog/service/non-existent-service",
+        "queryParameters": {
+          "passing": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [],
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Authentication Service - Validate Token",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/auth/validate",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.token"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": true,
+          "userId": 1001,
+          "permissions": ["read:events", "write:events", "read:devices"],
+          "expiresAt": "{{now offset='1 days'}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Authentication Service - Invalid Token",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/auth/validate",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.token",
+            "equalToJson": "\"invalid-token\""
+          }
+        ]
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": false,
+          "error": "Invalid or expired token",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Rule Validation Service - Validate Rule",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/rules/validate",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.rule"
+          },
+          {
+            "matchesJsonPath": "$.parameters"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": true,
+          "result": true,
+          "evaluationTime": "{{randomValue length=2 type='NUMERIC'}}ms",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Rule Validation Service - Invalid Rule",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/rules/validate",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.rule",
+            "equalToJson": "\"invalid-rule\""
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": false,
+          "error": "Invalid rule syntax",
+          "details": "Unable to parse rule expression",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Weather Service - Get Current Conditions",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/weather/current",
+        "queryParameters": {
+          "latitude": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "longitude": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "temperature": "{{randomDecimal lower=0 upper=35}}",
+          "humidity": "{{randomDecimal lower=30 upper=100}}",
+          "windSpeed": "{{randomDecimal lower=0 upper=30}}",
+          "conditions": "{{pickRandom 'Clear' 'Cloudy' 'Rain' 'Snow' 'Fog'}}",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Weather Service - Server Error",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/weather/current",
+        "queryParameters": {
+          "latitude": {
+            "equalTo": "91.0"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal server error",
+          "message": "Weather service temporarily unavailable",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Device Command Service - Send Command",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/api/devices/[0-9]+/command",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.type"
+          },
+          {
+            "matchesJsonPath": "$.attributes"
+          }
+        ]
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": true,
+          "commandId": "{{randomValue length=8 type='ALPHANUMERIC'}}",
+          "status": "queued",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Device Command Service - Device Offline",
+      "request": {
+        "method": "POST",
+        "urlPath": "/api/devices/999/command",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.type"
+          }
+        ]
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": false,
+          "error": "Device offline",
+          "message": "Cannot send command to offline device",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Health Check - Service Health",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/actuator/health"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "status": "UP",
+          "components": {
+            "db": {
+              "status": "UP"
+            },
+            "kafka": {
+              "status": "UP"
+            },
+            "diskSpace": {
+              "status": "UP",
+              "details": {
+                "total": 100000000000,
+                "free": 50000000000,
+                "threshold": 10000000000
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Metrics - Prometheus Metrics",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/actuator/prometheus"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "body": "# HELP event_service_events_processed_total Total number of events processed\n# TYPE event_service_events_processed_total counter\nevent_service_events_processed_total{type=\"overspeed\"} 42\nevent_service_events_processed_total{type=\"geofence\"} 23\n# HELP event_service_processing_time_seconds Time taken to process events\n# TYPE event_service_processing_time_seconds histogram\nevent_service_processing_time_seconds_count{type=\"overspeed\"} 42\nevent_service_processing_time_seconds_sum{type=\"overspeed\"} 1.23\nevent_service_processing_time_seconds_count{type=\"geofence\"} 23\nevent_service_processing_time_seconds_sum{type=\"geofence\"} 0.75\n"
+      }
+    },
+    {
+      "name": "Delayed Response - Simulated Network Latency",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/slow-service/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Response after delay",
+          "timestamp": "{{now}}"
+        },
+        "fixedDelayMilliseconds": 2000,
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Fault Simulation - Connection Reset",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/fault/connection-reset"
+      },
+      "response": {
+        "fault": "CONNECTION_RESET_BY_PEER"
+      }
+    },
+    {
+      "name": "Fault Simulation - Bad Response",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/fault/bad-response"
+      },
+      "response": {
+        "fault": "MALFORMED_RESPONSE_CHUNK"
+      }
+    },
+    {
+      "name": "Fault Simulation - Random Data",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/fault/random-data"
+      },
+      "response": {
+        "fault": "RANDOM_DATA_THEN_CLOSE"
+      }
+    }
+  ]
+}
