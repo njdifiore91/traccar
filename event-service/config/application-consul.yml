@@ -1,0 +1,78 @@
+# Consul Service Discovery Configuration for Event Processing Service
+
+spring:
+  cloud:
+    consul:
+      # Consul server connection properties
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      # Connection timeout settings
+      connect-timeout: 5000
+      read-timeout: 10000
+      # Consul ACL token if authentication is enabled
+      token: ${CONSUL_TOKEN:}
+      
+      # Service discovery configuration
+      discovery:
+        # Service registration properties
+        enabled: true
+        register: true
+        deregister: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${random.uuid}
+        service-name: ${spring.application.name}
+        # Health check configuration
+        healthCheckInterval: 15s
+        healthCheckTimeout: 5s
+        healthCheckPath: /actuator/health
+        healthCheckCriticalTimeout: 30s
+        # Service metadata for filtering and additional information
+        tags:
+          - event-service
+          - microservice
+          - traccar
+        metadata:
+          version: ${application.version:0.0.1}
+          zone: ${ZONE:default}
+          environment: ${ENVIRONMENT:default}
+          # Add custom metadata for service filtering
+          supports-events: true
+          api-version: v1
+      
+      # Consul configuration properties
+      config:
+        enabled: true
+        format: YAML
+        prefix: config
+        default-context: application
+        profile-separator: '-'
+        data-key: data
+        watch:
+          enabled: true
+          delay: 1000
+
+# Consul health check configuration
+management:
+  health:
+    consul:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,consul
+
+# Consul retry configuration for connection failures
+resilience4j:
+  retry:
+    instances:
+      consulRegistration:
+        maxAttempts: 5
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.net.ConnectException
