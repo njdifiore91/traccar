@@ -1,0 +1,857 @@
+{
+  "service": {
+    "name": "position-service",
+    "version": "1.0.0",
+    "description": "Mock Position Service for Event Service testing"
+  },
+  "endpoints": {
+    "getLatestPosition": {
+      "path": "/api/positions/latest",
+      "method": "GET",
+      "parameters": ["deviceId"],
+      "responses": {
+        "default": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 40.0,
+          "course": 90.0,
+          "address": "123 Test Street, San Francisco, CA",
+          "accuracy": 10.0,
+          "network": {},
+          "attributes": {
+            "motion": true,
+            "ignition": true,
+            "batteryLevel": 85,
+            "distance": 1000.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        },
+        "stopped": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "address": "123 Test Street, San Francisco, CA",
+          "accuracy": 10.0,
+          "network": {},
+          "attributes": {
+            "motion": false,
+            "ignition": false,
+            "batteryLevel": 85,
+            "distance": 0.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        },
+        "moving": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 60.0,
+          "course": 90.0,
+          "address": "123 Test Street, San Francisco, CA",
+          "accuracy": 10.0,
+          "network": {},
+          "attributes": {
+            "motion": true,
+            "ignition": true,
+            "batteryLevel": 85,
+            "distance": 1500.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        },
+        "overspeed": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 120.0,
+          "course": 90.0,
+          "address": "123 Test Street, San Francisco, CA",
+          "accuracy": 10.0,
+          "network": {},
+          "attributes": {
+            "motion": true,
+            "ignition": true,
+            "batteryLevel": 85,
+            "distance": 2000.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        },
+        "lowBattery": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": true,
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "altitude": 100.0,
+          "speed": 40.0,
+          "course": 90.0,
+          "address": "123 Test Street, San Francisco, CA",
+          "accuracy": 10.0,
+          "network": {},
+          "attributes": {
+            "motion": true,
+            "ignition": true,
+            "batteryLevel": 15,
+            "distance": 1000.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        },
+        "invalidPosition": {
+          "deviceId": "${deviceId}",
+          "protocol": "mock",
+          "serverTime": "${now}",
+          "deviceTime": "${now-5s}",
+          "fixTime": "${now-5s}",
+          "valid": false,
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "altitude": 0.0,
+          "speed": 0.0,
+          "course": 0.0,
+          "address": null,
+          "accuracy": 0.0,
+          "network": {},
+          "attributes": {
+            "motion": false,
+            "ignition": false,
+            "batteryLevel": 85,
+            "distance": 0.0,
+            "totalDistance": 15000.0,
+            "hours": 350.5
+          }
+        }
+      }
+    },
+    "getPositionHistory": {
+      "path": "/api/positions/history",
+      "method": "GET",
+      "parameters": ["deviceId", "from", "to"],
+      "responses": {
+        "default": [
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from}",
+            "deviceTime": "${from}",
+            "fixTime": "${from}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 100.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "123 Test Street, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": false,
+              "batteryLevel": 85,
+              "distance": 0.0,
+              "totalDistance": 14000.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from+1h}",
+            "deviceTime": "${from+1h}",
+            "fixTime": "${from+1h}",
+            "valid": true,
+            "latitude": 37.7850,
+            "longitude": -122.4100,
+            "altitude": 110.0,
+            "speed": 40.0,
+            "course": 90.0,
+            "address": "456 Test Avenue, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 80,
+              "distance": 500.0,
+              "totalDistance": 14500.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${to}",
+            "deviceTime": "${to}",
+            "fixTime": "${to}",
+            "valid": true,
+            "latitude": 37.7950,
+            "longitude": -122.4000,
+            "altitude": 120.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "789 Test Boulevard, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": false,
+              "batteryLevel": 75,
+              "distance": 0.0,
+              "totalDistance": 15000.0
+            }
+          }
+        ],
+        "moving": [
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from}",
+            "deviceTime": "${from}",
+            "fixTime": "${from}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 100.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "123 Test Street, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": true,
+              "batteryLevel": 85,
+              "distance": 0.0,
+              "totalDistance": 14000.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from+30m}",
+            "deviceTime": "${from+30m}",
+            "fixTime": "${from+30m}",
+            "valid": true,
+            "latitude": 37.7850,
+            "longitude": -122.4100,
+            "altitude": 110.0,
+            "speed": 40.0,
+            "course": 90.0,
+            "address": "456 Test Avenue, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 80,
+              "distance": 500.0,
+              "totalDistance": 14500.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${to}",
+            "deviceTime": "${to}",
+            "fixTime": "${to}",
+            "valid": true,
+            "latitude": 37.7950,
+            "longitude": -122.4000,
+            "altitude": 120.0,
+            "speed": 60.0,
+            "course": 90.0,
+            "address": "789 Test Boulevard, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 75,
+              "distance": 700.0,
+              "totalDistance": 15000.0
+            }
+          }
+        ],
+        "stopped": [
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from}",
+            "deviceTime": "${from}",
+            "fixTime": "${from}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 100.0,
+            "speed": 40.0,
+            "course": 90.0,
+            "address": "123 Test Street, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 85,
+              "distance": 500.0,
+              "totalDistance": 14000.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from+30m}",
+            "deviceTime": "${from+30m}",
+            "fixTime": "${from+30m}",
+            "valid": true,
+            "latitude": 37.7850,
+            "longitude": -122.4100,
+            "altitude": 110.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "456 Test Avenue, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": false,
+              "batteryLevel": 80,
+              "distance": 0.0,
+              "totalDistance": 14500.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${to}",
+            "deviceTime": "${to}",
+            "fixTime": "${to}",
+            "valid": true,
+            "latitude": 37.7850,
+            "longitude": -122.4100,
+            "altitude": 110.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "456 Test Avenue, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": false,
+              "batteryLevel": 75,
+              "distance": 0.0,
+              "totalDistance": 14500.0
+            }
+          }
+        ],
+        "geofenceEntry": [
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from}",
+            "deviceTime": "${from}",
+            "fixTime": "${from}",
+            "valid": true,
+            "latitude": 37.7700,
+            "longitude": -122.4200,
+            "altitude": 100.0,
+            "speed": 40.0,
+            "course": 90.0,
+            "address": "Outside Geofence, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 85,
+              "distance": 500.0,
+              "totalDistance": 14000.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from+30m}",
+            "deviceTime": "${from+30m}",
+            "fixTime": "${from+30m}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 110.0,
+            "speed": 20.0,
+            "course": 90.0,
+            "address": "Geofence Boundary, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 80,
+              "distance": 300.0,
+              "totalDistance": 14500.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${to}",
+            "deviceTime": "${to}",
+            "fixTime": "${to}",
+            "valid": true,
+            "latitude": 37.7800,
+            "longitude": -122.4150,
+            "altitude": 120.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "Inside Geofence, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": true,
+              "batteryLevel": 75,
+              "distance": 0.0,
+              "totalDistance": 15000.0
+            }
+          }
+        ],
+        "geofenceExit": [
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from}",
+            "deviceTime": "${from}",
+            "fixTime": "${from}",
+            "valid": true,
+            "latitude": 37.7800,
+            "longitude": -122.4150,
+            "altitude": 100.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "Inside Geofence, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": true,
+              "batteryLevel": 85,
+              "distance": 0.0,
+              "totalDistance": 14000.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${from+30m}",
+            "deviceTime": "${from+30m}",
+            "fixTime": "${from+30m}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 110.0,
+            "speed": 20.0,
+            "course": 270.0,
+            "address": "Geofence Boundary, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 80,
+              "distance": 300.0,
+              "totalDistance": 14500.0
+            }
+          },
+          {
+            "deviceId": "${deviceId}",
+            "protocol": "mock",
+            "serverTime": "${to}",
+            "deviceTime": "${to}",
+            "fixTime": "${to}",
+            "valid": true,
+            "latitude": 37.7700,
+            "longitude": -122.4200,
+            "altitude": 120.0,
+            "speed": 40.0,
+            "course": 270.0,
+            "address": "Outside Geofence, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 75,
+              "distance": 500.0,
+              "totalDistance": 15000.0
+            }
+          }
+        ]
+      }
+    },
+    "getDevicePositions": {
+      "path": "/api/positions/devices",
+      "method": "GET",
+      "parameters": ["deviceIds"],
+      "responses": {
+        "default": {
+          "${deviceIds[0]}": {
+            "deviceId": "${deviceIds[0]}",
+            "protocol": "mock",
+            "serverTime": "${now}",
+            "deviceTime": "${now-5s}",
+            "fixTime": "${now-5s}",
+            "valid": true,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 100.0,
+            "speed": 40.0,
+            "course": 90.0,
+            "address": "123 Test Street, San Francisco, CA",
+            "attributes": {
+              "motion": true,
+              "ignition": true,
+              "batteryLevel": 85,
+              "distance": 1000.0,
+              "totalDistance": 15000.0,
+              "hours": 350.5
+            }
+          },
+          "${deviceIds[1]}": {
+            "deviceId": "${deviceIds[1]}",
+            "protocol": "mock",
+            "serverTime": "${now}",
+            "deviceTime": "${now-10s}",
+            "fixTime": "${now-10s}",
+            "valid": true,
+            "latitude": 37.7850,
+            "longitude": -122.4100,
+            "altitude": 110.0,
+            "speed": 0.0,
+            "course": 0.0,
+            "address": "456 Test Avenue, San Francisco, CA",
+            "attributes": {
+              "motion": false,
+              "ignition": false,
+              "batteryLevel": 75,
+              "distance": 0.0,
+              "totalDistance": 12000.0,
+              "hours": 280.3
+            }
+          }
+        }
+      }
+    }
+  },
+  "messagePatterns": {
+    "positionUpdate": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 100.0,
+        "speed": 40.0,
+        "course": 90.0,
+        "address": "123 Test Street, San Francisco, CA",
+        "attributes": {
+          "motion": true,
+          "ignition": true,
+          "batteryLevel": 85,
+          "distance": 1000.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    },
+    "positionUpdateStopped": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 100.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": "123 Test Street, San Francisco, CA",
+        "attributes": {
+          "motion": false,
+          "ignition": false,
+          "batteryLevel": 85,
+          "distance": 0.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    },
+    "positionUpdateMoving": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 100.0,
+        "speed": 60.0,
+        "course": 90.0,
+        "address": "123 Test Street, San Francisco, CA",
+        "attributes": {
+          "motion": true,
+          "ignition": true,
+          "batteryLevel": 85,
+          "distance": 1500.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    },
+    "positionUpdateOverspeed": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 100.0,
+        "speed": 120.0,
+        "course": 90.0,
+        "address": "123 Test Street, San Francisco, CA",
+        "attributes": {
+          "motion": true,
+          "ignition": true,
+          "batteryLevel": 85,
+          "distance": 2000.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    },
+    "positionUpdateLowBattery": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": true,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 100.0,
+        "speed": 40.0,
+        "course": 90.0,
+        "address": "123 Test Street, San Francisco, CA",
+        "attributes": {
+          "motion": true,
+          "ignition": true,
+          "batteryLevel": 15,
+          "distance": 1000.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    },
+    "positionUpdateInvalidPosition": {
+      "topic": "position.updates",
+      "payload": {
+        "deviceId": "${deviceId}",
+        "protocol": "mock",
+        "serverTime": "${now}",
+        "deviceTime": "${now-5s}",
+        "fixTime": "${now-5s}",
+        "valid": false,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "altitude": 0.0,
+        "speed": 0.0,
+        "course": 0.0,
+        "address": null,
+        "attributes": {
+          "motion": false,
+          "ignition": false,
+          "batteryLevel": 85,
+          "distance": 0.0,
+          "totalDistance": 15000.0,
+          "hours": 350.5
+        }
+      }
+    }
+  },
+  "scenarios": {
+    "motionDetection": {
+      "description": "Simulates a device transitioning from stopped to moving state",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdateStopped",
+          "delay": "0s"
+        },
+        {
+          "messagePattern": "positionUpdateMoving",
+          "delay": "30s"
+        },
+        {
+          "messagePattern": "positionUpdateMoving",
+          "delay": "30s",
+          "overrides": {
+            "payload.attributes.distance": 600.0
+          }
+        }
+      ]
+    },
+    "motionStop": {
+      "description": "Simulates a device transitioning from moving to stopped state",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdateMoving",
+          "delay": "0s"
+        },
+        {
+          "messagePattern": "positionUpdateStopped",
+          "delay": "30s"
+        },
+        {
+          "messagePattern": "positionUpdateStopped",
+          "delay": "5m"
+        }
+      ]
+    },
+    "overspeedEvent": {
+      "description": "Simulates a device exceeding speed limit",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdateMoving",
+          "delay": "0s"
+        },
+        {
+          "messagePattern": "positionUpdateOverspeed",
+          "delay": "30s"
+        },
+        {
+          "messagePattern": "positionUpdateMoving",
+          "delay": "1m"
+        }
+      ]
+    },
+    "lowBatteryEvent": {
+      "description": "Simulates a device with low battery",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "0s",
+          "overrides": {
+            "payload.attributes.batteryLevel": 25
+          }
+        },
+        {
+          "messagePattern": "positionUpdateLowBattery",
+          "delay": "30s"
+        },
+        {
+          "messagePattern": "positionUpdateLowBattery",
+          "delay": "30s",
+          "overrides": {
+            "payload.attributes.batteryLevel": 10
+          }
+        }
+      ]
+    },
+    "geofenceEntry": {
+      "description": "Simulates a device entering a geofence",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "0s",
+          "overrides": {
+            "payload.latitude": 37.7700,
+            "payload.longitude": -122.4200,
+            "payload.address": "Outside Geofence, San Francisco, CA"
+          }
+        },
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "30s",
+          "overrides": {
+            "payload.latitude": 37.7749,
+            "payload.longitude": -122.4194,
+            "payload.address": "Geofence Boundary, San Francisco, CA"
+          }
+        },
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "30s",
+          "overrides": {
+            "payload.latitude": 37.7800,
+            "payload.longitude": -122.4150,
+            "payload.address": "Inside Geofence, San Francisco, CA"
+          }
+        }
+      ]
+    },
+    "geofenceExit": {
+      "description": "Simulates a device exiting a geofence",
+      "sequence": [
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "0s",
+          "overrides": {
+            "payload.latitude": 37.7800,
+            "payload.longitude": -122.4150,
+            "payload.address": "Inside Geofence, San Francisco, CA"
+          }
+        },
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "30s",
+          "overrides": {
+            "payload.latitude": 37.7749,
+            "payload.longitude": -122.4194,
+            "payload.address": "Geofence Boundary, San Francisco, CA"
+          }
+        },
+        {
+          "messagePattern": "positionUpdate",
+          "delay": "30s",
+          "overrides": {
+            "payload.latitude": 37.7700,
+            "payload.longitude": -122.4200,
+            "payload.address": "Outside Geofence, San Francisco, CA"
+          }
+        }
+      ]
+    }
+  },
+  "configuration": {
+    "responseDelay": {
+      "min": "10ms",
+      "max": "50ms"
+    },
+    "errorRate": 0.01,
+    "timeVariables": {
+      "now": "current_time",
+      "today": "current_date"
+    },
+    "positionEnrichment": {
+      "geocoding": true,
+      "speedCalculation": true,
+      "distanceCalculation": true,
+      "motionDetection": true
+    }
+  }
+}
