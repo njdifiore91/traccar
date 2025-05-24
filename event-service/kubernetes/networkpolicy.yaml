@@ -1,0 +1,142 @@
+# NetworkPolicy for Event Service
+# This policy implements the principle of least privilege by restricting
+# communication paths to only those necessary for the Event Service to function.
+# It controls both ingress (incoming) and egress (outgoing) traffic.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: event-service-network-policy
+  # The namespace is not specified here to make this policy more portable
+  # It will be applied to the namespace where it is deployed
+spec:
+  podSelector:
+    matchLabels:
+      app: event-service
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming traffic from API Gateway
+    - from:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: api-gateway
+      ports:
+        - protocol: TCP
+          port: 8082  # Event Service API port
+        - protocol: TCP
+          port: 9090  # gRPC port
+
+    # Allow incoming traffic from Position Service
+    - from:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: position-service
+      ports:
+        - protocol: TCP
+          port: 8082  # Event Service API port
+        - protocol: TCP
+          port: 9090  # gRPC port
+
+    # Allow incoming traffic for health checks and metrics
+    - from:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080  # Health check and metrics endpoint
+
+    # Allow traffic from other Event Service pods for clustering/coordination
+    - from:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      ports:
+        - protocol: TCP
+          port: 8082  # Event Service API port
+        - protocol: TCP
+          port: 9090  # gRPC port
+
+  egress:
+    # Allow outgoing traffic to Message Broker (Kafka/RabbitMQ)
+    - to:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092  # Kafka port
+
+    # Allow outgoing traffic to RabbitMQ if used as alternative
+    - to:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672  # RabbitMQ port
+
+    # Allow outgoing traffic to Database
+    - to:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: database
+      ports:
+        - protocol: TCP
+          port: 3306  # MySQL port
+        - protocol: TCP
+          port: 5432  # PostgreSQL port
+
+    # Allow outgoing traffic to Service Discovery
+    - to:
+      - namespaceSelector: {}
+        podSelector:
+          matchLabels:
+            app: consul
+      ports:
+        - protocol: TCP
+          port: 8500  # Consul HTTP API
+
+    # Allow outgoing traffic to Kubernetes API for service discovery if using K8s API
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-apiserver
+      ports:
+        - protocol: TCP
+          port: 443  # Kubernetes API port
+
+    # Allow traffic to other Event Service pods for clustering/coordination
+    - to:
+      - podSelector:
+          matchLabels:
+            app: event-service
+      ports:
+        - protocol: TCP
+          port: 8082  # Event Service API port
+        - protocol: TCP
+          port: 9090  # gRPC port
+
+    # Allow DNS resolution (critical for service discovery and general functionality)
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+        podSelector:
+          matchLabels:
+            k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53  # DNS
+        - protocol: TCP
+          port: 53  # DNS
