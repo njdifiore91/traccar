@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/interpreter",
+    "queryParameters": {
+      "data": {
+        "matches": ".*way\\[maxspeed\\]\\(around:.*,34\\..*,-82\\..*\\).*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache",
+      "X-Powered-By": "Overpass API"
+    },
+    "jsonBody": {
+      "version": 0.6,
+      "generator": "Overpass API 0.7.56.3 mock",
+      "osm3s": {
+        "timestamp_osm_base": "2023-05-15T08:22:02Z",
+        "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+      },
+      "elements": [
+        {
+          "type": "way",
+          "id": 123456789,
+          "nodes": [987654321, 987654322, 987654323, 987654324],
+          "tags": {
+            "highway": "secondary",
+            "maxspeed": "55 mph",
+            "name": "Rural County Road",
+            "surface": "asphalt",
+            "lanes": "2"
+          }
+        },
+        {
+          "type": "way",
+          "id": 123456790,
+          "nodes": [987654325, 987654326, 987654327, 987654328],
+          "tags": {
+            "highway": "tertiary",
+            "maxspeed": "45 mph",
+            "name": "Rural Side Road",
+            "surface": "asphalt",
+            "lanes": "2"
+          }
+        },
+        {
+          "type": "way",
+          "id": 123456791,
+          "nodes": [987654329, 987654330, 987654331, 987654332],
+          "tags": {
+            "highway": "unclassified",
+            "maxspeed": "35 mph",
+            "name": "Farm Access Road",
+            "surface": "gravel",
+            "lanes": "1"
+          }
+        }
+      ]
+    },
+    "transformers": ["response-template"]
+  }
+}
