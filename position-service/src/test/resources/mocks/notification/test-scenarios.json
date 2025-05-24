@@ -1,0 +1,459 @@
+{
+  "scenarios": [
+    {
+      "name": "overspeed_basic",
+      "description": "Basic overspeed event when device exceeds speed limit",
+      "input": {
+        "position": {
+          "deviceId": 1,
+          "time": "2023-01-01T12:00:00Z",
+          "latitude": 40.7128,
+          "longitude": -74.0060,
+          "speed": 55.0,
+          "attributes": {}
+        },
+        "device": {
+          "id": 1,
+          "name": "Test Device",
+          "speedLimit": 40.0,
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 1,
+              "time": "2023-01-01T11:59:40Z",
+              "latitude": 40.7125,
+              "longitude": -74.0065,
+              "speed": 50.0,
+              "attributes": {}
+            },
+            {
+              "deviceId": 1,
+              "time": "2023-01-01T11:59:20Z",
+              "latitude": 40.7122,
+              "longitude": -74.0070,
+              "speed": 50.0,
+              "attributes": {}
+            }
+          ]
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "deviceOverspeed",
+            "deviceId": 1,
+            "attributes": {
+              "speed": 55.0,
+              "speedLimit": 40.0
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "deviceOverspeed",
+            "userId": 1,
+            "deviceId": 1,
+            "attributes": {
+              "speed": 55.0,
+              "speedLimit": 40.0,
+              "deviceName": "Test Device"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "overspeed_with_geofence",
+      "description": "Overspeed event within a specific geofence",
+      "input": {
+        "position": {
+          "deviceId": 2,
+          "time": "2023-01-01T14:00:00Z",
+          "latitude": 37.7749,
+          "longitude": -122.4194,
+          "speed": 60.0,
+          "attributes": {}
+        },
+        "device": {
+          "id": 2,
+          "name": "Fleet Vehicle",
+          "speedLimit": 0.0,
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 2,
+              "time": "2023-01-01T13:59:40Z",
+              "latitude": 37.7745,
+              "longitude": -122.4190,
+              "speed": 55.0,
+              "attributes": {}
+            },
+            {
+              "deviceId": 2,
+              "time": "2023-01-01T13:59:20Z",
+              "latitude": 37.7740,
+              "longitude": -122.4185,
+              "speed": 55.0,
+              "attributes": {}
+            }
+          ],
+          "geofences": [
+            {
+              "id": 1,
+              "name": "School Zone",
+              "description": "Reduced speed area",
+              "speedLimit": 30.0
+            }
+          ]
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "deviceOverspeed",
+            "deviceId": 2,
+            "geofenceId": 1,
+            "attributes": {
+              "speed": 60.0,
+              "speedLimit": 30.0,
+              "geofenceName": "School Zone"
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "deviceOverspeed",
+            "userId": 1,
+            "deviceId": 2,
+            "geofenceId": 1,
+            "attributes": {
+              "speed": 60.0,
+              "speedLimit": 30.0,
+              "deviceName": "Fleet Vehicle",
+              "geofenceName": "School Zone"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "motion_start",
+      "description": "Device starts moving and triggers motion event",
+      "input": {
+        "position": {
+          "deviceId": 3,
+          "time": "2023-01-02T10:00:00Z",
+          "latitude": 51.5074,
+          "longitude": -0.1278,
+          "speed": 15.0,
+          "attributes": {
+            "motion": true,
+            "totalDistance": 700.0
+          }
+        },
+        "device": {
+          "id": 3,
+          "name": "Delivery Truck",
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 3,
+              "time": "2023-01-02T09:58:00Z",
+              "latitude": 51.5072,
+              "longitude": -0.1280,
+              "speed": 10.0,
+              "attributes": {
+                "motion": true,
+                "totalDistance": 600.0
+              }
+            },
+            {
+              "deviceId": 3,
+              "time": "2023-01-02T09:56:00Z",
+              "latitude": 51.5070,
+              "longitude": -0.1282,
+              "speed": 5.0,
+              "attributes": {
+                "motion": true,
+                "totalDistance": 100.0
+              }
+            }
+          ],
+          "tripsConfig": {
+            "minimalTripDistance": 500,
+            "minimalTripDuration": 300000,
+            "minimalParkingDuration": 300000,
+            "minimalNoDataDuration": 0,
+            "useIgnition": false,
+            "processInvalidPositions": false
+          }
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "deviceMoving",
+            "deviceId": 3,
+            "attributes": {
+              "speed": 15.0
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "deviceMoving",
+            "userId": 1,
+            "deviceId": 3,
+            "attributes": {
+              "speed": 15.0,
+              "deviceName": "Delivery Truck"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "motion_stop",
+      "description": "Device stops moving and triggers stopped event",
+      "input": {
+        "position": {
+          "deviceId": 4,
+          "time": "2023-01-03T15:10:00Z",
+          "latitude": 48.8566,
+          "longitude": 2.3522,
+          "speed": 0.0,
+          "attributes": {
+            "motion": false,
+            "totalDistance": 1500.0,
+            "ignition": false
+          }
+        },
+        "device": {
+          "id": 4,
+          "name": "Taxi Cab",
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 4,
+              "time": "2023-01-03T15:03:00Z",
+              "latitude": 48.8565,
+              "longitude": 2.3520,
+              "speed": 0.0,
+              "attributes": {
+                "motion": false,
+                "totalDistance": 1500.0,
+                "ignition": true
+              }
+            },
+            {
+              "deviceId": 4,
+              "time": "2023-01-03T15:00:00Z",
+              "latitude": 48.8560,
+              "longitude": 2.3510,
+              "speed": 5.0,
+              "attributes": {
+                "motion": true,
+                "totalDistance": 1500.0,
+                "ignition": true
+              }
+            }
+          ],
+          "tripsConfig": {
+            "minimalTripDistance": 500,
+            "minimalTripDuration": 300000,
+            "minimalParkingDuration": 300000,
+            "minimalNoDataDuration": 0,
+            "useIgnition": true,
+            "processInvalidPositions": false
+          }
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "deviceStopped",
+            "deviceId": 4,
+            "attributes": {
+              "ignition": false
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "deviceStopped",
+            "userId": 1,
+            "deviceId": 4,
+            "attributes": {
+              "ignition": false,
+              "deviceName": "Taxi Cab"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "geofence_entry",
+      "description": "Device enters a geofence area",
+      "input": {
+        "position": {
+          "deviceId": 5,
+          "time": "2023-01-04T09:30:00Z",
+          "latitude": 34.0522,
+          "longitude": -118.2437,
+          "speed": 25.0,
+          "attributes": {}
+        },
+        "device": {
+          "id": 5,
+          "name": "Service Vehicle",
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 5,
+              "time": "2023-01-04T09:29:00Z",
+              "latitude": 34.0530,
+              "longitude": -118.2450,
+              "speed": 25.0,
+              "attributes": {}
+            }
+          ],
+          "geofences": [
+            {
+              "id": 2,
+              "name": "Downtown Zone",
+              "description": "City center area",
+              "area": "POLYGON((-118.2500 34.0550, -118.2400 34.0550, -118.2400 34.0450, -118.2500 34.0450, -118.2500 34.0550))"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "geofenceEnter",
+            "deviceId": 5,
+            "geofenceId": 2,
+            "attributes": {
+              "geofenceName": "Downtown Zone"
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "geofenceEnter",
+            "userId": 1,
+            "deviceId": 5,
+            "geofenceId": 2,
+            "attributes": {
+              "deviceName": "Service Vehicle",
+              "geofenceName": "Downtown Zone"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "geofence_exit",
+      "description": "Device exits a geofence area",
+      "input": {
+        "position": {
+          "deviceId": 6,
+          "time": "2023-01-05T16:45:00Z",
+          "latitude": 41.8850,
+          "longitude": -87.6550,
+          "speed": 30.0,
+          "attributes": {}
+        },
+        "device": {
+          "id": 6,
+          "name": "Courier Van",
+          "attributes": {}
+        },
+        "context": {
+          "previousPositions": [
+            {
+              "deviceId": 6,
+              "time": "2023-01-05T16:44:00Z",
+              "latitude": 41.8810,
+              "longitude": -87.6320,
+              "speed": 30.0,
+              "attributes": {}
+            }
+          ],
+          "geofences": [
+            {
+              "id": 3,
+              "name": "Warehouse Area",
+              "description": "Company warehouse zone",
+              "area": "POLYGON((-87.6400 41.8900, -87.6200 41.8900, -87.6200 41.8700, -87.6400 41.8700, -87.6400 41.8900))"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "events": [
+          {
+            "type": "geofenceExit",
+            "deviceId": 6,
+            "geofenceId": 3,
+            "attributes": {
+              "geofenceName": "Warehouse Area"
+            }
+          }
+        ],
+        "notifications": [
+          {
+            "type": "geofenceExit",
+            "userId": 1,
+            "deviceId": 6,
+            "geofenceId": 3,
+            "attributes": {
+              "deviceName": "Courier Van",
+              "geofenceName": "Warehouse Area"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "error_scenario_missing_device",
+      "description": "Error scenario where device information is missing",
+      "input": {
+        "position": {
+          "deviceId": 7,
+          "time": "2023-01-06T08:15:00Z",
+          "latitude": 52.5200,
+          "longitude": 13.4050,
+          "speed": 45.0,
+          "attributes": {}
+        },
+        "device": null,
+        "context": {
+          "previousPositions": [],
+          "error": "Device not found in database"
+        }
+      },
+      "expected": {
+        "events": [],
+        "notifications": [],
+        "errors": [
+          {
+            "type": "deviceNotFound",
+            "deviceId": 7,
+            "message": "Device with ID 7 not found in database"
+          }
+        ]
+      }
+    }
+  ]
+}
