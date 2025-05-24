@@ -1,0 +1,273 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Kafka consumer templates for position messages consumed by the Position Service",
+  "positionMessageSchema": {
+    "type": "object",
+    "required": ["deviceId", "protocol", "timestamp", "latitude", "longitude", "valid"],
+    "properties": {
+      "deviceId": {
+        "type": "integer",
+        "description": "Unique identifier of the device"
+      },
+      "protocol": {
+        "type": "string",
+        "description": "Protocol used by the device"
+      },
+      "timestamp": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Unix timestamp in milliseconds"
+      },
+      "latitude": {
+        "type": "number",
+        "format": "double",
+        "description": "Latitude coordinate in decimal degrees"
+      },
+      "longitude": {
+        "type": "number",
+        "format": "double",
+        "description": "Longitude coordinate in decimal degrees"
+      },
+      "altitude": {
+        "type": "number",
+        "format": "double",
+        "description": "Altitude in meters above sea level",
+        "nullable": true
+      },
+      "speed": {
+        "type": "number",
+        "format": "double",
+        "description": "Speed in knots",
+        "nullable": true
+      },
+      "course": {
+        "type": "number",
+        "format": "double",
+        "description": "Course in degrees",
+        "nullable": true
+      },
+      "accuracy": {
+        "type": "number",
+        "format": "double",
+        "description": "Position accuracy in meters",
+        "nullable": true
+      },
+      "valid": {
+        "type": "boolean",
+        "description": "Indicates if the position is valid"
+      },
+      "attributes": {
+        "type": "object",
+        "description": "Protocol-specific attributes",
+        "additionalProperties": true
+      }
+    }
+  },
+  "kafkaMetadata": {
+    "topic": "raw-positions",
+    "partitionKey": "deviceId",
+    "headers": {
+      "messageType": "position",
+      "version": "1.0",
+      "source": "protocol-service"
+    },
+    "consumerGroup": "position-service-group"
+  },
+  "sampleMessages": [
+    {
+      "description": "Standard GPS position from Teltonika protocol",
+      "key": "123456",
+      "value": {
+        "deviceId": 123456,
+        "protocol": "teltonika",
+        "timestamp": 1621345678000,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 10.5,
+        "speed": 35.7,
+        "course": 178.4,
+        "accuracy": 5.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 87,
+          "ignition": true,
+          "satellites": 12,
+          "hdop": 0.8,
+          "externalPower": 12.4,
+          "event": 1,
+          "odometer": 12345.6,
+          "hours": 1234.5
+        }
+      },
+      "headers": {
+        "messageType": "position",
+        "version": "1.0",
+        "source": "protocol-service",
+        "deviceType": "FMB920",
+        "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    },
+    {
+      "description": "Position with minimal data from TK103 protocol",
+      "key": "789012",
+      "value": {
+        "deviceId": 789012,
+        "protocol": "tk103",
+        "timestamp": 1621345679000,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "altitude": null,
+        "speed": 0.0,
+        "course": 0.0,
+        "accuracy": null,
+        "valid": true,
+        "attributes": {
+          "alarm": "sos",
+          "batteryLevel": 45
+        }
+      },
+      "headers": {
+        "messageType": "position",
+        "version": "1.0",
+        "source": "protocol-service",
+        "deviceType": "TK103",
+        "correlationId": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+      }
+    },
+    {
+      "description": "Position with extended attributes from Meitrack protocol",
+      "key": "345678",
+      "value": {
+        "deviceId": 345678,
+        "protocol": "meitrack",
+        "timestamp": 1621345680000,
+        "latitude": 51.5074,
+        "longitude": -0.1278,
+        "altitude": 25.3,
+        "speed": 62.5,
+        "course": 90.2,
+        "accuracy": 3.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 92,
+          "ignition": true,
+          "satellites": 14,
+          "rssi": 75,
+          "temperature": 28.5,
+          "fuel": 78.3,
+          "input": 15,
+          "output": 8,
+          "event": 37,
+          "adc1": 3.45,
+          "adc2": 2.78,
+          "iccid": "89014103211118510720",
+          "odometer": 34567.8
+        }
+      },
+      "headers": {
+        "messageType": "position",
+        "version": "1.0",
+        "source": "protocol-service",
+        "deviceType": "MT90",
+        "correlationId": "c3d4e5f6-a7b8-9012-cdef-123456789012"
+      }
+    },
+    {
+      "description": "Invalid position from ATrack protocol",
+      "key": "901234",
+      "value": {
+        "deviceId": 901234,
+        "protocol": "atrack",
+        "timestamp": 1621345681000,
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "altitude": null,
+        "speed": null,
+        "course": null,
+        "accuracy": null,
+        "valid": false,
+        "attributes": {
+          "reason": "no_fix",
+          "batteryLevel": 23,
+          "cellId": "28491",
+          "lac": "10693",
+          "mcc": "310",
+          "mnc": "410"
+        }
+      },
+      "headers": {
+        "messageType": "position",
+        "version": "1.0",
+        "source": "protocol-service",
+        "deviceType": "AX5",
+        "correlationId": "d4e5f6a7-b8c9-0123-def1-23456789abcd"
+      }
+    },
+    {
+      "description": "Position with driver identification from Totem protocol",
+      "key": "567890",
+      "value": {
+        "deviceId": 567890,
+        "protocol": "totem",
+        "timestamp": 1621345682000,
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "altitude": 35.0,
+        "speed": 15.3,
+        "course": 270.0,
+        "accuracy": 4.0,
+        "valid": true,
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true,
+          "driverId": "DRIVER123456",
+          "satellites": 9,
+          "hdop": 1.2,
+          "externalPower": 13.8,
+          "motion": true,
+          "hours": 2345.6,
+          "status": 1,
+          "input": 3,
+          "output": 1
+        }
+      },
+      "headers": {
+        "messageType": "position",
+        "version": "1.0",
+        "source": "protocol-service",
+        "deviceType": "GT06E",
+        "correlationId": "e5f6a7b8-c9d0-1234-ef12-3456789abcde"
+      }
+    }
+  ],
+  "validationRules": {
+    "deviceId": {
+      "rule": "deviceId > 0",
+      "errorMessage": "Device ID must be a positive integer"
+    },
+    "timestamp": {
+      "rule": "timestamp > 0 && timestamp <= System.currentTimeMillis() + 60000",
+      "errorMessage": "Timestamp must be valid and not in the future (allowing 1 minute clock drift)"
+    },
+    "coordinates": {
+      "rule": "valid == false || (latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180)",
+      "errorMessage": "Valid positions must have valid latitude and longitude coordinates"
+    },
+    "speed": {
+      "rule": "speed == null || speed >= 0",
+      "errorMessage": "Speed must be null or non-negative"
+    },
+    "course": {
+      "rule": "course == null || (course >= 0 && course < 360)",
+      "errorMessage": "Course must be null or between 0 and 359.99 degrees"
+    }
+  },
+  "processingInstructions": {
+    "invalidPositionHandling": "process",
+    "duplicateDetection": true,
+    "duplicateWindowSeconds": 60,
+    "outOfOrderHandling": "resequence",
+    "maxResequenceWindowMinutes": 60,
+    "attributeFiltering": false
+  }
+}
