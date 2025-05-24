@@ -1,0 +1,555 @@
+syntax = "proto3";
+
+package org.traccar.api.websocket;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.api.websocket";
+option java_outer_classname = "WebSocketProto";
+
+// Main message wrapper for all WebSocket communication
+message WebSocketMessage {
+  // Unique message identifier for correlation
+  string message_id = 1;
+  
+  // Timestamp in milliseconds since epoch
+  int64 timestamp = 2;
+  
+  // Message type
+  oneof payload {
+    // Connection management
+    ConnectRequest connect_request = 10;
+    ConnectResponse connect_response = 11;
+    DisconnectRequest disconnect_request = 12;
+    DisconnectNotification disconnect_notification = 13;
+    HeartbeatRequest heartbeat_request = 14;
+    HeartbeatResponse heartbeat_response = 15;
+    
+    // Topic subscription
+    SubscribeRequest subscribe_request = 20;
+    SubscribeResponse subscribe_response = 21;
+    UnsubscribeRequest unsubscribe_request = 22;
+    UnsubscribeResponse unsubscribe_response = 23;
+    
+    // Data messages
+    PositionUpdate position_update = 30;
+    EventUpdate event_update = 31;
+    NotificationUpdate notification_update = 32;
+    LogUpdate log_update = 33;
+    DeviceUpdate device_update = 34;
+    
+    // Error messages
+    ErrorMessage error_message = 40;
+    
+    // Status messages
+    StatusUpdate status_update = 50;
+  }
+}
+
+// Connection request from client
+message ConnectRequest {
+  // Authentication token
+  string token = 1;
+  
+  // Client version information
+  string client_version = 2;
+  
+  // Client capabilities
+  repeated string capabilities = 3;
+  
+  // Connection metadata
+  map<string, string> metadata = 4;
+}
+
+// Connection response from server
+message ConnectResponse {
+  // Connection status
+  enum Status {
+    UNKNOWN = 0;
+    ACCEPTED = 1;
+    REJECTED_AUTHENTICATION = 2;
+    REJECTED_VERSION = 3;
+    REJECTED_SERVER_ERROR = 4;
+  }
+  Status status = 1;
+  
+  // Connection identifier
+  string connection_id = 2;
+  
+  // Server version
+  string server_version = 3;
+  
+  // Server capabilities
+  repeated string capabilities = 4;
+  
+  // Session expiration time in milliseconds since epoch
+  int64 session_expiration = 5;
+  
+  // Error message if status is not ACCEPTED
+  string error_message = 6;
+}
+
+// Disconnect request from client
+message DisconnectRequest {
+  // Reason for disconnection
+  string reason = 1;
+}
+
+// Disconnect notification from server
+message DisconnectNotification {
+  // Reason for disconnection
+  enum Reason {
+    UNKNOWN = 0;
+    CLIENT_REQUESTED = 1;
+    SESSION_EXPIRED = 2;
+    SERVER_SHUTDOWN = 3;
+    CONNECTION_ERROR = 4;
+    PROTOCOL_ERROR = 5;
+  }
+  Reason reason = 1;
+  
+  // Additional information about disconnection
+  string message = 2;
+  
+  // Reconnection delay hint in milliseconds
+  int32 reconnect_delay_ms = 3;
+}
+
+// Heartbeat request from client or server
+message HeartbeatRequest {
+  // Sequence number for correlation
+  int64 sequence = 1;
+  
+  // Client timestamp in milliseconds since epoch
+  int64 client_timestamp = 2;
+}
+
+// Heartbeat response from client or server
+message HeartbeatResponse {
+  // Sequence number from corresponding request
+  int64 sequence = 1;
+  
+  // Server timestamp in milliseconds since epoch
+  int64 server_timestamp = 2;
+  
+  // Round-trip time of previous heartbeat in milliseconds
+  int32 round_trip_time_ms = 3;
+}
+
+// Topic subscription request
+message SubscribeRequest {
+  // Topic to subscribe to
+  enum Topic {
+    UNKNOWN = 0;
+    POSITIONS = 1;
+    EVENTS = 2;
+    NOTIFICATIONS = 3;
+    LOGS = 4;
+    DEVICES = 5;
+    ALL = 99;
+  }
+  repeated Topic topics = 1;
+  
+  // Optional filter criteria
+  map<string, string> filters = 2;
+  
+  // Request ID for correlation
+  string request_id = 3;
+}
+
+// Topic subscription response
+message SubscribeResponse {
+  // Subscription status
+  enum Status {
+    UNKNOWN = 0;
+    ACCEPTED = 1;
+    REJECTED_PERMISSION = 2;
+    REJECTED_INVALID_TOPIC = 3;
+    REJECTED_INVALID_FILTER = 4;
+    REJECTED_SERVER_ERROR = 5;
+  }
+  
+  // Status for each requested topic
+  message TopicStatus {
+    SubscribeRequest.Topic topic = 1;
+    Status status = 2;
+    string error_message = 3;
+  }
+  repeated TopicStatus topic_statuses = 1;
+  
+  // Request ID from corresponding request
+  string request_id = 2;
+}
+
+// Topic unsubscribe request
+message UnsubscribeRequest {
+  // Topics to unsubscribe from
+  repeated SubscribeRequest.Topic topics = 1;
+  
+  // Request ID for correlation
+  string request_id = 2;
+}
+
+// Topic unsubscribe response
+message UnsubscribeResponse {
+  // Status for each requested topic
+  message TopicStatus {
+    SubscribeRequest.Topic topic = 1;
+    bool success = 2;
+  }
+  repeated TopicStatus topic_statuses = 1;
+  
+  // Request ID from corresponding request
+  string request_id = 2;
+}
+
+// Position update message
+message PositionUpdate {
+  // Device identifier
+  int64 device_id = 1;
+  
+  // Position identifier
+  int64 position_id = 2;
+  
+  // Device identifier (string format)
+  string device_unique_id = 3;
+  
+  // Position timestamp in milliseconds since epoch
+  int64 timestamp = 4;
+  
+  // Latitude in degrees
+  double latitude = 5;
+  
+  // Longitude in degrees
+  double longitude = 6;
+  
+  // Altitude in meters
+  double altitude = 7;
+  
+  // Speed in knots
+  double speed = 8;
+  
+  // Course in degrees
+  double course = 9;
+  
+  // Address (reverse geocoded)
+  string address = 10;
+  
+  // Position accuracy in meters
+  double accuracy = 11;
+  
+  // Additional attributes
+  map<string, string> attributes = 12;
+  
+  // Network information
+  NetworkInfo network = 13;
+  
+  // Device status information
+  DeviceStatus status = 14;
+}
+
+// Network information
+message NetworkInfo {
+  // Radio type (GSM, CDMA, etc.)
+  string radio_type = 1;
+  
+  // Carrier name
+  string carrier = 2;
+  
+  // Mobile Country Code
+  string mcc = 3;
+  
+  // Mobile Network Code
+  string mnc = 4;
+  
+  // Cell ID
+  string cell_id = 5;
+  
+  // Location Area Code
+  string lac = 6;
+  
+  // Signal strength in dBm
+  int32 signal_strength = 7;
+}
+
+// Device status information
+message DeviceStatus {
+  // Battery level in percentage
+  int32 battery_level = 1;
+  
+  // External power status
+  bool external_power = 2;
+  
+  // Motion status
+  bool motion = 3;
+  
+  // Ignition status
+  bool ignition = 4;
+  
+  // Status flags
+  uint32 status_flags = 5;
+  
+  // Additional status attributes
+  map<string, string> attributes = 6;
+}
+
+// Event update message
+message EventUpdate {
+  // Event identifier
+  int64 event_id = 1;
+  
+  // Device identifier
+  int64 device_id = 2;
+  
+  // Device identifier (string format)
+  string device_unique_id = 3;
+  
+  // Event type
+  string type = 4;
+  
+  // Event timestamp in milliseconds since epoch
+  int64 timestamp = 5;
+  
+  // Position identifier associated with event
+  int64 position_id = 6;
+  
+  // Geofence identifier (if applicable)
+  int64 geofence_id = 7;
+  
+  // Maintenance identifier (if applicable)
+  int64 maintenance_id = 8;
+  
+  // Event attributes
+  map<string, string> attributes = 9;
+}
+
+// Notification update message
+message NotificationUpdate {
+  // Notification identifier
+  int64 notification_id = 1;
+  
+  // User identifier
+  int64 user_id = 2;
+  
+  // Notification type
+  string type = 3;
+  
+  // Notification timestamp in milliseconds since epoch
+  int64 timestamp = 4;
+  
+  // Notification title
+  string title = 5;
+  
+  // Notification body
+  string body = 6;
+  
+  // Notification priority
+  enum Priority {
+    UNKNOWN = 0;
+    LOW = 1;
+    MEDIUM = 2;
+    HIGH = 3;
+    CRITICAL = 4;
+  }
+  Priority priority = 7;
+  
+  // Notification attributes
+  map<string, string> attributes = 8;
+  
+  // Related event identifier (if applicable)
+  int64 event_id = 9;
+  
+  // Related device identifier (if applicable)
+  int64 device_id = 10;
+}
+
+// Log update message
+message LogUpdate {
+  // Log entry identifier
+  int64 log_id = 1;
+  
+  // Log timestamp in milliseconds since epoch
+  int64 timestamp = 2;
+  
+  // Log level
+  enum Level {
+    UNKNOWN = 0;
+    DEBUG = 1;
+    INFO = 2;
+    WARNING = 3;
+    ERROR = 4;
+    CRITICAL = 5;
+  }
+  Level level = 3;
+  
+  // Log source
+  string source = 4;
+  
+  // Log message
+  string message = 5;
+  
+  // Related device identifier (if applicable)
+  int64 device_id = 6;
+  
+  // Related user identifier (if applicable)
+  int64 user_id = 7;
+  
+  // Log attributes
+  map<string, string> attributes = 8;
+}
+
+// Device update message
+message DeviceUpdate {
+  // Device identifier
+  int64 device_id = 1;
+  
+  // Device unique identifier
+  string unique_id = 2;
+  
+  // Device name
+  string name = 3;
+  
+  // Device type
+  string type = 4;
+  
+  // Device status
+  enum Status {
+    UNKNOWN = 0;
+    ONLINE = 1;
+    OFFLINE = 2;
+    INACTIVE = 3;
+  }
+  Status status = 5;
+  
+  // Last update timestamp in milliseconds since epoch
+  int64 last_update = 6;
+  
+  // Position identifier of last position
+  int64 position_id = 7;
+  
+  // Group identifier
+  int64 group_id = 8;
+  
+  // Device attributes
+  map<string, string> attributes = 9;
+  
+  // Update type
+  enum UpdateType {
+    UNKNOWN = 0;
+    CREATED = 1;
+    UPDATED = 2;
+    DELETED = 3;
+    STATUS_CHANGED = 4;
+  }
+  UpdateType update_type = 10;
+}
+
+// Error message
+message ErrorMessage {
+  // Error code
+  enum ErrorCode {
+    UNKNOWN = 0;
+    AUTHENTICATION_ERROR = 1;
+    PERMISSION_ERROR = 2;
+    SUBSCRIPTION_ERROR = 3;
+    MESSAGE_FORMAT_ERROR = 4;
+    INTERNAL_SERVER_ERROR = 5;
+    SERVICE_UNAVAILABLE = 6;
+    RATE_LIMIT_EXCEEDED = 7;
+  }
+  ErrorCode code = 1;
+  
+  // Error message
+  string message = 2;
+  
+  // Related message ID (if applicable)
+  string related_message_id = 3;
+  
+  // Error details
+  map<string, string> details = 4;
+}
+
+// Status update message
+message StatusUpdate {
+  // Status type
+  enum StatusType {
+    UNKNOWN = 0;
+    SERVER_STATUS = 1;
+    CONNECTION_STATUS = 2;
+    SUBSCRIPTION_STATUS = 3;
+  }
+  StatusType type = 1;
+  
+  // Server status (if type is SERVER_STATUS)
+  ServerStatus server_status = 2;
+  
+  // Connection status (if type is CONNECTION_STATUS)
+  ConnectionStatus connection_status = 3;
+  
+  // Subscription status (if type is SUBSCRIPTION_STATUS)
+  SubscriptionStatus subscription_status = 4;
+}
+
+// Server status information
+message ServerStatus {
+  // Server state
+  enum State {
+    UNKNOWN = 0;
+    NORMAL = 1;
+    DEGRADED = 2;
+    MAINTENANCE = 3;
+    OVERLOADED = 4;
+  }
+  State state = 1;
+  
+  // Server version
+  string version = 2;
+  
+  // Server time in milliseconds since epoch
+  int64 server_time = 3;
+  
+  // Message describing current status
+  string message = 4;
+  
+  // Expected maintenance end time (if in maintenance)
+  int64 maintenance_end_time = 5;
+}
+
+// Connection status information
+message ConnectionStatus {
+  // Connection state
+  enum State {
+    UNKNOWN = 0;
+    CONNECTED = 1;
+    UNSTABLE = 2;
+    RECONNECTING = 3;
+    DISCONNECTED = 4;
+  }
+  State state = 1;
+  
+  // Connection quality metric (0-100)
+  int32 quality = 2;
+  
+  // Last activity timestamp in milliseconds since epoch
+  int64 last_activity = 3;
+  
+  // Round-trip time in milliseconds
+  int32 round_trip_time_ms = 4;
+  
+  // Connection uptime in seconds
+  int64 uptime_seconds = 5;
+}
+
+// Subscription status information
+message SubscriptionStatus {
+  // Topic subscription statuses
+  message TopicStatus {
+    SubscribeRequest.Topic topic = 1;
+    bool active = 2;
+    int64 last_message_time = 3;
+    int32 message_count = 4;
+  }
+  repeated TopicStatus topic_statuses = 1;
+  
+  // Active filters
+  map<string, string> active_filters = 2;
+}
