@@ -1,0 +1,173 @@
+# Kubernetes-specific configuration for Event Processing Service
+# This profile is activated when running in a Kubernetes environment
+
+# Spring Cloud Kubernetes configuration
+spring:
+  cloud:
+    kubernetes:
+      # Enable Kubernetes integration
+      enabled: true
+      # Enable loading of Kubernetes ConfigMaps
+      config:
+        enabled: true
+        # Enable automatic reloading of ConfigMaps
+        reload:
+          enabled: true
+          # Strategy for reloading (refresh, restart, or shutdown)
+          strategy: refresh
+          # Monitoring interval for ConfigMap changes
+          period: 30000
+      # Enable loading of Kubernetes Secrets
+      secrets:
+        enabled: true
+        # Enable automatic reloading of Secrets
+        reload:
+          enabled: true
+          # Strategy for reloading (refresh, restart, or shutdown)
+          strategy: refresh
+          # Monitoring interval for Secret changes
+          period: 30000
+      # Service discovery configuration
+      discovery:
+        enabled: true
+        # Enable service catalog API client
+        catalog-services-watch:
+          enabled: true
+        # Enable service registry heartbeat
+        heartbeat:
+          enabled: true
+          # Heartbeat interval in milliseconds
+          interval: 30000
+        # Service metadata configuration
+        metadata:
+          # Add additional metadata to service registration
+          additional-metadata: true
+        # Service discovery filter configuration
+        filter:
+          # Filter services by metadata
+          metadata:
+            # Only discover services with matching labels
+            app: traccar
+        # Service discovery caching configuration
+        cache:
+          enabled: true
+          # Cache TTL in seconds
+          ttl: 60
+      # Client configuration for accessing Kubernetes API
+      client:
+        # Kubernetes API server URL (leave empty to use in-cluster config)
+        master-url: 
+        # Namespace to use for service discovery (leave empty to use pod's namespace)
+        namespace: 
+        # Trust certificates that are not signed by a certificate authority
+        trust-certs: false
+        # Connection and read timeouts
+        connection-timeout: 10000
+        read-timeout: 30000
+
+# Actuator endpoints configuration for Kubernetes health probes
+management:
+  # Expose health endpoints
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      # Base path for actuator endpoints
+      base-path: /actuator
+  # Health endpoint configuration
+  endpoint:
+    health:
+      # Show detailed health information
+      show-details: always
+      # Include additional health indicators
+      show-components: always
+      # Define health groups for Kubernetes probes
+      group:
+        # Liveness probe health group
+        liveness:
+          include: livenessState, diskSpace, ping
+        # Readiness probe health group
+        readiness:
+          include: readinessState, db, kafka, serviceDiscovery
+  # Health configuration
+  health:
+    # Enable liveness state health indicator
+    livenessstate:
+      enabled: true
+    # Enable readiness state health indicator
+    readinessstate:
+      enabled: true
+    # Kubernetes probes configuration
+    kubernetes:
+      enabled: true
+    # Disk space health indicator configuration
+    diskspace:
+      enabled: true
+      # Threshold for disk space health check
+      threshold: 10MB
+    # Database health indicator configuration
+    db:
+      enabled: true
+    # Kafka health indicator configuration
+    kafka:
+      enabled: true
+    # Service discovery health indicator configuration
+    serviceDiscovery:
+      enabled: true
+
+# Server configuration
+server:
+  # Port for the service
+  port: 8082
+  # Shutdown behavior
+  shutdown: graceful
+  # Tomcat configuration
+  tomcat:
+    # Maximum number of threads
+    max-threads: 200
+    # Minimum number of spare threads
+    min-spare-threads: 10
+    # Connection timeout
+    connection-timeout: 5000
+
+# Event Processing Service specific configuration
+event-service:
+  # Kubernetes-specific service properties
+  kubernetes:
+    # Enable Kubernetes-specific features
+    enabled: true
+    # Service discovery configuration
+    service-discovery:
+      # Services to discover
+      services:
+        # Position Service configuration
+        position-service:
+          # Service name in Kubernetes
+          name: position-service
+          # Namespace where the service is deployed
+          namespace: position
+          # Port name or number
+          port: grpc
+        # Notification Service configuration
+        notification-service:
+          # Service name in Kubernetes
+          name: notification-service
+          # Namespace where the service is deployed
+          namespace: notification
+          # Port name or number
+          port: grpc
+    # Label selector for finding related services
+    label-selector: app=traccar,component=event-service
+
+# Logging configuration
+logging:
+  level:
+    # Root logging level
+    root: INFO
+    # Spring Cloud Kubernetes logging level
+    org.springframework.cloud.kubernetes: INFO
+    # Event Service logging level
+    org.traccar.event-service: INFO
+  # Log pattern for console output
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
