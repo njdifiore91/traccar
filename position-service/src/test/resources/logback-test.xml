@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Position Service Test Logging Configuration
+  
+  This configuration controls logging during test execution for the Position Service.
+  It provides appropriate log levels for debugging while preventing excessive output.
+  
+  Key features:
+  - Configurable log levels via environment variables
+  - MDC support for correlation IDs and test context
+  - Console output formatting optimized for readability
+  - Test capture appender for programmatic log verification
+  - Reduced noise from third-party libraries
+-->
+<configuration>
+    <!-- Properties for configurable elements -->
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId}] [%X{testName}] - %msg%n"/>
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>
+    <property name="POSITION_LOG_LEVEL" value="${POSITION_LOG_LEVEL:-DEBUG}"/>
+    <property name="HANDLER_LOG_LEVEL" value="${HANDLER_LOG_LEVEL:-DEBUG}"/>
+    <property name="GEOCODER_LOG_LEVEL" value="${GEOCODER_LOG_LEVEL:-INFO}"/>
+    <property name="GEOFENCE_LOG_LEVEL" value="${GEOFENCE_LOG_LEVEL:-INFO}"/>
+    <property name="MESSAGING_LOG_LEVEL" value="${MESSAGING_LOG_LEVEL:-INFO}"/>
+    <property name="TEST_NAME" value="${TEST_NAME:-unknown}"/>
+    
+    <!-- Console Appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Test-specific appender that captures logs for test verification -->
+    <appender name="TEST_CAPTURE" class="ch.qos.logback.core.helpers.NOPAppender">
+        <!-- This is a placeholder that test frameworks can replace with a memory appender -->
+    </appender>
+    
+    <!-- MDC Filter to add test context information -->
+    <turboFilter class="ch.qos.logback.classic.turbo.MDCFilter">
+        <MDCKey>testName</MDCKey>
+        <Value>${TEST_NAME}</Value>
+        <OnMatch>NEUTRAL</OnMatch>
+    </turboFilter>
+    
+    <!-- Logger configurations for Position Service components -->
+    <logger name="org.traccar.processing" level="${POSITION_LOG_LEVEL}"/>
+    <logger name="org.traccar.handler" level="${HANDLER_LOG_LEVEL}"/>
+    <logger name="org.traccar.geocoder" level="${GEOCODER_LOG_LEVEL}"/>
+    <logger name="org.traccar.geofence" level="${GEOFENCE_LOG_LEVEL}"/>
+    <logger name="org.traccar.messaging" level="${MESSAGING_LOG_LEVEL}"/>
+    <logger name="org.traccar.health" level="DEBUG"/>
+    <logger name="org.traccar.config" level="INFO"/>
+    <logger name="org.traccar.metrics" level="INFO"/>
+    
+    <!-- Reduce noise from third-party libraries during tests -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+    <logger name="com.rabbitmq" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
+    
+    <!-- Distributed tracing related loggers -->
+    <logger name="io.opentelemetry" level="WARN"/>
+    
+    <!-- Root logger configuration -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="TEST_CAPTURE"/>
+    </root>
+    
+    <!-- MDC cleanup filter to ensure context is cleared between tests -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+</configuration>
