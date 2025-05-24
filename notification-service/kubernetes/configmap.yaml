@@ -1,0 +1,353 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-service-config
+  namespace: traccar
+  labels:
+    app: notification-service
+    component: config
+    part-of: traccar
+    version: "1.0.0"
+data:
+  # Application configuration for Notification Service
+  # This configuration is mounted into the container at runtime
+  application.yaml: |
+    # Notification Service Configuration
+    notification:
+      # General notification settings
+      enabled: true
+      # Maximum number of concurrent notifications
+      concurrentLimit: 10
+      # Correlation ID header name for distributed tracing
+      correlationIdHeader: "X-Correlation-ID"
+      # Notification retry settings
+      retry:
+        maxAttempts: 3
+        initialInterval: 1000
+        multiplier: 2.0
+        maxInterval: 10000
+      
+      # Email notification settings
+      mail:
+        enabled: true
+        smtp:
+          host: smtp.example.com
+          port: 587
+          starttls: true
+          ssl: false
+          username: "${SMTP_USERNAME:}"
+          password: "${SMTP_PASSWORD:}"
+          from: "no-reply@example.com"
+          fromName: "Traccar Notification"
+          # Connection timeout in milliseconds
+          connectionTimeout: 5000
+          # Socket timeout in milliseconds
+          timeout: 5000
+        # Circuit breaker settings for email
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 50
+          waitDurationInOpenState: 60000
+          permittedNumberOfCallsInHalfOpenState: 3
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+      
+      # SMS notification settings
+      sms:
+        enabled: true
+        provider: "http"
+        # HTTP SMS gateway settings
+        http:
+          url: "https://sms-gateway.example.com/send"
+          authorization: "${SMS_AUTH_TOKEN:}"
+          template: "message={message}&to={phone}&from=Traccar"
+          # Connection timeout in milliseconds
+          connectionTimeout: 5000
+          # Socket timeout in milliseconds
+          timeout: 5000
+        # AWS SNS settings
+        aws:
+          accessKey: "${AWS_ACCESS_KEY:}"
+          secretKey: "${AWS_SECRET_KEY:}"
+          region: "us-east-1"
+        # Circuit breaker settings for SMS
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 50
+          waitDurationInOpenState: 60000
+          permittedNumberOfCallsInHalfOpenState: 3
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+      
+      # Push notification settings
+      push:
+        enabled: true
+        # Firebase Cloud Messaging settings
+        fcm:
+          serviceAccountKey: "${FCM_SERVICE_ACCOUNT_KEY:}"
+          databaseUrl: "https://traccar-app.firebaseio.com"
+          # Connection timeout in milliseconds
+          connectionTimeout: 5000
+          # Socket timeout in milliseconds
+          timeout: 5000
+        # Circuit breaker settings for push
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 50
+          waitDurationInOpenState: 60000
+          permittedNumberOfCallsInHalfOpenState: 3
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+      
+      # Web notification settings (WebSocket)
+      web:
+        enabled: true
+        # Maximum number of notifications to keep in history per user
+        historyLimit: 100
+      
+      # External notification services
+      external:
+        # Telegram notification settings
+        telegram:
+          enabled: false
+          botToken: "${TELEGRAM_BOT_TOKEN:}"
+          chatId: "${TELEGRAM_CHAT_ID:}"
+          # Connection timeout in milliseconds
+          connectionTimeout: 5000
+          # Socket timeout in milliseconds
+          timeout: 5000
+        # Pushover notification settings
+        pushover:
+          enabled: false
+          userKey: "${PUSHOVER_USER_KEY:}"
+          appKey: "${PUSHOVER_APP_KEY:}"
+          # Connection timeout in milliseconds
+          connectionTimeout: 5000
+          # Socket timeout in milliseconds
+          timeout: 5000
+        # Circuit breaker settings for external services
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 50
+          waitDurationInOpenState: 60000
+          permittedNumberOfCallsInHalfOpenState: 3
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+      
+      # Template configuration
+      template:
+        # Template engine (velocity)
+        engine: "velocity"
+        # Template resource paths
+        path: "/templates"
+        # Default templates
+        defaults:
+          # Default email templates
+          mail:
+            subjectTemplate: "notification_subject.vm"
+            bodyTemplate: "notification_mail.vm"
+            htmlTemplate: "notification_mail_html.vm"
+          # Default SMS templates
+          sms:
+            bodyTemplate: "notification_sms.vm"
+          # Default push templates
+          push:
+            bodyTemplate: "notification_push.vm"
+            titleTemplate: "notification_push_title.vm"
+          # Default web templates
+          web:
+            bodyTemplate: "notification_web.vm"
+            titleTemplate: "notification_web_title.vm"
+        # Template variables
+        variables:
+          # Company name to use in templates
+          companyName: "${COMPANY_NAME:Traccar}"
+          # Support email to include in templates
+          supportEmail: "${SUPPORT_EMAIL:support@example.com}"
+          # Base URL for web links in notifications
+          baseUrl: "${BASE_URL:https://example.com}"
+      
+      # Dead letter queue settings
+      deadLetter:
+        enabled: true
+        # Maximum number of retries before sending to DLQ
+        maxRetries: 3
+        # DLQ topic name
+        topic: "notification-dlq"
+    
+    # Message broker configuration
+    messaging:
+      # Broker type: kafka or rabbitmq
+      broker: "${MESSAGE_BROKER_TYPE:kafka}"
+      # Consumer group ID
+      groupId: "notification-service"
+      # Topics configuration
+      topics:
+        # Input topics
+        notifications: "notifications"
+        events: "events"
+        # Output topics
+        emailOut: "email-out"
+        smsOut: "sms-out"
+        pushOut: "push-out"
+        webOut: "web-out"
+        deadLetterQueue: "notification-dlq"
+      # Message processing
+      processing:
+        # Maximum age of messages to process (in milliseconds)
+        maxMessageAge: 300000  # 5 minutes
+        # Batch size for processing
+        batchSize: 100
+      # Kafka specific configuration
+      kafka:
+        bootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}"
+        securityProtocol: "${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}"
+        saslMechanism: "${KAFKA_SASL_MECHANISM:}"
+        saslJaasConfig: "${KAFKA_SASL_JAAS_CONFIG:}"
+        # Consumer configuration
+        consumer:
+          autoOffsetReset: "earliest"
+          enableAutoCommit: false
+          maxPollRecords: 500
+          sessionTimeoutMs: 30000
+          heartbeatIntervalMs: 10000
+          maxPartitionFetchBytes: 1048576
+        # Producer configuration
+        producer:
+          acks: "all"
+          retries: 3
+          batchSize: 16384
+          lingerMs: 1
+          bufferMemory: 33554432
+      # RabbitMQ specific configuration
+      rabbitmq:
+        host: "${RABBITMQ_HOST:rabbitmq}"
+        port: "${RABBITMQ_PORT:5672}"
+        username: "${RABBITMQ_USERNAME:guest}"
+        password: "${RABBITMQ_PASSWORD:guest}"
+        virtualHost: "${RABBITMQ_VIRTUAL_HOST:/}"
+        # Exchange configuration
+        exchange:
+          name: "traccar.notifications"
+          type: "topic"
+          durable: true
+        # Queue configuration
+        queue:
+          durable: true
+          exclusive: false
+          autoDelete: false
+        # Consumer configuration
+        consumer:
+          prefetchCount: 10
+          concurrentConsumers: 5
+          maxConcurrentConsumers: 10
+    
+    # Service discovery configuration
+    discovery:
+      # Service discovery type: consul or kubernetes
+      type: "${SERVICE_DISCOVERY_TYPE:kubernetes}"
+      # Service registration
+      registration:
+        enabled: true
+        serviceName: "notification-service"
+        serviceId: "${HOSTNAME:notification-service}"
+        port: 8083
+        healthCheckPath: "/health/liveness"
+        healthCheckInterval: 10s
+        tags:
+          - "notification"
+          - "traccar"
+      # Consul specific configuration
+      consul:
+        host: "${CONSUL_HOST:consul}"
+        port: "${CONSUL_PORT:8500}"
+        aclToken: "${CONSUL_ACL_TOKEN:}"
+        # Service discovery configuration
+        discovery:
+          enabled: true
+          preferIpAddress: true
+          instanceId: "${HOSTNAME:notification-service}"
+          healthCheckPath: "/health/liveness"
+          healthCheckInterval: 10s
+      # Kubernetes specific configuration
+      kubernetes:
+        namespace: "${KUBERNETES_NAMESPACE:traccar}"
+        trustCerts: true
+        masterUrl: "${KUBERNETES_MASTER_URL:}"
+    
+    # Logging configuration
+    logging:
+      level:
+        root: INFO
+        org.traccar: INFO
+        org.traccar.notification: DEBUG
+        org.traccar.notificators: DEBUG
+      # Log format
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId}] - %msg%n"
+      # Log to JSON format for production
+      json:
+        enabled: "${LOG_JSON_ENABLED:false}"
+    
+    # Distributed tracing configuration
+    tracing:
+      enabled: "${TRACING_ENABLED:true}"
+      # Sampling configuration
+      sampling:
+        probability: 0.1
+      # Exporter configuration
+      exporter:
+        # Jaeger exporter configuration
+        jaeger:
+          enabled: "${JAEGER_ENABLED:true}"
+          endpoint: "${JAEGER_ENDPOINT:http://jaeger-collector:14268/api/traces}"
+        # Zipkin exporter configuration
+        zipkin:
+          enabled: "${ZIPKIN_ENABLED:false}"
+          endpoint: "${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}"
+      # Propagation configuration
+      propagation:
+        type: "b3"
+    
+    # Metrics configuration
+    metrics:
+      enabled: true
+      # Prometheus endpoint configuration
+      prometheus:
+        enabled: true
+        path: "/metrics"
+      # JVM metrics
+      jvm:
+        enabled: true
+      # System metrics
+      system:
+        enabled: true
+      # Application metrics
+      application:
+        enabled: true
+      # Custom notification metrics
+      notification:
+        enabled: true
+        # Track notification counts by type
+        countByType: true
+        # Track notification delivery times
+        deliveryTimes: true
+        # Track notification failures by channel
+        failuresByChannel: true
+        # Track circuit breaker states
+        circuitBreakerStates: true
+    
+    # Server configuration
+    server:
+      port: 8083
+      # Graceful shutdown timeout in seconds
+      shutdown: graceful
+      gracefulShutdownTimeout: 30s
+      # Compression
+      compression:
+        enabled: true
+        mimeTypes: text/html,text/xml,text/plain,text/css,application/json
+        minResponseSize: 1024
+      # HTTP/2 support
+      http2:
+        enabled: true
