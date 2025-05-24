@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/geocode/reverse",
+    "queryParameters": {
+      "format": {
+        "equalTo": "json"
+      },
+      "lat": {
+        "matches": "[0-9.-]+"
+      },
+      "lon": {
+        "matches": "[0-9.-]+"
+      },
+      "apiKey": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "formatted": "123 Main Street, Cityville, State 12345, USA",
+      "results": [
+        {
+          "housenumber": "123",
+          "street": "Main Street",
+          "suburb": "Downtown",
+          "city": "Cityville",
+          "district": "Central District",
+          "state": "State",
+          "country_code": "us",
+          "postcode": "12345"
+        }
+      ]
+    }
+  }
+}
