@@ -1,0 +1,554 @@
+{
+  "catalog": {
+    "services": {
+      "position-service": ["primary", "v1"],
+      "protocol-service": ["primary", "v1"],
+      "event-service": ["primary", "v1"],
+      "notification-service": ["primary", "v1"],
+      "api-gateway": ["primary", "v1"],
+      "reporting-service": ["primary", "v1"]
+    },
+    "service": {
+      "position-service": [
+        {
+          "ID": "position-service-1",
+          "Node": "node1",
+          "Address": "10.0.0.101",
+          "ServiceID": "position-service",
+          "ServiceName": "position-service",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.101",
+          "ServicePort": 8080,
+          "ServiceMeta": {
+            "version": "1.0.0"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 15,
+          "ModifyIndex": 15
+        },
+        {
+          "ID": "position-service-2",
+          "Node": "node2",
+          "Address": "10.0.0.102",
+          "ServiceID": "position-service",
+          "ServiceName": "position-service",
+          "ServiceTags": ["secondary", "v1"],
+          "ServiceAddress": "10.0.0.102",
+          "ServicePort": 8080,
+          "ServiceMeta": {
+            "version": "1.0.0"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 16,
+          "ModifyIndex": 16
+        }
+      ],
+      "protocol-service": [
+        {
+          "ID": "protocol-service-1",
+          "Node": "node3",
+          "Address": "10.0.0.103",
+          "ServiceID": "protocol-service",
+          "ServiceName": "protocol-service",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.103",
+          "ServicePort": 8081,
+          "ServiceMeta": {
+            "version": "1.0.0",
+            "protocols": "tk103,meitrack,teltonika"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 17,
+          "ModifyIndex": 17
+        },
+        {
+          "ID": "protocol-service-2",
+          "Node": "node4",
+          "Address": "10.0.0.104",
+          "ServiceID": "protocol-service",
+          "ServiceName": "protocol-service",
+          "ServiceTags": ["secondary", "v1"],
+          "ServiceAddress": "10.0.0.104",
+          "ServicePort": 8081,
+          "ServiceMeta": {
+            "version": "1.0.0",
+            "protocols": "atrack,totem,meiligao"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 18,
+          "ModifyIndex": 18
+        }
+      ],
+      "event-service": [
+        {
+          "ID": "event-service-1",
+          "Node": "node5",
+          "Address": "10.0.0.105",
+          "ServiceID": "event-service",
+          "ServiceName": "event-service",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.105",
+          "ServicePort": 8082,
+          "ServiceMeta": {
+            "version": "1.0.0"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 19,
+          "ModifyIndex": 19
+        }
+      ],
+      "notification-service": [
+        {
+          "ID": "notification-service-1",
+          "Node": "node6",
+          "Address": "10.0.0.106",
+          "ServiceID": "notification-service",
+          "ServiceName": "notification-service",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.106",
+          "ServicePort": 8083,
+          "ServiceMeta": {
+            "version": "1.0.0",
+            "channels": "email,sms,push"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 20,
+          "ModifyIndex": 20
+        }
+      ],
+      "api-gateway": [
+        {
+          "ID": "api-gateway-1",
+          "Node": "node7",
+          "Address": "10.0.0.107",
+          "ServiceID": "api-gateway",
+          "ServiceName": "api-gateway",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.107",
+          "ServicePort": 8084,
+          "ServiceMeta": {
+            "version": "1.0.0"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 21,
+          "ModifyIndex": 21
+        }
+      ],
+      "reporting-service": [
+        {
+          "ID": "reporting-service-1",
+          "Node": "node8",
+          "Address": "10.0.0.108",
+          "ServiceID": "reporting-service",
+          "ServiceName": "reporting-service",
+          "ServiceTags": ["primary", "v1"],
+          "ServiceAddress": "10.0.0.108",
+          "ServicePort": 8085,
+          "ServiceMeta": {
+            "version": "1.0.0"
+          },
+          "ServiceEnableTagOverride": false,
+          "CreateIndex": 22,
+          "ModifyIndex": 22
+        }
+      ]
+    }
+  },
+  "agent": {
+    "services": {
+      "position-service": {
+        "ID": "position-service",
+        "Service": "position-service",
+        "Tags": ["primary", "v1"],
+        "Meta": {
+          "version": "1.0.0"
+        },
+        "Port": 8080,
+        "Address": "10.0.0.101",
+        "EnableTagOverride": false,
+        "Weights": {
+          "Passing": 1,
+          "Warning": 1
+        }
+      }
+    },
+    "service": {
+      "register": {
+        "success": true
+      },
+      "deregister": {
+        "success": true
+      }
+    },
+    "checks": {
+      "position-service-health": {
+        "Node": "node1",
+        "CheckID": "service:position-service-health",
+        "Name": "Service 'position-service' check",
+        "Status": "passing",
+        "Notes": "Position service health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "position-service",
+        "ServiceName": "position-service",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 15,
+        "ModifyIndex": 15
+      },
+      "protocol-service-health": {
+        "Node": "node3",
+        "CheckID": "service:protocol-service-health",
+        "Name": "Service 'protocol-service' check",
+        "Status": "passing",
+        "Notes": "Protocol service health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "protocol-service",
+        "ServiceName": "protocol-service",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 17,
+        "ModifyIndex": 17
+      },
+      "event-service-health": {
+        "Node": "node5",
+        "CheckID": "service:event-service-health",
+        "Name": "Service 'event-service' check",
+        "Status": "passing",
+        "Notes": "Event service health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "event-service",
+        "ServiceName": "event-service",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 19,
+        "ModifyIndex": 19
+      },
+      "notification-service-health": {
+        "Node": "node6",
+        "CheckID": "service:notification-service-health",
+        "Name": "Service 'notification-service' check",
+        "Status": "passing",
+        "Notes": "Notification service health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "notification-service",
+        "ServiceName": "notification-service",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 20,
+        "ModifyIndex": 20
+      },
+      "api-gateway-health": {
+        "Node": "node7",
+        "CheckID": "service:api-gateway-health",
+        "Name": "Service 'api-gateway' check",
+        "Status": "passing",
+        "Notes": "API Gateway health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "api-gateway",
+        "ServiceName": "api-gateway",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 21,
+        "ModifyIndex": 21
+      },
+      "reporting-service-health": {
+        "Node": "node8",
+        "CheckID": "service:reporting-service-health",
+        "Name": "Service 'reporting-service' check",
+        "Status": "passing",
+        "Notes": "Reporting service health check",
+        "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+        "ServiceID": "reporting-service",
+        "ServiceName": "reporting-service",
+        "ServiceTags": ["primary", "v1"],
+        "Definition": {},
+        "CreateIndex": 22,
+        "ModifyIndex": 22
+      },
+      "failing-service-health": {
+        "Node": "node9",
+        "CheckID": "service:failing-service-health",
+        "Name": "Service 'failing-service' check",
+        "Status": "critical",
+        "Notes": "Failing service health check",
+        "Output": "HTTP GET /health: 503 Service Unavailable",
+        "ServiceID": "failing-service",
+        "ServiceName": "failing-service",
+        "ServiceTags": ["test"],
+        "Definition": {},
+        "CreateIndex": 23,
+        "ModifyIndex": 23
+      }
+    }
+  },
+  "health": {
+    "service": {
+      "position-service": [
+        {
+          "Node": {
+            "ID": "node1-id",
+            "Node": "node1",
+            "Address": "10.0.0.101",
+            "Datacenter": "dc1",
+            "TaggedAddresses": {
+              "lan": "10.0.0.101",
+              "wan": "10.0.0.101"
+            },
+            "Meta": {
+              "env": "test"
+            },
+            "CreateIndex": 10,
+            "ModifyIndex": 10
+          },
+          "Service": {
+            "ID": "position-service",
+            "Service": "position-service",
+            "Tags": ["primary", "v1"],
+            "Address": "10.0.0.101",
+            "Meta": {
+              "version": "1.0.0"
+            },
+            "Port": 8080,
+            "Weights": {
+              "Passing": 1,
+              "Warning": 1
+            },
+            "EnableTagOverride": false,
+            "CreateIndex": 15,
+            "ModifyIndex": 15
+          },
+          "Checks": [
+            {
+              "Node": "node1",
+              "CheckID": "service:position-service-health",
+              "Name": "Service 'position-service' check",
+              "Status": "passing",
+              "Notes": "Position service health check",
+              "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+              "ServiceID": "position-service",
+              "ServiceName": "position-service",
+              "ServiceTags": ["primary", "v1"],
+              "Definition": {},
+              "CreateIndex": 15,
+              "ModifyIndex": 15
+            },
+            {
+              "Node": "node1",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": "",
+              "ServiceTags": [],
+              "Definition": {},
+              "CreateIndex": 10,
+              "ModifyIndex": 10
+            }
+          ]
+        },
+        {
+          "Node": {
+            "ID": "node2-id",
+            "Node": "node2",
+            "Address": "10.0.0.102",
+            "Datacenter": "dc1",
+            "TaggedAddresses": {
+              "lan": "10.0.0.102",
+              "wan": "10.0.0.102"
+            },
+            "Meta": {
+              "env": "test"
+            },
+            "CreateIndex": 11,
+            "ModifyIndex": 11
+          },
+          "Service": {
+            "ID": "position-service",
+            "Service": "position-service",
+            "Tags": ["secondary", "v1"],
+            "Address": "10.0.0.102",
+            "Meta": {
+              "version": "1.0.0"
+            },
+            "Port": 8080,
+            "Weights": {
+              "Passing": 1,
+              "Warning": 1
+            },
+            "EnableTagOverride": false,
+            "CreateIndex": 16,
+            "ModifyIndex": 16
+          },
+          "Checks": [
+            {
+              "Node": "node2",
+              "CheckID": "service:position-service-health",
+              "Name": "Service 'position-service' check",
+              "Status": "passing",
+              "Notes": "Position service health check",
+              "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+              "ServiceID": "position-service",
+              "ServiceName": "position-service",
+              "ServiceTags": ["secondary", "v1"],
+              "Definition": {},
+              "CreateIndex": 16,
+              "ModifyIndex": 16
+            },
+            {
+              "Node": "node2",
+              "CheckID": "serfHealth",
+              "Name": "Serf Health Status",
+              "Status": "passing",
+              "Notes": "",
+              "Output": "Agent alive and reachable",
+              "ServiceID": "",
+              "ServiceName": "",
+              "ServiceTags": [],
+              "Definition": {},
+              "CreateIndex": 11,
+              "ModifyIndex": 11
+            }
+          ]
+        }
+      ]
+    },
+    "state": {
+      "passing": [
+        {
+          "Node": "node1",
+          "CheckID": "service:position-service-health",
+          "Name": "Service 'position-service' check",
+          "Status": "passing",
+          "Notes": "Position service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "position-service",
+          "ServiceName": "position-service",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 15,
+          "ModifyIndex": 15
+        },
+        {
+          "Node": "node2",
+          "CheckID": "service:position-service-health",
+          "Name": "Service 'position-service' check",
+          "Status": "passing",
+          "Notes": "Position service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "position-service",
+          "ServiceName": "position-service",
+          "ServiceTags": ["secondary", "v1"],
+          "Definition": {},
+          "CreateIndex": 16,
+          "ModifyIndex": 16
+        },
+        {
+          "Node": "node3",
+          "CheckID": "service:protocol-service-health",
+          "Name": "Service 'protocol-service' check",
+          "Status": "passing",
+          "Notes": "Protocol service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "protocol-service",
+          "ServiceName": "protocol-service",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 17,
+          "ModifyIndex": 17
+        },
+        {
+          "Node": "node5",
+          "CheckID": "service:event-service-health",
+          "Name": "Service 'event-service' check",
+          "Status": "passing",
+          "Notes": "Event service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "event-service",
+          "ServiceName": "event-service",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 19,
+          "ModifyIndex": 19
+        },
+        {
+          "Node": "node6",
+          "CheckID": "service:notification-service-health",
+          "Name": "Service 'notification-service' check",
+          "Status": "passing",
+          "Notes": "Notification service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "notification-service",
+          "ServiceName": "notification-service",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 20,
+          "ModifyIndex": 20
+        },
+        {
+          "Node": "node7",
+          "CheckID": "service:api-gateway-health",
+          "Name": "Service 'api-gateway' check",
+          "Status": "passing",
+          "Notes": "API Gateway health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "api-gateway",
+          "ServiceName": "api-gateway",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 21,
+          "ModifyIndex": 21
+        },
+        {
+          "Node": "node8",
+          "CheckID": "service:reporting-service-health",
+          "Name": "Service 'reporting-service' check",
+          "Status": "passing",
+          "Notes": "Reporting service health check",
+          "Output": "HTTP GET /health: 200 OK Output: Service is healthy",
+          "ServiceID": "reporting-service",
+          "ServiceName": "reporting-service",
+          "ServiceTags": ["primary", "v1"],
+          "Definition": {},
+          "CreateIndex": 22,
+          "ModifyIndex": 22
+        }
+      ],
+      "critical": [
+        {
+          "Node": "node9",
+          "CheckID": "service:failing-service-health",
+          "Name": "Service 'failing-service' check",
+          "Status": "critical",
+          "Notes": "Failing service health check",
+          "Output": "HTTP GET /health: 503 Service Unavailable",
+          "ServiceID": "failing-service",
+          "ServiceName": "failing-service",
+          "ServiceTags": ["test"],
+          "Definition": {},
+          "CreateIndex": 23,
+          "ModifyIndex": 23
+        }
+      ]
+    }
+  },
+  "kv": {
+    "position-service/config": {
+      "CreateIndex": 100,
+      "ModifyIndex": 200,
+      "LockIndex": 0,
+      "Key": "position-service/config",
+      "Flags": 0,
+      "Value": "ewogICJzZXJ2aWNlIjogewogICAgIm5hbWUiOiAicG9zaXRpb24tc2VydmljZSIsCiAgICAicG9ydCI6IDgwODAsCiAgICAiYWRkcmVzcyI6ICIxMC4wLjAuMTAxIiwKICAgICJ0YWdzIjogWyJwcmltYXJ5IiwgInYxIl0sCiAgICAibWV0YSI6IHsKICAgICAgInZlcnNpb24iOiAiMS4wLjAiCiAgICB9CiAgfSwKICAiZGF0YWJhc2UiOiB7CiAgICAidXJsIjogImpkYmM6cG9zdGdyZXNxbDovL2RiLmV4YW1wbGUuY29tOjU0MzIvcG9zaXRpb25fZGIiLAogICAgInVzZXJuYW1lIjogInBvc2l0aW9uX3VzZXIiLAogICAgInBhc3N3b3JkIjogInBhc3N3b3JkMTIzIgogIH0sCiAgIm1lc3NhZ2luZyI6IHsKICAgICJicm9rZXJfdXJsIjogImFtcXA6Ly9yYWJiaXRtcS5leGFtcGxlLmNvbTo1NjcyIiwKICAgICJ1c2VybmFtZSI6ICJndWVzdCIsCiAgICAicGFzc3dvcmQiOiAiZ3Vlc3QiCiAgfSwKICAiZ2VvY29kZXIiOiB7CiAgICAiZW5hYmxlZCI6IHRydWUsCiAgICAidXJsIjogImh0dHA6Ly9nZW9jb2Rlci5leGFtcGxlLmNvbS9hcGkiLAogICAgImFwaV9rZXkiOiAiYWJjMTIzIgogIH0sCiAgImhlYWx0aCI6IHsKICAgICJjaGVja19pbnRlcnZhbCI6ICIxMHMiLAogICAgImNoZWNrX3RpbWVvdXQiOiAiMXMiLAogICAgImNoZWNrX3VybCI6ICIvaGVhbHRoIgogIH0KfQ=="
+    },
+    "position-service/secrets": {
+      "CreateIndex": 101,
+      "ModifyIndex": 201,
+      "LockIndex": 0,
+      "Key": "position-service/secrets",
+      "Flags": 0,
+      "Value": "ewogICJhcGlfa2V5cyI6IHsKICAgICJnZW9jb2RlciI6ICJhYmMxMjMiLAogICAgIm1hcHMiOiAieHl6NDU2IgogIH0sCiAgInRva2VucyI6IHsKICAgICJhdXRoIjogImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnBjM01pT2lKd2IzTnBkR2x2YmkxelpYSjJhV05sSW4wLlNpZ25hdHVyZSIKICB9Cn0="
+    }
+  }
+}
