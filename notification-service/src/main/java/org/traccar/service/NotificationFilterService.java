@@ -1,85 +1,94 @@
+/*
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.service;
 
 import org.traccar.model.Event;
 import org.traccar.model.User;
 
-import java.util.Map;
+import java.util.Date;
 
 /**
  * Service interface for filtering notifications based on user-defined rules,
- * calendar schedules, and system policies.
- * 
- * This interface provides methods for evaluating whether an event should trigger
- * a notification based on various criteria including rule matching, calendar
- * scheduling, event age validation, user preferences, and system policies.
+ * calendar schedules, and system policies. This interface provides methods for
+ * evaluating whether an event should trigger a notification based on various criteria.
  */
 public interface NotificationFilterService {
 
     /**
-     * Evaluates whether a notification should be sent for the given event based on
-     * user-defined rules and system policies.
+     * Checks if an event is recent enough to process for notifications.
+     * Events that are too old may be skipped to prevent delayed notifications.
      *
-     * @param event The event to evaluate
-     * @param user The user to evaluate rules for
-     * @return true if notification should be sent, false otherwise
+     * @param event The event to check
+     * @param currentTime Current system time for comparison
+     * @return true if the event is recent enough to process, false otherwise
      */
-    boolean shouldNotify(Event event, User user);
-    
+    boolean validateEventAge(Event event, Date currentTime);
+
     /**
-     * Checks if the event matches any notification rules for the given user.
+     * Checks if the event matches any user-defined notification rules.
+     * Rules can be based on event type, device, geofence, or other attributes.
      *
      * @param event The event to check against rules
-     * @param user The user whose rules should be checked
-     * @return true if the event matches any rules, false otherwise
+     * @param userId ID of the user whose rules should be checked
+     * @return true if the event matches at least one notification rule, false otherwise
      */
-    boolean matchesRules(Event event, User user);
-    
+    boolean matchesNotificationRules(Event event, long userId);
+
     /**
-     * Checks if the current time is within the allowed notification schedule for the user.
-     *
-     * @param user The user to check schedule for
-     * @param event The event to check schedule for (some schedules may be event-type specific)
-     * @return true if current time is within allowed schedule, false otherwise
-     */
-    boolean isWithinSchedule(User user, Event event);
-    
-    /**
-     * Validates if the event is recent enough to trigger a notification.
-     * Events that are too old may be filtered out to prevent delayed notifications.
-     *
-     * @param event The event to validate
-     * @return true if the event is recent enough, false if it's too old
-     */
-    boolean isEventRecent(Event event);
-    
-    /**
-     * Applies user preferences to determine if notification should be sent.
-     * This includes checking notification type preferences and inheritance from groups.
+     * Verifies if the notification should be sent based on calendar scheduling constraints.
+     * This allows notifications to be restricted to specific time periods.
      *
      * @param event The event to check
-     * @param user The user whose preferences should be applied
-     * @return true if notification is allowed by user preferences, false otherwise
+     * @param userId ID of the user whose calendar settings should be checked
+     * @param currentTime Current system time for calendar comparison
+     * @return true if the notification is within scheduled time periods, false otherwise
      */
-    boolean isAllowedByUserPreferences(Event event, User user);
-    
+    boolean isWithinCalendarSchedule(Event event, long userId, Date currentTime);
+
     /**
-     * Checks if system policies allow sending the notification.
-     * This includes rate limiting and other system-wide constraints.
+     * Applies user preferences to determine if a notification should be sent.
+     * This includes user-specific settings like notification channels, quiet hours, etc.
      *
      * @param event The event to check
-     * @param user The user to check policies for
-     * @return true if notification is allowed by system policies, false otherwise
+     * @param user The user object containing preference settings
+     * @param notificationType The type of notification to be sent
+     * @return true if the notification should be sent according to user preferences, false otherwise
      */
-    boolean isAllowedBySystemPolicies(Event event, User user);
-    
+    boolean applyUserPreferences(Event event, User user, String notificationType);
+
     /**
-     * Gets the notification channels that should be used for this event and user.
-     * The result is a map of channel types to boolean values indicating whether
-     * that channel should be used.
+     * Enforces system-wide notification policies such as rate limits and global quiet hours.
+     * This prevents notification flooding and respects system-wide settings.
      *
-     * @param event The event to determine channels for
-     * @param user The user to determine channels for
-     * @return Map of channel types to boolean values (true = use this channel)
+     * @param event The event to check
+     * @param userId ID of the user who would receive the notification
+     * @param notificationType The type of notification to be sent
+     * @return true if the notification complies with system policies, false otherwise
      */
-    Map<String, Boolean> getNotificationChannels(Event event, User user);
+    boolean enforceSystemPolicies(Event event, long userId, String notificationType);
+
+    /**
+     * Comprehensive check that combines all filtering criteria to determine if a notification
+     * should be sent for an event to a specific user.
+     *
+     * @param event The event that might trigger a notification
+     * @param user The user who would receive the notification
+     * @param notificationType The type of notification to be sent
+     * @param currentTime Current system time for temporal checks
+     * @return true if the notification should be sent, false if it should be filtered out
+     */
+    boolean shouldSendNotification(Event event, User user, String notificationType, Date currentTime);
 }
