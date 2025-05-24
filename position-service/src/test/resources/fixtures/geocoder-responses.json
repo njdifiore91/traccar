@@ -1,0 +1,660 @@
+{
+  "google": {
+    "results": [
+      {
+        "address_components": [
+          {
+            "long_name": "1",
+            "short_name": "1",
+            "types": ["street_number"]
+          },
+          {
+            "long_name": "Ibn Shaprut Street",
+            "short_name": "Ibn Shaprut St",
+            "types": ["route"]
+          },
+          {
+            "long_name": "Jerusalem",
+            "short_name": "Jerusalem",
+            "types": ["locality", "political"]
+          },
+          {
+            "long_name": "Jerusalem District",
+            "short_name": "Jerusalem District",
+            "types": ["administrative_area_level_1", "political"]
+          },
+          {
+            "long_name": "Israel",
+            "short_name": "IL",
+            "types": ["country", "political"]
+          }
+        ],
+        "formatted_address": "1 Ibn Shaprut St, Jerusalem, Jerusalem District, Israel",
+        "geometry": {
+          "location": {
+            "lat": 31.776797,
+            "lng": 35.211489
+          },
+          "location_type": "ROOFTOP",
+          "viewport": {
+            "northeast": {
+              "lat": 31.7781459802915,
+              "lng": 35.2128379802915
+            },
+            "southwest": {
+              "lat": 31.7754480197085,
+              "lng": 35.2101400197085
+            }
+          }
+        },
+        "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+        "plus_code": {
+          "compound_code": "P27Q+P9 Jerusalem, Israel",
+          "global_code": "8G4RP27Q+P9"
+        },
+        "types": ["street_address"]
+      }
+    ],
+    "status": "OK"
+  },
+  "nominatim": {
+    "place_id": 259127396,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 25324284,
+    "lat": "40.7337807",
+    "lon": "-73.9974401",
+    "display_name": "35, West 9th Street, Greenwich Village, NYC, New York, 10011, United States",
+    "address": {
+      "house_number": "35",
+      "road": "West 9th Street",
+      "neighbourhood": "Greenwich Village",
+      "city": "NYC",
+      "state": "New York",
+      "postcode": "10011",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": ["40.7336807", "40.7338807", "-73.9975401", "-73.9973401"]
+  },
+  "gisgraphy": {
+    "numFound": 1,
+    "QTime": 69,
+    "result": [
+      {
+        "name": "Rue du Jardinet",
+        "lat": 48.8530000,
+        "lng": 2.3400000,
+        "distance": 0.0,
+        "country_code": "FR",
+        "country_name": "France",
+        "admin_name": "Île-de-France",
+        "city": "Paris",
+        "zipcode": "75006",
+        "street_name": "Rue du Jardinet",
+        "house_number": "",
+        "is_in": "Paris, Île-de-France, France"
+      }
+    ]
+  },
+  "opencage": {
+    "documentation": "https://opencagedata.com/api",
+    "licenses": [
+      {
+        "name": "see attribution guide",
+        "url": "https://opencagedata.com/credits"
+      }
+    ],
+    "rate": {
+      "limit": 2500,
+      "remaining": 2499,
+      "reset": 1598918400
+    },
+    "results": [
+      {
+        "annotations": {
+          "DMS": {
+            "lat": "34° 6' 58.68720'' N",
+            "lng": "118° 3' 5.46840'' W"
+          },
+          "MGRS": "11SMT9505912704",
+          "Maidenhead": "DM04vd12jx",
+          "Mercator": {
+            "x": -13141968.223,
+            "y": 4036591.664
+          },
+          "OSM": {
+            "edit_url": "https://www.openstreetmap.org/edit?way=26592010#map=17/34.11630/-118.05152",
+            "url": "https://www.openstreetmap.org/?mlat=34.11630&mlon=-118.05152#map=17/34.11630/-118.05152"
+          },
+          "callingcode": 1,
+          "currency": {
+            "alternate_symbols": ["US$"],
+            "decimal_mark": ".",
+            "html_entity": "$",
+            "iso_code": "USD",
+            "iso_numeric": 840,
+            "name": "United States Dollar",
+            "smallest_denomination": 1,
+            "subunit": "Cent",
+            "subunit_to_unit": 100,
+            "symbol": "$",
+            "symbol_first": 1,
+            "thousands_separator": ","
+          },
+          "flag": "🇺🇸",
+          "geohash": "9qh4cre8w1gmk85gj55p",
+          "qibla": 33.78,
+          "roadinfo": {
+            "drive_on": "right",
+            "road": "Charleston Road",
+            "speed_in": "mph"
+          },
+          "sun": {
+            "rise": {
+              "apparent": 1598883480,
+              "astronomical": 1598878680,
+              "civil": 1598881960,
+              "nautical": 1598880340
+            },
+            "set": {
+              "apparent": 1598930040,
+              "astronomical": 1598934840,
+              "civil": 1598931560,
+              "nautical": 1598933180
+            }
+          },
+          "timezone": {
+            "name": "America/Los_Angeles",
+            "now_in_dst": 1,
+            "offset_sec": -25200,
+            "offset_string": "-0700",
+            "short_name": "PDT"
+          },
+          "what3words": {
+            "words": "rocky.limited.shed"
+          }
+        },
+        "bounds": {
+          "northeast": {
+            "lat": 34.1213023,
+            "lng": -118.0465197
+          },
+          "southwest": {
+            "lat": 34.1112977,
+            "lng": -118.0565183
+          }
+        },
+        "components": {
+          "ISO_3166-1_alpha-2": "US",
+          "ISO_3166-1_alpha-3": "USA",
+          "_category": "road",
+          "_type": "road",
+          "continent": "North America",
+          "country": "United States of America",
+          "country_code": "us",
+          "county": "Los Angeles County",
+          "road": "Charleston Road",
+          "state": "California",
+          "state_code": "CA"
+        },
+        "confidence": 9,
+        "formatted": "Charleston Road, California, United States of America",
+        "geometry": {
+          "lat": 34.116302,
+          "lng": -118.051519
+        }
+      }
+    ],
+    "status": {
+      "code": 200,
+      "message": "OK"
+    },
+    "stay_informed": {
+      "blog": "https://blog.opencagedata.com",
+      "twitter": "https://twitter.com/OpenCage"
+    },
+    "thanks": "For using an OpenCage API",
+    "timestamp": {
+      "created_http": "Mon, 31 Aug 2020 17:49:38 GMT",
+      "created_unix": 1598895378
+    },
+    "total_results": 1
+  },
+  "geocodefarm": {
+    "geocoding_results": {
+      "LEGAL_COPYRIGHT": {
+        "copyright_notice": "Copyright (c) 2020 GeocodeFarm, All Rights Reserved. This API and its results are for use only by the registered user. Do not share, redistribute, or repackage the data provided here in any way.",
+        "copyright_logo": "https://www.geocodefarm.com/assets/images/logo.png",
+        "terms_of_service": "https://www.geocodefarm.com/terms/"
+      },
+      "STATUS": {
+        "status": "SUCCESS",
+        "access": "PUBLIC_RATE_LIMITED",
+        "address_provided": "34.116302,-118.051519",
+        "result_count": 1
+      },
+      "ACCOUNT": {
+        "ip_address": "127.0.0.1",
+        "distribution_license": "NONE",
+        "usage_limit": "2500",
+        "used_today": "1",
+        "used_total": "1",
+        "first_used": "2020-08-31"
+      },
+      "RESULTS": [
+        {
+          "result_number": 1,
+          "formatted_address": "604 Estrella Ave, Arcadia, CA, United States",
+          "accuracy": "STREET_ADDRESS",
+          "accuracy_description": "The address was matched to a specific street address.",
+          "address_components": {
+            "street_number": "604",
+            "street_name": "Estrella",
+            "street_suffix": "Ave",
+            "city": "Arcadia",
+            "state": "CA",
+            "country": "United States",
+            "postal_code": "91007"
+          },
+          "location": {
+            "latitude": "34.116302",
+            "longitude": "-118.051519"
+          },
+          "boundaries": {
+            "northeast_latitude": "34.116402",
+            "northeast_longitude": "-118.051419",
+            "southwest_latitude": "34.116202",
+            "southwest_longitude": "-118.051619"
+          }
+        }
+      ]
+    }
+  },
+  "geocodexyz": {
+    "standard": {
+      "addresst": "ESTRELLA AVE",
+      "city": "ARCADIA",
+      "prov": "California",
+      "countryname": "United States of America",
+      "postal": "91007",
+      "confidence": "0.9"
+    },
+    "longt": "-118.051519",
+    "latt": "34.116302",
+    "remaining_credits": "99",
+    "altgeocode": "true",
+    "alt": {
+      "loc": [
+        {
+          "longt": "-118.051519",
+          "latt": "34.116302",
+          "standard": {
+            "stnumber": "605",
+            "addresst": "ESTRELLA AVE",
+            "city": "ARCADIA",
+            "prov": "California",
+            "countryname": "United States of America",
+            "postal": "91007",
+            "confidence": "0.9"
+          }
+        }
+      ]
+    }
+  },
+  "ban": {
+    "type": "FeatureCollection",
+    "version": "draft",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [2.2944, 48.8575]
+        },
+        "properties": {
+          "label": "8 Avenue Gustave Eiffel 75007 Paris",
+          "score": 0.9,
+          "housenumber": "8",
+          "id": "75107_6590_00008",
+          "name": "8 Avenue Gustave Eiffel",
+          "postcode": "75007",
+          "citycode": "75107",
+          "x": 648952.58,
+          "y": 6862316.74,
+          "city": "Paris",
+          "context": "75, Paris, Île-de-France",
+          "type": "housenumber",
+          "importance": 0.6706612694243,
+          "street": "Avenue Gustave Eiffel"
+        }
+      }
+    ],
+    "attribution": "BAN",
+    "licence": "ETALAB-2.0",
+    "query": "8 avenue gustave eiffel",
+    "limit": 1
+  },
+  "here": {
+    "Response": {
+      "MetaInfo": {
+        "Timestamp": "2020-08-31T17:49:38.970+0000"
+      },
+      "View": [
+        {
+          "_type": "SearchResultsViewType",
+          "ViewId": 0,
+          "Result": [
+            {
+              "Relevance": 1.0,
+              "MatchLevel": "houseNumber",
+              "MatchQuality": {
+                "Country": 1.0,
+                "State": 1.0,
+                "County": 1.0,
+                "City": 1.0,
+                "District": 1.0,
+                "Street": [
+                  1.0
+                ],
+                "HouseNumber": 1.0,
+                "PostalCode": 1.0
+              },
+              "MatchType": "pointAddress",
+              "Location": {
+                "LocationId": "NT_3S-JdUDnZJNS8FUWlIRU5C_1",
+                "LocationType": "address",
+                "DisplayPosition": {
+                  "Latitude": 48.8575,
+                  "Longitude": 2.2944
+                },
+                "NavigationPosition": [
+                  {
+                    "Latitude": 48.8575,
+                    "Longitude": 2.2944
+                  }
+                ],
+                "MapView": {
+                  "TopLeft": {
+                    "Latitude": 48.8586,
+                    "Longitude": 2.2928
+                  },
+                  "BottomRight": {
+                    "Latitude": 48.8564,
+                    "Longitude": 2.2960
+                  }
+                },
+                "Address": {
+                  "Label": "1 Tour Eiffel, 75007 Paris, France",
+                  "Country": "FRA",
+                  "State": "Île-de-France",
+                  "County": "Paris",
+                  "City": "Paris",
+                  "District": "7e Arrondissement",
+                  "Street": "Tour Eiffel",
+                  "HouseNumber": "1",
+                  "PostalCode": "75007",
+                  "AdditionalData": [
+                    {
+                      "value": "France",
+                      "key": "CountryName"
+                    },
+                    {
+                      "value": "Île-de-France",
+                      "key": "StateName"
+                    },
+                    {
+                      "value": "Paris",
+                      "key": "CountyName"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mapmyindia": {
+    "responseCode": 200,
+    "version": "270.19",
+    "results": [
+      {
+        "houseNumber": "",
+        "houseName": "",
+        "poi": "India Gate",
+        "poi_dist": "1",
+        "street": "",
+        "streetDist": "",
+        "subSubLocality": "",
+        "subLocality": "",
+        "locality": "New Delhi",
+        "village": "",
+        "district": "Delhi",
+        "subDistrict": "",
+        "city": "",
+        "state": "Delhi",
+        "pincode": "110001",
+        "lat": "28.6129602407977",
+        "lng": "77.2294557094574",
+        "area": "India",
+        "formatted_address": "New Delhi, Delhi. 1 m from India Gate pin-110001 (India)"
+      }
+    ]
+  },
+  "positionstack": {
+    "data": [
+      {
+        "latitude": 28.6129602407977,
+        "longitude": 77.2294557094574,
+        "type": "venue",
+        "name": "India Gate",
+        "number": null,
+        "postal_code": null,
+        "street": null,
+        "confidence": 1,
+        "region": "Delhi",
+        "region_code": "DL",
+        "county": "Delhi",
+        "locality": "New Delhi",
+        "administrative_area": null,
+        "neighbourhood": null,
+        "country": "India",
+        "country_code": "IND",
+        "continent": "Asia",
+        "label": "India Gate, New Delhi, India"
+      }
+    ]
+  },
+  "mapbox": {
+    "type": "FeatureCollection",
+    "query": ["40.733", "-73.989"],
+    "features": [
+      {
+        "id": "address.1259528623549290",
+        "type": "Feature",
+        "place_type": ["address"],
+        "relevance": 1,
+        "properties": {
+          "accuracy": "rooftop"
+        },
+        "text": "East 13th Street",
+        "place_name": "120 East 13th Street, New York, New York 10003, United States",
+        "center": [-73.989, 40.733],
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-73.989, 40.733]
+        },
+        "address": "120",
+        "context": [
+          {
+            "id": "neighborhood.2103391",
+            "text": "Greenwich Village"
+          },
+          {
+            "id": "postcode.10568996950840990",
+            "text": "10003"
+          },
+          {
+            "id": "locality.12696928000137550",
+            "wikidata": "Q60",
+            "text": "New York"
+          },
+          {
+            "id": "place.2618194975964500",
+            "wikidata": "Q60",
+            "text": "New York"
+          },
+          {
+            "id": "region.10003493535855570",
+            "wikidata": "Q1384",
+            "short_code": "US-NY",
+            "text": "New York"
+          },
+          {
+            "id": "country.19678805456372290",
+            "wikidata": "Q30",
+            "short_code": "us",
+            "text": "United States"
+          }
+        ]
+      }
+    ],
+    "attribution": "NOTICE: © 2020 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+  },
+  "maptiler": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "address.1259528623549290",
+          "gid": "openstreetmap:address:way/5682357868",
+          "layer": "address",
+          "source": "openstreetmap",
+          "source_id": "way/5682357868",
+          "name": "East 13th Street",
+          "housenumber": "",
+          "street": "East 13th Street",
+          "confidence": 0.9,
+          "match_type": "exact",
+          "accuracy": "point",
+          "country": "United States",
+          "country_gid": "whosonfirst:country:85633793",
+          "country_a": "USA",
+          "region": "New York",
+          "region_gid": "whosonfirst:region:85688543",
+          "region_a": "NY",
+          "macrocounty": "New York City",
+          "macrocounty_gid": "whosonfirst:macrocounty:404476573",
+          "county": "New York County",
+          "county_gid": "whosonfirst:county:102081863",
+          "county_a": "NY",
+          "localadmin": "Manhattan",
+          "localadmin_gid": "whosonfirst:localadmin:404476537",
+          "locality": "New York City",
+          "locality_gid": "whosonfirst:locality:85977539",
+          "neighbourhood": "Greenwich Village",
+          "neighbourhood_gid": "whosonfirst:neighbourhood:85810575",
+          "label": "East 13th Street, New York City, New York, United States"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-73.989, 40.733]
+        }
+      }
+    ],
+    "bbox": [-73.989, 40.733, -73.989, 40.733]
+  },
+  "geoapify": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "datasource": {
+            "sourcename": "openstreetmap",
+            "attribution": "© OpenStreetMap contributors",
+            "license": "Open Database License",
+            "url": "https://www.openstreetmap.org/copyright"
+          },
+          "housenumber": "114",
+          "street": "East 13th Street",
+          "city": "New York",
+          "state": "New York",
+          "country": "United States",
+          "country_code": "us",
+          "lon": -73.989,
+          "lat": 40.733,
+          "formatted": "114 East 13th Street, New York, New York, US",
+          "address_line1": "114 East 13th Street",
+          "address_line2": "New York, New York, US",
+          "category": "building",
+          "result_type": "building",
+          "rank": {
+            "importance": 0.31001,
+            "popularity": 7.4040055857081,
+            "confidence": 1,
+            "match_type": "full_match"
+          },
+          "place_id": "51c8f3e2b8f15dc24059b04b0f02b2944940f00101f901a5c9190000000000c00203"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-73.989, 40.733]
+        }
+      }
+    ],
+    "query": {
+      "text": "40.733,-73.989",
+      "parsed": {
+        "point": {
+          "lat": 40.733,
+          "lon": -73.989
+        }
+      }
+    }
+  },
+  "geocodejson": {
+    "type": "FeatureCollection",
+    "geocoding": {
+      "version": "0.1.0",
+      "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
+      "licence": "ODbL",
+      "query": "40.7337807,-73.9974401"
+    },
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "geocoding": {
+            "place_id": 259127396,
+            "osm_type": "way",
+            "osm_id": 25324284,
+            "type": "house",
+            "accuracy": 0,
+            "label": "35 West 9th Street, New York, New York, US",
+            "name": "35",
+            "housenumber": "35",
+            "street": "West 9th Street",
+            "postcode": "10011",
+            "city": "New York",
+            "state": "New York",
+            "country": "United States",
+            "admin": {
+              "level2": "United States",
+              "level4": "New York",
+              "level6": "New York County",
+              "level8": "New York"
+            }
+          }
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-73.9974401, 40.7337807]
+        }
+      }
+    ]
+  }
+}
