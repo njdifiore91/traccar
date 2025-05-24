@@ -1,0 +1,258 @@
+# API Gateway Service Configuration
+
+# Server Configuration
+server:
+  port: 8082
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json
+    min-response-size: 1024
+  jetty:
+    threads:
+      min: 10
+      max: 200
+      idle-timeout: 60000
+    connection-idle-timeout: 60000
+    max-http-post-size: 10485760
+
+# WebSocket Configuration
+websocket:
+  path: /socket
+  max-text-message-size: 65536
+  max-sessions: 10000
+  idle-timeout: 300000
+  heartbeat-interval: 60000
+
+# Spring Configuration
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=60s
+
+  # Service Discovery Configuration
+  cloud:
+    consul:
+      enabled: ${CONSUL_ENABLED:false}
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        register: true
+        service-name: ${spring.application.name}
+        instance-id: ${spring.application.name}:${random.uuid}
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        tags:
+          - api-gateway
+          - traccar
+
+  # Message Broker Configuration - Kafka
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.traccar.*
+    topics:
+      positions: position-updates
+      events: event-updates
+      notifications: notification-updates
+
+  # Message Broker Configuration - RabbitMQ (alternative)
+  rabbitmq:
+    enabled: ${RABBITMQ_ENABLED:false}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 10
+
+# Management and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,diskSpace,db,kafka,rabbitmq
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    org.traccar: INFO
+    org.springframework: WARN
+    org.apache.kafka: WARN
+    org.eclipse.jetty: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: ${LOG_PATH:/var/log/traccar}/api-gateway.log
+    max-size: 10MB
+    max-history: 10
+
+# Resilience4j Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      positionService:
+        baseConfig: default
+      eventService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      protocolService:
+        baseConfig: default
+      reportingService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1000
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+    instances:
+      positionService:
+        baseConfig: default
+      eventService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      protocolService:
+        baseConfig: default
+      reportingService:
+        baseConfig: default
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 0
+    instances:
+      positionService:
+        baseConfig: default
+      eventService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      protocolService:
+        baseConfig: default
+      reportingService:
+        baseConfig: default
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+    instances:
+      api:
+        baseConfig: default
+        limitForPeriod: 50
+
+# API Gateway Configuration
+api-gateway:
+  # CORS Configuration
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type,X-Requested-With
+    allow-credentials: true
+    max-age: 3600
+  
+  # Authentication Configuration
+  auth:
+    jwt:
+      enabled: ${JWT_ENABLED:true}
+      secret: ${JWT_SECRET:changeme}
+      expiration: ${JWT_EXPIRATION:86400}
+    basic:
+      enabled: ${BASIC_AUTH_ENABLED:true}
+  
+  # Service Client Configuration
+  services:
+    position-service:
+      url: ${POSITION_SERVICE_URL:http://position-service:8080}
+      timeout: 5000
+    event-service:
+      url: ${EVENT_SERVICE_URL:http://event-service:8080}
+      timeout: 5000
+    notification-service:
+      url: ${NOTIFICATION_SERVICE_URL:http://notification-service:8080}
+      timeout: 5000
+    protocol-service:
+      url: ${PROTOCOL_SERVICE_URL:http://protocol-service:8080}
+      timeout: 5000
+    reporting-service:
+      url: ${REPORTING_SERVICE_URL:http://reporting-service:8080}
+      timeout: 10000
+
+  # WebSocket Configuration
+  websocket:
+    buffer-size: 4096
+    max-binary-message-size: 65536
+    async-write-timeout: 60000
+    broadcast-pool-size: 10
+
+# Traccar Specific Configuration
+traccar:
+  # Web Interface Configuration
+  web:
+    path: ${WEB_PATH:/opt/traccar/web}
+    override: ${WEB_OVERRIDE:}
+    debug: ${WEB_DEBUG:false}
+  
+  # API Configuration
+  api:
+    version: ${API_VERSION:1.0}
+    max-limit: ${API_MAX_LIMIT:1000}
+    default-limit: ${API_DEFAULT_LIMIT:100}
+  
+  # Session Configuration
+  session:
+    timeout: ${SESSION_TIMEOUT:3600}
+    cookie-secure: ${SESSION_COOKIE_SECURE:false}
+    cookie-max-age: ${SESSION_COOKIE_MAX_AGE:86400}
