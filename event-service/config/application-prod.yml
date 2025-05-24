@@ -1,0 +1,371 @@
+# Production Environment Configuration for Event Processing Service
+# This file contains production-specific overrides for the Event Service
+
+# Spring Application Settings
+spring:
+  # Application identification
+  application:
+    name: event-service
+  
+  # Production profile activation
+  profiles:
+    active: prod
+  
+  # Logging configuration for production
+  logging:
+    level:
+      root: WARN
+      org.traccar: INFO
+      org.traccar.event-service: INFO
+      org.springframework: WARN
+      org.apache.kafka: WARN
+    pattern:
+      console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n'
+  
+  # Kafka production configuration
+  kafka:
+    # Production broker cluster connection
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    # Security settings for production
+    security:
+      protocol: ${KAFKA_SECURITY_PROTOCOL:SSL}
+    # SSL configuration for secure communication
+    ssl:
+      trust-store-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION}
+      trust-store-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD}
+      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION}
+      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD}
+    
+    # Consumer production configuration
+    consumer:
+      # Optimized consumer settings for production
+      properties:
+        # Increased poll records for production throughput
+        max.poll.records: 1000
+        # Extended poll interval for production workloads
+        max.poll.interval.ms: 600000
+        # Production session timeout
+        session.timeout.ms: 60000
+        # Production heartbeat interval
+        heartbeat.interval.ms: 20000
+        # Read committed messages only
+        isolation.level: read_committed
+    
+    # Producer production configuration
+    producer:
+      # Production acknowledgment settings for durability
+      acks: all
+      # Increased retries for production reliability
+      retries: 5
+      properties:
+        # Enable idempotent producer for exactly-once semantics
+        enable.idempotence: true
+        # Optimized batch size for production throughput
+        batch.size: 32768
+        # Increased buffer memory for production workloads
+        buffer.memory: 67108864
+        # LZ4 compression for efficient network usage
+        compression.type: lz4
+    
+    # Listener production configuration
+    listener:
+      # Increased concurrency for production throughput
+      concurrency: ${KAFKA_LISTENER_CONCURRENCY:5}
+      # Manual acknowledgment mode for reliability
+      ack-mode: MANUAL_IMMEDIATE
+
+# Server configuration
+server:
+  # Production port
+  port: 8082
+  # Tomcat production settings
+  tomcat:
+    # Maximum number of worker threads
+    max-threads: 200
+    # Connection timeout in milliseconds
+    connection-timeout: 20000
+    # Maximum connections that can be queued
+    accept-count: 100
+    # Maximum keep-alive requests
+    max-keep-alive-requests: 10000
+    # Keep-alive timeout in milliseconds
+    keep-alive-timeout: 60000
+  # Compression for responses
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  # HTTP/2 support
+  http2:
+    enabled: true
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      # Expose only necessary endpoints in production
+      exposure:
+        include: health,info,metrics,prometheus
+      # Base path for actuator endpoints
+      base-path: /actuator
+  # Health check configuration
+  health:
+    # Show details only for authenticated users
+    show-details: when-authorized
+    # Enable Kafka health check
+    kafka:
+      enabled: true
+    # Enable disk space health check
+    diskspace:
+      enabled: true
+      # Threshold for disk space warning
+      threshold: 10GB
+  # Metrics configuration
+  metrics:
+    # Enable all metrics
+    enable:
+      all: true
+    # Export metrics to Prometheus
+    export:
+      prometheus:
+        enabled: true
+  # Tracing configuration
+  tracing:
+    sampling:
+      # Production sampling rate (sample 10% of requests)
+      probability: 0.1
+
+# Resilience configuration for production
+resilience4j:
+  # Circuit breaker configuration
+  circuitbreaker:
+    configs:
+      default:
+        # Sliding window size for failure rate calculation
+        slidingWindowSize: 100
+        # Failure rate threshold percentage
+        failureRateThreshold: 50
+        # Wait duration in open state before transitioning to half-open
+        waitDurationInOpenState: 60s
+        # Permitted number of calls in half-open state
+        permittedNumberOfCallsInHalfOpenState: 10
+        # Automatic transition from open to half-open
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  # Retry configuration
+  retry:
+    configs:
+      default:
+        # Maximum number of retry attempts
+        maxAttempts: 3
+        # Wait duration between retries
+        waitDuration: 1s
+        # Enable exponential backoff
+        enableExponentialBackoff: true
+        # Exponential backoff multiplier
+        exponentialBackoffMultiplier: 2
+  # Bulkhead configuration for thread isolation
+  bulkhead:
+    configs:
+      default:
+        # Maximum concurrent calls
+        maxConcurrentCalls: 25
+        # Maximum wait duration
+        maxWaitDuration: 2s
+  # Rate limiter configuration
+  ratelimiter:
+    configs:
+      default:
+        # Limit for period
+        limitForPeriod: 100
+        # Limit refresh period
+        limitRefreshPeriod: 1s
+        # Timeout duration
+        timeoutDuration: 500ms
+
+# Thread pool configuration for event processing
+event:
+  processing:
+    # Core thread pool size
+    core-pool-size: 10
+    # Maximum thread pool size
+    max-pool-size: 20
+    # Queue capacity
+    queue-capacity: 500
+    # Keep-alive time in seconds
+    keep-alive-seconds: 60
+  # Event rule evaluation configuration
+  rules:
+    # Cache size for rule evaluation
+    cache-size: 1000
+    # Cache expiration in seconds
+    cache-expiration-seconds: 300
+    # Maximum rules per device
+    max-rules-per-device: 100
+
+# Security configuration
+security:
+  # Enable security features
+  enabled: true
+  # Content Security Policy
+  content-security-policy: "default-src 'self'; frame-ancestors 'none'"
+  # HTTP Strict Transport Security
+  strict-transport-security: "max-age=31536000; includeSubDomains"
+  # X-Content-Type-Options
+  content-type-options: nosniff
+  # X-Frame-Options
+  frame-options: DENY
+  # X-XSS-Protection
+  xss-protection: "1; mode=block"
+  # Referrer Policy
+  referrer-policy: strict-origin-when-cross-origin
+
+# Service discovery configuration for production
+spring.cloud.consul:
+  # Consul host
+  host: ${CONSUL_HOST:consul}
+  # Consul port
+  port: ${CONSUL_PORT:8500}
+  # Discovery configuration
+  discovery:
+    # Enable service discovery
+    enabled: true
+    # Register with Consul
+    register: true
+    # Service name
+    serviceName: ${spring.application.name}
+    # Instance ID
+    instanceId: ${spring.application.name}:${random.value}
+    # Health check path
+    healthCheckPath: /actuator/health
+    # Health check interval
+    healthCheckInterval: 15s
+    # Health check timeout
+    healthCheckTimeout: 5s
+    # Tags for service discovery
+    tags: production,event-service,v1
+    # Default zone
+    defaultZone: ${CONSUL_HOST:consul}:${CONSUL_PORT:8500}
+
+# Kafka topic configuration for production
+kafka:
+  topic:
+    # Input topic for enriched positions
+    enriched-positions: ${KAFKA_TOPIC_ENRICHED_POSITIONS:enriched-positions}
+    # Output topic for detected events
+    events: ${KAFKA_TOPIC_EVENTS:events}
+    # Dead letter queue topic
+    dead-letter-queue: ${KAFKA_TOPIC_DLQ:event-service-dlq}
+  # Consumer configuration
+  consumer:
+    # Maximum retry attempts
+    max-retry-attempts: 5
+    # Initial retry interval
+    retry-interval: 1000
+    # Maximum retry interval
+    max-retry-interval: 30000
+    # Retry multiplier
+    retry-multiplier: 2.0
+    # Concurrency for consumers
+    concurrency: ${KAFKA_CONSUMER_CONCURRENCY:5}
+  # Producer configuration
+  producer:
+    # Transaction timeout
+    transaction-timeout: 60000
+    # Batch size for event publishing
+    batch-size: 200
+    # Flush interval for batched events
+    flush-interval: 200
+
+# Error handling configuration
+error:
+  handling:
+    # Enable dead letter queue
+    dlq-enabled: true
+    # Enable retry mechanism
+    retry-enabled: true
+    # Log failures
+    log-failures: true
+
+# Metrics and monitoring configuration
+metrics:
+  # Enable metrics collection
+  enabled: true
+  # JVM metrics
+  jvm:
+    enabled: true
+  # System metrics
+  system:
+    enabled: true
+  # HTTP metrics
+  http:
+    enabled: true
+  # Kafka metrics
+  kafka:
+    enabled: true
+  # Event processing metrics
+  event-processing:
+    enabled: true
+
+# Distributed tracing configuration
+tracing:
+  # Enable distributed tracing
+  enabled: true
+  # Sampling rate (0.0-1.0)
+  sampling-rate: 0.1
+  # Propagation format
+  propagation-format: B3
+  # Span processor type
+  span-processor: batch
+  # Exporter type
+  exporter: jaeger
+  # Jaeger configuration
+  jaeger:
+    # Jaeger endpoint
+    endpoint: ${JAEGER_ENDPOINT:http://jaeger-collector:14268/api/traces}
+    # Service name
+    service-name: ${spring.application.name}
+
+# Cache configuration
+cache:
+  # Enable caching
+  enabled: true
+  # Cache type
+  type: redis
+  # Redis configuration
+  redis:
+    # Redis host
+    host: ${REDIS_HOST:redis}
+    # Redis port
+    port: ${REDIS_PORT:6379}
+    # Redis password
+    password: ${REDIS_PASSWORD:}
+    # Redis database
+    database: 0
+    # Redis SSL
+    ssl: true
+    # Connection timeout
+    timeout: 2000
+    # Cache time-to-live in seconds
+    ttl: 300
+
+# Health check configuration
+health:
+  # Liveness check configuration
+  liveness:
+    # Failure threshold
+    failure-threshold: 3
+    # Success threshold
+    success-threshold: 1
+    # Initial delay seconds
+    initial-delay-seconds: 60
+    # Period seconds
+    period-seconds: 10
+  # Readiness check configuration
+  readiness:
+    # Failure threshold
+    failure-threshold: 3
+    # Success threshold
+    success-threshold: 1
+    # Initial delay seconds
+    initial-delay-seconds: 30
+    # Period seconds
+    period-seconds: 10
