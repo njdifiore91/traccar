@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-service
+  namespace: traccar
+  labels:
+    app: event-service
+    component: event-processing
+    part-of: traccar
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8082"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: event-service
+        component: event-processing
+    spec:
+      containers:
+      - name: event-service
+        image: registry/traccar/event:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8082
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8082
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: traccar-config
+              key: kafka.bootstrap-servers
+        - name: LOGGING_LEVEL_ORG_TRACCAR
+          value: "INFO"
+        - name: SPRING_APPLICATION_NAME
+          value: "event-service"
+        - name: SERVER_PORT
+          value: "8082"
+        - name: MANAGEMENT_SERVER_PORT
+          value: "8082"
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          value: "health,info,metrics,prometheus"
+        - name: SPRING_CLOUD_CONSUL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: traccar-config
+              key: consul.host
+        - name: SPRING_CLOUD_CONSUL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: traccar-config
+              key: consul.port
+        - name: KAFKA_CONSUMER_GROUP_ID
+          value: "event-service-group"
+        - name: KAFKA_CONSUMER_AUTO_OFFSET_RESET
+          value: "earliest"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: event-service-config
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - event-service
+              topologyKey: "kubernetes.io/hostname"
+      terminationGracePeriodSeconds: 60
