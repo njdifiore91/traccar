@@ -1,0 +1,638 @@
+{
+  "mappings": [
+    {
+      "name": "Geocoder API - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoder/reverse",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "format": {
+            "equalTo": "json"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=86400"
+        },
+        "jsonBody": {
+          "address": {
+            "road": "Main Street",
+            "city": "Test City",
+            "state": "Test State",
+            "country": "Test Country",
+            "postcode": "12345"
+          },
+          "display_name": "Main Street, Test City, Test State, Test Country"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Geocoder API - Delayed Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoder/reverse/delayed",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "address": {
+            "road": "Delayed Street",
+            "city": "Slow City",
+            "state": "Slow State",
+            "country": "Slow Country",
+            "postcode": "54321"
+          },
+          "display_name": "Delayed Street, Slow City, Slow State, Slow Country"
+        },
+        "fixedDelayMilliseconds": 2000
+      }
+    },
+    {
+      "name": "Geocoder API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoder/reverse/error"
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Internal Server Error",
+          "message": "Geocoding service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "name": "Geocoder API - Not Found Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/geocoder/reverse/notfound",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Not Found",
+          "message": "No results found for the given coordinates"
+        }
+      }
+    },
+    {
+      "name": "Speed Limit API - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/speedlimit",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "speedLimit": 50,
+          "unit": "km/h",
+          "roadType": "urban"
+        }
+      }
+    },
+    {
+      "name": "Speed Limit API - Variable Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/speedlimit/variable",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "speedLimit": "{{randomValue length=2 type='NUMERIC'}}",
+          "unit": "km/h",
+          "roadType": "{{pickRandom 'urban,highway,residential,rural'}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Speed Limit API - Error Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/speedlimit/error"
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Service Unavailable",
+          "message": "Speed limit service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "name": "Map Service API - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/map/info",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "roadName": "Test Road",
+          "roadType": "primary",
+          "speedLimit": 60,
+          "direction": "one-way",
+          "additionalInfo": {
+            "trafficCondition": "normal",
+            "roadSurface": "asphalt"
+          }
+        }
+      }
+    },
+    {
+      "name": "Map Service API - Timeout Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/map/info/timeout"
+      },
+      "response": {
+        "fault": "CONNECTION_RESET_BY_PEER"
+      }
+    },
+    {
+      "name": "Weather API - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/weather",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "temperature": 22.5,
+          "humidity": 65,
+          "windSpeed": 10.2,
+          "windDirection": "NE",
+          "conditions": "Partly Cloudy"
+        }
+      }
+    },
+    {
+      "name": "Authentication Service - Token Validation",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/auth/validate",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.token"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": true,
+          "userId": "test-user-123",
+          "permissions": ["read:positions", "write:positions", "read:devices"]
+        }
+      }
+    },
+    {
+      "name": "Authentication Service - Invalid Token",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/auth/validate",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.token",
+            "equalTo": "invalid-token"
+          }
+        ]
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "valid": false,
+          "error": "Invalid token",
+          "message": "The provided authentication token is invalid or expired"
+        }
+      }
+    },
+    {
+      "name": "Geofence Service - Check Position",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/geofence/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.deviceId"
+          },
+          {
+            "matchesJsonPath": "$.latitude"
+          },
+          {
+            "matchesJsonPath": "$.longitude"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "inside": true,
+          "geofences": [
+            {
+              "id": 1,
+              "name": "Test Geofence 1",
+              "description": "A test geofence",
+              "type": "polygon"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Geofence Service - Outside Geofence",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/geofence/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.latitude",
+            "equalTo": "0.0"
+          },
+          {
+            "matchesJsonPath": "$.longitude",
+            "equalTo": "0.0"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "inside": false,
+          "geofences": []
+        }
+      }
+    },
+    {
+      "name": "Distance Calculation API - Successful Response",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/distance/calculate",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.points[*].latitude"
+          },
+          {
+            "matchesJsonPath": "$.points[*].longitude"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalDistance": 1250.75,
+          "unit": "meters",
+          "segments": [
+            {
+              "startIndex": 0,
+              "endIndex": 1,
+              "distance": 450.25
+            },
+            {
+              "startIndex": 1,
+              "endIndex": 2,
+              "distance": 800.50
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "External Notification Service - Successful Response",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/notification/send",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.type"
+          },
+          {
+            "matchesJsonPath": "$.recipients"
+          },
+          {
+            "matchesJsonPath": "$.message"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": true,
+          "messageId": "{{randomValue length=10 type='ALPHANUMERIC'}}",
+          "timestamp": "{{now}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "External Notification Service - Partial Failure",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/notification/send/partial",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "success": true,
+          "messageId": "{{randomValue length=10 type='ALPHANUMERIC'}}",
+          "failedRecipients": [
+            {
+              "recipient": "failed@example.com",
+              "reason": "Mailbox full"
+            }
+          ],
+          "successCount": 2,
+          "failureCount": 1
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "External Notification Service - Rate Limited",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/notification/send/ratelimited"
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "30"
+        },
+        "jsonBody": {
+          "error": "Too Many Requests",
+          "message": "Rate limit exceeded. Please try again in 30 seconds."
+        }
+      }
+    },
+    {
+      "name": "Device Information Service - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/device/([0-9]+)",
+        "urlPathPattern": "/device/[0-9]+"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "{{request.pathSegments.[1]}}",
+          "name": "Test Device {{request.pathSegments.[1]}}",
+          "type": "tracker",
+          "status": "active",
+          "lastUpdate": "{{now}}",
+          "attributes": {
+            "model": "Test Model",
+            "manufacturer": "Test Manufacturer",
+            "serialNumber": "SN-{{randomValue length=8 type='ALPHANUMERIC'}}"
+          }
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "Device Information Service - Not Found",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/device/999999"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "Not Found",
+          "message": "Device with ID 999999 not found"
+        }
+      }
+    },
+    {
+      "name": "Batch Geocoding API - Successful Response",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/geocoder/batch",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.positions[*].latitude"
+          },
+          {
+            "matchesJsonPath": "$.positions[*].longitude"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "index": 0,
+              "address": {
+                "road": "First Street",
+                "city": "Test City 1",
+                "state": "Test State",
+                "country": "Test Country"
+              }
+            },
+            {
+              "index": 1,
+              "address": {
+                "road": "Second Avenue",
+                "city": "Test City 2",
+                "state": "Test State",
+                "country": "Test Country"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Traffic Information API - Successful Response",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/traffic",
+        "queryParameters": {
+          "lat": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "lon": {
+            "matches": "[-+]?[0-9]*\\.?[0-9]+"
+          },
+          "radius": {
+            "matches": "[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "trafficLevel": "{{pickRandom 'light,moderate,heavy,severe'}}",
+          "averageSpeed": "{{randomInt lower=5 upper=80}}",
+          "incidents": [
+            {
+              "type": "{{pickRandom 'accident,construction,closure,event'}}",
+              "severity": "{{pickRandom 'minor,moderate,major'}}",
+              "description": "Test traffic incident",
+              "startTime": "{{now offset='-2 hours'}}",
+              "endTime": "{{now offset='2 hours'}}"
+            }
+          ]
+        },
+        "transformers": ["response-template"]
+      }
+    }
+  ]
+}
