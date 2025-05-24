@@ -1,0 +1,160 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-network-policy
+  namespace: api-gateway
+  labels:
+    app: api-gateway
+    component: networking
+  annotations:
+    description: "Network policy for API Gateway Service implementing principle of least privilege"
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow incoming traffic from external load balancer/ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+      podSelector:
+        matchLabels:
+          app: nginx-ingress
+    ports:
+    - protocol: TCP
+      port: 8080 # Main API port
+    - protocol: TCP
+      port: 8443 # HTTPS port
+  
+  # Allow health check probes from monitoring services
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+      podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 8080 # Health check endpoint
+  
+  # Allow health check probes from Kubernetes control plane
+  - from:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-proxy
+    ports:
+    - protocol: TCP
+      port: 8080 # Health check endpoint
+  
+  egress:
+  # Allow outgoing traffic to Protocol Service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: protocol
+      podSelector:
+        matchLabels:
+          app: protocol-service
+    ports:
+    - protocol: TCP
+      port: 8080 # Protocol Service API port
+  
+  # Allow outgoing traffic to Position Service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: position
+      podSelector:
+        matchLabels:
+          app: position-service
+    ports:
+    - protocol: TCP
+      port: 8081 # Position Service API port
+  
+  # Allow outgoing traffic to Event Service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: event
+      podSelector:
+        matchLabels:
+          app: event-service
+    ports:
+    - protocol: TCP
+      port: 8082 # Event Service API port
+  
+  # Allow outgoing traffic to Notification Service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: notification
+      podSelector:
+        matchLabels:
+          app: notification-service
+    ports:
+    - protocol: TCP
+      port: 8083 # Notification Service API port
+  
+  # Allow outgoing traffic to Reporting Service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: reporting
+      podSelector:
+        matchLabels:
+          app: reporting-service
+    ports:
+    - protocol: TCP
+      port: 8084 # Reporting Service API port
+  
+  # Allow outgoing traffic to Service Discovery
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: service-discovery
+      podSelector:
+        matchLabels:
+          app: consul
+    ports:
+    - protocol: TCP
+      port: 8500 # Consul HTTP API
+  
+  # Allow outgoing traffic to Kubernetes API for service discovery
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-apiserver
+    ports:
+    - protocol: TCP
+      port: 443 # Kubernetes API
+  
+  # Allow outgoing traffic to Message Broker for WebSocket updates
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: message-broker
+      podSelector:
+        matchLabels:
+          app: kafka
+    ports:
+    - protocol: TCP
+      port: 9092 # Kafka broker port
+  
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53 # DNS
+    - protocol: TCP
+      port: 53 # DNS
