@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Import Spring Boot defaults for base configuration -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- Get application name from Spring properties -->
+    <springProperty scope="context" name="applicationName" source="spring.application.name" defaultValue="api-gateway"/>
+    
+    <!-- Get instance ID from environment or generate one -->
+    <property name="INSTANCE_ID" value="${INSTANCE_ID:-${HOSTNAME}}"/>
+    
+    <!-- Common properties -->
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-logs}/${applicationName}}"/>
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>
+    <property name="LOG_FORMAT" value="${LOG_FORMAT:-json}"/>
+    
+    <!-- Appenders -->
+    <!-- Console appender with JSON format -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>UTC</timeZone>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>[ignore]</version>
+                <level>level</level>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+            <customFields>{"service":"${applicationName}","instance":"${INSTANCE_ID}"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>sessionId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+        </encoder>
+    </appender>
+    
+    <!-- File appender with JSON format and rotation -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}.json</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>UTC</timeZone>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>[ignore]</version>
+                <level>level</level>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+            <customFields>{"service":"${applicationName}","instance":"${INSTANCE_ID}"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>sessionId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+            <stackTrace>
+                <fieldName>exception</fieldName>
+                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                    <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                    <maxLength>5000</maxLength>
+                    <shortenedClassNameLength>50</shortenedClassNameLength>
+                    <rootCauseFirst>true</rootCauseFirst>
+                </throwableConverter>
+            </stackTrace>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.json.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Access log appender for API Gateway requests -->
+    <appender name="ACCESS_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}-access.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>UTC</timeZone>
+            <customFields>{"service":"${applicationName}","instance":"${INSTANCE_ID}","type":"access"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}-access.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Async wrapper for file appender to improve performance -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_JSON" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+    
+    <!-- Loggers -->
+    <!-- API Gateway specific loggers -->
+    <logger name="org.traccar.api" level="${LOG_LEVEL_API:-${LOG_LEVEL}}" />
+    <logger name="org.traccar.web" level="${LOG_LEVEL_WEB:-${LOG_LEVEL}}" />
+    <logger name="org.traccar.api.security" level="${LOG_LEVEL_SECURITY:-${LOG_LEVEL}}" />
+    <logger name="org.traccar.api.resource" level="${LOG_LEVEL_API_RESOURCE:-${LOG_LEVEL}}" />
+    <logger name="org.traccar.api.signature" level="${LOG_LEVEL_API_SIGNATURE:-${LOG_LEVEL}}" />
+    
+    <!-- Access logger for API requests -->
+    <logger name="org.traccar.api.access" level="INFO" additivity="false">
+        <appender-ref ref="ACCESS_LOG" />
+    </logger>
+    
+    <!-- Framework loggers -->
+    <logger name="org.springframework" level="${LOG_LEVEL_SPRING:-WARN}" />
+    <logger name="org.springframework.web" level="${LOG_LEVEL_SPRING_WEB:-WARN}" />
+    <logger name="org.springframework.security" level="${LOG_LEVEL_SPRING_SECURITY:-WARN}" />
+    <logger name="org.apache.catalina" level="${LOG_LEVEL_TOMCAT:-WARN}" />
+    <logger name="org.hibernate" level="${LOG_LEVEL_HIBERNATE:-WARN}" />
+    
+    <!-- Monitoring and metrics loggers -->
+    <logger name="io.micrometer" level="${LOG_LEVEL_MICROMETER:-INFO}" />
+    <logger name="io.opentelemetry" level="${LOG_LEVEL_OPENTELEMETRY:-INFO}" />
+    
+    <!-- WebSocket loggers -->
+    <logger name="org.traccar.websocket" level="${LOG_LEVEL_WEBSOCKET:-${LOG_LEVEL}}" />
+    
+    <!-- Plain text console appender for development environments -->
+    <appender name="CONSOLE_PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId},%X{traceId},%X{spanId}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Root logger with conditional appender selection based on LOG_FORMAT -->
+    <root level="${LOG_LEVEL}">
+        <if condition='property("LOG_FORMAT").equalsIgnoreCase("json")'>
+            <then>
+                <appender-ref ref="CONSOLE_JSON" />
+            </then>
+            <else>
+                <appender-ref ref="CONSOLE_PLAIN" />
+            </else>
+        </if>
+        <appender-ref ref="ASYNC_FILE" />
+    </root>
+    
+    <!-- MDC cleanup filter to ensure thread local variables are properly cleared -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+</configuration>
