@@ -1,0 +1,172 @@
+syntax = "proto3";
+
+package org.traccar.proto;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto";
+option java_outer_classname = "PositionServiceProto";
+
+// Import common message definitions
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+// Protocol Service interface for Position Service consumption
+service ProtocolService {
+  // Sends a position from a device to the Position Service
+  rpc SendPosition(PositionMessage) returns (PositionResponse);
+  
+  // Streams positions from devices to the Position Service
+  rpc StreamPositions(stream PositionMessage) returns (stream PositionResponse);
+  
+  // Batch sends multiple positions to the Position Service
+  rpc BatchSendPositions(BatchPositionMessage) returns (BatchPositionResponse);
+  
+  // Gets the latest position for a specific device
+  rpc GetLatestPosition(DeviceRequest) returns (PositionMessage);
+}
+
+// Message representing a position from a device
+message PositionMessage {
+  // Unique identifier for the device
+  int64 device_id = 1;
+  
+  // Protocol used by the device
+  string protocol = 2;
+  
+  // Position timestamp
+  google.protobuf.Timestamp time = 3;
+  
+  // Position validity flag
+  bool valid = 4;
+  
+  // Geographical coordinates
+  double latitude = 5;
+  double longitude = 6;
+  double altitude = 7;
+  
+  // Speed in knots
+  double speed = 8;
+  
+  // Course in degrees
+  double course = 9;
+  
+  // Address information (optional)
+  google.protobuf.StringValue address = 10;
+  
+  // Accuracy in meters (optional)
+  google.protobuf.DoubleValue accuracy = 11;
+  
+  // Network information (optional)
+  NetworkMessage network = 12;
+  
+  // Additional attributes
+  map<string, AttributeValue> attributes = 13;
+  
+  // Alarm type (optional)
+  google.protobuf.StringValue alarm = 14;
+}
+
+// Message for batch position operations
+message BatchPositionMessage {
+  repeated PositionMessage positions = 1;
+}
+
+// Response to a position message
+message PositionResponse {
+  // Success status
+  bool success = 1;
+  
+  // Error message if not successful
+  google.protobuf.StringValue error = 2;
+  
+  // Position ID assigned by the system
+  int64 position_id = 3;
+}
+
+// Response to a batch position message
+message BatchPositionResponse {
+  // Success status
+  bool success = 1;
+  
+  // Error message if not successful
+  google.protobuf.StringValue error = 2;
+  
+  // Number of positions processed
+  int32 processed_count = 3;
+  
+  // IDs of positions that were successfully processed
+  repeated int64 position_ids = 4;
+  
+  // Details of any failures
+  repeated PositionFailure failures = 5;
+}
+
+// Details of a position processing failure
+message PositionFailure {
+  // Index in the original batch
+  int32 index = 1;
+  
+  // Error message
+  string error = 2;
+}
+
+// Request for a specific device
+message DeviceRequest {
+  int64 device_id = 1;
+}
+
+// Network information
+message NetworkMessage {
+  // Mobile country code
+  google.protobuf.Int32Value mcc = 1;
+  
+  // Mobile network code
+  google.protobuf.Int32Value mnc = 2;
+  
+  // Radio access technology
+  google.protobuf.StringValue radio = 3;
+  
+  // Cell towers
+  repeated CellTower cells = 4;
+  
+  // WiFi access points
+  repeated WifiAccessPoint wifi = 5;
+}
+
+// Cell tower information
+message CellTower {
+  // Mobile country code
+  google.protobuf.Int32Value mcc = 1;
+  
+  // Mobile network code
+  google.protobuf.Int32Value mnc = 2;
+  
+  // Location area code
+  google.protobuf.Int32Value lac = 3;
+  
+  // Cell ID
+  google.protobuf.Int32Value cid = 4;
+  
+  // Signal strength
+  google.protobuf.Int32Value signal = 5;
+}
+
+// WiFi access point information
+message WifiAccessPoint {
+  // MAC address
+  string mac_address = 1;
+  
+  // Signal strength
+  google.protobuf.Int32Value signal = 2;
+}
+
+// Attribute value for flexible attribute storage
+message AttributeValue {
+  oneof value {
+    string string_value = 1;
+    int64 int_value = 2;
+    double double_value = 3;
+    bool bool_value = 4;
+    bytes binary_value = 5;
+  }
+}
