@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,47 +15,117 @@
  */
 package org.traccar.geocoder;
 
-import org.traccar.database.StatisticsManager;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * Interface for geocoding services that convert coordinates to human-readable addresses.
- * Updated to support resilience patterns and health status reporting for microservices architecture.
+ * Interface for geocoding services that convert coordinates to human-readable addresses
+ * and vice versa. This interface supports resilience patterns, health reporting, and metrics
+ * collection for microservices architecture.
  */
 public interface Geocoder {
 
     /**
-     * Interface for asynchronous reverse geocoding callbacks.
+     * Asynchronously get address string for specified location.
+     *
+     * @param latitude latitude
+     * @param longitude longitude
+     * @return future with address string
      */
-    interface ReverseGeocoderCallback {
-        void onSuccess(Address address);
-        void onFailure(Throwable e);
-    }
+    CompletableFuture<String> getAddress(double latitude, double longitude);
 
     /**
-     * Gets a human-readable address for the specified coordinates.
-     * This method can be implemented synchronously or asynchronously.
+     * Asynchronously get address string for specified location with fallback support.
+     * If the primary geocoding service fails, the system will attempt to use fallback providers.
      *
-     * @param latitude Latitude coordinate
-     * @param longitude Longitude coordinate
-     * @param callback Optional callback for asynchronous execution (if null, executes synchronously)
-     * @return Address object if executed synchronously, null if using callback
+     * @param latitude latitude
+     * @param longitude longitude
+     * @param useFallback whether to use fallback providers if primary fails
+     * @return future with address string
      */
-    Address getAddress(double latitude, double longitude, ReverseGeocoderCallback callback);
+    CompletableFuture<String> getAddress(double latitude, double longitude, boolean useFallback);
 
     /**
-     * Sets the statistics manager for metrics collection.
+     * Check if the geocoder service is available and functioning properly.
      *
-     * @param statisticsManager Statistics manager instance
+     * @return true if the service is healthy, false otherwise
      */
-    void setStatisticsManager(StatisticsManager statisticsManager);
-    
+    boolean isHealthy();
+
     /**
-     * Reports the health status of the geocoder.
-     * Used by the health check system for service discovery and monitoring.
+     * Get detailed health status information about the geocoder service.
      *
-     * @return true if the geocoder is healthy and operational, false otherwise
+     * @return a HealthStatus object containing health metrics
      */
-    default boolean isHealthy() {
-        return true; // Default implementation assumes healthy
-    }
+    GeocoderHealthStatus getHealthStatus();
+
+    /**
+     * Register this geocoder instance with the service discovery system.
+     * This allows the geocoder to be dynamically discovered by other services.
+     *
+     * @param serviceId unique identifier for this geocoder service
+     * @return true if registration was successful, false otherwise
+     */
+    boolean registerWithServiceDiscovery(String serviceId);
+
+    /**
+     * Deregister this geocoder instance from the service discovery system.
+     *
+     * @param serviceId unique identifier for this geocoder service
+     * @return true if deregistration was successful, false otherwise
+     */
+    boolean deregisterFromServiceDiscovery(String serviceId);
+
+    /**
+     * Resolve the endpoint for a geocoding service using service discovery.
+     *
+     * @param serviceType the type of geocoding service to resolve
+     * @return the resolved endpoint URL or null if not found
+     */
+    String resolveServiceEndpoint(String serviceType);
+
+    /**
+     * Get metrics about the geocoder service operations.
+     *
+     * @return a GeocoderMetrics object containing performance and usage metrics
+     */
+    GeocoderMetrics getMetrics();
+
+    /**
+     * Reset the circuit breaker if it's in an open state.
+     * This allows manual recovery from failure states.
+     *
+     * @return true if the circuit breaker was reset, false otherwise
+     */
+    boolean resetCircuitBreaker();
+
+    /**
+     * Configure the retry policy for this geocoder.
+     *
+     * @param maxRetries maximum number of retry attempts
+     * @param initialDelayMs initial delay in milliseconds before first retry
+     * @param maxDelayMs maximum delay in milliseconds between retries
+     */
+    void configureRetryPolicy(int maxRetries, long initialDelayMs, long maxDelayMs);
+
+    /**
+     * Configure the circuit breaker for this geocoder.
+     *
+     * @param failureThreshold number of failures before opening the circuit
+     * @param resetTimeoutMs time in milliseconds before attempting to close the circuit
+     */
+    void configureCircuitBreaker(int failureThreshold, long resetTimeoutMs);
+
+    /**
+     * Set a fallback geocoder to use when this geocoder fails.
+     *
+     * @param fallbackGeocoder the geocoder to use as a fallback
+     */
+    void setFallbackGeocoder(Geocoder fallbackGeocoder);
+
+    /**
+     * Get the current fallback geocoder.
+     *
+     * @return the current fallback geocoder or null if none is set
+     */
+    Geocoder getFallbackGeocoder();
 }
