@@ -1,0 +1,357 @@
+{
+  "serviceName": "notification-service-mock",
+  "version": "1.0.0",
+  "description": "Mock configuration for the Notification Service to test Event Service event publishing",
+  "endpoints": {
+    "eventConsumer": {
+      "description": "Simulates the Notification Service consuming events from the message broker",
+      "topic": "events",
+      "groupId": "notification-service-test",
+      "enabled": true,
+      "validationRules": [
+        {
+          "field": "type",
+          "required": true,
+          "allowedValues": ["deviceOnline", "deviceOffline", "deviceUnknown", "deviceMoving", "deviceStopped", "deviceOverspeed", "geofenceEnter", "geofenceExit", "alarm", "ignitionOn", "ignitionOff", "maintenance", "driverChanged", "textMessage"]
+        },
+        {
+          "field": "deviceId",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "field": "positionId",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "field": "geofenceId",
+          "required": false,
+          "type": "number",
+          "requiredFor": ["geofenceEnter", "geofenceExit"]
+        },
+        {
+          "field": "maintenanceId",
+          "required": false,
+          "type": "number",
+          "requiredFor": ["maintenance"]
+        },
+        {
+          "field": "driverId",
+          "required": false,
+          "type": "number",
+          "requiredFor": ["driverChanged"]
+        }
+      ]
+    },
+    "notificationStatus": {
+      "description": "Simulates the Notification Service publishing delivery status back to the message broker",
+      "topic": "notification-status",
+      "enabled": true
+    }
+  },
+  "notificationChannels": {
+    "email": {
+      "enabled": true,
+      "simulateDelivery": true,
+      "deliveryLatency": {
+        "min": 100,
+        "max": 500
+      },
+      "successRate": 0.95,
+      "failureScenarios": [
+        {
+          "name": "server_unavailable",
+          "probability": 0.03,
+          "errorCode": "EMAIL_SERVER_UNAVAILABLE",
+          "errorMessage": "SMTP server connection failed"
+        },
+        {
+          "name": "invalid_recipient",
+          "probability": 0.02,
+          "errorCode": "INVALID_EMAIL_ADDRESS",
+          "errorMessage": "Email address is invalid or does not exist"
+        }
+      ]
+    },
+    "sms": {
+      "enabled": true,
+      "simulateDelivery": true,
+      "deliveryLatency": {
+        "min": 200,
+        "max": 800
+      },
+      "successRate": 0.90,
+      "failureScenarios": [
+        {
+          "name": "provider_unavailable",
+          "probability": 0.05,
+          "errorCode": "SMS_PROVIDER_UNAVAILABLE",
+          "errorMessage": "SMS provider service is unavailable"
+        },
+        {
+          "name": "invalid_number",
+          "probability": 0.05,
+          "errorCode": "INVALID_PHONE_NUMBER",
+          "errorMessage": "Phone number is invalid or does not exist"
+        }
+      ]
+    },
+    "push": {
+      "enabled": true,
+      "simulateDelivery": true,
+      "deliveryLatency": {
+        "min": 50,
+        "max": 300
+      },
+      "successRate": 0.98,
+      "failureScenarios": [
+        {
+          "name": "token_expired",
+          "probability": 0.02,
+          "errorCode": "PUSH_TOKEN_EXPIRED",
+          "errorMessage": "Push notification token has expired"
+        }
+      ]
+    },
+    "webhook": {
+      "enabled": true,
+      "simulateDelivery": true,
+      "deliveryLatency": {
+        "min": 100,
+        "max": 400
+      },
+      "successRate": 0.92,
+      "failureScenarios": [
+        {
+          "name": "endpoint_unavailable",
+          "probability": 0.05,
+          "errorCode": "WEBHOOK_ENDPOINT_UNAVAILABLE",
+          "errorMessage": "Webhook endpoint is unavailable"
+        },
+        {
+          "name": "timeout",
+          "probability": 0.03,
+          "errorCode": "WEBHOOK_TIMEOUT",
+          "errorMessage": "Webhook request timed out"
+        }
+      ]
+    }
+  },
+  "eventTypeToTemplateMapping": {
+    "deviceOnline": {
+      "email": "device_online_email.ftl",
+      "sms": "device_online_sms.ftl",
+      "push": "device_online_push.ftl",
+      "webhook": "device_online_webhook.json"
+    },
+    "deviceOffline": {
+      "email": "device_offline_email.ftl",
+      "sms": "device_offline_sms.ftl",
+      "push": "device_offline_push.ftl",
+      "webhook": "device_offline_webhook.json"
+    },
+    "deviceMoving": {
+      "email": "device_moving_email.ftl",
+      "sms": "device_moving_sms.ftl",
+      "push": "device_moving_push.ftl",
+      "webhook": "device_moving_webhook.json"
+    },
+    "deviceStopped": {
+      "email": "device_stopped_email.ftl",
+      "sms": "device_stopped_sms.ftl",
+      "push": "device_stopped_push.ftl",
+      "webhook": "device_stopped_webhook.json"
+    },
+    "deviceOverspeed": {
+      "email": "device_overspeed_email.ftl",
+      "sms": "device_overspeed_sms.ftl",
+      "push": "device_overspeed_push.ftl",
+      "webhook": "device_overspeed_webhook.json"
+    },
+    "geofenceEnter": {
+      "email": "geofence_enter_email.ftl",
+      "sms": "geofence_enter_sms.ftl",
+      "push": "geofence_enter_push.ftl",
+      "webhook": "geofence_enter_webhook.json"
+    },
+    "geofenceExit": {
+      "email": "geofence_exit_email.ftl",
+      "sms": "geofence_exit_sms.ftl",
+      "push": "geofence_exit_push.ftl",
+      "webhook": "geofence_exit_webhook.json"
+    },
+    "alarm": {
+      "email": "alarm_email.ftl",
+      "sms": "alarm_sms.ftl",
+      "push": "alarm_push.ftl",
+      "webhook": "alarm_webhook.json"
+    },
+    "ignitionOn": {
+      "email": "ignition_on_email.ftl",
+      "sms": "ignition_on_sms.ftl",
+      "push": "ignition_on_push.ftl",
+      "webhook": "ignition_on_webhook.json"
+    },
+    "ignitionOff": {
+      "email": "ignition_off_email.ftl",
+      "sms": "ignition_off_sms.ftl",
+      "push": "ignition_off_push.ftl",
+      "webhook": "ignition_off_webhook.json"
+    },
+    "maintenance": {
+      "email": "maintenance_email.ftl",
+      "sms": "maintenance_sms.ftl",
+      "push": "maintenance_push.ftl",
+      "webhook": "maintenance_webhook.json"
+    },
+    "driverChanged": {
+      "email": "driver_changed_email.ftl",
+      "sms": "driver_changed_sms.ftl",
+      "push": "driver_changed_push.ftl",
+      "webhook": "driver_changed_webhook.json"
+    },
+    "textMessage": {
+      "email": "text_message_email.ftl",
+      "sms": "text_message_sms.ftl",
+      "push": "text_message_push.ftl",
+      "webhook": "text_message_webhook.json"
+    }
+  },
+  "notificationDeliverySimulation": {
+    "enabled": true,
+    "recordDeliveryAttempts": true,
+    "recordDeliveryResults": true,
+    "simulateUserPreferences": true,
+    "userPreferences": [
+      {
+        "userId": 1,
+        "channels": ["email", "push"],
+        "eventTypes": ["deviceOffline", "deviceOverspeed", "geofenceEnter", "geofenceExit", "alarm"]
+      },
+      {
+        "userId": 2,
+        "channels": ["email", "sms", "push"],
+        "eventTypes": ["deviceOffline", "deviceOverspeed", "geofenceEnter", "geofenceExit", "alarm", "maintenance"]
+      },
+      {
+        "userId": 3,
+        "channels": ["email", "webhook"],
+        "eventTypes": ["deviceOffline", "deviceOverspeed", "geofenceEnter", "geofenceExit", "alarm", "ignitionOn", "ignitionOff"]
+      }
+    ]
+  },
+  "retryBehavior": {
+    "enabled": true,
+    "maxRetries": 3,
+    "retryDelays": [1000, 5000, 15000],
+    "retryableErrorCodes": [
+      "EMAIL_SERVER_UNAVAILABLE",
+      "SMS_PROVIDER_UNAVAILABLE",
+      "WEBHOOK_ENDPOINT_UNAVAILABLE",
+      "WEBHOOK_TIMEOUT"
+    ]
+  },
+  "mockResponses": {
+    "deliveryStatus": [
+      {
+        "channel": "email",
+        "status": "DELIVERED",
+        "timestamp": "${timestamp}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "recipient": "${recipient}",
+          "deliveryTime": "${deliveryTime}"
+        }
+      },
+      {
+        "channel": "email",
+        "status": "FAILED",
+        "timestamp": "${timestamp}",
+        "errorCode": "${errorCode}",
+        "errorMessage": "${errorMessage}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "recipient": "${recipient}",
+          "attemptCount": "${attemptCount}"
+        }
+      },
+      {
+        "channel": "sms",
+        "status": "DELIVERED",
+        "timestamp": "${timestamp}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "recipient": "${recipient}",
+          "deliveryTime": "${deliveryTime}"
+        }
+      },
+      {
+        "channel": "sms",
+        "status": "FAILED",
+        "timestamp": "${timestamp}",
+        "errorCode": "${errorCode}",
+        "errorMessage": "${errorMessage}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "recipient": "${recipient}",
+          "attemptCount": "${attemptCount}"
+        }
+      },
+      {
+        "channel": "push",
+        "status": "DELIVERED",
+        "timestamp": "${timestamp}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "deviceToken": "${deviceToken}",
+          "deliveryTime": "${deliveryTime}"
+        }
+      },
+      {
+        "channel": "push",
+        "status": "FAILED",
+        "timestamp": "${timestamp}",
+        "errorCode": "${errorCode}",
+        "errorMessage": "${errorMessage}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "deviceToken": "${deviceToken}",
+          "attemptCount": "${attemptCount}"
+        }
+      },
+      {
+        "channel": "webhook",
+        "status": "DELIVERED",
+        "timestamp": "${timestamp}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "endpoint": "${endpoint}",
+          "deliveryTime": "${deliveryTime}",
+          "statusCode": 200
+        }
+      },
+      {
+        "channel": "webhook",
+        "status": "FAILED",
+        "timestamp": "${timestamp}",
+        "errorCode": "${errorCode}",
+        "errorMessage": "${errorMessage}",
+        "metadata": {
+          "messageId": "${uuid}",
+          "endpoint": "${endpoint}",
+          "attemptCount": "${attemptCount}",
+          "statusCode": "${statusCode}"
+        }
+      }
+    ]
+  },
+  "logging": {
+    "enabled": true,
+    "logLevel": "INFO",
+    "logEvents": true,
+    "logNotifications": true,
+    "logDeliveryAttempts": true,
+    "logDeliveryResults": true
+  }
+}
