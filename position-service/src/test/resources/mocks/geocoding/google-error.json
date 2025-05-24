@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/maps/api/geocode/json.*",
+    "queryParameters": {
+      "latlng": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache"
+    },
+    "jsonBody": {
+      "status": "REQUEST_DENIED",
+      "error_message": "The provided API key is invalid or has expired.",
+      "results": []
+    }
+  }
+}
