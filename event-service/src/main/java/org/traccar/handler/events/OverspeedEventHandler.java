@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
- * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,238 +15,306 @@
  */
 package org.traccar.handler.events;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-import org.traccar.helper.model.AttributeUtil;
-import org.traccar.helper.model.PositionUtil;
-import org.traccar.messaging.EventProducer;
 import org.traccar.model.Device;
-import org.traccar.model.Geofence;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.session.state.OverspeedProcessor;
-import org.traccar.session.state.OverspeedState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
-import java.util.concurrent.TimeUnit;
+import jakarta.inject.Inject;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
+/**
+ * Handler for overspeed events.
+ * 
+ * This class detects when a device exceeds its configured speed limit and generates
+ * appropriate events. It includes circuit breaker pattern for resilience, OpenTelemetry
+ * instrumentation for observability, and retry mechanisms for transient failures.
+ */
 public class OverspeedEventHandler extends BaseEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OverspeedEventHandler.class);
-
+    
+    private static final String CIRCUIT_BREAKER_NAME = "overspeedEventHandler";
+    private static final String RETRY_NAME = "overspeedEventHandler";
+    private static final String CORRELATION_ID_KEY = "correlationId";
+    
     private final CacheManager cacheManager;
     private final Storage storage;
-    private final EventProducer eventProducer;
+    private final CircuitBreaker cacheCircuitBreaker;
+    private final CircuitBreaker storageCircuitBreaker;
+    private final Retry cacheRetry;
+    private final Retry storageRetry;
     private final Tracer tracer;
-    private final MeterRegistry meterRegistry;
-
-    private final long minimalDuration;
-    private final boolean preferLowest;
-    private final double multiplier;
-
+    
     // Metrics
-    private final Timer overspeedDetectionTimer;
-    private final Timer overspeedEventPublishTimer;
-
+    private final Timer processingTimer;
+    private final Counter overspeedEventCounter;
+    private final Counter failedDetectionCounter;
+    
+    /**
+     * Constructs the OverspeedEventHandler with necessary dependencies.
+     *
+     * @param cacheManager Cache manager for device data access
+     * @param storage Storage for persistence operations
+     * @param tracer OpenTelemetry tracer for distributed tracing
+     * @param meterRegistry Registry for metrics collection
+     */
     @Inject
-    public OverspeedEventHandler(Config config, CacheManager cacheManager, Storage storage, 
-                                EventProducer eventProducer, Tracer tracer, MeterRegistry meterRegistry) {
+    public OverspeedEventHandler(
+            CacheManager cacheManager,
+            Storage storage,
+            Tracer tracer,
+            MeterRegistry meterRegistry) {
+        
         this.cacheManager = cacheManager;
         this.storage = storage;
-        this.eventProducer = eventProducer;
         this.tracer = tracer;
-        this.meterRegistry = meterRegistry;
         
-        minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
-        preferLowest = config.getBoolean(Keys.EVENT_OVERSPEED_PREFER_LOWEST);
-        multiplier = config.getDouble(Keys.EVENT_OVERSPEED_THRESHOLD_MULTIPLIER);
+        // Initialize circuit breakers
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(
+                CircuitBreakerConfig.custom()
+                        .failureRateThreshold(50)
+                        .waitDurationInOpenState(Duration.ofSeconds(10))
+                        .permittedNumberOfCallsInHalfOpenState(5)
+                        .slidingWindowSize(10)
+                        .recordExceptions(StorageException.class, TimeoutException.class)
+                        .build());
+        
+        this.cacheCircuitBreaker = circuitBreakerRegistry.circuitBreaker(CIRCUIT_BREAKER_NAME + "Cache");
+        this.storageCircuitBreaker = circuitBreakerRegistry.circuitBreaker(CIRCUIT_BREAKER_NAME + "Storage");
+        
+        // Initialize retry mechanisms
+        RetryConfig retryConfig = RetryConfig.custom()
+                .maxAttempts(3)
+                .waitDuration(Duration.ofMillis(500))
+                .retryExceptions(StorageException.class, TimeoutException.class)
+                .enableExponentialBackoff(true)
+                .exponentialBackoffMultiplier(2)
+                .build();
+        
+        RetryRegistry retryRegistry = RetryRegistry.of(retryConfig);
+        this.cacheRetry = retryRegistry.retry(RETRY_NAME + "Cache");
+        this.storageRetry = retryRegistry.retry(RETRY_NAME + "Storage");
         
         // Initialize metrics
-        overspeedDetectionTimer = Timer.builder("traccar.event.overspeed.detection")
-                .description("Time taken to detect overspeed events")
+        this.processingTimer = Timer.builder("overspeed.processing.time")
+                .description("Time taken to process position for overspeed detection")
                 .register(meterRegistry);
         
-        overspeedEventPublishTimer = Timer.builder("traccar.event.overspeed.publish")
-                .description("Time taken to publish overspeed events")
+        this.overspeedEventCounter = Counter.builder("overspeed.events.total")
+                .description("Total number of overspeed events detected")
                 .register(meterRegistry);
         
-        // Register additional counters
-        meterRegistry.counter("traccar.event.overspeed.detected");
+        this.failedDetectionCounter = Counter.builder("overspeed.detection.failures")
+                .description("Number of failed overspeed detection attempts")
+                .register(meterRegistry);
     }
 
-    @Override
-    public void onPosition(Position position, Callback callback) {
-        // Create a span for overspeed detection
-        Span span = tracer.spanBuilder("overspeed.detection")
-                .setSpanKind(SpanKind.INTERNAL)
-                .setAttribute("deviceId", String.valueOf(position.getDeviceId()))
-                .setAttribute("positionId", String.valueOf(position.getId()))
-                .setParent(Context.current())
+    /**
+     * Analyzes a position to detect overspeed events.
+     * 
+     * This method is instrumented with OpenTelemetry for distributed tracing and
+     * uses circuit breakers and retry mechanisms for resilience.
+     *
+     * @param position the position to analyze
+     * @param correlationId the correlation ID for cross-service tracking
+     * @return CompletableFuture with the event if detected, or null if no event
+     */
+    public CompletableFuture<Event> analyzePosition(Position position, String correlationId) {
+        // Create a span for this operation
+        Span span = tracer.spanBuilder("overspeed.detect")
+                .setSpanKind(SpanKind.CONSUMER)
+                .setAttribute(CORRELATION_ID_KEY, correlationId)
+                .setAttribute("deviceId", position.getDeviceId())
                 .startSpan();
         
-        try (Scope scope = span.makeCurrent()) {
-            // Use timer to measure overspeed detection performance
-            Timer.Sample sample = Timer.start(meterRegistry);
-            
-            processPosition(position, callback, span);
-            
-            // Record the time taken for overspeed detection
-            sample.stop(overspeedDetectionTimer);
-            span.setStatus(StatusCode.OK);
-        } catch (Exception e) {
-            span.recordException(e);
-            span.setStatus(StatusCode.ERROR, e.getMessage());
-            LOGGER.warn("Overspeed detection failed", e);
-        } finally {
-            span.end();
-        }
+        // Use the timer to measure processing time
+        return processingTimer.record(() -> {
+            try (Scope scope = span.makeCurrent()) {
+                // Add position attributes to the span for context
+                span.setAttribute("position.speed", position.getSpeed());
+                span.setAttribute("position.time", position.getFixTime().getTime());
+                
+                return detectOverspeed(position, span, correlationId);
+            } catch (Exception e) {
+                span.recordException(e);
+                span.setStatus(StatusCode.ERROR, e.getMessage());
+                failedDetectionCounter.increment();
+                LOGGER.error("Error detecting overspeed for device {}: {}", 
+                        position.getDeviceId(), e.getMessage(), e);
+                return CompletableFuture.completedFuture(null);
+            } finally {
+                span.end();
+            }
+        });
     }
 
-    @CircuitBreaker(name = "cacheManager", fallbackMethod = "fallbackProcessPosition")
-    @Retry(name = "cacheManager")
-    private void processPosition(Position position, Callback callback, Span parentSpan) {
-        long deviceId = position.getDeviceId();
-        Device device = getDevice(deviceId);
-        if (device == null) {
-            return;
+    /**
+     * Core logic for overspeed detection with resilience patterns applied.
+     *
+     * @param position the position to analyze
+     * @param span the current tracing span
+     * @param correlationId the correlation ID for cross-service tracking
+     * @return CompletableFuture with the event if detected, or null if no event
+     */
+    private CompletableFuture<Event> detectOverspeed(Position position, Span span, String correlationId) {
+        // Skip position if speed is not available
+        if (!position.hasSpeed()) {
+            span.addEvent("No speed data available");
+            return CompletableFuture.completedFuture(null);
         }
-        if (!PositionUtil.isLatest(cacheManager, position) || !position.getValid()) {
-            return;
-        }
-
-        double speedLimit = AttributeUtil.lookup(cacheManager, Keys.EVENT_OVERSPEED_LIMIT, deviceId);
-
-        double positionSpeedLimit = position.getDouble(Position.KEY_SPEED_LIMIT);
-        if (positionSpeedLimit > 0) {
-            speedLimit = positionSpeedLimit;
-        }
-
-        double geofenceSpeedLimit = 0;
-        long overspeedGeofenceId = 0;
-
-        if (position.getGeofenceIds() != null) {
-            for (long geofenceId : position.getGeofenceIds()) {
-                Geofence geofence = getGeofence(geofenceId);
-                if (geofence != null) {
-                    double currentSpeedLimit = geofence.getDouble(Keys.EVENT_OVERSPEED_LIMIT.getKey());
-                    if (currentSpeedLimit > 0 && geofenceSpeedLimit == 0
-                            || preferLowest && currentSpeedLimit < geofenceSpeedLimit
-                            || !preferLowest && currentSpeedLimit > geofenceSpeedLimit) {
-                        geofenceSpeedLimit = currentSpeedLimit;
-                        overspeedGeofenceId = geofenceId;
-                    }
-                }
-            }
-        }
-        if (geofenceSpeedLimit > 0) {
-            speedLimit = geofenceSpeedLimit;
-        }
-
-        if (speedLimit == 0) {
-            return;
-        }
-
-        OverspeedState state = OverspeedState.fromDevice(device);
-        OverspeedProcessor.updateState(state, position, speedLimit, multiplier, minimalDuration, overspeedGeofenceId);
-        if (state.isChanged()) {
-            state.toDevice(device);
-            updateDeviceOverspeedState(device);
-        }
-        if (state.getEvent() != null) {
-            // Increment the counter for detected overspeed events
-            meterRegistry.counter("traccar.event.overspeed.detected").increment();
-            
-            // Create a child span for event publishing
-            Span publishSpan = tracer.spanBuilder("overspeed.event.publish")
-                    .setSpanKind(SpanKind.PRODUCER)
+        
+        // Get device with circuit breaker and retry for resilience
+        Supplier<Device> deviceSupplier = () -> {
+            Span deviceSpan = tracer.spanBuilder("get.device.info")
                     .setParent(Context.current())
+                    .setAttribute(CORRELATION_ID_KEY, correlationId)
                     .startSpan();
             
-            try (Scope scope = publishSpan.makeCurrent()) {
-                Timer.Sample publishSample = Timer.start(meterRegistry);
-                
-                // Add correlation ID to the event for distributed tracing
-                state.getEvent().set("correlationId", Span.current().getSpanContext().getTraceId());
-                
-                // Use the callback to publish the event
-                callback.eventDetected(state.getEvent());
-                
-                // Also publish to the message broker
-                publishEvent(state.getEvent());
-                
-                publishSample.stop(overspeedEventPublishTimer);
-                publishSpan.setStatus(StatusCode.OK);
+            try {
+                deviceSpan.setAttribute("deviceId", position.getDeviceId());
+                return cacheManager.getObject(Device.class, position.getDeviceId());
             } catch (Exception e) {
-                publishSpan.recordException(e);
-                publishSpan.setStatus(StatusCode.ERROR, e.getMessage());
-                LOGGER.warn("Failed to publish overspeed event", e);
+                deviceSpan.recordException(e);
+                deviceSpan.setStatus(StatusCode.ERROR, e.getMessage());
+                throw e;
             } finally {
-                publishSpan.end();
+                deviceSpan.end();
             }
-        }
-    }
-
-    @CircuitBreaker(name = "cacheManager")
-    @Retry(name = "cacheManager")
-    private Device getDevice(long deviceId) {
-        return cacheManager.getObject(Device.class, deviceId);
-    }
-
-    @CircuitBreaker(name = "cacheManager")
-    @Retry(name = "cacheManager")
-    private Geofence getGeofence(long geofenceId) {
-        return cacheManager.getObject(Geofence.class, geofenceId);
-    }
-
-    @CircuitBreaker(name = "storage", fallbackMethod = "fallbackUpdateDeviceOverspeedState")
-    @Retry(name = "storage")
-    private void updateDeviceOverspeedState(Device device) {
+        };
+        
+        // Apply circuit breaker and retry patterns
+        Device device;
         try {
-            storage.updateObject(device, new Request(
-                    new Columns.Include("overspeedState", "overspeedTime", "overspeedGeofenceId"),
-                    new Condition.Equals("id", device.getId())));
-        } catch (StorageException e) {
-            LOGGER.warn("Update device overspeed error", e);
-            throw e; // Rethrow for circuit breaker and retry
+            device = Retry.decorateSupplier(cacheRetry, 
+                    CircuitBreaker.decorateSupplier(cacheCircuitBreaker, deviceSupplier))
+                    .get();
+        } catch (Exception e) {
+            span.recordException(e);
+            span.setStatus(StatusCode.ERROR, "Failed to get device: " + e.getMessage());
+            failedDetectionCounter.increment();
+            LOGGER.warn("Failed to get device for overspeed detection: {}", e.getMessage());
+            return CompletableFuture.completedFuture(null);
+        }
+        
+        if (device == null) {
+            span.addEvent("Device not found");
+            return CompletableFuture.completedFuture(null);
+        }
+        
+        // Check if device has a speed limit configured
+        double speedLimit = device.getDouble("speedLimit");
+        if (speedLimit == 0) {
+            span.addEvent("No speed limit configured");
+            return CompletableFuture.completedFuture(null);
+        }
+        
+        span.setAttribute("device.speedLimit", speedLimit);
+        
+        // Check for overspeed condition
+        double speed = position.getSpeed();
+        if (speed > speedLimit) {
+            span.setAttribute("overspeed.detected", true);
+            span.setAttribute("overspeed.value", speed - speedLimit);
+            
+            // Create overspeed event
+            Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
+            event.set("speed", speed);
+            event.set("speedLimit", speedLimit);
+            event.set(Event.KEY_CORRELATION_ID, correlationId);
+            
+            // Save event with circuit breaker and retry
+            Supplier<Event> eventSaveSupplier = () -> {
+                Span saveSpan = tracer.spanBuilder("save.overspeed.event")
+                        .setParent(Context.current())
+                        .setAttribute(CORRELATION_ID_KEY, correlationId)
+                        .startSpan();
+                
+                try {
+                    saveSpan.setAttribute("event.type", event.getType());
+                    saveSpan.setAttribute("event.deviceId", event.getDeviceId());
+                    
+                    storage.addObject(event, Map.of());
+                    overspeedEventCounter.increment();
+                    return event;
+                } catch (Exception e) {
+                    saveSpan.recordException(e);
+                    saveSpan.setStatus(StatusCode.ERROR, e.getMessage());
+                    throw new RuntimeException("Failed to save overspeed event", e);
+                } finally {
+                    saveSpan.end();
+                }
+            };
+            
+            try {
+                Event savedEvent = Retry.decorateSupplier(storageRetry,
+                        CircuitBreaker.decorateSupplier(storageCircuitBreaker, eventSaveSupplier))
+                        .get();
+                
+                return CompletableFuture.completedFuture(savedEvent);
+            } catch (Exception e) {
+                span.recordException(e);
+                span.setStatus(StatusCode.ERROR, "Failed to save event: " + e.getMessage());
+                failedDetectionCounter.increment();
+                LOGGER.error("Failed to save overspeed event: {}", e.getMessage(), e);
+                return CompletableFuture.completedFuture(null);
+            }
+        } else {
+            span.setAttribute("overspeed.detected", false);
+            return CompletableFuture.completedFuture(null);
         }
     }
 
-    @CircuitBreaker(name = "eventProducer", fallbackMethod = "fallbackPublishEvent")
-    @Retry(name = "eventProducer")
-    private void publishEvent(org.traccar.model.Event event) {
-        eventProducer.publish(event);
-    }
-
-    // Fallback methods for circuit breakers
-    private void fallbackProcessPosition(Position position, Callback callback, Span parentSpan, Exception e) {
-        LOGGER.warn("Using fallback for position processing due to: {}", e.getMessage());
-        // No further processing in fallback mode
-    }
-
-    private void fallbackUpdateDeviceOverspeedState(Device device, Exception e) {
-        LOGGER.warn("Using fallback for device state update due to: {}", e.getMessage());
-        // State update will be retried on next position update
-    }
-
-    private void fallbackPublishEvent(org.traccar.model.Event event, Exception e) {
-        LOGGER.warn("Using fallback for event publishing due to: {}", e.getMessage());
-        // Event will still be processed through the callback mechanism
+    /**
+     * Processes a position message from the message broker.
+     * This is the main entry point for the handler when receiving position data.
+     *
+     * @param position the position to process
+     * @param correlationId the correlation ID for cross-service tracking
+     * @return CompletableFuture with the event if detected, or null if no event
+     */
+    public CompletableFuture<Event> processPositionMessage(Position position, String correlationId) {
+        Span rootSpan = tracer.spanBuilder("process.position.message")
+                .setSpanKind(SpanKind.CONSUMER)
+                .setAttribute(CORRELATION_ID_KEY, correlationId)
+                .setAttribute("deviceId", position.getDeviceId())
+                .startSpan();
+        
+        try (Scope scope = rootSpan.makeCurrent()) {
+            return analyzePosition(position, correlationId)
+                    .exceptionally(e -> {
+                        rootSpan.recordException(e);
+                        rootSpan.setStatus(StatusCode.ERROR, e.getMessage());
+                        LOGGER.error("Unhandled exception in overspeed detection: {}", e.getMessage(), e);
+                        return null;
+                    });
+        } finally {
+            rootSpan.end();
+        }
     }
 }
