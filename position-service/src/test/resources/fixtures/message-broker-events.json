@@ -1,0 +1,363 @@
+{
+  "events": [
+    {
+      "type": "raw_position",
+      "topic": "raw-positions",
+      "description": "Raw position data from Protocol Service",
+      "payload": {
+        "deviceId": 123456,
+        "protocol": "osmand",
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "accuracy": 5.0,
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true,
+          "motion": true,
+          "rssi": -75
+        },
+        "valid": true,
+        "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    },
+    {
+      "type": "enriched_position",
+      "topic": "enriched-positions",
+      "description": "Enriched position data from Position Service",
+      "payload": {
+        "deviceId": 123456,
+        "protocol": "osmand",
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "accuracy": 5.0,
+        "address": "123 Market St, San Francisco, CA 94105, USA",
+        "geofenceIds": [5, 8, 12],
+        "distanceSinceLastPosition": 120.5,
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true,
+          "motion": true,
+          "rssi": -75,
+          "speedLimit": 50.0,
+          "overSpeedPercentage": 0.0,
+          "drivingTime": 1250
+        },
+        "valid": true,
+        "processed": true,
+        "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    },
+    {
+      "type": "position_update",
+      "topic": "position-updates",
+      "description": "Position update for WebSocket clients",
+      "payload": {
+        "deviceId": 123456,
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "address": "123 Market St, San Francisco, CA 94105, USA",
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true
+        },
+        "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    },
+    {
+      "type": "event_detected",
+      "topic": "events",
+      "description": "Event detected by Event Service based on position data",
+      "payload": {
+        "id": 987654,
+        "deviceId": 123456,
+        "type": "geofenceEnter",
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "positionId": 789012,
+        "geofenceId": 5,
+        "attributes": {
+          "geofenceName": "Warehouse Zone"
+        },
+        "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    },
+    {
+      "type": "device_command",
+      "topic": "device-commands",
+      "description": "Command sent to a device via Position Service",
+      "payload": {
+        "deviceId": 123456,
+        "type": "engineStop",
+        "attributes": {
+          "reason": "Unauthorized movement detected"
+        },
+        "correlationId": "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+      }
+    },
+    {
+      "type": "command_result",
+      "topic": "command-results",
+      "description": "Result of a command execution",
+      "payload": {
+        "deviceId": 123456,
+        "commandId": 45678,
+        "type": "engineStop",
+        "success": true,
+        "timestamp": "2023-06-15T10:31:02.456Z",
+        "attributes": {
+          "responseTime": 1250
+        },
+        "correlationId": "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+      }
+    },
+    {
+      "type": "device_status",
+      "topic": "device-status",
+      "description": "Device status update",
+      "payload": {
+        "deviceId": 123456,
+        "status": "online",
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "attributes": {
+          "lastPositionUpdate": "2023-06-15T10:30:45.123Z",
+          "batteryLevel": 85,
+          "signalStrength": "good"
+        },
+        "correlationId": "c3d4e5f6-a7b8-9012-cdef-3456789012ab"
+      }
+    },
+    {
+      "type": "position_batch",
+      "topic": "raw-positions-batch",
+      "description": "Batch of raw positions from Protocol Service",
+      "payload": {
+        "deviceId": 123456,
+        "protocol": "teltonika",
+        "positions": [
+          {
+            "timestamp": "2023-06-15T10:29:45.123Z",
+            "latitude": 37.7740,
+            "longitude": -122.4180,
+            "altitude": 15.0,
+            "speed": 42.5,
+            "course": 178.5,
+            "attributes": {
+              "batteryLevel": 86,
+              "ignition": true
+            },
+            "valid": true
+          },
+          {
+            "timestamp": "2023-06-15T10:30:15.123Z",
+            "latitude": 37.7745,
+            "longitude": -122.4185,
+            "altitude": 15.2,
+            "speed": 44.0,
+            "course": 179.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true
+            },
+            "valid": true
+          },
+          {
+            "timestamp": "2023-06-15T10:30:45.123Z",
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "altitude": 15.5,
+            "speed": 45.2,
+            "course": 180.0,
+            "attributes": {
+              "batteryLevel": 85,
+              "ignition": true
+            },
+            "valid": true
+          }
+        ],
+        "correlationId": "d4e5f6a7-b8c9-0123-def4-56789012abcd"
+      }
+    },
+    {
+      "type": "notification",
+      "topic": "notifications",
+      "description": "Notification generated from an event",
+      "payload": {
+        "id": 567890,
+        "userId": 1001,
+        "deviceId": 123456,
+        "type": "geofenceEnter",
+        "timestamp": "2023-06-15T10:30:50.789Z",
+        "eventId": 987654,
+        "attributes": {
+          "deviceName": "Delivery Truck 1",
+          "geofenceName": "Warehouse Zone",
+          "position": {
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "address": "123 Market St, San Francisco, CA 94105, USA"
+          }
+        },
+        "correlationId": "e5f6a7b8-c9d0-1234-ef56-789012abcdef"
+      }
+    },
+    {
+      "type": "position_query",
+      "topic": "position-queries",
+      "description": "Query for the latest position of a device",
+      "payload": {
+        "deviceId": 123456,
+        "requestId": "query-789012",
+        "correlationId": "f6a7b8c9-d0e1-2345-f678-9012abcdef01"
+      }
+    },
+    {
+      "type": "position_response",
+      "topic": "position-responses",
+      "description": "Response to a position query",
+      "payload": {
+        "deviceId": 123456,
+        "requestId": "query-789012",
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "altitude": 15.5,
+        "speed": 45.2,
+        "course": 180.0,
+        "address": "123 Market St, San Francisco, CA 94105, USA",
+        "attributes": {
+          "batteryLevel": 85,
+          "ignition": true
+        },
+        "correlationId": "f6a7b8c9-d0e1-2345-f678-9012abcdef01"
+      }
+    },
+    {
+      "type": "error_event",
+      "topic": "error-events",
+      "description": "Error event for testing error handling",
+      "payload": {
+        "timestamp": "2023-06-15T10:32:15.789Z",
+        "service": "position-service",
+        "errorCode": "POSITION_PROCESSING_ERROR",
+        "message": "Failed to process position data",
+        "deviceId": 123456,
+        "details": {
+          "rawData": "Invalid position format",
+          "exceptionType": "IllegalArgumentException"
+        },
+        "correlationId": "a7b8c9d0-e1f2-3456-a789-012bcdef3456"
+      }
+    },
+    {
+      "type": "heartbeat",
+      "topic": "heartbeats",
+      "description": "Service heartbeat for health monitoring",
+      "payload": {
+        "service": "position-service",
+        "instanceId": "position-service-pod-1",
+        "timestamp": "2023-06-15T10:35:00.000Z",
+        "status": "healthy",
+        "metrics": {
+          "cpu": 0.35,
+          "memory": 0.42,
+          "positionsProcessed": 12567,
+          "errorCount": 2,
+          "averageProcessingTime": 45.7
+        },
+        "correlationId": "b8c9d0e1-f2a3-4567-b890-12cdef456789"
+      }
+    },
+    {
+      "type": "cache_invalidation",
+      "topic": "cache-invalidation",
+      "description": "Cache invalidation event",
+      "payload": {
+        "entityType": "device",
+        "entityId": 123456,
+        "timestamp": "2023-06-15T10:36:12.345Z",
+        "operation": "update",
+        "correlationId": "c9d0e1f2-a3b4-5678-c901-2def3456789a"
+      }
+    },
+    {
+      "type": "trip_start",
+      "topic": "trips",
+      "description": "Trip start event",
+      "payload": {
+        "deviceId": 123456,
+        "tripId": "trip-345678",
+        "startTime": "2023-06-15T10:25:30.000Z",
+        "startPositionId": 789010,
+        "startLocation": {
+          "latitude": 37.7730,
+          "longitude": -122.4170,
+          "address": "100 Market St, San Francisco, CA 94105, USA"
+        },
+        "attributes": {
+          "driverId": 5001,
+          "purpose": "delivery"
+        },
+        "correlationId": "d0e1f2a3-b4c5-6789-d012-ef3456789abc"
+      }
+    },
+    {
+      "type": "trip_end",
+      "topic": "trips",
+      "description": "Trip end event",
+      "payload": {
+        "deviceId": 123456,
+        "tripId": "trip-345678",
+        "startTime": "2023-06-15T10:25:30.000Z",
+        "endTime": "2023-06-15T11:15:45.000Z",
+        "endPositionId": 789050,
+        "endLocation": {
+          "latitude": 37.7830,
+          "longitude": -122.4270,
+          "address": "200 California St, San Francisco, CA 94111, USA"
+        },
+        "distance": 5.7,
+        "duration": 3015,
+        "averageSpeed": 38.5,
+        "maxSpeed": 52.3,
+        "fuelUsed": 0.8,
+        "attributes": {
+          "driverId": 5001,
+          "purpose": "delivery",
+          "completed": true
+        },
+        "correlationId": "e1f2a3b4-c5d6-7890-e123-f456789abcde"
+      }
+    },
+    {
+      "type": "position_correction",
+      "topic": "position-corrections",
+      "description": "Position data correction",
+      "payload": {
+        "deviceId": 123456,
+        "positionId": 789012,
+        "timestamp": "2023-06-15T10:30:45.123Z",
+        "corrections": {
+          "latitude": 37.7751,
+          "longitude": -122.4196,
+          "altitude": 16.0,
+          "attributes": {
+            "correctionSource": "map-matching",
+            "correctionConfidence": 0.95
+          }
+        },
+        "correlationId": "f2a3b4c5-d6e7-8901-f234-56789abcdef0"
+      }
+    }
+  ]
+}
