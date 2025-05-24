@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    # Generate a unique instance ID for service registry identification
+    instanceId: ${spring.application.name}:${random.value}
+    # Consul service discovery configuration
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      enabled: ${CONSUL_ENABLED:true}
+      discovery:
+        instanceId: ${spring.application.name}:${random.value}
+        serviceName: ${spring.application.name}
+        preferIpAddress: true
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 15s
+        tags:
+          - api
+          - gateway
+          - microservice
+        # Disable Consul discovery when running in Kubernetes
+        enabled: ${CONSUL_DISCOVERY_ENABLED:${CONSUL_ENABLED:true}}
+    # Kubernetes service discovery configuration
+    kubernetes:
+      enabled: ${KUBERNETES_ENABLED:false}
+      discovery:
+        enabled: ${KUBERNETES_DISCOVERY_ENABLED:${KUBERNETES_ENABLED:false}}
+        service-name: ${spring.application.name}
+        primary-port-name: http
+        all-namespaces: false
+        namespace: ${KUBERNETES_NAMESPACE:default}
+
+# Load environment-specific configuration
+---
+spring:
+  profiles: dev
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+
+---
+spring:
+  profiles: staging
+  cloud:
+    consul:
+      host: consul.service.consul
+      port: 8500
+
+---
+spring:
+  profiles: prod
+  cloud:
+    consul:
+      host: consul.service.consul
+      port: 8500
+
+---
+spring:
+  profiles: kubernetes
+  cloud:
+    consul:
+      enabled: false
+      discovery:
+        enabled: false
+    kubernetes:
+      enabled: true
+      discovery:
+        enabled: true
