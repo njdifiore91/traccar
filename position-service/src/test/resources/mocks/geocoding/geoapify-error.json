@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/geocode/reverse",
+    "queryParameters": {
+      "format": {
+        "equalTo": "json"
+      },
+      "apiKey": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*"
+    },
+    "jsonBody": {
+      "statusCode": 401,
+      "message": "Invalid API key or unauthorized access",
+      "error": "Unauthorized"
+    },
+    "fixedDelayMilliseconds": 100
+  }
+}
