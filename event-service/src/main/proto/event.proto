@@ -1,0 +1,298 @@
+syntax = "proto3";
+
+package org.traccar.proto;
+
+option java_multiple_files = true;
+option java_package = "org.traccar.proto.event";
+option java_outer_classname = "EventProto";
+
+// Event message for communication between Event Processing Service and other services
+message Event {
+  // Unique identifier for the event
+  int64 id = 1;
+  
+  // Device identifier that this event is associated with
+  int64 device_id = 2;
+  
+  // Type of event
+  EventType type = 3;
+  
+  // Timestamp when the event occurred (milliseconds since epoch)
+  int64 timestamp = 4;
+  
+  // Position identifier that triggered this event (if applicable)
+  optional int64 position_id = 5;
+  
+  // Geofence identifier for geofence-related events (if applicable)
+  optional int64 geofence_id = 6;
+  
+  // Maintenance identifier for maintenance-related events (if applicable)
+  optional int64 maintenance_id = 7;
+  
+  // Additional attributes specific to the event type
+  map<string, AttributeValue> attributes = 8;
+}
+
+// Enumeration of all possible event types
+enum EventType {
+  // Unknown event type
+  UNKNOWN = 0;
+  
+  // Device status events
+  DEVICE_ONLINE = 1;
+  DEVICE_OFFLINE = 2;
+  DEVICE_MOVING = 3;
+  DEVICE_STOPPED = 4;
+  DEVICE_OVERSPEED = 5;
+  DEVICE_FUEL_DROP = 6;
+  DEVICE_FUEL_INCREASE = 7;
+  DEVICE_IDLE_BEGIN = 8;
+  DEVICE_IDLE_END = 9;
+  
+  // Geofence events
+  GEOFENCE_ENTER = 20;
+  GEOFENCE_EXIT = 21;
+  
+  // Driver events
+  DRIVER_CHANGED = 30;
+  
+  // Alarm events
+  ALARM_GENERAL = 40;
+  ALARM_SOS = 41;
+  ALARM_VIBRATION = 42;
+  ALARM_MOVEMENT = 43;
+  ALARM_LOW_BATTERY = 44;
+  ALARM_FAULT = 45;
+  ALARM_POWER_OFF = 46;
+  ALARM_POWER_ON = 47;
+  ALARM_DOOR = 48;
+  ALARM_LOCK = 49;
+  ALARM_UNLOCK = 50;
+  
+  // Device command events
+  COMMAND_RESULT = 60;
+  COMMAND_SENT = 61;
+  
+  // Maintenance events
+  MAINTENANCE_REQUIRED = 70;
+  MAINTENANCE_COMPLETED = 71;
+  
+  // System events
+  SYSTEM_TRIGGER = 80;
+  USER_TRIGGER = 81;
+  
+  // Custom events
+  CUSTOM_EVENT_1 = 90;
+  CUSTOM_EVENT_2 = 91;
+  CUSTOM_EVENT_3 = 92;
+  CUSTOM_EVENT_4 = 93;
+  CUSTOM_EVENT_5 = 94;
+  CUSTOM_EVENT_6 = 95;
+  CUSTOM_EVENT_7 = 96;
+  CUSTOM_EVENT_8 = 97;
+  CUSTOM_EVENT_9 = 98;
+  CUSTOM_EVENT_10 = 99;
+}
+
+// Value type for event attributes
+message AttributeValue {
+  oneof value {
+    bool bool_value = 1;
+    int64 int_value = 2;
+    double double_value = 3;
+    string string_value = 4;
+    bytes binary_value = 5;
+  }
+}
+
+// Event notification message sent to the Notification Service
+message EventNotification {
+  // The event that triggered the notification
+  Event event = 1;
+  
+  // Device information related to the event
+  DeviceInfo device = 2;
+  
+  // Position information related to the event (if applicable)
+  optional PositionInfo position = 3;
+  
+  // Geofence information related to the event (if applicable)
+  optional GeofenceInfo geofence = 4;
+  
+  // Maintenance information related to the event (if applicable)
+  optional MaintenanceInfo maintenance = 5;
+  
+  // User IDs that should receive this notification
+  repeated int64 user_ids = 6;
+  
+  // Group IDs that should receive this notification
+  repeated int64 group_ids = 7;
+  
+  // Notification priority (higher values indicate higher priority)
+  int32 priority = 8;
+  
+  // Whether this notification should be sent immediately, bypassing rate limits
+  bool immediate = 9;
+}
+
+// Basic device information included with event notifications
+message DeviceInfo {
+  // Device identifier
+  int64 id = 1;
+  
+  // Device name
+  string name = 2;
+  
+  // Device unique identifier (IMEI, etc.)
+  string unique_id = 3;
+  
+  // Device status
+  string status = 4;
+  
+  // Last known position ID
+  int64 last_position_id = 5;
+  
+  // Device group IDs
+  repeated int64 group_ids = 6;
+  
+  // Device phone number (if available)
+  optional string phone = 7;
+  
+  // Device model (if available)
+  optional string model = 8;
+  
+  // Device contact information (if available)
+  optional string contact = 9;
+  
+  // Device category (if available)
+  optional string category = 10;
+}
+
+// Position information included with event notifications
+message PositionInfo {
+  // Position identifier
+  int64 id = 1;
+  
+  // Device identifier
+  int64 device_id = 2;
+  
+  // Position timestamp
+  int64 timestamp = 3;
+  
+  // Latitude in degrees
+  double latitude = 4;
+  
+  // Longitude in degrees
+  double longitude = 5;
+  
+  // Altitude in meters
+  optional double altitude = 6;
+  
+  // Speed in knots
+  optional double speed = 7;
+  
+  // Course in degrees
+  optional double course = 8;
+  
+  // Address (if available)
+  optional string address = 9;
+  
+  // Position accuracy in meters (if available)
+  optional double accuracy = 10;
+  
+  // Additional position attributes
+  map<string, AttributeValue> attributes = 11;
+}
+
+// Geofence information included with geofence-related event notifications
+message GeofenceInfo {
+  // Geofence identifier
+  int64 id = 1;
+  
+  // Geofence name
+  string name = 2;
+  
+  // Geofence description (if available)
+  optional string description = 3;
+  
+  // Geofence area type (circle, polygon, etc.)
+  string area_type = 4;
+  
+  // Geofence color (if available)
+  optional string color = 5;
+}
+
+// Maintenance information included with maintenance-related event notifications
+message MaintenanceInfo {
+  // Maintenance identifier
+  int64 id = 1;
+  
+  // Maintenance name
+  string name = 2;
+  
+  // Maintenance type
+  string type = 3;
+  
+  // Maintenance start time
+  int64 start_time = 4;
+  
+  // Maintenance period in appropriate units
+  int32 period = 5;
+  
+  // Current maintenance value
+  double current_value = 6;
+  
+  // Maintenance threshold value
+  double threshold_value = 7;
+}
+
+// Event batch message for efficient transmission of multiple events
+message EventBatch {
+  // List of events in the batch
+  repeated Event events = 1;
+  
+  // Batch identifier
+  string batch_id = 2;
+  
+  // Timestamp when the batch was created
+  int64 timestamp = 3;
+  
+  // Source service that created the batch
+  string source = 4;
+}
+
+// Event subscription message for services to register interest in specific event types
+message EventSubscription {
+  // Subscriber identifier
+  string subscriber_id = 1;
+  
+  // Event types to subscribe to (empty means all events)
+  repeated EventType event_types = 2;
+  
+  // Device IDs to filter events (empty means all devices)
+  repeated int64 device_ids = 3;
+  
+  // Group IDs to filter events (empty means all groups)
+  repeated int64 group_ids = 4;
+  
+  // Subscription expiration time (0 means no expiration)
+  int64 expiration_time = 5;
+}
+
+// Event acknowledgment message for confirming event processing
+message EventAcknowledgment {
+  // Event identifiers that were processed
+  repeated int64 event_ids = 1;
+  
+  // Subscriber that processed the events
+  string subscriber_id = 2;
+  
+  // Processing status (true = success, false = failure)
+  bool success = 3;
+  
+  // Error message if processing failed
+  optional string error_message = 4;
+  
+  // Timestamp when the events were processed
+  int64 timestamp = 5;
+}
